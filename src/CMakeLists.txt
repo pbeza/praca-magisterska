@@ -1,40 +1,41 @@
-###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
-#                                                                         #
-#                   This is main CMake of the project.                    #
-#                                                                         #
-###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
-
-## TYPICAL USAGE
-#  Simplest compilation (should suffice for most users):
-#      cd src && mkdir build && cd build && cmake .. && make
-
-## DEBUG / RELEASE
-#  To generate Makefile for Debug or Release version run:
-#      cmake -D CMAKE_BUILD_TYPE=X ..
-#  where X is 'Debug' or 'Release'.
-
-## COMPILATION DETAILS
-#  To see compilation details (i.e. compiler's flags) run:
-#      make VERBOSE=1
-
-## MORE
+# This is main CMake of the project.
+#
+### TYPICAL USAGE
+#
+# Simplest compilation (should suffice for most users):
+#
+#   cd src && mkdir build && cd build && cmake .. && make && make install
+#
+### DEBUG / RELEASE
+#
+# To generate Makefile for Debug or Release version run:
+#
+#   cmake -D CMAKE_BUILD_TYPE=X ..
+#
+# where X is 'Debug' or 'Release'.
+#
+### COMPILATION DETAILS
+#
+# To see compilation details (i.e. compiler's flags) run:
+#
+#   make VERBOSE=1
+#
+### MORE
+#
 #  See www.cmake.org to learn more about CMake.
 
 cmake_minimum_required(VERSION 3.1)
-
-# Set project's name, version and programming language.
-
 project(mgr VERSION 0.1 LANGUAGES C)
 
 # Define a few constant values.
 
-set(AUTHOR						"Patryk Bęza (patryk.beza@gmail.com)")
-set(DOXYGEN_LANGUAGE			"English" CACHE STRING "Doxygen documentation language")
-set(MANUAL_FILENAME				"${PROJECT_NAME}.1")
+#set(AUTHOR						"Patryk Bęza (patryk.beza@gmail.com)")
+#set(DOXYGEN_LANGUAGE			"English" CACHE STRING "Doxygen documentation language")
+#set(MANUAL_FILENAME				"${PROJECT_NAME}.1")
 
 # Define user-configurable variables.
 
-option(POSIXLY_CORRECT			"Don't use non-POSIX compliant extensions" OFF)
+#option(POSIXLY_CORRECT			"Don't use non-POSIX compliant extensions" OFF)
 option(DEBUG_CMAKE_MESSAGES		"Print all CMake variables" OFF)
 
 # Print some information about detected system.
@@ -57,9 +58,26 @@ add_subdirectory("client")
 
 # Generate Doxygen based documentation if Doxygen is installed.
 
-find_package(Doxygen REQUIRED)
-configure_file("doxygen_template.dox.in" "doxygen_template.dox")
-add_custom_target(doc ${DOXYGEN_EXECUTABLE} "doxygen_template.dox" VERBATIM)
+#find_package(Doxygen REQUIRED)
+#configure_file("doxygen_template.dox.in" "doxygen_template.dox")
+#add_custom_target(doc ${DOXYGEN_EXECUTABLE} "doxygen_template.dox" VERBATIM)
+
+# Generate ctags symbols if ctags is installed
+
+#set_source_files_properties(tags PROPERTIES GENERATED true)
+#add_custom_target(tags COMMAND ctags -R ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+
+#find_program(CTAGS_PATH ctags)
+#if(CTAGS_PATH)
+#	add_dependencies(${PROJECT_NAME} tags)
+#endif()
+
+# Set warning level for GCC and MSVC (MS Visual Studio) to maximum possible.
+
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUC)
+	set(GCC_CODE_QUALITY_FLAGS "-Wall -pedantic -Wextra -Wno-long-long -Werror")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_CODE_QUALITY_FLAGS}")
+endif()
 
 # Debug list of all the CMake variables.
 
