@@ -1,3 +1,8 @@
+# This is mix of customized MIT-licensed .gitignore files available in GitHub
+# repository: https://github.com/github/gitignore.git
+
+#### C ####
+
 # Object files
 *.o
 *.ko
@@ -30,3 +35,16 @@
 
 # Debug files
 *.dSYM/
+
+ #### CMake ####
+
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+#### Custom ####
+
+build

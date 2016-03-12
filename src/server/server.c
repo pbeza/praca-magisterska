@@ -1,22 +1,22 @@
 /**
- * @file Server's starting point.
+ * @file
+ * Server's main file / starting point.
  */
 
 #include <stdlib.h>
 
-#include "help.h"
+#include "parser.h"
 
-static void fill_options(options_t* options) {
-	/*add_option(options, 'h', "--help", "Prints help.", NULL, NULL);*/
+static void server_work(const config_t* config) {
+	UNUSED(config);
 }
 
 int main(int argc, char** argv) {
-	/**
-	 * Server's runtime options set as parameters of this application.
-	 */
-	options_t options = INIT_OPTIONS;
-	fill_options(&options);
-	/*save_parsed_args(argc, argv);
-	server_work();*/
+	/** Server's runtime configuration */
+	config_t config = INIT_CONFIG;
+	/** Parse argv and save parsed options */
+	parse_argv(argc, argv, &config);
+	/** Do server's work */
+	server_work(&config);
 	return EXIT_SUCCESS;
 }

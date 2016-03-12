@@ -1,17 +1,32 @@
+/**
+ * @file
+ * Universal `argv` options representation and basic parser used by both
+ * server and client applications.
+ */
 #ifndef _OPTIONS_H
 #define _OPTIONS_H
 
-#include <assert.h>
 #include <stdint.h>
-#include <string.h>
 
-#define MAX_OPTIONS_NUMBER		32
-#define MAX_OPTSTRING_LENGTH		128
+#include "common.h"
+
+#ifdef POSIXLY_CORRECT
+#define GETOPT getopt
+#define OPTION(A, B, C, D, E, F) { A, B,    D, E, F }
+#else
+#define GETOPT getopt_long
+#define OPTION(A, B, C, D, E, F) { A, B, C, D, E, F }
+#endif
 
 /**
  * Stores single runtime option read from `argv[]`.
  */
-typedef struct user_option_t {
+typedef struct option_t {
+	/**
+	 * Unique ID enumerated from 0.
+	 * \note *Rationale:* this ID can be used as a index in array of options.
+	 */
+	const uint8_t id;
 	/**
 	  * Single character representing short option for `getopt()`.
 	  */
@@ -19,6 +34,7 @@ typedef struct user_option_t {
 #ifndef POSIXLY_CORRECT
 	/**
 	 * String representing long option for `getopt_long()`.
+	 * \note This variable is not defined if `POSIXLY_CORRECT` is defined.
 	 */
 	const char* long_option;
 #endif
@@ -27,7 +43,7 @@ typedef struct user_option_t {
 	 */
 	const char* help_desc;
 	/**
-	 * Parameter's value name to be displayed when `--help` is present.
+	 * Parameter's value name to be displayed with `--help` option.
 	 * If parameter has no value use `NULL`.
 	 */
 	const char* help_value_name;
@@ -35,54 +51,12 @@ typedef struct user_option_t {
 	 * Function handler called when this option is present in `argv[]`.
 	 * If function pointer is `NULL` no function is called.
 	 */
-	void (*parser_fun)(const struct user_option_t* option, int argv_index);
-} user_option_t;
-
-/**
- * \var user_option_t with some metadata.
- */
-typedef struct option_t {
-	/**
-	 * Bit's index in \var options_t.selected_options representing this
-	 * option. Can be understood as unique option's ID.
-	 */
-	uint8_t bit_index;
-	/**
-	 * User's option definition.
-	 */
-	user_option_t user_option;
+	void (*save)(const struct option_t* option, const char* value, void* config);
 } option_t;
 
 /**
- * Stores all allowed runtime options.
+ * Parse `argv` and save parsed results.
  */
-typedef struct options_t {
-	/**
-	 * All allowed options.
-	 */
-	option_t allowed_options[MAX_OPTIONS_NUMBER];
-	/**
-	 * Selected runtime options are represented by single bits set to 1.
-	 */
-	uint32_t selected_options;
-	/**
-	 * Number of allowed options stored in \var allowed_options array.
-	 */
-	uint8_t options_number;
-	/**
-	 * `optstring` for `getopt_long()` function.
-	 */
-	char optstring[MAX_OPTSTRING_LENGTH];
-} options_t;
-
-/**
- * Initialized (zeroed) `options_t` object.
- */
-static const options_t INIT_OPTIONS = { .optstring = ":\0" };
-
-/**
- * Add new allowed option to set of all of the allowed options.
- */
-void add_option(options_t* all_options, user_option_t* user_option);
+void parse(int argc, char** argv, const char* optstring, const option_t* options, uint32_t* selected_options, void* config, const int n);
 
 #endif

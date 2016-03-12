@@ -1,0 +1,53 @@
+@PROJECT_NAME@
+=====
+
+
+Table of contents
+=================
+
+- Overview
+- Documentation
+- Compilation
+- Development
+
+
+Overview
+========
+
+@PROJECT_NAME@ is my master thesis. TODO
+
+
+Documentation
+=============
+
+See `/doc/` directory. Documentation is generated in multiple formats:
+
+- HTML,
+- PDF,
+- man pages.
+
+
+Compilation
+===========
+
+To compile the project:
+
+0. Install [CMake][0], make, [Doxygen][1], [help2man][2] and other required (TODO make list).
+1. `cd build`
+2. If you want to make debug build run:
+
+       cmake -D CMAKE_BUILD_TYPE=Debug ..
+
+   If you want to compile *release* build, run:
+
+       cmake ..
+
+3. If errors occurs, you probably need to install required packages mentioned in
+   error message.
+4. Run:
+
+       make
+
+[0]: https://cmake.org/
+[1]: http://www.doxygen.org/
+[2]: https://www.gnu.org/software/help2man/
