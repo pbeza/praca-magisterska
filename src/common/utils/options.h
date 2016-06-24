@@ -1,7 +1,7 @@
 /**
  * @file
- * Universal `argv` options representation and basic parser used by both
- * server and client applications.
+ * Universal `argv` options representation and basic parser used by both server
+ * and client applications.
  */
 #ifndef _OPTIONS_H
 #define _OPTIONS_H
@@ -19,7 +19,7 @@
 #endif
 
 /**
- * Stores single runtime option read from `argv[]`.
+ * Stores single runtime option read from `argv`.
  */
 typedef struct option_t {
 	/**
@@ -43,7 +43,7 @@ typedef struct option_t {
 	 */
 	const char* help_desc;
 	/**
-	 * Parameter's value name to be displayed with `--help` option.
+	 * Parameter's value named displayed in `--help`.
 	 * If parameter has no value use `NULL`.
 	 */
 	const char* help_value_name;
@@ -55,8 +55,10 @@ typedef struct option_t {
 } option_t;
 
 /**
- * Parse `argv` and save parsed results.
+ * Parse `argv` and save parsed results in \p options and \p selected_options.
  */
 void parse(int argc, char** argv, const char* optstring, const option_t* options, uint32_t* selected_options, void* config, const int n);
+
+void print_help(const option_t* options, const int n, const char* help_prefix, const char* help_postfix);
 
 #endif

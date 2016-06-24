@@ -1,7 +1,7 @@
 /**
  * @file
  * `argv` parser.
- * */
+ */
 
 #ifndef _PARSER_H
 #define _PARSER_H
@@ -69,7 +69,7 @@ typedef enum {
 #define DESC_OPTION_TEST	"Test option accepting single integer value."
 
 /**
- * See `getopt()` manual for optstring prefix meaning.
+ * See `getopt` manual for optstring prefix meaning.
  */
 #define OPTSTRING_PREFIX	":"
 

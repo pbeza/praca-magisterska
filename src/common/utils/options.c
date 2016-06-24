@@ -7,22 +7,22 @@
 #include "options.h"
 
 /**
- * Parser return codes in case of missing option's value.
+ * Parser `getopt` return code in case of missing option's value.
  */
 #define PARSER_MISSING_VALUE		':'
 
 /**
- * Parser return codes in case of unrecognized option.
+ * Parser `getopt` return code in case of unrecognized option.
  */
 #define PARSER_UNRECOGNIZED_OPTION	'?'
 
 /**
- * Common message for all warning parser's messages.
+ * Common message for all parser's warning messages.
  */
 #define CHECK_MANUAL_MSG		"Check manual for usage help."
 
 /**
- * Print missing value message when some option needs an argument.
+ * Print missing value message when some option requires an argument and exit.
  */
 static inline void print_missing_value() {
 /** \c getopt_long() doesn't store error in optopt in opposite to \c getopt() ;( */
@@ -37,7 +37,7 @@ static inline void print_missing_value() {
 }
 
 /**
- * Print unrecognized option value when option is not allowed.
+ * Print unrecognized option value when option is not allowed and exit.
  */
 static inline void print_unrecognized_option() {
 	fprintf(stderr,
@@ -51,7 +51,9 @@ static inline void print_unrecognized_option() {
 }
 
 /**
- * Call \ref option_t.save to parse and save option.
+ * For given short option \p opt, find \ref option_t.save action in \p options
+ * array (of length \p n) and execute it. Set \ref option_t.id-th bit in
+ * \p selected_options integer, to indicate that this option is active.
  */
 static void save_option(const option_t* options, int opt, uint32_t* selected_options, void* config, const int n) {
 	int i;
@@ -68,9 +70,9 @@ static void save_option(const option_t* options, int opt, uint32_t* selected_opt
 }
 
 /**
- * Fill array \p long_options with \p options in format required by `getopt_long`.
+ * Convert \p options to \p long_options accepted by `getopt_long` system call.
  */
-static void add_getopt_long_options(struct option* long_options, const option_t* options, const int n) {
+static void convert_to_getopt_long_options(struct option* long_options, const option_t* options, const int n) {
 	int i;
 	const option_t* c;
 	for (i = 0; i < n; i++) {
@@ -86,14 +88,14 @@ static void add_getopt_long_options(struct option* long_options, const option_t*
 }
 
 /**
- * Parse `argv` and save results by calling \ref option_t.save with appropiate
- * pointer to \var option_t.
+ * Parse `argv` (of length \p argc) and save results in \p options integer and
+ * \p selected_options array.
  */
 void parse(int argc, char** argv, const char* optstring, const option_t* options, uint32_t* selected_options, void* config, const int n) {
 	int opt;
 #ifndef POSIXLY_CORRECT
 	struct option long_options[n + 1];
-	add_getopt_long_options(long_options, options, n);
+	convert_to_getopt_long_options(long_options, options, n);
 #endif
 	while ((opt = GETOPT(argc, argv, optstring
 #ifndef POSIXLY_CORRECT
@@ -107,3 +109,20 @@ void parse(int argc, char** argv, const char* optstring, const option_t* options
 		save_option(options, opt, selected_options, config, n);
 	}
 }
+
+void print_help(const option_t* options, const int n, const char* help_prefix, const char* help_postfix) {
+	int i;
+	const option_t* opt;
+	printf(help_prefix);
+	for (i = 0; i < n; i++) {
+		opt = &options[i];
+		printf("--%s -%c%s%s\n\t%s\n",
+			opt->long_option,
+			(char)opt->short_option,
+			opt->help_value_name ? " " : "",
+			opt->help_value_name ? opt->help_value_name : "",
+			opt->help_desc);
+	}
+	printf(help_postfix);
+}
+

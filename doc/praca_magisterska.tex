@@ -1,11 +1,15 @@
 \documentclass{mini}
 \usepackage[utf8]{inputenc}
+
+\usepackage[polish]{babel}
 \usepackage{subfiles}
+\usepackage[style=numeric,backend=biber]{biblatex}
+\addbibresource{bibliography.bib}
 
 \title{Protokół zarządzania stacjami komputerowymi pod kontrolą systemu Linux}
-\author{Patryk Bęza}
+\author{\href{mailto:P.Beza@student.mini.pw.edu.pl}{Patryk Bęza}}
 \album{237533}
-\supervisor{dr inż. Marek Kozłowski}
+\supervisor{\href{M.Kozlowski@mini.pw.edu.pl}{dr inż. Marek Kozłowski}}
 \discipline{informatyka}
 \monthyear{luty 2017}
 \date{\today}
@@ -17,15 +21,15 @@
     \renewcommand{\arraystretch}{2.5}
     \centerline{
         \begin{tabular}{>{\bfseries}l>{\itshape}l}
-        Autor:            & \@author\\
-		Numer albumu:     & \@album\\
+	Autor:            & \@author\\
+	Numer albumu:     & \@album\\
         Promotor:         & \@supervisor\\
         Tytuł:            & \parbox{6.5cm}{\@title}\\
         Uczelnia:         & Politechnika Warszawska\\
         Wydział:          & Matematyki i Nauk Informacyjnych (MiNI)\\
         Kierunek:         & Informatyka\\
         Rok akademicki:   & 2016/2017\\
-		Semestr:          & Zimowy\\
+	Semestr:          & Zimowy\\
         Dziekan Wydziału: & prof. nzw. dr hab. Irmina Herburt\\
         \end{tabular}
     }
@@ -47,7 +51,8 @@
 \subfile{chapters/ch01}
 \subfile{chapters/ch02}
 
-\bibliographystyle{plplain}
-\bibliography{bibliography}
+%\bibliographystyle{plplain}
+%\bibliography{bibliography}
+\printbibliography
 
 \end{document}

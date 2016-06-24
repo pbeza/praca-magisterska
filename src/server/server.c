@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-#include "parser.h"
+#include "server_parser.h"
 
 static void server_work(const config_t* config) {
 	UNUSED(config);
