@@ -236,39 +236,55 @@ literate=%
 \renewcommand{\maketitle}{
 \pdfbookmark[0]{\@titlepagecap}{titlepage}
 \begin{titlepage}
-\begin{center}
-	\begin{minipage}{25mm}
-		\includegraphics[scale=0.75]{img/pw}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+	\center
+	\begin{minipage}{2.5cm}
+		\includegraphics[width=2.25cm]{img/pw}
 	\end{minipage}
 	\hfill
 	\begin{minipage}{100mm}
 		\begin{center}
-			\textsc{\Large\@university\\\vspace{1mm}\large\@faculty}
+			\textsc{\LARGE\@university\\\vspace{1mm}\large\@faculty}
 		\end{center}
 	\end{minipage}
 	\hfill
-	\begin{minipage}{25mm}
+	\begin{minipage}{2.5cm}
 		\begin{flushright}
-				\includegraphics[scale=0.75]{img/mini}
+				\includegraphics[width=2.25cm]{img/mini}
 		\end{flushright}
 	\end{minipage}\par
-	\vspace{30mm}
-	{\large
-		\MakeUppercase{Praca dyplomowa magisterska}\\
-		\MakeUppercase{na kierunku \@discipline}
+	\vspace{3cm}
+	{
+		\textsc{\Large Praca dyplomowa magisterska na kierunku \@discipline}\\[0.5cm]
+		\textsc{\large Rok akademicki 2016/2017}\\[1.8cm]
 	\par}
-	\vfill
-	\begin{spacing}{1.3}
-		\textbf{\Large\MakeUppercase{\@title}}
+	\HRule\\[1.5cm]
+	\begin{minipage}[t]{0.95\textwidth}
+	\begin{spacing}{2.0}
+		\center
+		\textbf{\LARGE\@title}
 	\end{spacing}
-	\vfill
-\end{center}
-\hspace{.7\textwidth}
-\begin{minipage}[t][70mm]{.5\textwidth}
-	\textsc{\large\@authorcap:}\\\@author\par
-	\vspace{7mm}
-	\textsc{\large\@supervisorcap:}\\\@supervisor
+	\end{minipage}\\[0.5cm]
+	\HRule\\[2cm]
+\begin{minipage}[t]{0.4\textwidth}
+	\begin{flushleft}\large
+		\textsc{\@authorcap:}\\[3mm]
+		\@author
+	\end{flushleft}
 \end{minipage}
+\begin{minipage}[t]{0.4\textwidth}
+	\begin{flushright}\large
+		\textsc{\@supervisorcap:}\\[3mm]
+		\@supervisor\\[1cm]
+	\end{flushright}
+\end{minipage}
+\vfill
+%\hspace{.7\textwidth}
+%\begin{minipage}[t][70mm]{.4\textwidth}
+%	\textsc{\large\@authorcap:}\\\@author\par
+%	\vspace{7mm}
+%	\textsc{\large\@supervisorcap:}\\\@supervisor
+%\end{minipage}
 \begin{center}
 	\textsc{\large\@location, \@monthyear}
 \end{center}
