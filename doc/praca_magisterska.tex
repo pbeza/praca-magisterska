@@ -2,8 +2,9 @@
 \usepackage[utf8]{inputenc}
 
 \usepackage[polish]{babel}
+\usepackage{csquotes}
 \usepackage{subfiles}
-\usepackage[style=numeric,backend=biber]{biblatex}
+\usepackage[style=numeric,backend=biber,sorting=none]{biblatex}
 \addbibresource{bibliography.bib}
 
 \title{Protokół zarządzania stacjami komputerowymi pod kontrolą systemu Linux}
@@ -18,21 +19,25 @@
 \maketitle
 \makeatletter
 {
-    \renewcommand{\arraystretch}{2.5}
-    \centerline{
-        \begin{tabular}{>{\bfseries}l>{\itshape}l}
-	Autor:            & \@author\\
-	Numer albumu:     & \@album\\
-        Promotor:         & \@supervisor\\
-        Tytuł:            & \parbox{6.5cm}{\@title}\\
-        Uczelnia:         & Politechnika Warszawska\\
-        Wydział:          & Matematyki i Nauk Informacyjnych (MiNI)\\
-        Kierunek:         & Informatyka\\
-        Rok akademicki:   & 2016/2017\\
-	Semestr:          & Zimowy\\
-        Dziekan Wydziału: & prof. nzw. dr hab. Irmina Herburt\\
-        \end{tabular}
-    }
+	\renewcommand{\arraystretch}{2.5}
+	\vspace*{\fill}
+	\begin{table}[h]
+	\centering
+	\begin{tabular}{>{\bfseries}l>{\itshape}l}
+		Autor:            & \@author\\
+		Numer albumu:     & \@album\\
+		Promotor:         & \@supervisor\\
+		Tytuł:            & \parbox{6.5cm}{\@title}\\
+		Uczelnia:         & \href{https://www.pw.edu.pl/}{Politechnika Warszawska}\\
+		Wydział:          & \href{http://www.mini.pw.edu.pl/}{Matematyki i Nauk Informacyjnych (MiNI)}\\
+		Kierunek:         & Informatyka\\
+		Specjalność:      & Metody Sztucznej Inteligencji\\
+		Rok akademicki:   & 2016/2017\\
+		Semestr:          & Zimowy\\
+		Dziekan Wydziału: & \href{mailto:I.Herburt@mini.pw.edu.pl}{prof. nzw. dr hab. Irmina Herburt}\\
+	\end{tabular}
+	\end{table}
+	\vspace*{\fill}
 }
 \makeatother
 \tableofcontents
@@ -48,8 +53,8 @@
 \stepcounter{page}
 
 \subfile{chapters/intro}
-\subfile{chapters/ch01}
-\subfile{chapters/ch02}
+%\subfile{chapters/ch01}
+%\subfile{chapters/ch02}
 
 %\bibliographystyle{plplain}
 %\bibliography{bibliography}
