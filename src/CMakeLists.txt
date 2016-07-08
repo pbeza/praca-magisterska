@@ -1,12 +1,12 @@
 # This is main CMake of the project.
 #
-## TYPICAL USAGE
+# TYPICAL USAGE
 #
 # Simplest compilation (should suffice for most users):
 #
 #   cd src && mkdir build && cd build && cmake .. && make && make install
 #
-## DEBUG / RELEASE
+# DEBUG / RELEASE
 #
 # To generate Makefile for Debug or Release version run:
 #
@@ -14,13 +14,13 @@
 #
 # where X is 'Debug' or 'Release'.
 #
-## COMPILATION DETAILS
+# COMPILATION DETAILS
 #
 # To see compilation details (i.e. compiler's flags) run:
 #
 #   make VERBOSE=1
 #
-## MORE
+# MORE
 #
 #  See www.cmake.org to learn more about CMake.
 
@@ -37,7 +37,7 @@ set(DOXYGEN_LANGUAGE "English" CACHE STRING "Doxygen documentation language")
 option(POSIXLY_CORRECT "Don't use non-POSIX compliant extensions" OFF)
 option(DEBUG_CMAKE_MESSAGES "Print all CMake variables" OFF)
 
-# Print some information about detected system.
+# Print basic information about detected system.
 
 message(STATUS "Detected system: ${CMAKE_SYSTEM} ${CMAKE_HOST_SYSTEM_PROCESSOR}.")
 
@@ -47,13 +47,15 @@ configure_file("README.md.in" "README.md")
 
 # Generate ctags symbols if ctags is installed.
 
-set_source_files_properties(tags PROPERTIES GENERATED true)
-add_custom_target(tags COMMAND ctags -R ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-
-find_program(CTAGS_PATH ctags)
-#if(CTAGS_PATH)
+#find_program(CTAGS_PATH ctags)
+#if (NOT CTAGS_PATH)
+#	message(FATAL_ERROR "ctags not found")
+#else()
 #	add_dependencies(${PROJECT_NAME} tags)
 #endif()
+
+add_custom_command(OUTPUT tags COMMAND ctags -R ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+add_custom_target(ctags DEPENDS tags)
 
 # Set warning level for GCC and MSVC (MS Visual Studio) to maximum possible.
 

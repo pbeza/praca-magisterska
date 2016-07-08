@@ -1,6 +1,6 @@
 /**
  * @file
- * Server's main file / starting point.
+ * Server's main file.
  */
 
 #include <stdlib.h>

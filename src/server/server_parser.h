@@ -1,10 +1,10 @@
 /**
  * @file
- * `argv` parser.
+ * Server's `argv` parser.
  */
 
-#ifndef _PARSER_H
-#define _PARSER_H
+#ifndef _SERVER_PARSER_H
+#define _SERVER_PARSER_H
 
 #include "common/utils/options.h"
 #include "config.h"
