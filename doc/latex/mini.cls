@@ -71,17 +71,18 @@
 	belowcaptionskip=1\baselineskip,
 	breaklines=true,
 	frame=l,
-	xleftmargin=\parindent,
+%	xleftmargin=\parindent,
 	language=C,
 	showstringspaces=false,
 	basicstyle=\footnotesize\ttfamily,
 	keywordstyle=\bfseries\color{green!50!black},
 	commentstyle=\itshape\color{green!60!black},
-	identifierstyle=\color{blue},
+	identifierstyle=\color{blue!60!black},
 	stringstyle=\color{orange},
 	captionpos=b,
-	frame=top,
-	frame=bottom
+	frame=single
+%	frame=top,
+%	frame=bottom
 }
 \lstset{
 prebreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},

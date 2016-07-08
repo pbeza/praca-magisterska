@@ -1,0 +1,40 @@
+\documentclass[praca_magisterska]{subfiles}
+
+\begin{document}
+
+\chapter{Implementacja}
+
+W tym rozdziale opisano z jakich narzędzi i jakiej konfiguracji korzystano w trakcie implementacji. Wszystkie narzędzia, z których korzystano w ramach ninienszego projektu, są bezpłatne i wydane na jednej z wolnych licencji takich jak \emph{GPL}, \emph{LGPL}, \emph{MIT}, \emph{BSD}, \emph{Apache2.0}.
+
+\section{Edytor tekstu \texttt{vim}}
+
+Do pisania kodu źródłowego projektu wykorzystano edytor tekstu~\texttt{vim} rozbudowany o wtyczki~(\emph{ang.~plugins}).
+
+\subsection{Wykorzystane wtyczki \texttt{vim}}
+
+Lista wtyczek \texttt{vim}, wykorzystanych w czasie implementacji:
+\begin{itemize}
+	\item\texttt{NerdTree} -- narzędzie do wyświetlania wygodnego drzewa systemu plików,
+	\item\texttt{ctags} -- narzędzie do generowania.
+\end{itemize}
+
+\subsection{Konfiguracja}
+
+W celu włączenia automatycznego ładowania pliku \texttt{tags} przez \texttt{vim}, do pliku \path{~/.vimrc} dodano następującą konfigurację:
+\begin{lstlisting}[language=bash,numbers=none,caption={Konfiguracja \texttt{~/.vimrc}}]
+set tags=build/tags,tags,./tags;$HOME
+\end{lstlisting}
+Konfiguracja ta powoduje, że \texttt{vim} automatycznie wczytuje plik \texttt{tags}, szukając go kolejno~w:
+\begin{itemize}[font=\ttfamily]
+	\item katalogu \path{$PWD/build},
+	\item katalogu \path{$PWD},
+	\item katalogu, w którym znajduje się aktualnie otwarty plik w \texttt{vim},
+	\item katalogach poniżej katalogu \path{$PWD}, ale nie niżej niż \path{$HOME}.
+\end{itemize}
+Zmienna systemowa \texttt{\gls{PWD}} oznacza aktualny katalog roboczy.
+
+\section{Menadżer plików \texttt{Midnight Commander}}
+
+Do sprawnego poruszania się po drzewie katalogów projektu wykorzystano menadżer plików \texttt{Midnight~Commander}.
+
+\end{document}

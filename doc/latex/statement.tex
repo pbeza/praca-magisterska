@@ -1,0 +1,62 @@
+\documentclass[%
+    paper=a4,
+    fontsize=11pt,
+    fromphone=off,
+    fromlogo,
+    parskip=full,
+    addrfield=off,
+    backaddress=off,
+    foldmarks=off,
+    fromemail=off,
+    subject=underlined,
+    version=last
+]{scrlttr2}
+\usepackage[utf8]{inputenc}
+\usepackage{polski}
+\usepackage[polish]{babel}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\linespread{1.7}
+
+\newcommand{\degree}{inż.}
+\newcommand{\aauthor}{\degree~Patryk~Bęza}
+\newcommand*{\Signature}[1]{%
+	\vspace{7em}
+	\par\hfill\makebox[2.5in]{\hrulefill}%
+	\par\hfill\noindent\makebox[2.5in][r]{#1}%
+}%
+\renewcommand*{\raggedsignature}{\raggedright}
+
+\setkomavar{fromname}{\aauthor}
+%\setkomavar{fromaddress}{}
+\setkomavar{signature}{\author}
+\setkomafont{title}{\scshape\large}
+%\setkomafont{fromemail}{\scshape\large}
+
+%\LoadLetterOption{DIN}
+\setkomavar{fromname}{\aauthor\\Nr albumu: 237533}
+%\setkomavar{fromaddress}{ul. Jakaś 10,\\00-000 Warszawa}
+\setkomavar{fromphone}{+48 888\,524\,988}
+\setkomavar{fromemail}{\texttt{\href{mailto:P.Beza@student.mini.pw.edu.pl}{P.Beza@student.mini.pw.edu.pl}}}
+%\setkomavar{backaddressseparator}{\enspace\textperiodcentered\enspace}
+\setkomavar{signature}{\aauthor}
+\setkomavar{place}{Warszawa}
+\setkomavar{date}{\today}
+\setkomavar{title}{Oświadczenie}
+\setkomavar{fromlogo}{\includegraphics[height=3.5\baselineskip]{img/mini}}
+
+\makeatletter
+\@setplength{firstheadvpos}{2cm}
+\makeatother
+
+\begin{document}
+\begin{letter}{--}
+
+\opening{}
+Oświadczam, że niniejszą pracę magisterską pod tytułem \textbf{,,Protokół zarządzania stacjami komputerowymi pod kontrolą systemu Linux''}, której promotorem jest \emph{dr~inż.~Marek~Kozłowski}, wykonałem samodzielnie, co poświadczam własnoręcznym podpisem.
+%\closing{Z poważaniem,}
+\Signature{Patryk Bęza\\}
+
+\end{letter}
+\end{document}

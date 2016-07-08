@@ -5,8 +5,10 @@
 \usepackage{csquotes}
 \usepackage{subfiles}
 \usepackage[style=numeric,backend=biber,sorting=none]{biblatex}
-\addbibresource{bibliography.bib}
+\usepackage[justification=centering]{caption}
+\usepackage{pdfpages}
 
+\addbibresource{bibliography.bib}
 \title{Protokół zarządzania stacjami komputerowymi pod kontrolą systemu Linux}
 \author{\href{mailto:P.Beza@student.mini.pw.edu.pl}{inż. Patryk Bęza}}
 \album{237533}
@@ -17,29 +19,7 @@
 
 \begin{document}
 \maketitle
-\makeatletter
-{
-	\renewcommand{\arraystretch}{2.5}
-	\vspace*{\fill}
-	\begin{table}[h]
-	\centering
-	\begin{tabular}{>{\bfseries}l>{\itshape}l}
-		Autor:            & \@author\\
-		Numer albumu:     & \@album\\
-		Promotor:         & \@supervisor\\
-		Tytuł:            & \parbox{6.5cm}{\@title}\\
-		Uczelnia:         & \href{https://www.pw.edu.pl/}{Politechnika Warszawska}\\
-		Wydział:          & \href{http://www.mini.pw.edu.pl/}{Matematyki i Nauk Informacyjnych (MiNI)}\\
-		Kierunek:         & Informatyka\\
-		Specjalność:      & Metody Sztucznej Inteligencji\\
-		Rok akademicki:   & 2016/2017\\
-		Semestr:          & Zimowy\\
-		Dziekan Wydziału: & \href{mailto:I.Herburt@mini.pw.edu.pl}{prof. nzw. dr hab. Irmina Herburt}\\
-	\end{tabular}
-	\end{table}
-	\vspace*{\fill}
-}
-\makeatother
+\include{chapters/infopage}
 \tableofcontents
 \include{glossary}
 \printglossary[style=clong,title=Słownik pojęć]
@@ -52,12 +32,30 @@
 %\setcounter{page}{\thesavepage}
 %\stepcounter{page}
 
+% 1) Wstęp,
+% 2) Cel i zakres pisania pracy dyplomowej,
+% 3) Wstęp teoretyczny, przegląd aktualnego stanu wiedzy,
+% 4) Metodyka badawcza i użyte materiały,
+% 5) Opis wyników i ich analiza,
+% 6) Dyskusja wyników badań,
+% 7) Wnioski.
+%
+% Ponadto:
+% 1) Bibliografia,
+% 2) Spis rysunków, tabel i schematów,
+% 3) Spis załączników,
+% 4) Opis dołączonej płyty CD,
+% 5) Oświadczenie o własnoręcznym wykonaniu pracy,
+% 6) Streszczenie w języku polskim i angielskim.
+
 \subfile{chapters/intro}
 %\subfile{chapters/ch01}
 %\subfile{chapters/ch02}
+\subfile{chapters/ch03}
 
 %\bibliographystyle{plplain}
 %\bibliography{bibliography}
 \printbibliography
+\includepdf[pages=1-,pagecommand={\thispagestyle{plain}}]{statement}
 
 \end{document}
