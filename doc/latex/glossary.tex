@@ -3,25 +3,86 @@
 % Na końcu każdego wpisu w słowniku dodaje się automatycznie znak kropki '.' i nowej linii '\\'.
 %
 
+\newglossaryentry{gnu}
+{
+	name={GNU},
+	description={\emph{GNU’s not Unix}\\&Uniksopodobny system operacyjny, zapoczątkowany przez Richarda Stallmana w styczniu~1984~roku, złożony wyłącznie z~\glslink{wolne-oprogramowanie}{wolnego oprogramowania}. W~ramach projektu \gls{gnu} powstały m.in.~\emph{gcc}, \emph{glibc}, \emph{bash}, \emph{emacs} i~jądro systemu operacyjnego --- \emph{GNU~Hurd} --- jednak jego popularność jest dużo mniejsza od~jądra \gls{linux}. System operacyjny \gls{gnu} z~jądrem \gls{linux} nazywamy dystrybucją \gls{gnulinux}~\cite{gnu,gnulinux,gnu-faq,wiki:linux-naming-controversy}}
+}
+\newglossaryentry{linux}
+{
+	name={Linux},
+	description={Uniksopodobne jądro systemu operacyjnego będące \glslink{wolne-oprogramowanie}{wolnym oprogramowaniem}, zapoczątkowane przez Linusa Torvaldsa w~1991~roku~\cite{linux-kernel}. Często mylnie lub~potocznie utożsamiany z~określeniem \gls{gnulinux}~\cite{gnu-faq,wiki:linux-naming-controversy}}
+}
+\newglossaryentry{unix}
+{
+	name={Unix},
+	description={Rodzina systemów operacyjnych, mających wspólny początek w~postaci systemu \gls{unix} powstałego w~1969~roku w~\emph{AT\&T} (obecnie \emph{Bell~Labs}). Korzystając z~kodu \glslink{unix}{Unix'a} powstało wiele pokrewnych systemów operacyjnych, m.in.~\emph{BSD}, \emph{Solaris}, \emph{Sun~OS}, \emph{System~V}, \emph{AIX}, \emph{HP-UX}, \emph{Mac~OS~X}. Projekt \gls{gnu} był od~początku projektowany jako ulepszony \gls{unix}, ale nie bazujący na~jego kodzie źródłowym~\cite{gnu-initial-msg}}
+}
+\hyphenation{GNU/Linux}
 \newglossaryentry{gnulinux}
 {
 	name={GNU/Linux},
-	description={System operacyjny \texttt{GNU} napisany przez \emph{Richarda Stallmana}, z jądrem \texttt{Linux}, napisanym przez \emph{Linusa Torvalds'a}~\cite{gnulinux}}
+	description={System operacyjny \gls{gnu} zapoczątkowany przez Richarda Stallmana, z~jądrem \gls{linux}, zapoczątkowanym przez Linusa Torvaldsa~\cite{gnulinux}. Często mylnie lub~potocznie utożsamiany z~określeniem \gls{linux}~\cite{gnu-faq,wiki:linux-naming-controversy}}
 }
 \newglossaryentry{kernel}
 {
 	name={kernel},
-	description={Jądro \gls{OpenCL}.\\&Program uruchamiany w środowisku OpenCL na urządzeniu docelowym, a kompilowany na urządzeniu host}
+	description={Jądro systemu \gls{gnulinux}.\\&Centralna część systemu operacyjnego, mająca całkowitą kontrolę nad nim. W~szczególności, jądro systemu operacyjnego jest odpowiedzialne za~zarządzanie pamięcią, komunikacją między urządzeniami, obsługę sterowników i~za~inne, niskopoziomowe zadania}
 }
 \newglossaryentry{UTF8}
 {
 	name={UTF-8},
-	description={\emph{UCS Transformation Format 8-bit}.\\&System kodowania \emph{Unicode}, wykorzystujący od 8 do 32 bitów do zakodowania pojedynczego znaku, w pełni kompatybilny z \gls{ASCII}}
+	description={\emph{UCS Transformation Format 8-bit}.\\&System kodowania \emph{Unicode}, wykorzystujący od 8~do 32~bitów do zakodowania pojedynczego znaku, w~pełni kompatybilny z~\gls{ASCII}}
 }
 \newglossaryentry{PWD}
 {
 	name={\texttt{\$PWD}},
-	description={\emph{\textbf{P}athname of the current \textbf{W}orking \textbf{D}irectory}\\&Zmienna środowiskowa systemu \gls{gnulinux}, zawierająca ścieżkę aktualnego katalogu roboczego}
+	description={\emph{\textbf{P}athname of the current \textbf{W}orking \textbf{D}irectory}.\\&Zmienna środowiskowa systemu \gls{gnulinux} przechowująca ścieżkę aktualnego katalogu roboczego}
+}
+\newglossaryentry{wolne-oprogramowanie}
+{
+	name = {Wolne oprogramowanie},
+	description = {\emph{Free Software}.\\&Oprogramowanie publikowane na licencji typu \glslink{copyleft}{copyleft}, które zezwala użytkownikom je~uruchamiać, powielać, badać, zmieniać i~ulepszać~\cite{free-software}}
+}
+\newglossaryentry{gpl}
+{
+	name={licencja GPL},
+	description={\emph{GNU General Public License}.\\&Licencja \glslink{wolne-oprogramowanie}{wolnego oprogramowania} stworzona w~1989~roku przez Richarda Stallmana, gwarantująca użytkownikowi możliwość uruchamiania, kopiowania i~modyfikowania oprogramowania, pod~warunkiem, że~zmodyfikowana wersja zostanie również opublikowana na~warunkach tej~licencji. Najnowszą wersją \glslink{gpl}{GPL} jest \emph{GPL~3}, wydana 29~czerwca~2007~roku~\cite{gpl3,wiki:licenses-comparison}}
+}
+\newglossaryentry{lgpl}
+{
+	name={licencja LGPL},
+	description={\emph{GNU Lesser General Public License}.\\&Licencja typu \glslink{copyleft}{copyleft}, bazująca na~licencji \glslink{gpl}{GPL} --- różni się od niej tylko tym, że~wykorzystanie \glslink{lgpl}{LGPL} dopuszcza korzystanie z~biblioteki w~programach prawnie zastrzeżonych~\cite{lgpl3,why-not-lgpl,wiki:licenses-comparison}}
+}
+\newglossaryentry{mit-license}
+{
+	name={licencja MIT},
+	description={Licencja \emph{Massachusetts Institute of Technology}.\\&Licencja typu \glslink{copyleft}{copyleft}, kompatybilna z~wieloma innymi \glslink{wolne-oprogramowanie}{wolnymi} licencjami --- np.~z~licencją~\glslink{gpl}{GPL}~\cite{mit}. W~projekcie~\emph{Fedora} i~na~\emph{GitHub} jest to najczęściej używana licencja~\cite{mit-popularity-fedora,mit-popularity-github,wiki:licenses-comparison}}
+}
+\newglossaryentry{apache2.0-license}
+{
+	name={licencja Apache~2.0},
+	description={Licencja typu \glslink{copyleft}{copyleft}~opublikowana w~styczniu~2004~roku, zezwalająca użycie oprogramowania objętą tą licencją również na użytek zamkniętego oprogramowania komercyjnego~\cite{apache2.0,wiki:licenses-comparison}. Jest kompatybilna z licencją \glslink{gpl}{GPL~3}, ale nie z jej poprzednimi wersjami}
+}
+\newglossaryentry{bsd-license}
+{
+	name={licencje BSD},
+	description={Rodzina licencji typu \glslink{copyleft}{copyleft}, zezwalająca na~rozprowadzanie oprogramowania bez postaci źródłowej oraz na~włączenia do~zamkniętego oprogramowania, pod warunkiem załączenia do~oprogramowania informacji o~autorach oryginalnego kodu i~treści licencji~\cite{bsd,wiki:licenses-comparison}}
+}
+\newglossaryentry{copyleft}
+{
+	name={licencje copyleft},
+	description={Licencje umożliwiające uczynienie programu \glslink{wolne-oprogramowanie}{wolnym oprogramowaniem} i~nakazanie, by~wszystkie jego zmienione i~poszerzone wersje również takimi były~\cite{copyleft,wiki:licenses-comparison}}
+}
+\newglossaryentry{ssh}
+{
+	name={SSH},
+	description={\emph{Secure Shell}.\\&Protokół sieciowy działający w~trybie klient-serwer, zapewniający bezpieczne zdalne logowanie i~inne bezpieczne usługi sieciowe~\cite{rfc:ssh}. Serwer \gls{ssh} działa domyślnie na~porcie~22}
+}
+\newglossaryentry{tcpip}
+{
+	name={TCP/IP},
+	description={Model warstwowej struktury protokołów komunikacyjnych stworzony w latach 70.~XX~wieku w~\emph{DARPA}TODO}
 }
 \newacronym{CPU}{CPU}{\emph{Central Processing Unit}.\\&Procesor}
 \newacronym{API}{API}{\emph{Application Programming Interface}.\\&Interfejs Programowania Aplikacji}

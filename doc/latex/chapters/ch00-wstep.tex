@@ -1,0 +1,50 @@
+\documentclass[praca_magisterska]{subfiles}
+
+\begin{document}
+
+\chapter{Wstęp}
+\label{chapter:intro}
+
+\section{Temat pracy}
+
+\noindent Tematem niniejszej pracy jest:
+\begin{displayquote}
+Protokół zarządzania stacjami komputerowymi pod kontrolą systemu Linux.
+\end{displayquote}
+
+\section{Cel i zakres pracy}
+
+\noindent Celem niniejszej pracy jest:
+\blockcquote{formularz-zgloszenia-pracy}{Zaprojektowanie i~zaimplementowanie protokołu umożliwiającego propagowanie zmian w~systemie plików, pakietów oraz elementów konfiguracji do~stacji roboczych pod kontrolą systemu operacyjnego \glslink{gnulinux}{Linux/GNU} lub~innego systemu \emph{*nix}, a~także elastycznego standardu opisu zmian oraz narzędzi dla~ich rejestrowania i~dostosowywania. Proponowaną architekturą jest model klient--serwer. Konkretny obraz zmian może być przeznaczony dla~konkretnej dystrybucji, jednakże stworzone rozwiązania praktyczne powinny dawać się w~prosty sposób dostosowywać do~popularnych dystrybucji systemu \glslink{gnulinux}{Linux/GNU} oraz systemów \emph{*nix}.}
+W~skrócie, cel niniejszej pracy to zaprojektowanie i~zaimplementowanie systemu synchronizowania oprogramowania, instalowanego na~grupie komputerów pracujących pod kontrolą systemu operacyjnego~\glslink{gnulinux}{GNU/Linux}.
+
+\section{Motywacja}
+
+Motywacją do~napisania pracy magisterskiej na~przedstawiony temat jest problem, z~którym zmagają się~administratorzy głównie średnich i dużych sieci komputerowych na~całym świecie, niezależnie od~używanego przez nich systemu operacyjnego --- problem automatycznego dystrybuowania ujednoliconego oprogramowania i~jego konfiguracji na~komputery połączone siecią komputerową~\cite{so-problem-intro}. W~ogólności nie~muszą to~być komputery takie jak serwery czy stacje robocze --- choć to~głównie z~nimi administratorzy komputerowi mają do~czynienia. Omawiany problem może dotyczyć również niektórych połączonych w~sieć systemów wbudowanych nie będących systemami typu~\mbox{\emph{bare~metal}}, tzn.~pracujących pod kontrolą systemu operacyjnego.
+
+W praktyce problem dystrybuowania jednolitego oprogramowania jest szczególnie odczuwalny przez administratorów, którzy zarządzają dużym zbiorem komputerów --- serwerów lub~stacji roboczych --- z~których każdy musi mieć ten~sam lub podobny zestaw zainstalowanych programów i~konfiguracji dedykowanej dla~zainstalowanego oprogramowania. Popularne sposoby radzenia sobie z~tym problemem~(patrz rozdział~\ref{sec:istniejace-rozwiazania}) są~uciążliwe w~praktyce, a~istniejące rozwiązania w~pełni automatyzujące cały proces synchronizacji oprogramowania i~konfiguracji, są stosunkowo młode i~słabo rozpowszechnione wśród większości administratorów komputerowych.
+
+\section{Zastosowania rozwiązania problemu}
+
+Zastosowania rozwiązania problemu dystrybuowania jednolitego oprogramowania możemy znaleźć wszędzie tam gdzie istnieje grupa ludzi, procesów, maszyn lub~innych podmiotów, z~których każdy wykorzystuje to~samo lub podobnie skonfigurowane oprogramowanie na~urządzeniu wyposażonym w~system operacyjny, podłączonym do~sieci komputerowej, najlepiej opartej o~\gls{tcpip}. W~szczególności mogą to~być niektóre: grupy serwerów pracujących w~podobnym środowisku, np.~maszyny developerskie, testowe i~produkcyjne, serwery działające w~ramach systemu rozproszonego, laboratoria komputerowe na~uczelniach, w szkołach, bibliotekach, biura, komputery administracji publicznej, w~szczególności w~urzędach, bankomaty, biletomaty, maszyny vendingowe, komputery kasjerów w~hipermarketach~itp.
+
+\section{Istniejące rozwiązania}
+\label{sec:istniejace-rozwiazania}
+
+W~niniejszym rozdziale przedstawiono przegląd istniejących rozwiązań dla~problemu dystrybuowania oprogramowania na~wiele komputerów połączonych siecią komputerową.
+
+\section{Uwagi licencyjne}
+
+Niniejsza praca wpisuje się w~tematykę \glslink{wolne-oprogramowanie}{wolnego oprogramowania} i~w~związku z~tym wszystkie wykorzystane w czasie implementacji projektu biblioteki, programy, kody źródłowe, grafiki są~licencjonowane jedną z~licencji typu~\glslink{copyleft}{copyleft} o~ile nie zaznaczono inaczej.
+
+\newpage
+
+\section{Środowisko projektu}
+
+TODO
+
+\section{Użyte źródła i materiały}
+
+\newpage
+
+\end{document}

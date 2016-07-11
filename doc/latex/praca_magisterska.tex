@@ -8,6 +8,8 @@
 \usepackage[justification=centering]{caption}
 \usepackage{pdfpages}
 
+%\hypersetup{colorlinks   = true}
+
 \addbibresource{bibliography.bib}
 \title{Protokół zarządzania stacjami komputerowymi pod kontrolą systemu Linux}
 \author{\href{mailto:P.Beza@student.mini.pw.edu.pl}{inż. Patryk Bęza}}
@@ -23,6 +25,7 @@
 \tableofcontents
 \include{glossary}
 \printglossary[style=clong,title=Słownik pojęć]
+%\glsaddall % if you want to print all glossary entries
 
 %\newcounter{savepage}
 %\setcounter{savepage}{\thepage}
@@ -32,10 +35,6 @@
 %\setcounter{page}{\thesavepage}
 %\stepcounter{page}
 
-% 1) Wstęp,
-% 2) Cel i zakres pisania pracy dyplomowej,
-% 3) Wstęp teoretyczny, przegląd aktualnego stanu wiedzy,
-% 4) Metodyka badawcza i użyte materiały,
 % 5) Opis wyników i ich analiza,
 % 6) Dyskusja wyników badań,
 % 7) Wnioski.
@@ -48,10 +47,11 @@
 % 5) Oświadczenie o własnoręcznym wykonaniu pracy,
 % 6) Streszczenie w języku polskim i angielskim.
 
-\subfile{chapters/intro}
-%\subfile{chapters/ch01}
-%\subfile{chapters/ch02}
-\subfile{chapters/ch03}
+\subfile{chapters/ch00-wstep}
+\subfile{chapters/ch01-protokol}
+\subfile{chapters/ch02-implementacja}
+\subfile{chapters/ch03-testy}
+\subfile{chapters/ch04-wnioski}
 
 %\bibliographystyle{plplain}
 %\bibliography{bibliography}
