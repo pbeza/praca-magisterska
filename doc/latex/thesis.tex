@@ -1,17 +1,14 @@
 \documentclass{mini}
-\usepackage[utf8]{inputenc}
 
-\usepackage[polish]{babel}
-\usepackage{csquotes}
+% Paczki do dołączenia oświadczenia o samodzielności wykonania pracy
+
 \usepackage{subfiles}
-\usepackage[style=numeric,backend=biber,sorting=none]{biblatex}
-\usepackage[justification=centering]{caption}
 \usepackage{pdfpages}
 
-%\hypersetup{colorlinks   = true}
+% Podstawowe (meta)dane
 
-\addbibresource{bibliography.bib}
 \title{Protokół zarządzania stacjami komputerowymi pod kontrolą systemu Linux}
+\titleaux{Management Protocol for Linux Workstations}
 \author{\href{mailto:P.Beza@student.mini.pw.edu.pl}{inż. Patryk Bęza}}
 \album{237533}
 \supervisor{\href{M.Kozlowski@mini.pw.edu.pl}{dr inż. Marek Kozłowski}}
@@ -19,13 +16,15 @@
 \monthyear{luty 2017}
 \date{\today}
 
+% Właściwy początek dokumentu
+
 \begin{document}
 \maketitle
 \include{chapters/infopage}
 \tableofcontents
 \include{glossary}
 \printglossary[style=clong,title=Słownik pojęć]
-%\glsaddall % if you want to print all glossary entries
+%\glsaddall % wypisuje również nieużywane pozycje słownika
 
 %\newcounter{savepage}
 %\setcounter{savepage}{\thepage}
@@ -52,10 +51,12 @@
 \subfile{chapters/ch02-implementacja}
 \subfile{chapters/ch03-testy}
 \subfile{chapters/ch04-wnioski}
-
-%\bibliographystyle{plplain}
-%\bibliography{bibliography}
+\subfile{chapters/appendix}
+%\listoffigures
 \printbibliography
+
+% Oświadczenie o samodzielności wykonania pracy
+
 \includepdf[pages=1-,pagecommand={\thispagestyle{plain}}]{statement}
 
 \end{document}

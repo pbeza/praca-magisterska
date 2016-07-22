@@ -1,4 +1,11 @@
-\documentclass[praca_magisterska]{subfiles}
+\documentclass[thesis]{subfiles}
+
+% Umożliwienia odwoływania się do polskiego tytułu pracy
+
+\makeatletter
+\let\inserttitle\@title
+\let\inserttitleaux\@titleaux
+\makeatother
 
 \begin{document}
 
@@ -9,10 +16,15 @@
 
 \noindent Tematem niniejszej pracy jest:
 \begin{displayquote}
-Protokół zarządzania stacjami komputerowymi pod kontrolą systemu Linux.
+\inserttitle.
+\end{displayquote}
+Wersja angielska tytułu pracy:
+\begin{displayquote}
+\inserttitleaux.
 \end{displayquote}
 
 \section{Cel i zakres pracy}
+\label{cel-i-zakres}
 
 \noindent Celem niniejszej pracy jest:
 \blockcquote{formularz-zgloszenia-pracy}{Zaprojektowanie i~zaimplementowanie protokołu umożliwiającego propagowanie zmian w~systemie plików, pakietów oraz elementów konfiguracji do~stacji roboczych pod kontrolą systemu operacyjnego \glslink{gnulinux}{Linux/GNU} lub~innego systemu \emph{*nix}, a~także elastycznego standardu opisu zmian oraz narzędzi dla~ich rejestrowania i~dostosowywania. Proponowaną architekturą jest model klient--serwer. Konkretny obraz zmian może być przeznaczony dla~konkretnej dystrybucji, jednakże stworzone rozwiązania praktyczne powinny dawać się w~prosty sposób dostosowywać do~popularnych dystrybucji systemu \glslink{gnulinux}{Linux/GNU} oraz systemów \emph{*nix}.}
@@ -33,17 +45,54 @@ Zastosowania rozwiązania problemu dystrybuowania jednolitego oprogramowania mo�
 
 W~niniejszym rozdziale przedstawiono przegląd istniejących rozwiązań dla~problemu dystrybuowania oprogramowania na~wiele komputerów połączonych siecią komputerową.
 
+\subsection{\texttt{Puppet}}
+
 \section{Uwagi licencyjne}
 
-Niniejsza praca wpisuje się w~tematykę \glslink{wolne-oprogramowanie}{wolnego oprogramowania} i~w~związku z~tym wszystkie wykorzystane w czasie implementacji projektu biblioteki, programy, kody źródłowe, grafiki są~licencjonowane jedną z~licencji typu~\glslink{copyleft}{copyleft} o~ile nie zaznaczono inaczej.
+Niniejsza praca wpisuje się w~tematykę \glslink{wolne-oprogramowanie}{wolnego oprogramowania} i~w~związku z~tym wszystkie narzędzia, biblioteki, programy, kody źródłowe, grafiki wykorzystane w czasie implementacji i~dokumentacji niniejszego projektu są~licencjonowane na~warunkach co~najmniej jednej z~licencji typu~\glslink{copyleft}{copyleft}, takiej jak np.~\gls{gpl}, \gls{lgpl}, \gls{mit-license}, \gls{bsd-license}, \gls{apache2.0-license}, o~ile nie zaznaczono inaczej.
+
+W~związku z~obowiązującym \emph{art.~15a~ustawy z~dnia 4~lutego~1994r. o~prawie autorskim i~prawach pokrewnych}~\cite{papp}, kod źródłowy aplikacji powstałej w~ramach niniejszej pracy prawdopodobnie zostanie opublikowany na~warunkach licencji~\glslink{gpl}{GNU~GPL~3} po~upływie co~najmniej 6~miesięcy od~momentu obrony autora niniejszej pracy, pod warunkiem, że~Uczelnia, tj.~Politechnika Warszawska, sama nie~opublikuje jej przez ten~czas.
 
 \newpage
 
 \section{Środowisko projektu}
 
-TODO
+\section{Zawartość pracy}
 
-\section{Użyte źródła i materiały}
+\noindent Niniejsza praca magisterska składa się z~dwóch głównych części:
+\begin{enumerate}
+	\item Niniejszej dokumentacji napisanej w \LaTeX,
+	\item Aplikacji, w~tym wersji skompilowanej, kodu źródłowego i~dokumentacji wygenerowanej z~komentarzy w~kodzie.
+\end{enumerate}
+Aplikacja składa się~również z~dwóch części, co~jest naturalne biorąc pod uwagę przyjętą architekturę klient-serwer~(por.~rozdział~\ref{cel-i-zakres}):
+\begin{enumerate}
+	\item Serwera --- wzorca oprogramowania i~konfiguracji dla~klientów,
+	\item Klienta --- okresowo synchronizującego oprogramowanie i~konfigurację z serwerem.
+\end{enumerate}
+
+\section{Wykorzystane źródła wiedzy}
+
+W~czasie prac nad implementacją projektu, korzystano z~wielu pomocnych dokumentacji, materiałów dydaktycznych i~innych źródeł wiedzy takich jak np.~programistyczne dyskusyjne, fora programistyczne, np.~\texttt{\href{http://stackoverflow.com/}{stackoverflow.com}}, \texttt{\href{http://superuser.com/}{superuser.com}}.
+
+\noindent Na~szczególne wyróżnienie zasługują źródła, z~których korzystano najwięcej:
+\begin{enumerate}
+	\item dokumentacje:
+	\begin{itemize}
+		\item dokumentacja TLDP,
+		\item dokumentacja deweloperów dla wybranych dystrybucji/systemów,
+		\item dokumentacja POSIX,
+		\item dokumentacja wybranego języka programowania i innych użytych narzędzi,
+		\item (opcjonalnie) dokumenty IETF (RFC),
+		\item dokumenty W3C,
+		\item drobiazgowy przegląd protokołu TCP/IP opublikowany na~stronie internetowej \texttt{\href{http://www.tcpipguide.com/}{tcpipguide.com}} oraz w~formie obszernej\footnote{Książka ma~1616 stron.} książki autorstwa \mbox{Charlesa~M.~Kozieroka} pt.~\textit{The~TCP/IP Guide}~(ISBN:~9781593270476).
+	\end{itemize}
+	\item materiały dydaktyczne do~przedmiotów prowadzonych na~Wydziale~MiNI~PW:
+	\begin{itemize}
+		\item ,,TCP/IP'' --- przedmiot prowadzony przez dra~inż.~Marka~Kozłowskiego~\cite{kozlowski},
+		\item ,,UNIX'' --- przedmiot prowadzony przez mgra~inż.~Marcina~Borkowskiego~\cite{borkowski}.
+	\end{itemize}
+\end{enumerate}
+Kompletny spis bibliografii, cytowanej w~niniejszej dokumentacji, znajduje się~na~jej końcu.
 
 \newpage
 

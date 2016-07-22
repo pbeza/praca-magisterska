@@ -6,7 +6,7 @@
 \newglossaryentry{gnu}
 {
 	name={GNU},
-	description={\emph{GNU’s not Unix}\\&Uniksopodobny system operacyjny, zapoczątkowany przez Richarda Stallmana w styczniu~1984~roku, złożony wyłącznie z~\glslink{wolne-oprogramowanie}{wolnego oprogramowania}. W~ramach projektu \gls{gnu} powstały m.in.~\emph{gcc}, \emph{glibc}, \emph{bash}, \emph{emacs} i~jądro systemu operacyjnego --- \emph{GNU~Hurd} --- jednak jego popularność jest dużo mniejsza od~jądra \gls{linux}. System operacyjny \gls{gnu} z~jądrem \gls{linux} nazywamy dystrybucją \gls{gnulinux}~\cite{gnu,gnulinux,gnu-faq,wiki:linux-naming-controversy}}
+	description={\emph{GNU’s not Unix}.\\&Uniksopodobny system operacyjny, zapoczątkowany przez Richarda Stallmana w styczniu~1984~roku, złożony wyłącznie z~\glslink{wolne-oprogramowanie}{wolnego oprogramowania}. W~ramach projektu \gls{gnu} powstały m.in.~\emph{gcc}, \emph{glibc}, \emph{bash}, \emph{emacs} i~jądro systemu operacyjnego --- \emph{GNU~Hurd} --- jednak jego popularność jest dużo mniejsza od~jądra \gls{linux}. System operacyjny \gls{gnu} z~jądrem \gls{linux} nazywamy dystrybucją \gls{gnulinux}~\cite{gnu,gnulinux,gnu-faq,wiki:linux-naming-controversy}}
 }
 \newglossaryentry{linux}
 {
@@ -82,9 +82,34 @@
 \newglossaryentry{tcpip}
 {
 	name={TCP/IP},
-	description={Model warstwowej struktury protokołów komunikacyjnych stworzony w latach 70.~XX~wieku w~\emph{DARPA}TODO}
+	description={Model warstwowej struktury protokołów komunikacyjnych bazujący na~modelu \emph{Department-of-Defence~(DoD)}~\cite{rfc:tcpip-dod}}
 }
-\newacronym{CPU}{CPU}{\emph{Central Processing Unit}.\\&Procesor}
-\newacronym{API}{API}{\emph{Application Programming Interface}.\\&Interfejs Programowania Aplikacji}
-\newacronym{BOM}{BOM}{\emph{Byte Order Mark}.\\&Znacznik kolejności bajtów}
-\newacronym{IDE}{IDE}{\emph{Integrated Development Environment}.\\&Zintegrowane Środowisko Programistyczne}
+\newglossaryentry{signal-handler}
+{
+	name={signal handler},
+	description={Funkcja, która zostaje wywołana przez system operacyjny gdy~program otrzymuje od~systemu niezamaskowany sygnał~\cite{signal-handler}}
+}
+\newglossaryentry{fifo}
+{
+	name={FIFO},
+	description={\emph{First In, First Out} --- \emph{łącze nazwane}.\\&W~ogólności \gls{fifo} to~sposób organizacji i~manipulacji danymi, w~szczególności danymi na~stosie. W~kontekście niniejszej pracy pisząc o~\gls{fifo}, mamy na~myśli plik specjalny podobny w~działaniu do~łączy nienazwanych~(potoków) --- różni się od~nich tym, że~dostęp do~\gls{fifo} odbywa się przez system plików~\cite{fifo-manual}}
+}
+\newglossaryentry{socket}
+{
+	name={socket},
+	description={W~\glslink{unix-like-system}{systemach *niksowych}~plik specjalny reprezentujący dwukierunkowy punkt końcowy połączenia --- najczęściej sieciowego (wyjątek stanowią \emph{Unix sockets})~\cite{socket-definition-oracle}}
+}
+\newglossaryentry{posix}
+{
+	name={\mbox{POSIX}},
+	description={\emph{Portable Operating System Interface for Unix}.\\&Rodzina standardów opublikowana przez \emph{IEEE Computer Society}, mająca na~celu zapewnienie zgodności pomiędzy systemami operacyjnymi m.in.~na~poziomie \acrshort{api}. W~czasie pisania niniejszej pracy, najnowsza wersja standardu \gls{posix} została opublikowana w~kwietniu~2013~roku~\cite{posix-ieee,posix-opengroup}}
+}
+\newglossaryentry{unix-like-system}
+{
+	name={system *niksowy},
+	description={System operacyjny zbliżony budową do systemu \gls{unix}, np.~\gls{gnulinux}, \emph{bsd}, \emph{Solaris}, \emph{HP-UX}, \emph{AIX}~itp.~\cite{wiki:unix-like}}
+}
+\newacronym{cpu}{CPU}{\emph{Central Processing Unit}.\\&Procesor}
+\newacronym{api}{API}{\emph{Application Programming Interface}}
+\newacronym{bom}{BOM}{\emph{Byte Order Mark}.\\&Znacznik kolejności bajtów}
+\newacronym{ide}{IDE}{\emph{Integrated Development Environment}.\\&Zintegrowane Środowisko Programistyczne}
