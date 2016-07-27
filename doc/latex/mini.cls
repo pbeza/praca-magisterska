@@ -93,28 +93,28 @@
 % Umożliwienie korzystania z polskich liter w listingach kodu
 
 \lstset{
-prebreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
-escapechar=@,
-style=customc,
-literate=%
-{ą}{{\k{a}}}1
-{ć}{{\'c}}1
-{ę}{{\k{e}}}1
-{ł}{{\l{}}}1
-{ń}{{\'n}}1
-{ó}{{\'o}}1
-{ś}{{\'s}}1
-{ż}{{\.z}}1
-{ź}{{\'z}}1
-{Ą}{{\k{A}}}1
-{Ć}{{\'C}}1
-{Ę}{{\k{E}}}1
-{Ł}{{\L{}}}1
-{Ń}{{\'N}}1
-{Ó}{{\'O}}1
-{Ś}{{\'S}}1
-{Ż}{{\.Z}}1
-{Ź}{{\'Z}}1
+	prebreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+	escapechar=@,
+	style=customc,
+	literate=%
+	{ą}{{\k{a}}}1
+	{ć}{{\'c}}1
+	{ę}{{\k{e}}}1
+	{ł}{{\l{}}}1
+	{ń}{{\'n}}1
+	{ó}{{\'o}}1
+	{ś}{{\'s}}1
+	{ż}{{\.z}}1
+	{ź}{{\'z}}1
+	{Ą}{{\k{A}}}1
+	{Ć}{{\'C}}1
+	{Ę}{{\k{E}}}1
+	{Ł}{{\L{}}}1
+	{Ń}{{\'N}}1
+	{Ó}{{\'O}}1
+	{Ś}{{\'S}}1
+	{Ż}{{\.Z}}1
+	{Ź}{{\'Z}}1
 }
 
 % Centrowanie podpisów pod obrazkami, listingami kodu itp.
@@ -156,13 +156,13 @@ literate=%
 % Ustawienia słownika pojęć (glossaries)
 
 \RequirePackage[nomain,acronym,xindy={language=polish,codepage=utf8},nonumberlist]{glossaries}
-\renewcommand{\acronymname}{S{\l}ownik}
+%\RequirePackage{glossary-mcols} % for 2 columns \printglossary[style=mcolindex]
 %\renewcommand*{\glstextformat}{\texttt} % font dla odwołań \gls
 \renewcommand{\glsnamefont}[1]{\textbf{#1}} % font dla haseł w słowniku
-%\renewcommand*{\glspostdescription}{}
-\newglossarystyle{clong}{%
+\renewcommand*{\glspostdescription}{}
+\newglossarystyle{labeling}{%
 	\renewenvironment{theglossary}%
-		{\begin{longtable}{p{.25\linewidth}p{1.45\glsdescwidth}}}%
+		{\begin{longtable}{p{.2\linewidth}p{1.5\glsdescwidth}}}%
 		{\end{longtable}}%
 	\renewcommand*{\glspostdescription}{.\\}%
 	\renewcommand*{\glossaryheader}{}%
@@ -173,6 +173,7 @@ literate=%
 		& \glstarget{##2}{\strut}##4\glspostdescription\space ##6\\}%
 	\renewcommand*{\glsgroupskip}{}%
 }
+
 \makeglossaries
 
 % Ustawienia polskiego formatowania cytowanej bibliografii
@@ -190,7 +191,9 @@ literate=%
 \RequirePackage[
 	style=numeric,
 	backend=biber,
-	sorting=none]{biblatex}
+	sorting=none,
+	backref=true
+	]{biblatex}
 \addbibresource{bibliography.bib}
 
 % Paczki dla matematycznych formuł
@@ -209,8 +212,8 @@ literate=%
 \RequirePackage{enumitem}
 \RequirePackage{wrapfig}
 \def\@schapter#1{
-\phantomsection\addcontentsline{toc}{chapter}{#1}
-\markboth{#1}{#1}\@makeschapterhead{#1}\@afterheading}
+	\phantomsection\addcontentsline{toc}{chapter}{#1}
+	\markboth{#1}{#1}\@makeschapterhead{#1}\@afterheading}
 
 % Usunięcie ze spisu treści odwołania do spisu treści
 

@@ -23,7 +23,8 @@
 \include{chapters/infopage}
 \tableofcontents
 \include{glossary}
-\printglossary[style=clong,title=Słownik pojęć]
+%\printglossary[style=mcolindex,title=Słownik pojęć]
+\printglossary[style=labeling,title=Słownik pojęć]
 %\glsaddall % wypisuje również nieużywane pozycje słownika
 
 %\newcounter{savepage}
@@ -45,6 +46,12 @@
 % 4) Opis dołączonej płyty CD,
 % 5) Oświadczenie o własnoręcznym wykonaniu pracy,
 % 6) Streszczenie w języku polskim i angielskim.
+
+% Zakaz dzielenia wybranych słów (szczególnie angielskich)
+
+\input{chapters/hypenation}
+
+% Wszystkie rozdziały pracy magisterskiej
 
 \subfile{chapters/ch00-wstep}
 \subfile{chapters/ch01-protokol}
