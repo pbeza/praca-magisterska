@@ -274,6 +274,10 @@
 \renewcommand{\appendixtocname}{\zalaczniki}
 \renewcommand{\appendixpagename}{\zalaczniki}
 
+% Wyświetlanie drzewa katalogów
+
+\usepackage{dirtree}
+
 % Strona tytułowa
 
 \renewcommand{\maketitle}{

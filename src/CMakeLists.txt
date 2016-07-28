@@ -1,28 +1,18 @@
-# This is main CMake of the project.
-#
-# TYPICAL USAGE
-#
-# Simplest compilation (should suffice for most users):
+# This is main CMake of the project. Simplest compilation (should suffice for
+# most users):
 #
 #   cd src && mkdir build && cd build && cmake .. && make && make install
-#
-# DEBUG / RELEASE
 #
 # To generate Makefile for Debug or Release version run:
 #
 #   cmake -D CMAKE_BUILD_TYPE=X ..
 #
-# where X is 'Debug' or 'Release'.
-#
-# COMPILATION DETAILS
-#
-# To see compilation details (i.e. compiler's flags) run:
+# where X is 'Debug' or 'Release'. To see compilation details (i.e. compiler's
+# flags) run:
 #
 #   make VERBOSE=1
 #
-# MORE
-#
-#  See www.cmake.org to learn more about CMake.
+# Visit www.cmake.org to learn more about CMake.
 
 cmake_minimum_required(VERSION 3.1)
 project(mgr VERSION 0.1 LANGUAGES C)
@@ -56,6 +46,12 @@ configure_file("README.md.in" "README.md")
 
 add_custom_command(OUTPUT tags COMMAND ctags -R ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 add_custom_target(ctags DEPENDS tags)
+
+# Generate cscope symbols if cscope is installed.
+
+set(CSCOPE_OUTPUT_FILES cscope.in.out cscope.out cscope.po.out)
+add_custom_command(OUTPUT ${CSCOPE_OUTPUT_FILES} COMMAND cscope -b -q -R)
+add_custom_target(cscope DEPENDS ${CSCOPE_OUTPUT_FILES})
 
 # Set warning level for GCC and MSVC (MS Visual Studio) to maximum possible.
 

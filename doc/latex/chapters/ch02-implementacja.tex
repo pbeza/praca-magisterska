@@ -38,14 +38,17 @@ W~tym rozdziale opisano z~jakich narzędzi i~jakiej konfiguracji korzystano w~tr
 
 \subsection{Edytor tekstu \texttt{vim}}
 
-Do pisania kodu źródłowego projektu oraz niniejszej dokumentacji wykorzystano edytor tekstu~\texttt{vim} rozbudowany o wtyczki~(\emph{ang.~plugins}).
+Do pisania kodu źródłowego projektu oraz niniejszej dokumentacji wykorzystano edytor tekstu~\texttt{vim} w~wersji~7.4, rozbudowany o wtyczki~(\emph{ang.~plugins}).
 
 \subsubsection{Wykorzystane wtyczki \texttt{vim}}
 
 \noindent Lista wtyczek \texttt{vim}, wykorzystanych w czasie implementacji:
 \begin{itemize}
-	\item\texttt{NerdTree} --- narzędzie do wyświetlania wygodnego drzewa systemu plików,
-	\item\texttt{ctags} --- narzędzie do~generowania.
+	\item\texttt{NerdTree} --- narzędzie do wyświetlania drzewa systemu plików i~nawigowania po nim~\cite{nerdtree-vimorg,nerdtree-github},
+	\item\texttt{ctags} --- narzędzie do~generowania metainformacji do~wygodnego nawigowania po kodzie źródłowym~\cite{ctags},
+	% http://stackoverflow.com/questions/934233/cscope-or-ctags-why-choose-one-over-the-other
+	% http://cscope.sourceforge.net/cscope_maps.vim
+	\item\texttt{cscope} --- narzędzie do~wygodnego przeglądania kodu źródłowego, bardziej rozbudowane od \texttt{ctags}~\cite{cscope}.
 \end{itemize}
 
 \subsubsection{Konfiguracja \texttt{.vimrc}}
