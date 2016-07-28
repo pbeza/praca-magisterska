@@ -19,40 +19,42 @@
 % Właściwy początek dokumentu
 
 \begin{document}
+
+% Wyłączenie numeracji w spisie treści
+
+\pagenumbering{gobble}
+
+% Strona tytułowa + podpisy autora i Promotora na odwrocie
+
 \maketitle
+
+% Strona z informacjami o Wydziale i autorze
+
 \include{chapters/infopage}
+
+% Spis treści
+
 \tableofcontents
+
+% Słownik pojęć
+
 \include{glossary}
+\pagenumbering{roman}
 %\printglossary[style=mcolindex,title=Słownik pojęć]
 \printglossary[style=labeling,title=Słownik pojęć]
 %\glsaddall % wypisuje również nieużywane pozycje słownika
-
-%\newcounter{savepage}
-%\setcounter{savepage}{\thepage}
-
-\subfile{chapters/abstract}
-
-%\setcounter{page}{\thesavepage}
-%\stepcounter{page}
-
-% 5) Opis wyników i ich analiza,
-% 6) Dyskusja wyników badań,
-% 7) Wnioski.
-%
-% Ponadto:
-% 1) Bibliografia,
-% 2) Spis rysunków, tabel i schematów,
-% 3) Spis załączników,
-% 4) Opis dołączonej płyty CD,
-% 5) Oświadczenie o własnoręcznym wykonaniu pracy,
-% 6) Streszczenie w języku polskim i angielskim.
 
 % Zakaz dzielenia wybranych słów (szczególnie angielskich)
 
 \input{chapters/hypenation}
 
+% Streszczenie pracy TODO tłumaczenie na ang.
+
+\subfile{chapters/abstract}
+
 % Wszystkie rozdziały pracy magisterskiej
 
+\pagenumbering{arabic}
 \subfile{chapters/ch00-wstep}
 \subfile{chapters/ch01-protokol}
 \subfile{chapters/ch02-implementacja}

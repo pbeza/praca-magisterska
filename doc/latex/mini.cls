@@ -42,10 +42,20 @@
 %	includeheadfoot
 %}
 
-% Zawijanie bardzo długich adresów URL
+% Font URLi i zawijanie bardzo długich adresów URL
 
 \PassOptionsToPackage{hyphens}{url}
+%\RequirePackage[unicode,plainpages=false,hypertexnames=true]{hyperref}
 \RequirePackage[unicode]{hyperref}
+
+% Zwykły \href z verbatim font
+
+\newcommand\hreftt[2]{%
+	\href{#1}{\texttt{#2}}%
+}
+
+%\let\oldhref\href
+%\renewcommand{\href}[2]{\oldhref{#1}{#2}}
 
 % Ustawienia wyłączenia podświetlania linków za pomocą kolorowych ramek
 
@@ -142,8 +152,8 @@
 \renewcommand{\chaptermark}[1]{\markboth{\thechapter.\enspace#1}{}}
 \renewcommand{\sectionmark}[1]{\markright{\thesection.\enspace#1}}
 \def\cleardoublepage{\clearpage\if@twoside
-\ifodd\c@page\else\hbox{}\thispagestyle{empty}\newpage
-\if@twocolumn\hbox{}\newpage\fi\fi\fi}
+	\ifodd\c@page\else\hbox{}\thispagestyle{empty}\newpage
+	\if@twocolumn\hbox{}\newpage\fi\fi\fi}
 \renewcommand{\@seccntformat}[1]{\csname the#1\endcsname.\enspace}
 \renewcommand{\numberline}[1]{\hb@xt@\@tempdima{#1.\hfil}}
 \RequirePackage[parfill]{parskip}[2001/04/09]
@@ -192,8 +202,7 @@
 	style=numeric,
 	backend=biber,
 	sorting=none,
-	backref=true
-	]{biblatex}
+	backref=true]{biblatex}
 \addbibresource{bibliography.bib}
 
 % Paczki dla matematycznych formuł
@@ -250,11 +259,20 @@
 \def\@authorsig{podpis autora}
 \def\@supervisorsig{podpis promotora}
 \def\@titlepagecap{Strona tytu{\l}owa}
+\def\@academicyear{2016/2017}
 %\def\@statementcap{O{\'s}wiadczenie}
 %\def\@definition{Definicja}
 %\def\@corollary{Wniosek}
 %\def\@remark{Uwaga}
 %\def\@example{Przyk{\l}ad}
+
+% Załączniki
+
+\RequirePackage[toc,page]{appendix}
+
+\def\zalaczniki{Załączniki}
+\renewcommand{\appendixtocname}{\zalaczniki}
+\renewcommand{\appendixpagename}{\zalaczniki}
 
 % Strona tytułowa
 
@@ -281,7 +299,7 @@
 		\vspace{3cm}
 		{
 			\textsc{\Large Praca dyplomowa magisterska na kierunku \@discipline}\\[0.5cm]
-			\textsc{\large Rok akademicki 2016/2017}\\[1.8cm]
+			\textsc{\large Rok akademicki \@academicyear}\\[1.8cm]
 		\par}
 		\HRule\\[1.5cm]
 		\begin{minipage}[t]{0.95\textwidth}
