@@ -39,37 +39,37 @@
 }
 \newglossaryentry{wolne-oprogramowanie}
 {
-	name={Wolne oprogramowanie},
+	name={wolne oprogramowanie},
 	description = {\emph{Free Software}. Oprogramowanie publikowane na licencji typu \glslink{copyleft}{copyleft}, które zezwala użytkownikom je~uruchamiać, powielać, badać, zmieniać i~ulepszać~\cite{free-software}}
 }
 \newglossaryentry{gpl}
 {
-	name={Licencja GPL},
-	description={\emph{GNU General Public License}. Licencja \glslink{wolne-oprogramowanie}{wolnego oprogramowania} stworzona w~1989~roku przez Richarda Stallmana, gwarantująca użytkownikowi możliwość uruchamiania, kopiowania i~modyfikowania oprogramowania, pod~warunkiem, że~zmodyfikowana wersja zostanie również opublikowana na~warunkach tej~licencji. Najnowszą wersją \glslink{gpl}{GPL} jest \emph{GPL~3}, wydana 29~czerwca~2007~roku~\cite{gpl3,wiki:licenses-comparison}}
+	name={licencja GPL},
+	description={\emph{GNU General Public License}. Licencja \glslink{wolne-oprogramowanie}{wolnego oprogramowania} stworzona w~1989~roku przez Richarda Stallmana, gwarantująca użytkownikowi możliwość uruchamiania, kopiowania i~modyfikowania oprogramowania, pod~warunkiem, że~zmodyfikowana wersja zostanie również opublikowana na~warunkach tej~licencji. Najnowszą wersją \glslink{gpl}{GPL} jest \glslink{gpl}{GPL~3}, opublikowana 29~czerwca~2007~roku~\cite{gpl3,wiki:licenses-comparison}}
 }
 \newglossaryentry{lgpl}
 {
-	name={Licencja LGPL},
+	name={licencja LGPL},
 	description={\emph{GNU Lesser General Public License}. Licencja typu \glslink{copyleft}{copyleft}, bazująca na~licencji \glslink{gpl}{GPL} --- różni się od niej tylko tym, że~wykorzystanie \glslink{lgpl}{LGPL} dopuszcza korzystanie z~biblioteki w~programach prawnie zastrzeżonych~\cite{lgpl3,why-not-lgpl,wiki:licenses-comparison}}
 }
 \newglossaryentry{mit-license}
 {
-	name={Licencja MIT},
+	name={licencja MIT},
 	description={Licencja \emph{Massachusetts Institute of Technology}. Licencja typu \glslink{copyleft}{copyleft}, kompatybilna z~wieloma innymi \glslink{wolne-oprogramowanie}{wolnymi} licencjami --- np.~z~licencją~\glslink{gpl}{GPL}~\cite{mit}. W~projekcie~\emph{Fedora} i~na~\emph{GitHub} jest to najczęściej używana licencja~\cite{mit-popularity-fedora,mit-popularity-github,wiki:licenses-comparison}}
 }
 \newglossaryentry{apache2.0-license}
 {
-	name={Licencja Apache~2.0},
+	name={licencja Apache~2.0},
 	description={Licencja typu \glslink{copyleft}{copyleft}~opublikowana w~styczniu~2004~roku, zezwalająca użycie oprogramowania objętą tą licencją również na użytek zamkniętego oprogramowania komercyjnego~\cite{apache2.0,wiki:licenses-comparison}. Jest kompatybilna z licencją \glslink{gpl}{GPL~3}, ale nie z jej poprzednimi wersjami}
 }
 \newglossaryentry{bsd-license}
 {
-	name={Licencje BSD},
+	name={licencje BSD},
 	description={Rodzina licencji typu \glslink{copyleft}{copyleft}, zezwalająca na~rozprowadzanie oprogramowania bez postaci źródłowej oraz na~włączenia do~zamkniętego oprogramowania, pod warunkiem załączenia do~oprogramowania informacji o~autorach oryginalnego kodu i~treści licencji~\cite{bsd,wiki:licenses-comparison}}
 }
 \newglossaryentry{copyleft}
 {
-	name={Licencje copyleft},
+	name={licencje copyleft},
 	description={Licencje umożliwiające uczynienie programu \glslink{wolne-oprogramowanie}{wolnym oprogramowaniem} i~nakazanie, by~wszystkie jego zmienione i~poszerzone wersje również takimi były~\cite{copyleft,wiki:licenses-comparison}}
 }
 \newglossaryentry{ssh}
@@ -80,12 +80,12 @@
 \newglossaryentry{tcpip}
 {
 	name={TCP/IP},
-	description={Model warstwowej struktury protokołów komunikacyjnych bazujący na~modelu \emph{Department-of-Defence~(DoD)}~\cite{rfc:tcpip-dod}, powstały w~\gls{darpa}. Protokół TCP~miał pierwotnie odpowiadać za zadania, które dziś realizuje protokół IP. Z~czasem okazało się, że wygodniej jest rozdzielić te~protokoły i~protokół IP został wydzielony z~pierwotnego zakresu odpowiedzialności TCP (dlatego też pierwsza wersja IP to IPv4, a nie IPv1)~\cite{tcpguide-tcpip-history}. Protokół IP odpowiada głównie za~logiczną adresację i~fragmentację datagramów. Pierwsza wersja protokołu IP~została zaproponowana w RFC760 --- została ona rok później zastąpiona przez RFC791 wraz z~dalszymi poprawkami~\cite{rfc:ip-rfc760,rfc:ip-rfc791}. Pierwsza wizja protokołu TCP~została opisana w~RFC675, a~kolejne wersja w~RFC793~\cite{rfc:tcp-rfc675,rfc:ip-rfc793}}
+	description={Model warstwowej struktury protokołów komunikacyjnych bazujący na~modelu \emph{Department-of-Defence~(DoD)}~\cite{rfc:tcpip-dod}, powstały w~\gls{darpa}. Protokół TCP~miał pierwotnie odpowiadać za zadania, które dziś realizuje protokół IP. Z~czasem okazało się, że wygodniej jest rozdzielić te~protokoły i~protokół IP został wydzielony z~pierwotnego zakresu odpowiedzialności TCP (dlatego też pierwsza wersja IP to IPv4, a nie IPv1)~\cite{tcpguide-tcpip-history}. Protokół IP odpowiada głównie za~logiczną adresację i~fragmentację datagramów. Pierwsza wersja protokołu IP~została zaproponowana w \glslink{rfc}{RFC760} --- została ona rok później zastąpiona przez \glslink{rfc}{RFC791} wraz z~dalszymi poprawkami~\cite{rfc:ip-rfc760,rfc:ip-rfc791}. Pierwsza wizja protokołu TCP~została opisana w~\glslink{rfc}{RFC675}, a~kolejne wersja w~\glslink{rfc}{RFC793}, którą później również poszerzano kolejnymi fokumentamim~\gls{rfc}~\cite{rfc:tcp-rfc675,rfc:ip-rfc793}}
 }
 \newglossaryentry{signal-handler}
 {
-	name={Signal handler},
-	description={Funkcja, która zostaje wywołana przez system operacyjny gdy~program otrzymuje od~systemu niezamaskowany sygnał~\cite{signal-handler}}
+	name={signal handler},
+	description={Funkcja, która zostaje wywołana przez system operacyjny gdy~program otrzymuje od~systemu niemaskowany, nieignorowany sygnał~\cite{signal-handler}}
 }
 \newglossaryentry{fifo}
 {
@@ -94,23 +94,33 @@
 }
 \newglossaryentry{socket}
 {
-	name={Socket},
+	name={socket},
 	description={W~\glslink{unix-like-system}{systemach *niksowych}~plik specjalny reprezentujący dwukierunkowy punkt końcowy połączenia --- najczęściej sieciowego (wyjątek stanowią \emph{Unix sockets})~\cite{socket-definition-oracle}}
 }
 \newglossaryentry{posix}
 {
-	name={\mbox{POSIX}},
+	name={POSIX},
 	description={\emph{Portable Operating System Interface for Unix}. Rodzina standardów opublikowana przez \emph{IEEE Computer Society}, mająca na~celu zapewnienie zgodności pomiędzy systemami operacyjnymi m.in.~na~poziomie \acrshort{api}. W~czasie pisania niniejszej pracy, najnowsza wersja standardu \gls{posix} została opublikowana w~kwietniu~2013~roku~\cite{posix-ieee,posix-opengroup}}
 }
 \newglossaryentry{unix-like-system}
 {
-	name={System \mbox{*niksowy}},
-	description={System operacyjny zbliżony budową do systemu \gls{unix}, np.~\gls{gnulinux}, \emph{bsd}, \emph{Solaris}, \emph{HP-UX}, \emph{AIX}~itp.~\cite{wiki:unix-like}}
+	name={system \mbox{*niksowy}},
+	description={System operacyjny zbliżony budową do systemu \gls{unix}, np.~\gls{gnulinux}, \emph{BSD}, \emph{Solaris}, \emph{HP-UX}, \emph{AIX}~itp.~\cite{wiki:unix-like}}
 }
 \newglossaryentry{darpa}
 {
 	name={DARPA},
-	description={\emph{Defense Advanced Research Projects Agency}. Amerykańska agencja rządowa działająca w strukturach Departamentu Obrony Stanów Zjednoczonych, powstała w~1958~roku, zajmująca się~rozwojem technologii mogącej mieć zastosowanie wojskowe. Organizacja zasłużyła się dla rozwoju informatyki m.in.~finansując rozwój projektu ARPANET, w ramach którego zostało opracowanych wiele protokołów, na czele z~\gls{tcpip}. W~ostatnich latach intensywnie wspiera rozwój sztucznej inteligencji, np.~w robotach i~autonomicznych samochodach~\cite{darpa-grandchallange,darpa-robotics-challange,darpa-robotics-challange-ieee}}
+	description={\emph{Defense Advanced Research Projects Agency}. Amerykańska agencja rządowa działająca w strukturach Departamentu Obrony Stanów Zjednoczonych, powstała w~1958~roku, zajmująca się~rozwojem technologii mającej potencjał militarny. Organizacja zasłużyła się dla rozwoju informatyki m.in.~finansując rozwój projektu ARPANET, w ramach którego zostało opracowanych wiele protokołów, na czele z~\gls{tcpip}. W~ostatnich latach intensywnie wspiera rozwój sztucznej inteligencji, np.~w robotach i~autonomicznych samochodach~\cite{darpa-grandchallange,darpa-robotics-challange,darpa-robotics-challange-ieee}}
+}
+\newglossaryentry{daemon}
+{
+	name={daemon},
+	description={Program komputerowy działający w~tle. Nazwy \glslink{daemon}{daemonów} w~systemach \glslink{unix-like-system}{*niksowych} zwyczajowo kończą się literą~\textbf{d}}
+}
+\newglossaryentry{rfc}
+{
+	name={RFC},
+	description={\emph{Request for Comments}. Zbiór technicznych dokumentacji związanych z~protokołami sieciowymi i~ogólnie z~sieciami komputerowymi, w~szczególności z Internetem, publikowany przez \emph{Internet Engineering Task Force (IETF)}~\cite{rfc-editor}. Każdy dokument \gls{rfc} ma~unikatowy numer identyfikacyjny używany w~odniesieniach. Błędy w~\gls{rfc} są~publikowane w erratach, a~większe zmiany następują przez opublikowanie nowego \gls{rfc}, anulujący poprzedni. Idea dokumentów \gls{rfc} pojawiła się jako część projektu ARPANET w~\gls{darpa}}
 }
 \newacronym{cpu}{CPU}{\emph{Central Processing Unit}. Procesor}
 \newacronym{api}{API}{\emph{Application Programming Interface}}

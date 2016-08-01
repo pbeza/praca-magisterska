@@ -92,7 +92,8 @@
 	basicstyle=\footnotesize\ttfamily,
 	keywordstyle=\bfseries\color{green!50!black},
 	commentstyle=\itshape\color{green!60!black},
-	identifierstyle=\color{blue!60!black},
+%	identifierstyle=\color{blue!60!black},
+	identifierstyle=\color{black},
 	stringstyle=\color{orange},
 	captionpos=b,
 	frame=single
@@ -214,8 +215,8 @@
 
 % Ustawienie wcięć na początku każdego akapitu
 
-\RequirePackage{indentfirst}
-\setlength{\parindent}{1cm}
+%\RequirePackage{indentfirst}
+%\setlength{\parindent}{1cm}
 
 \RequirePackage{array}
 \RequirePackage{enumitem}

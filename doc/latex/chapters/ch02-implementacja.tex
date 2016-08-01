@@ -7,20 +7,66 @@
 
 Kod źródłowy projektu został napisany w~języku~\texttt{C}. Kod jest zgodny ze standardem~\gls{posix}. W~rozdziale przedstawiono szczegóły implementacyjne projektu.
 
+\section{Formatowanie kodu}
+
+Formatowanie kodu źródłowego jest w~większości zgodne z~wytycznymi zaproponowanymi przez programistów \glslink{kernel}{jądra} systemu \gls{gnulinux}~\cite{kernel-coding-style}. Jednym z~niewielu odstępstw od~tych wytycznych jest rozmiar tabulacji równy 4~znakom, a~nie~8.
+
+%------------------------------------------------------------------------------
+
 \section{Wykorzystane biblioteki}
 \subsection{\texttt{OpenSSL}}
+
+Dla~zapewnienia bezpieczeństwa komunikacji między serwerem i~jego klientami, wykorzystano bibliotekę \texttt{OpenSSL}, która udostępnia wiele sprawdzonych algorytmów kryptograficznych mogących zwiększyć bezpieczeństwo komunikacji. Biblioteka ta pozwoliła na stosunkowo łatwe szyfrowanie połączenia między serwerem i klientami, co jednak nie jest wystarczającym zabezpieczeniem. % TODO
+
 \subsection{\texttt{glibc}}
-\section{Utworzenie daemona}
+
+%------------------------------------------------------------------------------
+
+\section{Utworzenie daemona systemowego}
+
+\noindent Utworzenie \emph{\glslink{daemon}{daemona}} systemowego w~systemach \glslink{unix-like-system}{*niksowych} polega na~wykonaniu następujących kroków~\cite{creating-daemon-stackoverflow}:
+\begin{itemize}
+	\item Utworzenie procesu~\texttt{A}.
+	\item Utworzenie procesu potomnego \texttt{B} przez proces \texttt{A}, przez wywołanie funkcji \texttt{fork} przez proces \texttt{A} i~pozwolenie na zakończenie działania procesu~\texttt{A}.
+	\item Utworzenie nowej sesji przez wywołanie funkcji \texttt{setsid} przez proces~\texttt{B}. W~ten sposób proces \texttt{B}~zostaje liderem nowej sesji i~jest odłączony od~kontrolującego go~terminala~(\texttt{CTTY}).
+	\item Obsłużenie lub zignorowanie sygnałów systemowych.
+	\item Utworzenie procesu potomnego \texttt{C}~przez wywołanie funkcji \texttt{fork} przez proces~\texttt{B} i pozwolenie na zakończenie się procesu~\texttt{B}. W~ten sposób pozbywamy się procesów, które były liderami sesji, a~tylko takie mogą pozyskać \texttt{TTY} ponownie.
+	\item Zmiana aktualnego katalogu zgodnie z~potrzebami przez wywołanie funkcji \texttt{chdir}.
+	\item Zmiana \emph{umaski} zgodnie z~potrzebami przez wywołanie funkcji \texttt{umask}.
+	\item Zamknięcie deskryptorów, które zostały odziedziczone po~rodzicach.
+\end{itemize}
+
+%------------------------------------------------------------------------------
+
 \section{Procesy i wątki}
+
+Aplikacja jest w~pełni zgodna ze~standardem \gls{posix}, dlatego do~obsługi wątków wykorzystano biblioteki \texttt{pthread}, wchodząca w~skład tego standardu~\cite{pthreads-posix-manual}.
+
+%------------------------------------------------------------------------------
+
 \section{Obsługa sygnałów systemowych}
+
+%------------------------------------------------------------------------------
+
 \section{Zmienne globalne}
 \noindent Zmienne globalne zostały wykorzystane tylko tam gdzie to~konieczne, tzn.~w:
 \begin{itemize}
 	\item \glslink{signal-handler}{signal handlerach}\footnote{Zmienne te~muszą być typu \texttt{volatile sig\_atomic\_t}.},
 \end{itemize}
+
+%------------------------------------------------------------------------------
+
 \section{Zmienne \texttt{volatile}}
+
+%------------------------------------------------------------------------------
+
 \section{Semafory, mutexy}
+
+%------------------------------------------------------------------------------
+
 \section{Shared memory segments and message queues}
+
+%------------------------------------------------------------------------------
 
 \section{Wybrane makra}
 
@@ -28,11 +74,28 @@ Kod źródłowy projektu został napisany w~języku~\texttt{C}. Kod jest zgodny 
 TEMP_FAILURE_RETRY(expr)
 \end{lstlisting}
 
+%------------------------------------------------------------------------------
+
 \section{Wykorzystane narzędzia}
 
-W~tym rozdziale opisano z~jakich narzędzi i~jakiej konfiguracji korzystano w~trakcie implementacji.
+W~tym rozdziale opisano z~jakich narzędzi i~jakiej konfiguracji korzystano w~trakcie implementacji niniejszej pracy.
 
 \subsection{\texttt{cmake}}
+
+Do kompilacji kodu źródłowego wykorzystano \texttt{CMake}, który jest elastycznym, rozszerzalnym oprogramowaniem do~zarządzania procesem kompilacji i~instalacji oprogramowania na~różnych platformach i~systemach operacyjnych~\cite{cmake}. Jego konfiguracja sprowadza się do~napisania plików konfiguracyjnych o~zwyczajowej nazwie \mbox{\texttt{CMakeLists.txt}}, umieszczonych w~podkatalogach z~kodem źródłowym projektu. Wynikiem uruchomienia \texttt{cmake} na~\glslink{unix-like-system}{systemach *uniksowych} jest klasyczny plik \texttt{Makefile}.
+
+\begin{lstlisting}[language=bash,numbers=none,caption={Uruchomienie \texttt{cmake} w~trybie \texttt{Debug}}]
+cmake -D CMAKE_BUILD_TYPE=Debug ..
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,numbers=none,caption={Generowanie symboli dla \texttt{cscope}}]
+make cscope
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,numbers=none,caption={Generowanie symboli dla \texttt{ctags}}]
+make ctags
+\end{lstlisting}
+
 \subsubsection{Generowanie dokumentacji \texttt{Doxygen}}
 \subsubsection{Generowanie paczek \texttt{deb} i innych}
 
@@ -53,8 +116,12 @@ Do pisania kodu źródłowego projektu oraz niniejszej dokumentacji wykorzystano
 
 \subsubsection{Konfiguracja \texttt{.vimrc}}
 
-W celu włączenia automatycznego ładowania pliku \texttt{tags} przez \texttt{vim}, do pliku \path{~/.vimrc} dodano następującą konfigurację:
-\begin{lstlisting}[language=bash,numbers=none,caption={Konfiguracja \texttt{.vimrc}}]
+% TODO dodać inne ustawienia z .vimrc
+
+\paragraph{ctags}
+
+W celu włączenia automatycznego ładowania pliku \texttt{tags} przez \texttt{vim}, do~pliku \mbox{\path{~/.vimrc}} dodano następującą konfigurację~\cite{ctags,ctags-tricks}:
+\begin{lstlisting}[language=tex,numbers=none,caption={Konfiguracja \texttt{ctags} w~\texttt{.vimrc}}]
 set tags=build/tags,tags,./tags;$HOME
 \end{lstlisting}
 Konfiguracja ta powoduje, że \texttt{vim} automatycznie wczytuje plik \texttt{tags}, szukając go kolejno~w:
@@ -64,7 +131,23 @@ Konfiguracja ta powoduje, że \texttt{vim} automatycznie wczytuje plik \texttt{t
 	\item katalogu, w którym znajduje się aktualnie otwarty plik w \texttt{vim},
 	\item katalogach poniżej katalogu \path{$PWD}, ale nie niżej niż \path{$HOME}.
 \end{itemize}
-Zmienna systemowa \texttt{\gls{PWD}} oznacza aktualny katalog roboczy.
+gdzie zmienna systemowa \gls{PWD} oznacza aktualny katalog roboczy.
+
+\paragraph{Cscope}
+
+Analogiczną konfigurację ustawiono, aby włączyć automatyczne szukanie plików pomocniczych dla~obsługi \texttt{Cscope} w~edytorze~\texttt{vim}~\cite{cscope,cscope-autoload}. Do~\path{~/.vimrc} dodano:
+\begin{lstlisting}[language=tex,numbers=none,caption={Konfiguracja \texttt{Cscope} w~\texttt{.vimrc}}]
+function! LoadCscope()
+  let db = findfile("cscope.out", "build,.;$HOME")
+  if (!empty(db))
+    let path = strpart(db, 0, match(db, "/cscope.out$"))
+    set nocscopeverbose " suppress 'duplicate connection' error
+    exe "cs add " . db . " " . path
+    set cscopeverbose
+  endif
+endfunction
+au BufEnter /* call LoadCscope()
+\end{lstlisting}
 
 \subsection{\texttt{latexmk}}
 

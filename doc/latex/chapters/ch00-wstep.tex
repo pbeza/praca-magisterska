@@ -23,12 +23,16 @@ Wersja angielska tytułu pracy:
 \inserttitleaux.
 \end{displayquote}
 
+%------------------------------------------------------------------------------
+
 \section{Cel i zakres pracy}
 \label{cel-i-zakres}
 
 \noindent Celem niniejszej pracy jest:
-\blockcquote{formularz-zgloszenia-pracy}{Zaprojektowanie i~zaimplementowanie protokołu umożliwiającego propagowanie zmian w~systemie plików, pakietów oraz elementów konfiguracji do~stacji roboczych pod kontrolą systemu operacyjnego \glslink{gnulinux}{Linux/GNU} lub~innego systemu \emph{*nix}, a~także elastycznego standardu opisu zmian oraz narzędzi dla~ich rejestrowania i~dostosowywania. Proponowaną architekturą jest model klient--serwer. Konkretny obraz zmian może być przeznaczony dla~konkretnej dystrybucji, jednakże stworzone rozwiązania praktyczne powinny dawać się w~prosty sposób dostosowywać do~popularnych dystrybucji systemu \glslink{gnulinux}{Linux/GNU} oraz systemów \emph{*nix}.}
+\blockcquote{formularz-zgloszenia-pracy}{Zaprojektowanie i~zaimplementowanie protokołu umożliwiającego propagowanie zmian w~systemie plików, pakietów oraz elementów konfiguracji do~stacji roboczych pod kontrolą systemu operacyjnego \glslink{gnulinux}{Linux/GNU} lub~innego systemu \glslink{unix-like-system}{\emph{*nix}}, a~także elastycznego standardu opisu zmian oraz narzędzi dla~ich rejestrowania i~dostosowywania. Proponowaną architekturą jest model klient--serwer. Konkretny obraz zmian może być przeznaczony dla~konkretnej dystrybucji, jednakże stworzone rozwiązania praktyczne powinny dawać się w~prosty sposób dostosowywać do~popularnych dystrybucji systemu \glslink{gnulinux}{Linux/GNU} oraz systemów \glslink{unix-like-system}{\emph{*nix}}.}
 W~skrócie, cel niniejszej pracy to zaprojektowanie i~zaimplementowanie systemu synchronizowania oprogramowania, instalowanego na~grupie komputerów pracujących pod kontrolą systemu operacyjnego~\glslink{gnulinux}{GNU/Linux}.
+
+%------------------------------------------------------------------------------
 
 \section{Motywacja}
 
@@ -36,16 +40,51 @@ Motywacją do~napisania pracy magisterskiej na~przedstawiony temat jest problem,
 
 W praktyce problem dystrybuowania jednolitego oprogramowania jest szczególnie odczuwalny przez administratorów, którzy zarządzają dużym zbiorem komputerów --- serwerów lub~stacji roboczych --- z~których każdy musi mieć ten~sam lub podobny zestaw zainstalowanych programów i~konfiguracji dedykowanej dla~zainstalowanego oprogramowania. Popularne sposoby radzenia sobie z~tym problemem~(patrz rozdział~\ref{sec:istniejace-rozwiazania}) są~uciążliwe w~praktyce, a~istniejące rozwiązania w~pełni automatyzujące cały proces synchronizacji oprogramowania i~konfiguracji, są stosunkowo młode i~słabo rozpowszechnione wśród większości administratorów komputerowych.
 
+%------------------------------------------------------------------------------
+
 \section{Zastosowania rozwiązania problemu}
 
 Zastosowania rozwiązania problemu dystrybuowania jednolitego oprogramowania możemy znaleźć wszędzie tam gdzie istnieje grupa ludzi, procesów, maszyn lub~innych podmiotów, z~których każdy wykorzystuje to~samo lub podobnie skonfigurowane oprogramowanie na~urządzeniu wyposażonym w~system operacyjny, podłączonym do~sieci komputerowej, najlepiej opartej o~\gls{tcpip}. W~szczególności mogą to~być niektóre: grupy serwerów pracujących w~podobnym środowisku, np.~maszyny developerskie, testowe i~produkcyjne, serwery działające w~ramach systemu rozproszonego, laboratoria komputerowe na~uczelniach, w szkołach, bibliotekach, biura, komputery administracji publicznej, w~szczególności w~urzędach, bankomaty, biletomaty, maszyny vendingowe, komputery kasjerów w~hipermarketach~itp.
 
+%------------------------------------------------------------------------------
+
 \section{Istniejące rozwiązania}
 \label{sec:istniejace-rozwiazania}
 
-W~niniejszym rozdziale przedstawiono przegląd istniejących rozwiązań dla~problemu dystrybuowania oprogramowania na~wiele komputerów połączonych siecią komputerową.
+W~niniejszym rozdziale przedstawiono przegląd wybranych, najpopularniejszych rozwiązań dla~problemu dystrybuowania oprogramowania na~wiele komputerów połączonych siecią komputerową~\cite{leading-scms}. Wymienione w~tym rozdziale aplikacje, poza możliwością synchronizacji zainstalowanego oprogramowania i~konfiguracji, pozwalają również na~inne manipulacje systemem operacyjnym, np.~zapewnienie istnienia zadanego użytkownika w~systemie czy zapewnienie działanie zadanego \glslink{daemon}{daemona}.
 
 \subsection{\texttt{Puppet}}
+
+Jednym z~najpopularniejszych\footnote{O ile nie najpopularniejszym.} istniejących rozwiązań problemu dystrybuowania oprogramowania jest \texttt{Puppet}, który jest dedykowany nie tylko dla systemów~\glslink{unix-like-system}{*niksowych}, ale~również dla~systemów \emph{Windows} i~\emph{Mac~OS}~\cite{puppet,puppet-examples,puppet-clients}.
+
+\texttt{Puppet} został napisany w~języku programowania \texttt{Perl}, a~jego rozwój jest wspierany i~wykorzystywany przez wiele czołowych firm i~organizacji w~branży~IT, takich jak: \emph{Google}, \emph{NASA}, \emph{Verizon}, \emph{Sony}, \emph{Uber}, \emph{gettyimages}, \emph{CERN} i~wiele innych~\cite{puppet,puppet-cern,puppet-google}. Pierwsza wersja \texttt{Puppet} została opublikowana w~2005~roku na licencji \gls{gpl}. Od~wersji 2.0~\texttt{Puppet} jest licencjonowany na~warunkach licencji~\gls{apache2.0-license}.
+
+Konfiguracja \texttt{Puppet} polega na~napisaniu reguł tekstowych, niezależnych od~systemu operacyjnego, przechowywanych zwyczajowo w~plikach z~rozszerzeniem~\texttt{.pp}, zwanych manifestami. Przykładowe manifesty przedstawiono na~listingach \ref{puppet-openssh-example}, \ref{puppet-motd-example} i~\ref{puppet-httpd-example}.
+
+\begin{lstlisting}[numbers=none,caption={Manifest \texttt{Puppet} gwarantujący, że \texttt{OpenSSH} jest zainstalowany},label=puppet-openssh-example]
+package { 'openssh':
+  ensure => present,
+}
+\end{lstlisting}
+
+\begin{lstlisting}[numbers=none,caption={Manifest \texttt{Puppet} gwarantujący istnienie pliku \hreftt{https://en.wikipedia.org/wiki/Motd_(Unix)}{/etc/motd}},label=puppet-motd-example]
+file { 'motd':
+  path => '/etc/motd',
+}
+\end{lstlisting}
+
+\begin{lstlisting}[numbers=none,caption={Manifest \texttt{Puppet} gwarantujący, że \gls{daemon} \hreftt{https://httpd.apache.org/}{httpd} jest włączony i~działa},label=puppet-httpd-example]
+service { 'httpd':
+  ensure => running,
+  enable => true,
+}
+\end{lstlisting}
+
+\subsection{\texttt{Chef}}
+\subsection{\texttt{Salt}}
+\subsection{\texttt{Ansible}}
+
+%------------------------------------------------------------------------------
 
 \section{Uwagi licencyjne}
 
@@ -53,9 +92,11 @@ Niniejsza praca wpisuje się w~tematykę \glslink{wolne-oprogramowanie}{wolnego 
 
 W~związku z~obowiązującym \emph{art.~15a~ustawy z~dnia 4~lutego~1994r. o~prawie autorskim i~prawach pokrewnych}~\cite{papp}, kod źródłowy aplikacji powstałej w~ramach niniejszej pracy, może zostać opublikowany, np.~na~warunkach licencji~\glslink{gpl}{GNU~GPL~3}, po~upływie co~najmniej 6~miesięcy od~momentu obrony autora niniejszej pracy, pod warunkiem, że~Uczelnia, tj.~Politechnika Warszawska, sama nie~opublikuje jej przez ten~czas. Jeśli warunek ten~będzie spełniony, aplikacja zostanie opublikowana w~ramach repozytorium na~serwisie~\hreftt{https://github.com/}{github.com}.
 
-\newpage
+%------------------------------------------------------------------------------
 
 \section{Środowisko projektu}
+
+%------------------------------------------------------------------------------
 
 \section{Zawartość pracy}
 
@@ -70,6 +111,8 @@ Aplikacja składa się~również z~dwóch części, co~jest naturalne biorąc po
 	\item Klienta --- okresowo synchronizującego oprogramowanie i~konfigurację z serwerem.
 \end{enumerate}
 
+%------------------------------------------------------------------------------
+
 \section{Wykorzystane źródła wiedzy}
 
 W~czasie prac nad implementacją projektu, korzystano z~wielu pomocnych dokumentacji, materiałów dydaktycznych i~innych źródeł wiedzy takich jak np.~programistyczne dyskusyjne, fora programistyczne, np.~\hreftt{http://stackoverflow.com/}{stackoverflow.com}, \hreftt{http://superuser.com/}{superuser.com}.
@@ -82,7 +125,7 @@ W~czasie prac nad implementacją projektu, korzystano z~wielu pomocnych dokument
 		\item dokumentacja deweloperów dla wybranych dystrybucji/systemów~\cite{archlinux-wiki,gentoo-wiki},
 		\item dokumentacja POSIX~\cite{posix},
 		\item dokumentacja wybranego języka programowania i innych użytych narzędzi~\cite{glibc-doc},
-		\item (opcjonalnie) dokumenty IETF (RFC)~\cite{rfc-editor},
+		\item (opcjonalnie) dokumenty IETF (\gls{rfc})~\cite{rfc-editor},
 		\item dokumenty W3C~\cite{w3c},
 		\item \hreftt{http://www.tcpipguide.com/}{tcpipguide.com}, czyli szczegółowy przegląd protokołu TCP/IP i~pokrewnych protokołów, opublikowany również w~formie obszernej\footnote{Książka ma~1616 stron.} książki autorstwa \mbox{Charlesa~M.~Kozieroka} pt.~\textit{The~TCP/IP Guide}\footnote{ISBN:~\href{https://www.nostarch.com/tcpip.htm}{9781593270476}. Wydawnictwo \emph{No Starch Press}.}.
 	\end{itemize}
