@@ -82,7 +82,7 @@ W~tym rozdziale opisano z~jakich narzędzi i~jakiej konfiguracji korzystano w~tr
 
 \subsection{\texttt{cmake}}
 
-Do kompilacji kodu źródłowego wykorzystano \texttt{CMake}, który jest elastycznym, rozszerzalnym oprogramowaniem do~zarządzania procesem kompilacji i~instalacji oprogramowania na~różnych platformach i~systemach operacyjnych~\cite{cmake}. Jego konfiguracja sprowadza się do~napisania plików konfiguracyjnych o~zwyczajowej nazwie \mbox{\texttt{CMakeLists.txt}}, umieszczonych w~podkatalogach z~kodem źródłowym projektu. Wynikiem uruchomienia \texttt{cmake} na~\glslink{unix-like-system}{systemach *uniksowych} jest klasyczny plik \texttt{Makefile}.
+Do kompilacji kodu źródłowego wykorzystano \texttt{CMake}, który jest elastycznym, rozszerzalnym oprogramowaniem do~zarządzania procesem kompilacji i~instalacji oprogramowania na~różnych platformach i~systemach operacyjnych~\cite{cmake}. Jego konfiguracja sprowadza się do~napisania plików konfiguracyjnych o~zwyczajowej nazwie \mbox{\texttt{CMakeLists.txt}}, umieszczonych w~podkatalogach z~kodem źródłowym projektu. Wynikiem uruchomienia \texttt{cmake} na~\glslink{unix-like-system}{systemach *uniksowych} jest klasyczny plik \texttt{Makefile}~\cite{gnu-makefile-manual}.
 
 \begin{lstlisting}[language=bash,numbers=none,caption={Uruchomienie \texttt{cmake} w~trybie \texttt{Debug}}]
 cmake -D CMAKE_BUILD_TYPE=Debug ..

@@ -38,7 +38,7 @@ W~skrócie, cel niniejszej pracy to zaprojektowanie i~zaimplementowanie systemu 
 
 Motywacją do~napisania pracy magisterskiej na~przedstawiony temat jest problem, z~którym zmagają się~administratorzy głównie średnich i dużych sieci komputerowych na~całym świecie, niezależnie od~używanego przez nich systemu operacyjnego --- problem automatycznego dystrybuowania ujednoliconego oprogramowania i~jego konfiguracji na~komputery połączone siecią komputerową~\cite{so-problem-intro}. W~ogólności nie~muszą to~być komputery takie jak serwery czy stacje robocze --- choć to~głównie z~nimi administratorzy komputerowi mają do~czynienia. Omawiany problem może dotyczyć również niektórych połączonych w~sieć systemów wbudowanych nie będących systemami typu~\mbox{\emph{bare~metal}}, tzn.~pracujących pod kontrolą systemu operacyjnego.
 
-W praktyce problem dystrybuowania jednolitego oprogramowania jest szczególnie odczuwalny przez administratorów, którzy zarządzają dużym zbiorem komputerów --- serwerów lub~stacji roboczych --- z~których każdy musi mieć ten~sam lub podobny zestaw zainstalowanych programów i~konfiguracji dedykowanej dla~zainstalowanego oprogramowania. Popularne sposoby radzenia sobie z~tym problemem~(patrz rozdział~\ref{sec:istniejace-rozwiazania}) są~uciążliwe w~praktyce, a~istniejące rozwiązania w~pełni automatyzujące cały proces synchronizacji oprogramowania i~konfiguracji, są stosunkowo młode i~słabo rozpowszechnione wśród większości administratorów komputerowych.
+W praktyce problem dystrybuowania jednolitego oprogramowania jest szczególnie odczuwalny przez administratorów, którzy zarządzają dużym zbiorem komputerów --- serwerów lub~stacji roboczych --- z~których każdy musi mieć ten~sam lub podobny zestaw zainstalowanych programów i~konfiguracji dedykowanej dla~zainstalowanego oprogramowania. Popularne sposoby radzenia sobie z~tym problemem są~uciążliwe w~praktyce, a~istniejące rozwiązania w~pełni automatyzujące cały proces synchronizacji oprogramowania i~konfiguracji~(patrz rozdział~\ref{sec:istniejace-rozwiazania}), są stosunkowo młode i~słabo rozpowszechnione wśród większości administratorów komputerowych.
 
 %------------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ Zastosowania rozwiązania problemu dystrybuowania jednolitego oprogramowania mo�
 \section{Istniejące rozwiązania}
 \label{sec:istniejace-rozwiazania}
 
-W~niniejszym rozdziale przedstawiono przegląd wybranych, najpopularniejszych rozwiązań dla~problemu dystrybuowania oprogramowania na~wiele komputerów połączonych siecią komputerową~\cite{leading-scms}. Wymienione w~tym rozdziale aplikacje, poza możliwością synchronizacji zainstalowanego oprogramowania i~konfiguracji, pozwalają również na~inne manipulacje systemem operacyjnym, np.~zapewnienie istnienia zadanego użytkownika w~systemie czy zapewnienie działanie zadanego \glslink{daemon}{daemona}.
+W~niniejszym rozdziale przedstawiono przegląd wybranych, najpopularniejszych rozwiązań dla~problemu dystrybuowania oprogramowania na~wiele komputerów połączonych siecią komputerową~\cite{leading-scms}. Wymienione w~tym rozdziale aplikacje, poza możliwością synchronizacji zainstalowanego oprogramowania i~konfiguracji, pozwalają również na~inne manipulacje systemem operacyjnym, np.~zapewnienie istnienia zadanego użytkownika w~systemie czy zapewnienie działanie zadanego \emph{\glslink{daemon}{daemona}}.
 
 \subsection{\texttt{Puppet}}
 
@@ -73,7 +73,7 @@ file { 'motd':
 }
 \end{lstlisting}
 
-\begin{lstlisting}[numbers=none,caption={Manifest \texttt{Puppet} gwarantujący, że \gls{daemon} \hreftt{https://httpd.apache.org/}{httpd} jest włączony i~działa},label=puppet-httpd-example]
+\begin{lstlisting}[numbers=none,caption={Manifest \texttt{Puppet} gwarantujący, że \emph{\gls{daemon}} \hreftt{https://httpd.apache.org/}{httpd} jest włączony i~działa},label=puppet-httpd-example]
 service { 'httpd':
   ensure => running,
   enable => true,
