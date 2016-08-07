@@ -9,7 +9,7 @@
 #include <errno.h>
 #include <stdio.h>
 
-#define DEBUG /* \TODO temporary */
+#include "common/utils/common_config.h" /* To import DEBUG symbol if defined */
 
 #ifndef DEBUG
 

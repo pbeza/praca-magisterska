@@ -55,8 +55,8 @@ static inline void print_unrecognized_option() {
  * array (of length \p n) and execute it. Set \ref option_t.id-th bit in
  * \p selected_options integer, to indicate that this option is active.
  */
-static void save_option(const option_t* options, int opt, uint32_t* selected_options, void* config, const int n) {
-	int i;
+static int save_option(const option_t* options, int opt, uint32_t* selected_options, void* config, const int n) {
+	int i, ret = 0;
 	const option_t* c;
 	for (i = 0; i < n; i++) {
 		c = &options[i];
@@ -64,9 +64,10 @@ static void save_option(const option_t* options, int opt, uint32_t* selected_opt
 			continue;
 		SETBIT(*selected_options, c->id);
 		if (c->save)
-			c->save(c, c->help_value_name ? optarg : NULL, config);
+			ret = c->save(c, c->help_value_name ? optarg : NULL, config);
 		break;
 	}
+	return ret;
 }
 
 /**
@@ -88,11 +89,11 @@ static void convert_to_getopt_long_options(struct option* long_options, const op
 }
 
 /**
- * Parse `argv` (of length \p argc) and save results in \p options integer and
- * \p selected_options array.
+ * Parse `argv` (of length \p argc), save results in \p options array and in
+ * \p selected_options integer.
  */
-void parse(int argc, char** argv, const char* optstring, const option_t* options, uint32_t* selected_options, void* config, const int n) {
-	int opt;
+int parse(int argc, char** argv, const char* optstring, const option_t* options, uint32_t* selected_options, void* config, const int n) {
+	int opt, ret;
 #ifndef POSIXLY_CORRECT
 	struct option long_options[n + 1];
 	convert_to_getopt_long_options(long_options, options, n);
@@ -106,8 +107,11 @@ void parse(int argc, char** argv, const char* optstring, const option_t* options
 			print_missing_value();
 		else if (opt == PARSER_UNRECOGNIZED_OPTION)
 			print_unrecognized_option();
-		save_option(options, opt, selected_options, config, n);
+		ret = save_option(options, opt, selected_options, config, n);
+		if (ret < 0)
+			return ret;
 	}
+	return 0;
 }
 
 void print_help(const option_t* options, const int n, const char* help_prefix, const char* help_postfix) {
@@ -125,4 +129,3 @@ void print_help(const option_t* options, const int n, const char* help_prefix, c
 	}
 	printf(help_postfix);
 }
-

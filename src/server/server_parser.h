@@ -7,7 +7,7 @@
 #define _SERVER_PARSER_H
 
 #include "common/utils/options.h"
-#include "config.h"
+#include "server_config.h"
 
 #ifdef POSIXLY_CORRECT
 #define POSIXLY_CORRECT_MSG	"Note: Long options are not supported in this build.\n"
@@ -35,7 +35,7 @@
 typedef enum {
 	HELP_OPTION,
 	VERSION_OPTION,
-	TEST_OPTION
+	PORT_OPTION
 } option_code;
 
 /*
@@ -44,7 +44,7 @@ typedef enum {
 
 #define SHORT_OPTION_HELP	'h'
 #define SHORT_OPTION_VERSION	'v'
-#define SHORT_OPTION_TEST	't'
+#define SHORT_OPTION_PORT	'p'
 
 /*
  * Long options' names.
@@ -52,13 +52,13 @@ typedef enum {
 
 #define LONG_OPTION_HELP	"help"
 #define LONG_OPTION_VERSION	"version"
-#define LONG_OPTION_TEST	"test"
+#define LONG_OPTION_PORT	"port"
 
 /*
  * Options' values' names.
  */
 
-#define OPTION_VALUE_NAME	"TEST_VAL"
+#define OPTION_VALUE_NAME	"PORT_NUMBER"
 
 /*
  * Options' description.
@@ -66,7 +66,7 @@ typedef enum {
 
 #define DESC_OPTION_HELP	"Print this help message."
 #define DESC_OPTION_VERSION	"Print server's version number."
-#define DESC_OPTION_TEST	"Test option accepting single integer value."
+#define DESC_OPTION_PORT	"Port number for clients' listening."
 
 /**
  * See `getopt` manual for optstring prefix meaning.
@@ -76,11 +76,12 @@ typedef enum {
 /**
  * Options string for `getopt`.
  */
-#define GETOPT_STRING		OPTSTRING_PREFIX "hvt:"
+#define GETOPT_STRING		OPTSTRING_PREFIX "hvp:"
 
 /**
  * Add application's allowed options, parse `argv` and save result to \p config.
+ * Returns negative integer if application should exit.
  */
-void parse_argv(int argc, char** argv, config_t* config);
+int parse_argv(int argc, char** argv, config_t* config);
 
 #endif

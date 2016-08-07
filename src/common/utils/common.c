@@ -1,5 +1,9 @@
+#define _GNU_SOURCE /* TEMP_FAILURE_RETRY */
+
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "common.h"
 
@@ -19,6 +23,19 @@ char *concat(const char *s1, const char *s2) {
 	char *s = xmalloc(n1 + n2 + 1, errmsg);
 	strcpy(s, s1);
 	strcat(s, s2);
-	/* User has to free returned allocated space */
-	return s;
+	return s; /* User has to free returned allocated space */
+}
+
+ssize_t bulk_read(int fd, char *buf, size_t nbyte) {
+	int c;
+	size_t len = 0;
+	do {
+		c = TEMP_FAILURE_RETRY(read(fd, buf, nbyte));
+		if (c < 0) return c;
+		if (c == 0) return len;
+		buf += c;
+		len += c;
+		nbyte -= c;
+	} while (nbyte > 0);
+	return len;
 }

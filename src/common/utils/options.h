@@ -51,13 +51,13 @@ typedef struct option_t {
 	 * Function handler called when this option is present in `argv[]`.
 	 * If function pointer is `NULL` no function is called.
 	 */
-	void (*save)(const struct option_t* option, const char* value, void* config);
+	int (*save)(const struct option_t* option, const char* value, void* config);
 } option_t;
 
 /**
  * Parse `argv` and save parsed results in \p options and \p selected_options.
  */
-void parse(int argc, char** argv, const char* optstring, const option_t* options, uint32_t* selected_options, void* config, const int n);
+int parse(int argc, char** argv, const char* optstring, const option_t* options, uint32_t* selected_options, void* config, const int n);
 
 void print_help(const option_t* options, const int n, const char* help_prefix, const char* help_postfix);
 

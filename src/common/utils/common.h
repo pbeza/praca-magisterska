@@ -1,10 +1,24 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
+#include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #define STR_HELPER(x)			#x
 #define STR(x)				STR_HELPER(x)
+#define ERR(source) (fprintf(stderr,"%s:%d\n", __FILE__, __LINE__),\
+		     perror(source),\
+		     kill(0,SIGKILL),\
+		     exit(EXIT_FAILURE))
+
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
+
+/**
+ * Macro for reporting errors and critical exit in multithreaded environment.
+ */
+/* TODO strerror_r */
 
 /**
  * Set i-th bit to 1.
@@ -40,5 +54,7 @@ void *xmalloc(size_t size, const char *errmsg);
  * them. \warning User **must** free allocated memory by himself.
  */
 char *concat(const char *s1, const char *s2);
+
+ssize_t bulk_read(int fd, char *buf, size_t nbyte);
 
 #endif
