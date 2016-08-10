@@ -14,23 +14,14 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "server_config.h"
 #include "daemonize.h"
 #include "utils/common.h"
-
-/**
- * Path to file with daemon's PID to disallow multiple instances of daemon.
- * See: http://www.pathname.com/fhs/2.2/fhs-5.13.html
- * TODO Need root to access /var/run directory.
- */
-/* #define UNIQ_DAEMON_PID_PATH		"/var/run/" PROJECT_NAME ".pid" */
-#define UNIQ_DAEMON_PID_PATH		"/tmp/" PROJECT_NAME ".pid"
 
 #define UNIQ_DAEMON_FILE_PERMISSION	0644
 
 /**
   * Maximum number of digits in PID. This is needed for writing/reading PID
-  * to/from \a UNIQ_DAEMON_PID_PATH file.
+  * to/from \a pid_fpath file.
   */
 #define MAX_DIGITS_IN_PID	9
 
@@ -45,24 +36,23 @@
 	return pid < 0 || buf == *endptr || errno != 0 ? -1 : pid;
 }*/
 
-static int assure_single_daemon_instance() {
+static int assure_single_daemon_instance(const char *pid_fpath, int *fd) {
 	char pid_str[MAX_DIGITS_IN_PID + 1] = { 0 };
-	int fd = TEMP_FAILURE_RETRY(open(UNIQ_DAEMON_PID_PATH, O_CREAT | O_RDWR,
+	*fd = TEMP_FAILURE_RETRY(open(pid_fpath, O_CREAT | O_RDWR,
 					 UNIQ_DAEMON_FILE_PERMISSION));
-	if (fd < 0)
+	if (*fd < 0)
 		ERR("open");
 	/* File locking to allow one daemon instance. Process' exit unlocks it. */
-	if (TEMP_FAILURE_RETRY(lockf(fd, F_TLOCK, 0)) < 0) {
+	if (TEMP_FAILURE_RETRY(lockf(*fd, F_TLOCK, 0)) < 0) {
 		if (errno == EAGAIN || errno == EACCES)
 			return -1;
 		else
 			ERR("lockf");
 	}
 	snprintf(pid_str, sizeof(pid_str), "%ld\n", (long)getpid());
-	if (bulk_write(fd, pid_str, strlen(pid_str)) < 0)
-		ERR("can't write PID to " UNIQ_DAEMON_PID_PATH);
-	if (TEMP_FAILURE_RETRY(close(fd)) < 0)
-		ERR("close");
+	if (bulk_write(*fd, pid_str, strlen(pid_str)) < 0)
+		ERR("can't write PID to file");
+	/* DO NOT close *fd because it will release the file's lock! */
 	return 0;
 }
 
@@ -81,7 +71,7 @@ static void redirect_to_dev_null() {
 		ERR("dup for stderr");
 }
 
-static void daemon_work(int pipe_fd) {
+static void daemon_work(int pipe_fd, const char *pid_fpath, int *pid_fd) {
 	int ret = 0;
 	redirect_to_dev_null();
 	/* 10. Reset umask to 0. */
@@ -90,7 +80,7 @@ static void daemon_work(int pipe_fd) {
 	if (chdir("/") < 0)
 		ERR("chdir");
 	/* 12. Make sure that other instance of daemon is not working. */
-	if (assure_single_daemon_instance() < 0)
+	if (assure_single_daemon_instance(pid_fpath, pid_fd) < 0)
 		ret = -1;
 	/* 13. Dropping privileges is not applicable.
 	 * 14. Notify original process that daemon was successfully created. */
@@ -104,7 +94,7 @@ static void daemon_work(int pipe_fd) {
 	}
 }
 
-static void first_child_work(int pipe_fd) {
+static void first_child_work(int pipe_fd, const char *pid_fpath, int *pid_fd) {
 	pid_t pid;
 	/* 6. Detach from any terminal and create an independent session. */
 	if (setsid() < 0)
@@ -119,19 +109,21 @@ static void first_child_work(int pipe_fd) {
 		/* 8. Exit in the first child. Ensures reparenting 2nd child. */
 		exit(EXIT_SUCCESS);
 	} else {
-		daemon_work(pipe_fd);
+		daemon_work(pipe_fd, pid_fpath, pid_fd);
 	}
 }
 
 /**
  * To understand why this daemonizing implementation consists of 15 steps, see:
  * https://www.freedesktop.org/software/systemd/man/daemon.html#SysV%20Daemons
+ * \a pid_fd is file descriptor of locked file with daemon's PID. It can't be
+ * closed as long as we want only one daemon's instance.
  *
  * \return 0 if application was daemonized, ie. it consists of one process
  * running in background. -1 if daemonization wasn't successfull because another
  * daemon instance exists or error occured.
  */
-int sysv_daemonize() {
+int sysv_daemonize(const char *pid_fpath, int *pid_fd) {
 	/* Demonization consists of 15 steps. As long as demonization is the
 	 * first thing we do in program, we can safely assume that:
 	 * 1. All file descriptors > 3 are closed.
@@ -140,7 +132,7 @@ int sysv_daemonize() {
 	 * 4. There are no environment variables that might niegatively impact
 	 *    daemon runtime. */
 
-	int pipe_fd[2], ret = -1;
+	int pipe_fd[2], ret;
 	pid_t pid;
 
 	/* Pipe for signaling success or failure of daemon creation. See 14. */
@@ -163,7 +155,8 @@ int sysv_daemonize() {
 		if (!ret)
 			exit(EXIT_SUCCESS);
 	} else {
-		first_child_work(pipe_fd[1]);
+		first_child_work(pipe_fd[1], pid_fpath, pid_fd);
+		ret = 0;
 	}
 	return ret;
 }

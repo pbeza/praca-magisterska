@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 #include "common/utils/options.h"
-#include "server_parser.h"
+#include "parser.h"
 
 #define PORT_NUMBER_TOO_SMALL	-1
 #define PORT_NUMBER_TOO_BIG	-2

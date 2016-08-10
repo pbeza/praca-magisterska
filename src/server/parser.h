@@ -1,12 +1,11 @@
 /** \file
  * Server's `argv` parser.
  */
-
 #ifndef _SERVER_PARSER_H
 #define _SERVER_PARSER_H
 
 #include "common/utils/options.h"
-#include "server_config.h"
+#include "config.h"
 
 #ifdef POSIXLY_CORRECT
 #define POSIXLY_CORRECT_MSG	"Note: Long options are not supported in this build.\n"

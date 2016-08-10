@@ -17,7 +17,9 @@ project(mgr VERSION 0.1 LANGUAGES C)
 
 # Define a few constant values.
 
-set(AUTHOR "Patryk Bęza (patryk.beza@gmail.com)")
+set(AUTHOR_FULL_NAME "Patryk Bęza")
+set(AUTHOR_EMAIL "patryk.beza@gmail.com")
+set(AUTHOR "${AUTHOR_FULL_NAME} (${AUTHOR_EMAIL})")
 set(DOXYGEN_LANGUAGE "English" CACHE STRING "Doxygen documentation language")
 
 # Define user-configurable variables.

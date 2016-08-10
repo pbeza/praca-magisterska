@@ -1,7 +1,6 @@
 /** \file
  * Server's configuration - both precompiled and parsed from `argv`.
  */
-
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
