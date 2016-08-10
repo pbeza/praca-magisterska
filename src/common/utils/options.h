@@ -1,7 +1,6 @@
-/**
- * @file
+/** \file
  * Universal `argv` options representation and basic parser used by both server
- * and client applications.
+ * and client.
  */
 #ifndef _OPTIONS_H
 #define _OPTIONS_H

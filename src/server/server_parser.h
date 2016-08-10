@@ -1,5 +1,4 @@
-/**
- * @file
+/** \file
  * Server's `argv` parser.
  */
 

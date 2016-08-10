@@ -1,5 +1,4 @@
-/**
- * @file
+/** \file
  * Debug functions and macros.
  */
 

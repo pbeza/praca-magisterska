@@ -1,26 +1,28 @@
-/**
- * @file
+/** \file
  * Server's main file.
  */
 
 #define _GNU_SOURCE /* TEMP_FAILURE_RETRY */
 
-#include <string.h>
+#include <arpa/inet.h>
+#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <string.h>
 #include <sys/select.h>
-#include <arpa/inet.h>
+#include <syslog.h>
+#include <unistd.h>
 
+#include "common/daemonize.h"
 #include "common/utils/common.h"
-#include "common/utils/debug.h"
 #include "common/utils/network.h"
 #include "server_parser.h"
 
 #define BACKLOG		MIN(32, SOMAXCONN)
 #define MSGCOUNT	8
 
+/*
 static void init_sockaddr(struct sockaddr_in* addr, uint16_t port) {
 	memset(addr, 0, sizeof(struct sockaddr_in));
 	addr->sin_family = AF_INET;
@@ -35,8 +37,8 @@ static int listen_on_port(uint16_t port) {
 	if (fd < 0)
 		ERR("socket");
 	init_sockaddr(&addr, port);
-	/* TODO Check if other setsockopt options would be helpful.
-	   See: man 7 ip */
+	/ TODO Check if other setsockopt options would be helpful.
+	   See: man 7 ip /
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)))
 		ERR("setsockopt");
 	if (bind(fd, (struct sockaddr*) &addr, sizeof(addr)) < 0)
@@ -51,7 +53,7 @@ static int wait_for_client_msg(int csocket_fd){
 	fd_set rfds;
 	FD_ZERO(&rfds);
 	FD_SET(csocket_fd, &rfds);
-	/* TODO poll is better for waiting for a single file descriptor */
+	/ TODO poll is better for waiting for a single file descriptor /
 	if (TEMP_FAILURE_RETRY(select(csocket_fd + 1, &rfds, NULL, NULL, NULL)) < 0)
 		ERR("select");
 	is_set = FD_ISSET(csocket_fd, &rfds);
@@ -60,18 +62,17 @@ static int wait_for_client_msg(int csocket_fd){
 	return is_set;
 }
 
-static void server_work(const config_t *config) {
+static void listen_clients(const config_t *config) {
 	ssize_t len;
-	int port = config->port, csocket_fd, is_set;
-	int ssocket_fd = listen_on_port(port);
-	char buf[MSGCOUNT + 1];
+	int port = config->port, ssocket_fd = listen_on_port(port);
+	int csocket_fd, is_set;
+	char buf[MSGCOUNT + 1], *ip;
 	struct sockaddr caddr;
 	struct sockaddr_in *caddr_in;
 	socklen_t caddr_len;
-	char *ip;
 	memset(buf, 0, sizeof(buf));
 
-	debug("accepting connection...");
+	syslog(LOG_INFO, "accepting connection...");
 
 	csocket_fd = TEMP_FAILURE_RETRY(accept(ssocket_fd, &caddr, &caddr_len));
 	if (csocket_fd < 0)
@@ -79,8 +80,8 @@ static void server_work(const config_t *config) {
 
 	caddr_in = (struct sockaddr_in*)&caddr;
 	ip = inet_ntoa(caddr_in->sin_addr);
-	debug("connection accepted from client %s", ip);
-	debug("waiting for client message");
+	syslog(LOG_INFO, "connection accepted from client %s", ip);
+	syslog(LOG_INFO, "waiting for client message");
 
 	is_set = wait_for_client_msg(csocket_fd);
 	errno = 0;
@@ -89,7 +90,7 @@ static void server_work(const config_t *config) {
 			ERR("read");
 		if (TEMP_FAILURE_RETRY(close(csocket_fd)) < 0)
 			ERR("close");
-		debug("connection probably lost");
+		syslog(LOG_NOTICE, "connection probably lost");
 	}
 	printf("incoming msg:\n%s", buf);
 
@@ -97,6 +98,14 @@ static void server_work(const config_t *config) {
 		ERR("close");
 	if (TEMP_FAILURE_RETRY(close(ssocket_fd)) < 0)
 		ERR("close");
+}*/
+
+static void server_work(const config_t *config) {
+	UNUSED(config);
+	if (sysv_daemonize() < 0)
+		printf("Cannot create SysV daemon - check syslog for details\n");
+	/*else*/
+	/* listen_clients(config); */
 }
 
 int main(int argc, char** argv) {

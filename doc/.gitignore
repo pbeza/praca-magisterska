@@ -1,3 +1,6 @@
+# Don't include Doxygen's automatically generated documentation
+doxygen
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof

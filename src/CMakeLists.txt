@@ -71,7 +71,8 @@ endif()
 # Set warning level for GCC to maximum possible.
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUC)
-	set(GCC_CODE_QUALITY_FLAGS "-Wall -pedantic -Wextra -Wno-long-long -Werror")
+	# TODO -Wno-format added because of '%m' warning for syslog
+	set(GCC_CODE_QUALITY_FLAGS "-Wall -pedantic -Wextra -Wno-long-long -Werror -Wno-format")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_CODE_QUALITY_FLAGS}")
 endif()
 

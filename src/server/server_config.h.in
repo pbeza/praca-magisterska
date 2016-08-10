@@ -1,5 +1,4 @@
-/**
- * @file
+/** \file
  * Server's configuration - both precompiled and parsed from `argv`.
  */
 
