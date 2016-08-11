@@ -1,7 +1,6 @@
 /** \file
  * Server's main file.
  */
-
 #define _GNU_SOURCE /* TEMP_FAILURE_RETRY */
 
 #include <errno.h>
@@ -20,13 +19,14 @@
 #define UNIQ_DAEMON_PID_PATH		"/tmp/" PROJECT_NAME ".pid"
 
 static void server_work(const config_t *config) {
-	int pid_fd = 0;
+	int pid_file_fd = 0; /* file with PID to allow one instance of daemon */
 	UNUSED(config);
-	if (sysv_daemonize(UNIQ_DAEMON_PID_PATH, &pid_fd) < 0) {
+	if (!is_option_set(config, DONT_DAEMONIZE_OPTION) &&
+	    sysv_daemonize(UNIQ_DAEMON_PID_PATH, &pid_file_fd) < 0) {
 		printf("Cannot create SysV daemon - check syslog for details\n");
 	} else {
 		listen_clients(config);
-		if (TEMP_FAILURE_RETRY(close(pid_fd)) < 0)
+		if (TEMP_FAILURE_RETRY(close(pid_file_fd)) < 0)
 			ERR("closing PID file");
 	}
 }
@@ -34,7 +34,9 @@ static void server_work(const config_t *config) {
 int main(int argc, char** argv) {
 	config_t config = INIT_CONFIG;
 	int exit = parse_argv(argc, argv, &config);
+	openlog(PROJECT_NAME, LOG_PID | LOG_CONS | LOG_ODELAY, LOG_USER);
 	if (!exit)
 		server_work(&config);
+	closelog();
 	return EXIT_SUCCESS;
 }

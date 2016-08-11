@@ -8,8 +8,8 @@
 #include <syslog.h>
 #include <unistd.h>
 
-#include "common/utils/common.h"
-#include "common/utils/network.h"
+#include "common/common.h"
+#include "common/network.h"
 #include "parser.h"
 
 #define BACKLOG		MIN(32, SOMAXCONN)
@@ -34,7 +34,7 @@ static int listen_on_port(uint16_t port) {
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)))
 		ERR("setsockopt");
 	if (bind(fd, (struct sockaddr*) &addr, sizeof(addr)) < 0)
-		ERR("bind");
+		ERR("bind (check whether other daemon instance is running)");
 	if (listen(fd, BACKLOG) < 0)
 		ERR("listen");
 	return fd;

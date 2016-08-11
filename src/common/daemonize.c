@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 #include "daemonize.h"
-#include "utils/common.h"
+#include "common.h"
 
 #define UNIQ_DAEMON_FILE_PERMISSION	0644
 
@@ -49,7 +49,7 @@ static int assure_single_daemon_instance(const char *pid_fpath, int *fd) {
 		else
 			ERR("lockf");
 	}
-	snprintf(pid_str, sizeof(pid_str), "%ld\n", (long)getpid());
+	snprintf(pid_str, sizeof(pid_str), "%ld", (long)getpid());
 	if (bulk_write(*fd, pid_str, strlen(pid_str)) < 0)
 		ERR("can't write PID to file");
 	/* DO NOT close *fd because it will release the file's lock! */
@@ -90,6 +90,7 @@ static void daemon_work(int pipe_fd, const char *pid_fpath, int *pid_fd) {
 		ERR("closing pipe in daemon");
 	if (ret < 0) {
 		syslog(LOG_WARNING, "Another instance of daemon is running");
+		closelog();
 		exit(EXIT_SUCCESS);
 	}
 }
@@ -106,6 +107,7 @@ static void first_child_work(int pipe_fd, const char *pid_fpath, int *pid_fd) {
 	} else if (pid) {
 		if (TEMP_FAILURE_RETRY(close(pipe_fd)) < 0)
 			ERR("closing pipe in daemon");
+		closelog();
 		/* 8. Exit in the first child. Ensures reparenting 2nd child. */
 		exit(EXIT_SUCCESS);
 	} else {
@@ -152,8 +154,10 @@ int sysv_daemonize(const char *pid_fpath, int *pid_fd) {
 		if (TEMP_FAILURE_RETRY(close(pipe_fd[0])) < 0)
 			ERR("close");
 		/* 15. Exit if daemon was created successfully. */
-		if (!ret)
+		if (!ret) {
+			closelog();
 			exit(EXIT_SUCCESS);
+		}
 	} else {
 		first_child_work(pipe_fd[1], pid_fpath, pid_fd);
 		ret = 0;

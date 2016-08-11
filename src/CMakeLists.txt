@@ -36,7 +36,7 @@ message(STATUS "Detected system: ${CMAKE_SYSTEM} ${CMAKE_HOST_SYSTEM_PROCESSOR}.
 
 # Substitude CMake variables with their values in header files.
 
-configure_file("common/utils/common_config.h.in" "common/utils/common_config.h")
+configure_file("common/common_config.h.in" "common/common_config.h")
 configure_file("README.md.in" "README.md")
 
 # Make generating ctags symbols active if ctags is installed.
@@ -79,7 +79,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUC)
 endif()
 
 # Include headers from ${PROJECT_BINARY_DIR} to allow inclusion dynamically
-# generated headers generated from common/utils/*.in files.
+# generated headers generated from common/*.in files.
 
 include_directories(${PROJECT_BINARY_DIR})
 

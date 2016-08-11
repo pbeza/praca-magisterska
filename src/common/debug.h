@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <stdio.h>
 
-#include "common/utils/common_config.h" /* To import DEBUG symbol if defined */
+#include "common/common_config.h" /* To import DEBUG symbol if defined */
 
 #ifndef DEBUG
 

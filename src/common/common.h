@@ -26,12 +26,12 @@
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 /**
- * Macro for reporting errors and critical exit in multithreaded environment.
+ * Creates integer number with only i-th bit set to 1.
  */
-/* TODO strerror_r */
+#define BITMASK(bit)			(1 << bit)
 
 /**
- * Set i-th bit to 1.
+ * Set i-th bit in \a x to 1.
  */
 #define SETBIT(x, bit)			(x |= (1 << bit))
 

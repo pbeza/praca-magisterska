@@ -13,7 +13,7 @@ include_directories(${PROJECT_BINARY_DIR})
 
 # Create executable.
 
-add_executable(${PROJECT_NAME} "main.c" "parser.c" "main_loop.c" "common/daemonize.c" "common/utils/options.c" "common/utils/debug.c" "common/utils/common.c" "common/utils/network.c")
+add_executable(${PROJECT_NAME} "main.c" "parser.c" "main_loop.c" "common/daemonize.c" "common/options.c" "common/debug.c" "common/common.c" "common/network.c")
 
 # Generate manual from --help output.
 

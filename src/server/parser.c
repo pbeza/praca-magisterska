@@ -1,13 +1,19 @@
 #include <getopt.h>
 #include <stdio.h>
 
-#include "common/utils/options.h"
+#include "common/options.h"
 #include "parser.h"
 
-#define PORT_NUMBER_TOO_SMALL	-1
-#define PORT_NUMBER_TOO_BIG	-2
+#define PORT_NUMBER_TOO_SMALL			-1
+#define PORT_NUMBER_TOO_BIG			-2
 
-static int port_save_fun(const struct option_t* option, const char* value, void* config) {
+/*
+ * See:
+ * http://stackoverflow.com/questions/16245521/c99-inline-function-in-c-file/16245669#16245669
+ */
+int is_option_set(const config_t *config, int opt);
+
+static int port_save_fun(const struct option_t *option, const char *value, void *config) {
 	int port = atoi(value), ret = 0;
 	UNUSED(option);
 	config_t* c = (config_t*) config;
@@ -30,43 +36,29 @@ static void print_version() {
 	printf("Written by " AUTHOR ".\n");
 }
 
-static int is_option_set(const config_t* config, option_code opt) {
-	return IS_SETBIT(config->selected_options, opt);
-}
-
-int parse_argv(int argc, char** argv, config_t* config) {
+int parse_argv(int argc, char **argv, config_t *config) {
 	const option_t options[] = {
-		OPTION(HELP_OPTION,
-		       SHORT_OPTION_HELP,
-		       LONG_OPTION_HELP,
-		       DESC_OPTION_HELP,
-		       NULL,
-		       NULL),
-		OPTION(VERSION_OPTION,
-		       SHORT_OPTION_VERSION,
-		       LONG_OPTION_VERSION,
-		       DESC_OPTION_VERSION,
-		       NULL,
-		       NULL),
-		OPTION(PORT_OPTION,
-		       SHORT_OPTION_PORT,
-		       LONG_OPTION_PORT,
-		       DESC_OPTION_PORT,
-		       OPTION_VALUE_NAME,
-		       port_save_fun)
+		OPTION(HELP_OPTION, SHORT_OPTION_HELP, LONG_OPTION_HELP,
+		       DESC_OPTION_HELP, NULL, NULL),
+		OPTION(VERSION_OPTION, SHORT_OPTION_VERSION,
+		       LONG_OPTION_VERSION, DESC_OPTION_VERSION, NULL, NULL),
+		OPTION(PORT_OPTION, SHORT_OPTION_PORT, LONG_OPTION_PORT,
+		       DESC_OPTION_PORT, OPTION_VALUE_NAME, port_save_fun),
+		OPTION(DONT_DAEMONIZE_OPTION, SHORT_OPTION_DONT_DAEMONIZE,
+		       LONG_OPTION_DONT_DAEMONIZE, DESC_OPTION_DONT_DAEMONIZE,
+		       NULL, NULL)
 	};
 	const int n = ARRAY_LENGTH(options);
 	int ret = parse(argc, argv, GETOPT_STRING, options, &(config->selected_options), (void*)config, n);
-	if (ret < 0)
+	if (ret < 0) {
 		printf("Port number is too %s. "
 		       "Port number must be integer from range [%d,%d].\n",
 		       ret == PORT_NUMBER_TOO_SMALL ? "small" : "big",
 		       MIN_PORT_NUMBER, MAX_PORT_NUMBER);
-	else if (is_option_set(config, HELP_OPTION)) {
+	} else if (is_option_set(config, HELP_OPTION)) {
 		print_help(options, n, HELP_PREFIX, HELP_POSTFIX);
 		ret = -1;
-	}
-	else if (is_option_set(config, VERSION_OPTION)) {
+	} else if (is_option_set(config, VERSION_OPTION)) {
 		print_version();
 		ret = -1;
 	}
