@@ -16,8 +16,11 @@
 /**
  * Macro reporting fatal errors (via syslog), killing all processes in process'
  * group and exiting.
+ * \note If this macro was implemented as function, than printing line number
+ * of occured error using \a __LINE__ macro would be misleading.
  */
-#define ERR(err_msg)			(syslog(LOG_EMERG, "%s:%d - %s - %m\n",\
+#define ERR(err_msg)			(closelog(),\
+					syslog(LOG_EMERG, "%s:%d - %s - %m\n",\
 						__FILE__, __LINE__, err_msg),\
 					kill(0, SIGKILL),\
 					exit(EXIT_FAILURE))
