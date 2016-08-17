@@ -1,8 +1,8 @@
 /** \file
- * Server's configuration - both precompiled and parsed from `argv`.
+ * Server's basic configuration.
  */
-#ifndef _CONFIG_H
-#define _CONFIG_H
+#ifndef _SERVER_CONFIG_H
+#define _SERVER_CONFIG_H
 
 #include <stdint.h>
 

@@ -7,23 +7,12 @@
 #include "common/options.h"
 #include "config.h"
 
-#ifdef POSIXLY_CORRECT
-#define POSIXLY_CORRECT_MSG		"Note: Long options are not supported in this build.\n"
-#else
-#define POSIXLY_CORRECT_MSG
-#endif
-
 /**
  * Beginning of the help section.
  */
 #define HELP_PREFIX			"Usage: " PROJECT_NAME " [ options ]\n\n"\
 					"Starts server providing application's packages for clients.\n\n"\
 					"Options:\n\n"
-
-/**
- * Ending of the help section.
- */
-#define HELP_POSTFIX			POSIXLY_CORRECT_MSG "\nReport bugs to: <patryk.beza@gmail.com>.\n"
 
 /**
  * Options' arguments IDs.
@@ -74,43 +63,34 @@ typedef enum {
 /**
  * See `getopt` manual for optstring prefix meaning.
  */
-#define OPTSTRING_PREFIX	":"
+#define OPTSTRING_PREFIX		":"
 
 /**
  * Options string for `getopt`.
  */
-#define GETOPT_STRING		OPTSTRING_PREFIX "hvp:d"
+#define GETOPT_STRING			OPTSTRING_PREFIX "hvp:d"
 
 /**
  * Application configuration - both precompiled and parsed from `argv`.
  */
-typedef struct config_t {
-	/**
-	 * Selected runtime options are represented by single bits set to 1.
-	 */
-	uint32_t selected_options;
-	/**
-	 * Server's listening port.
-	 */
-	uint16_t port;
-} config_t;
+typedef struct server_config_t {
+	common_config_t base_config;
+} server_config_t;
 
 /**
  * Precompiled  application configuration ie. configuration before parsing `argv`.
  */
-static const config_t INIT_CONFIG = {
-	.selected_options = 0,
-	.port = DEFAULT_SERVER_LISTENING_PORT
+static const server_config_t INIT_CONFIG = {
+	.base_config = {
+		.selected_options = 0,
+		.port = DEFAULT_SERVER_LISTENING_PORT
+	}
 };
 
 /**
  * Add application's allowed options, parse `argv` and save result to \p config.
  * Returns negative integer if application should exit.
  */
-int parse_argv(int argc, char **argv, config_t *config);
-
-inline int is_option_set(const config_t *config, int opt) {
-	return IS_SETBIT(config->selected_options, opt);
-}
+int parse_argv(int argc, char **argv, server_config_t *config);
 
 #endif

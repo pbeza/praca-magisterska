@@ -41,7 +41,7 @@ static int listen_on_port(uint16_t port) {
 	return fd;
 }
 
-static int wait_for_client_msg(int csocket_fd){
+static int wait_for_client_msg(int csocket_fd) {
 	int is_set;
 	struct pollfd fds[1] = { 0 };
 	fds[0].fd = csocket_fd;
@@ -57,9 +57,9 @@ static int wait_for_client_msg(int csocket_fd){
 	return is_set;
 }
 
-void listen_clients(const config_t *config) {
+void listen_clients(const server_config_t *config) {
 	ssize_t len;
-	int port = config->port, ssocket_fd = listen_on_port(port);
+	int port = config->base_config.port, ssocket_fd = listen_on_port(port);
 	int csocket_fd, is_set;
 	char buf[MSGCOUNT + 1] = { 0 }, *ip;
 	struct sockaddr caddr = { 0 };
@@ -75,7 +75,7 @@ void listen_clients(const config_t *config) {
 	       "waiting for client message for %dms", ip,
 	       POLL_TIMEOUT_MILLISECONDS);
 	is_set = wait_for_client_msg(csocket_fd);
-	if (is_set == 0 || (len = bulk_read(csocket_fd, buf, MSGCOUNT)) <= 0) {
+	if (is_set == 0 || (len = bulk_recv(csocket_fd, buf, MSGCOUNT, 0)) <= 0) {
 		if (len < 0)
 			ERR("read");
 		syslog(LOG_NOTICE, "Connection probably lost");

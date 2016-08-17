@@ -11,18 +11,18 @@
  * See:
  * http://stackoverflow.com/questions/16245521/c99-inline-function-in-c-file/16245669#16245669
  */
-int is_option_set(const config_t *config, int opt);
+int is_option_set(uint32_t selected_options, int opt);
 
 static int port_save_fun(const struct option_t *option, const char *value, void *config) {
 	int port = atoi(value), ret = 0;
 	UNUSED(option);
-	config_t* c = (config_t*) config;
+	server_config_t* c = (server_config_t*) config;
 	if (port < MIN_PORT_NUMBER)
 		ret = PORT_NUMBER_TOO_SMALL;
 	else if (port > MAX_PORT_NUMBER)
 		ret = PORT_NUMBER_TOO_BIG;
 	else
-		c->port = port;
+		c->base_config.port = port;
 	return ret;
 }
 
@@ -36,7 +36,7 @@ static void print_version() {
 	printf("Written by " AUTHOR ".\n");
 }
 
-int parse_argv(int argc, char **argv, config_t *config) {
+int parse_argv(int argc, char **argv, server_config_t *config) {
 	const option_t options[] = {
 		OPTION(HELP_OPTION, SHORT_OPTION_HELP, LONG_OPTION_HELP,
 		       DESC_OPTION_HELP, NULL, NULL),
@@ -49,16 +49,17 @@ int parse_argv(int argc, char **argv, config_t *config) {
 		       NULL, NULL)
 	};
 	const int n = ARRAY_LENGTH(options);
-	int ret = parse(argc, argv, GETOPT_STRING, options, &(config->selected_options), (void*)config, n);
+	uint32_t selected_options = config->base_config.selected_options;
+	int ret = parse(argc, argv, GETOPT_STRING, options, &selected_options, (void*)config, n);
 	if (ret < 0) {
 		printf("Port number is too %s. "
 		       "Port number must be integer from range [%d,%d].\n",
 		       ret == PORT_NUMBER_TOO_SMALL ? "small" : "big",
 		       MIN_PORT_NUMBER, MAX_PORT_NUMBER);
-	} else if (is_option_set(config, HELP_OPTION)) {
+	} else if (is_option_set(selected_options, HELP_OPTION)) {
 		print_help(options, n, HELP_PREFIX, HELP_POSTFIX);
 		ret = -1;
-	} else if (is_option_set(config, VERSION_OPTION)) {
+	} else if (is_option_set(selected_options, VERSION_OPTION)) {
 		print_version();
 		ret = -1;
 	}

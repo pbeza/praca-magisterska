@@ -5,6 +5,7 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
+#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>

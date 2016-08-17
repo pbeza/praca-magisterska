@@ -3,6 +3,6 @@
 
 #include "parser.h"
 
-void listen_clients(const config_t *config);
+void listen_clients(const server_config_t *config);
 
 #endif

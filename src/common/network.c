@@ -1,12 +1,35 @@
+#define _GNU_SOURCE /* TEMP_FAILURE_RETRY */
+
 #include <netinet/in.h> /* sockaddr_in */
 #include <string.h> /* memset */
 #include <sys/socket.h> /* socket */
+#include <unistd.h>
 
 #include "common.h"
 
-/*int sethandler(void (*f)(int), int sig) {
-	struct sigaction act;
-	memset(&act, 0, sizeof(struct sigaction));
-	act.sa_handler = f;
-	return sigaction(sig, &act, NULL);
-}*/
+ssize_t bulk_recv(int socket, char *buffer, size_t length, int flags) {
+	int c;
+	size_t len = 0;
+	do {
+		c = TEMP_FAILURE_RETRY(recv(socket, buffer, length, flags));
+		if (c < 0) return c;
+		if (c == 0) return len;
+		buffer += c;
+		len += c;
+		length -= c;
+	} while (length > 0);
+	return len;
+}
+
+ssize_t bulk_send(int socket, const char *buffer, size_t length, int flags) {
+	int c;
+	size_t len = 0;
+	do {
+		c = TEMP_FAILURE_RETRY(send(socket, buffer, length, flags));
+		if (c < 0) return c;
+		buffer += c;
+		len += c;
+		length -= c;
+	} while(length > 0);
+	return len;
+}

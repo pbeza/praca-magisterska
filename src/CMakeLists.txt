@@ -7,27 +7,27 @@
 #
 #   cmake -D CMAKE_BUILD_TYPE=X ..
 #
-# where X is 'Debug' or 'Release'. To see compilation details (i.e. compiler's
-# flags) run 'make VERBOSE=1'. To see Makefile targets run 'make help'.
+# where X is 'Debug' or 'Release' (default). To see compilation details (i.e.
+# compiler's flags) run 'make VERBOSE=1'. To see Makefile targets run 'make help'.
 #
 # Visit www.cmake.org to learn more about CMake.
 
 cmake_minimum_required(VERSION 3.1)
 project(mgr VERSION 0.1 LANGUAGES C)
 
-# Define a few constant values.
+# Few constant values.
 
 set(AUTHOR_FULL_NAME "Patryk Bęza")
 set(AUTHOR_EMAIL "patryk.beza@gmail.com")
 set(AUTHOR "${AUTHOR_FULL_NAME} (${AUTHOR_EMAIL})")
 set(DOXYGEN_LANGUAGE "English" CACHE STRING "Doxygen documentation language")
 
-# Define user-configurable variables.
+# User-configurable variables.
 
 option(POSIXLY_CORRECT "Don't use non-POSIX compliant extensions" OFF)
 option(DEBUG_CMAKE_MESSAGES "Print all CMake variables" OFF)
 if (${CMAKE_BUILD_TYPE} MATCHES Debug)
-	option(DEBUG "Constant propagated to source files whether debug compilation is active" ON)
+	option(DEBUG "Constant propagated to source files indicating whether debug compilation is active" ON)
 endif()
 
 # Print basic information about detected system.
@@ -36,10 +36,9 @@ message(STATUS "Detected system: ${CMAKE_SYSTEM} ${CMAKE_HOST_SYSTEM_PROCESSOR}.
 
 # Substitude CMake variables with their values in header files.
 
-configure_file("common/common_config.h.in" "common/common_config.h")
 configure_file("README.md.in" "README.md")
 
-# Make generating ctags symbols active if ctags is installed.
+# Make ctags symbols active if ctags is installed.
 
 find_program(CTAGS_PATH ctags)
 if (EXISTS ${CTAGS_PATH})
@@ -50,7 +49,7 @@ else()
 	message(WARNING "ctags is not installed - consider installing it")
 endif()
 
-# Make generating cscope symbols active if cscope is installed.
+# Make cscope symbols active if cscope is installed.
 
 find_program(CSCOPE_PATH cscope)
 if (EXISTS ${CSCOPE_PATH})
@@ -61,7 +60,7 @@ else()
 	message(WARNING "cscope is not installed - consider installing it")
 endif()
 
-# Add generating developer's symbols (cscope + ctags) to default target in debug mode
+# Make developer's symbols (cscope + ctags) active in debug mode.
 
 if(${CMAKE_BUILD_TYPE} MATCHES Debug AND EXISTS ${CTAGS_PATH} AND EXISTS ${CSCOPE_PATH})
 	message(STATUS "Generating developer's symbols (cscope and ctags) in debug mode is active")
@@ -85,6 +84,7 @@ include_directories(${PROJECT_BINARY_DIR})
 
 # Add subprojects.
 
+add_subdirectory(common)
 add_subdirectory(server)
 add_subdirectory(client)
 
