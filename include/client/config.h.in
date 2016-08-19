@@ -4,16 +4,16 @@
 #ifndef _CLIENT_CONFIG_H
 #define _CLIENT_CONFIG_H
 
-#include "common/common_config.h"
+#include "common/config.h"
 
 /**
  * Project name populated from CMake file.
  */
-#define PROJECT_NAME			"@PROJECT_NAME@"
+#cmakedefine PROJECT_NAME		"@PROJECT_NAME@"
 
 /**
  * Project version number populated from CMake file.
  */
-#define PROJECT_VERSION			"@PROJECT_VERSION@"
+#cmakedefine PROJECT_VERSION		"@PROJECT_VERSION@"
 
 #endif

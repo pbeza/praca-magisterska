@@ -1,8 +1,6 @@
 #define _GNU_SOURCE /* TEMP_FAILURE_RETRY */
 
-#include <netinet/in.h> /* sockaddr_in */
-#include <string.h> /* memset */
-#include <sys/socket.h> /* socket */
+#include <sys/socket.h>
 #include <unistd.h>
 
 #include "common.h"

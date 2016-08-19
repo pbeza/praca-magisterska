@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "options.h"
+#include "argv_parser.h"
 
 /**
  * Parser `getopt` return code in case of missing option's value.
@@ -33,6 +33,7 @@ static inline void print_missing_value() {
 	"Option -%c requires an operand. " CHECK_MANUAL_MSG "\n", optopt
 #endif
 	);
+	closelog();
 	exit(EXIT_FAILURE);
 }
 
@@ -47,6 +48,7 @@ static inline void print_unrecognized_option() {
 	"Unrecognized option -%c. " CHECK_MANUAL_MSG "\n", optopt
 #endif
 	);
+	closelog();
 	exit(EXIT_FAILURE);
 }
 
@@ -55,9 +57,9 @@ static inline void print_unrecognized_option() {
  * array (of length \p n) and execute it. Set \ref option_t.id-th bit in
  * \p selected_options integer, to indicate that this option is active.
  */
-static int save_option(const option_t* options, int opt, uint32_t* selected_options, void* config, const int n) {
+static int save_option(const option_t *options, int opt, uint32_t *selected_options, void *config, const int n) {
 	int i, ret = 0;
-	const option_t* c;
+	const option_t *c;
 	for (i = 0; i < n; i++) {
 		c = &options[i];
 		if (c->short_option != opt)
@@ -73,9 +75,9 @@ static int save_option(const option_t* options, int opt, uint32_t* selected_opti
 /**
  * Convert \p options to \p long_options accepted by `getopt_long` system call.
  */
-static void convert_to_getopt_long_options(struct option* long_options, const option_t* options, const int n) {
+static void convert_to_getopt_long_options(struct option *long_options, const option_t *options, const int n) {
 	int i;
-	const option_t* c;
+	const option_t *c;
 	for (i = 0; i < n; i++) {
 		c = &options[i];
 		long_options[i] = (struct option) {
@@ -92,7 +94,7 @@ static void convert_to_getopt_long_options(struct option* long_options, const op
  * Parse `argv` (of length \p argc), save results in \p options array and in
  * \p selected_options integer.
  */
-int parse(int argc, char** argv, const char* optstring, const option_t* options, uint32_t* selected_options, void* config, const int n) {
+int parse(int argc, char **argv, const char *optstring, const option_t *options, uint32_t *selected_options, void *config, const int n) {
 	int opt, ret;
 #ifndef POSIXLY_CORRECT
 	struct option long_options[n + 1];
@@ -114,9 +116,9 @@ int parse(int argc, char** argv, const char* optstring, const option_t* options,
 	return 0;
 }
 
-void print_help(const option_t* options, const int n, const char* help_prefix, const char* help_postfix) {
+void print_help(const option_t *options, const int n, const char *help_prefix, const char *help_postfix) {
 	int i;
-	const option_t* opt;
+	const option_t *opt;
 	printf(help_prefix);
 	for (i = 0; i < n; i++) {
 		opt = &options[i];
@@ -129,3 +131,9 @@ void print_help(const option_t* options, const int n, const char* help_prefix, c
 	}
 	printf(help_postfix);
 }
+
+/*
+ * See:
+ * http://stackoverflow.com/questions/16245521/c99-inline-function-in-c-file/16245669#16245669
+ */
+int is_option_set(uint32_t selected_options, int opt);

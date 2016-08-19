@@ -77,8 +77,8 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUC)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_CODE_QUALITY_FLAGS}")
 endif()
 
-# Include headers from ${PROJECT_BINARY_DIR} to allow inclusion dynamically
-# generated headers generated from common/*.in files.
+# Add ${PROJECT_BINARY_DIR} to directories with headers to allow inclusion files
+# from common directory, using 'common/' path prefix.
 
 include_directories(${PROJECT_BINARY_DIR})
 
@@ -91,9 +91,9 @@ add_subdirectory(client)
 # Generate Doxygen based documentation if Doxygen is installed.
 
 find_package(Doxygen REQUIRED)
-set(DOXYGEN_TEMPLATE "doxygen_template.dox")
-configure_file("${DOXYGEN_TEMPLATE}.in" ${DOXYGEN_TEMPLATE})
-add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${DOXYGEN_TEMPLATE} DEPENDS srv_doc VERBATIM)
+set(DOXYGEN_TEMPLATE_FILENAME "doxygen_template.dox")
+configure_file("../doc/doxygen/${DOXYGEN_TEMPLATE_FILENAME}.in" ${DOXYGEN_TEMPLATE_FILENAME})
+add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${DOXYGEN_TEMPLATE_FILENAME} DEPENDS srv_doc cli_doc VERBATIM)
 
 # Print list of all the CMake variables if requested to do so.
 

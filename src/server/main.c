@@ -6,15 +6,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "argv_parser.h"
 #include "common/daemonize.h"
 #include "main_loop.h"
-#include "parser.h"
 
 /**
  * Path to file with daemon's PID to disallow multiple instances of daemon.
  * See: http://www.pathname.com/fhs/2.2/fhs-5.13.html
  *
- * TODO Need root to access /var/run directory.
+ * \todo Need root to access /var/run directory.
  */
 #define UNIQ_DAEMON_PID_PATH		"/tmp/" PROJECT_NAME ".pid"
 /* #define UNIQ_DAEMON_PID_PATH		"/var/run/" PROJECT_NAME ".pid" */

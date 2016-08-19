@@ -8,13 +8,13 @@
 #include <syslog.h>
 #include <unistd.h>
 
+#include "argv_parser.h"
 #include "common/common.h"
 #include "common/network.h"
-#include "parser.h"
 
 #define BACKLOG				MIN(32, SOMAXCONN)
 #define MSGCOUNT			8
-#define POLL_TIMEOUT_MILLISECONDS	30 * 1000 /* TODO increase timeout */
+#define POLL_TIMEOUT_MILLISECONDS	30 * 1000 /* \todo increase timeout */
 
 static void init_sockaddr(struct sockaddr_in* addr, uint16_t port) {
 	memset(addr, 0, sizeof(struct sockaddr_in));
@@ -31,7 +31,7 @@ static int listen_on_port(uint16_t port) {
 		ERR("socket");
 	init_sockaddr(&addr, port);
 	/* http://stackoverflow.com/questions/14388706/socket-options-so-reuseaddr-and-so-reuseport-how-do-they-differ-do-they-mean-t */
-	/* TODO Check if other setsockopt options would be helpful. See: man 7 ip */
+	/* \todo Check if other setsockopt options would be helpful. See: man 7 ip */
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)))
 		ERR("setsockopt");
 	if (bind(fd, (struct sockaddr*) &addr, sizeof(addr)) < 0)

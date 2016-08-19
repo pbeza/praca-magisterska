@@ -1,0 +1,11 @@
+[NAME]
+synchron-srv - server serving list of applications to install on clients' hosts
+
+[OPTIONS]
+Allowed options:
+
+[EXAMPLES]
+Simple usage examples: TODO
+
+[SEE ALSO]
+synchron-cli(1)

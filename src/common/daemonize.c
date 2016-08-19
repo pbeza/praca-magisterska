@@ -21,7 +21,7 @@
 
 /**
   * Maximum number of digits in PID. This is needed for writing/reading PID
-  * to/from \a pid_fpath file.
+  * to/from `pid_fpath` file.
   */
 #define MAX_DIGITS_IN_PID	9
 

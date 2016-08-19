@@ -26,28 +26,27 @@
 					kill(0, SIGKILL),\
 					exit(EXIT_FAILURE))
 
-#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
-#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
+#define MIN(X, Y)			(((X) < (Y)) ? (X) : (Y))
+#define MAX(X, Y)			(((X) > (Y)) ? (X) : (Y))
 
 /**
- * Creates integer number with only i-th bit set to 1.
+ * Creates integer number with only i-th \p bit set to 1.
  */
 #define BITMASK(bit)			(1 << bit)
 
 /**
- * Set i-th bit in \a x to 1.
+ * Set i-th bit in \p x to 1.
  */
 #define SETBIT(x, bit)			(x |= (1 << bit))
 
 /**
- * Returns non-zero number if i-th bit is set to 1.
+ * Returns non-zero number if i-th \p bit is set to 1.
  */
 #define IS_SETBIT(x, bit)		((x >> bit) & 1)
 
 /**
  * Macro for marking unused variables.
- *
- * \note **RATIONALE** Pedantic compiler's option produce error/warning
+ * \note *Rationale* Pedantic compiler's option produce error/warning
  * (depending whether \c -Werror option is present) when unused variable is intruced.
  */
 #define UNUSED(expr)			do { (void)(expr); } while (0)
@@ -58,8 +57,8 @@
 #define ARRAY_LENGTH(x)			(sizeof(x) / sizeof((x)[0]))
 
 /**
- * Concatenate two strings by reserving space for concatenated word and copying
- * them. \warning User **must** free allocated memory by himself.
+ * Concatenate two strings by reserving memory for concatenated word and copying
+ * them into buffer. \warning User **must** free allocated memory by himself.
  */
 char *concat(const char *s1, const char *s2);
 

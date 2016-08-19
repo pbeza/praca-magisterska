@@ -1,5 +1,7 @@
 /** \file
- * Debug functions and macros.
+ * Debug functions and macros printing errors on \a DEBUG_STREAM.
+ * \note Note that most of the time `syslog` is used for logging and debug.
+ * Daemonized application is not able to print on `stdout` and `stderr`.
  */
 
 #ifndef _DEBUG_H
@@ -8,7 +10,7 @@
 #include <errno.h>
 #include <stdio.h>
 
-#include "common/common_config.h" /* To import DEBUG symbol if defined */
+#include "config.h" /* To import DEBUG symbol if defined */
 
 #ifndef DEBUG
 

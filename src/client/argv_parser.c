@@ -1,22 +1,15 @@
 #include <getopt.h>
 #include <stdio.h>
 
-#include "common/options.h"
-#include "parser.h"
+#include "argv_parser.h"
 
-#define PORT_NUMBER_TOO_SMALL			-1
-#define PORT_NUMBER_TOO_BIG			-2
-
-/*
- * See:
- * http://stackoverflow.com/questions/16245521/c99-inline-function-in-c-file/16245669#16245669
- */
-int is_option_set(uint32_t selected_options, int opt);
+#define PORT_NUMBER_TOO_SMALL		-1
+#define PORT_NUMBER_TOO_BIG		-2
 
 static int port_save_fun(const struct option_t *option, const char *value, void *config) {
 	int port = atoi(value), ret = 0;
 	UNUSED(option);
-	server_config_t* c = (server_config_t*) config;
+	client_config_t *c = (client_config_t*) config;
 	if (port < MIN_PORT_NUMBER)
 		ret = PORT_NUMBER_TOO_SMALL;
 	else if (port > MAX_PORT_NUMBER)
@@ -36,7 +29,7 @@ static void print_version() {
 	printf("Written by " AUTHOR ".\n");
 }
 
-int parse_argv(int argc, char **argv, server_config_t *config) {
+int parse_argv(int argc, char **argv, client_config_t *config) {
 	const option_t options[] = {
 		OPTION(HELP_OPTION, SHORT_OPTION_HELP, LONG_OPTION_HELP,
 		       DESC_OPTION_HELP, NULL, NULL),

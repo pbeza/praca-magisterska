@@ -1,5 +1,5 @@
 [NAME]
-synchron-srv - server serving list of applications to install on clients' hosts
+synchron-cli - client synchronizing its software and configuration with server
 
 [OPTIONS]
 Allowed options:
@@ -8,4 +8,4 @@ Allowed options:
 Simple usage examples: TODO
 
 [SEE ALSO]
-TODO(1)
+synchron-srv(1)

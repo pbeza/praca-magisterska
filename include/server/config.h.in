@@ -1,0 +1,19 @@
+/** \file
+ * Server's basic configuration.
+ */
+#ifndef _SERVER_CONFIG_H
+#define _SERVER_CONFIG_H
+
+#include "common/config.h"
+
+/**
+ * Project name populated from CMake file.
+ */
+#cmakedefine PROJECT_NAME		"@PROJECT_NAME@"
+
+/**
+ * Project version number populated from CMake file.
+ */
+#cmakedefine PROJECT_VERSION		"@PROJECT_VERSION@"
+
+#endif
