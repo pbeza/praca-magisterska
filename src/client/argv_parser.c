@@ -1,36 +1,44 @@
+#include <arpa/inet.h>
 #include <getopt.h>
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "argv_parser.h"
 
-#define PORT_NUMBER_TOO_SMALL		-1
-#define PORT_NUMBER_TOO_BIG		-2
+#define DESC_OPTION_VERSION		"Print client's version number."
 
-static int port_save_fun(const struct option_t *option, const char *value, void *config) {
-	int port = atoi(value), ret = 0;
-	UNUSED(option);
-	client_config_t *c = (client_config_t*) config;
-	if (port < MIN_PORT_NUMBER)
-		ret = PORT_NUMBER_TOO_SMALL;
-	else if (port > MAX_PORT_NUMBER)
-		ret = PORT_NUMBER_TOO_BIG;
-	else
-		c->base_config.port = port;
-	return ret;
+static int init_server_addr(client_config_t *config) {
+	struct sockaddr_in *addr = &config->serv_addr;
+	uint16_t port = config->base_config.port;
+	memset(addr, 0, sizeof(struct sockaddr_in));
+	addr->sin_family = AF_INET;
+	addr->sin_port = htons(port);
+	/** \note We don't use `inet_aton` because it doesn't support IPv6. */
+	if (inet_pton(AF_INET, config->serv_ip_str, &addr->sin_addr.s_addr) <= 0) {
+		printf("Unexpected format of IPv4.\n");
+		return -1;
+	}
+	return 0;
 }
 
-static void print_version() {
-	printf(PROJECT_NAME " " PROJECT_VERSION
-#ifdef DEBUG
-	       " debug"
-#endif
-	       " built for " HOST_SYSTEM_PROCESSOR ".\n\n");
-	printf(COPYRIGHT);
-	printf("Written by " AUTHOR ".\n");
+static int client_parse(int argc, char **argv, client_config_t *config) {
+	int d = argc - optind;
+	char *last = argv[argc - 1];
+	if (d == 1) {
+		config->serv_ip_str = last;
+	} else if (d == 0 && !(strlen(last) == 2 && !strncmp(last, "--", 2))) {
+		printf("Missing server's IP. See --" LONG_OPTION_HELP ".\n");
+		return -1;
+	} else {
+		printf("Unexpected options. See --" LONG_OPTION_HELP ".\n");
+		return -1;
+	}
+	return init_server_addr(config);
 }
 
-int parse_argv(int argc, char **argv, client_config_t *config) {
-	const option_t options[] = {
+int parse(int argc, char **argv, client_config_t *config) {
+	const option_t allowed_options[] = {
 		OPTION(HELP_OPTION, SHORT_OPTION_HELP, LONG_OPTION_HELP,
 		       DESC_OPTION_HELP, NULL, NULL),
 		OPTION(VERSION_OPTION, SHORT_OPTION_VERSION,
@@ -41,20 +49,7 @@ int parse_argv(int argc, char **argv, client_config_t *config) {
 		       LONG_OPTION_DONT_DAEMONIZE, DESC_OPTION_DONT_DAEMONIZE,
 		       NULL, NULL)
 	};
-	const int n = ARRAY_LENGTH(options);
-	uint32_t selected_options = config->base_config.selected_options;
-	int ret = parse(argc, argv, GETOPT_STRING, options, &selected_options, (void*)config, n);
-	if (ret < 0) {
-		printf("Port number is too %s. "
-		       "Port number must be integer from range [%d,%d].\n",
-		       ret == PORT_NUMBER_TOO_SMALL ? "small" : "big",
-		       MIN_PORT_NUMBER, MAX_PORT_NUMBER);
-	} else if (is_option_set(selected_options, HELP_OPTION)) {
-		print_help(options, n, HELP_PREFIX, HELP_POSTFIX);
-		ret = -1;
-	} else if (is_option_set(selected_options, VERSION_OPTION)) {
-		print_version();
-		ret = -1;
-	}
-	return ret;
+	const int n = ARRAY_LENGTH(allowed_options);
+	return common_parse(argc, argv, allowed_options, (void*)config, n) < 0 ?
+		-1 : client_parse(argc, argv, config);
 }

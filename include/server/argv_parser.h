@@ -7,24 +7,10 @@
 #include "common/argv_parser.h"
 #include "config.h"
 
-/**
- * Beginning of the help section.
- */
 #define HELP_PREFIX			"Usage: " PROJECT_NAME " [ options ]\n\n"\
-					"Starts server providing synchronization of applications' packages and configuration for clients.\n\n"\
+					"Starts server providing synchronization of applications' "\
+					"packages and configuration for clients.\n\n"\
 					"Options:\n\n"
-
-/**
- * @{ Options' description.
- */
-#define DESC_OPTION_VERSION		"Print server's version number."
-#define DESC_OPTION_PORT		"Port number for listening for clients."
-
-/**
- * @}
- * Options string for `getopt`.
- */
-#define GETOPT_STRING			":hvp:d"
 
 /**
  * Server configuration - both precompiled and parsed from `argv`.
@@ -37,16 +23,13 @@ typedef struct server_config_t {
  * Precompiled application configuration ie. configuration before parsing `argv`.
  */
 static const server_config_t INIT_CONFIG = {
-	.base_config = {
-		.selected_options = 0,
-		.port = DEFAULT_SERVER_LISTENING_PORT
-	}
+	.base_config = INIT_BASE_CONFIG
 };
 
 /**
  * Add application's allowed options, parse `argv` and save result to \p config.
  * Returns negative integer if application should exit.
  */
-int parse_argv(int argc, char **argv, server_config_t *config);
+int parse(int argc, char **argv, server_config_t *config);
 
 #endif

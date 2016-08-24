@@ -2,13 +2,53 @@
  * Universal `argv` options representation and basic parser used by both server
  * and client.
  */
-#ifndef _ARGV_PARSER_H
-#define _ARGV_PARSER_H
+#ifndef _COMMON_ARGV_PARSER_H
+#define _COMMON_ARGV_PARSER_H
 
 #include <stdint.h>
 
 #include "common.h"
 #include "config.h"
+
+/**
+ * @{ Short options' names.
+ */
+#define SHORT_OPTION_HELP		'h'
+#define SHORT_OPTION_VERSION		'v'
+#define SHORT_OPTION_PORT		'p'
+#define SHORT_OPTION_DONT_DAEMONIZE	'd'
+
+/**
+ * @}
+ * @{ Long options' names.
+ */
+#define LONG_OPTION_HELP		"help"
+#define LONG_OPTION_VERSION		"version"
+#define LONG_OPTION_PORT		"port"
+#define LONG_OPTION_DONT_DAEMONIZE	"nodaemon"
+
+/**
+ * @}
+ * Options' values' names.
+ */
+#define OPTION_VALUE_NAME		"PORT_NUMBER"
+
+/**
+ * Options' description.
+ */
+#define DESC_OPTION_HELP		"Print this help message."
+#define DESC_OPTION_DONT_DAEMONIZE	"Don't daemonize. By default application is daemonized. Both daemonized\n\t"\
+					"and not daemonized application uses syslog for logging. Standard output\n\t"\
+					"is used only for printing help message."
+#define DESC_OPTION_PORT		"Server's listening port number. "\
+					"Default is " STR(DEFAULT_SERVER_LISTENING_PORT) "."
+
+/**
+ * If user didn't specify listening port for server, this port is used.
+ * \note See list of (un)assigned port numbers:
+ * https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.txt
+ */
+#define DEFAULT_SERVER_LISTENING_PORT	4440
 
 #ifdef POSIXLY_CORRECT
 #define GETOPT getopt
@@ -17,6 +57,30 @@
 #define GETOPT getopt_long
 #define OPTION(A, B, C, D, E, F)	{ A, B, C, D, E, F }
 #endif
+
+/**
+ * Common initial config for both server and client.
+ */
+#define INIT_BASE_CONFIG		{\
+					.project_name = PROJECT_NAME,\
+					.project_version = PROJECT_VERSION,\
+					.help_prefix = HELP_PREFIX,\
+					.selected_options = 0,\
+					.port = DEFAULT_SERVER_LISTENING_PORT\
+					}
+
+/**
+ * Options' IDs.
+ * \note Option ID is used as a bit index in `uint32_t` variable to mark active
+ * options. Therefore IDs must be positive integers less than 32.
+ * \warning Server's and client's IDs must be greater than common IDs.
+ */
+typedef enum {
+	HELP_OPTION,
+	VERSION_OPTION,
+	PORT_OPTION,
+	DONT_DAEMONIZE_OPTION
+} option_code;
 
 /**
  * Represents single runtime option read from `argv`.
@@ -55,70 +119,12 @@ typedef struct option_t {
 } option_t;
 
 /**
- * Options' IDs.
- * \note Option ID is used as a bit index in `uint32_t` variable to mark active
- * options. Therefore IDs must be positive integers less than 32.
- */
-typedef enum {
-	HELP_OPTION,
-	VERSION_OPTION,
-	PORT_OPTION,
-	DONT_DAEMONIZE_OPTION
-} option_code;
-
-/**
- * @{ Short options' names.
- */
-#define SHORT_OPTION_HELP		'h'
-#define SHORT_OPTION_VERSION		'v'
-#define SHORT_OPTION_PORT		'p'
-#define SHORT_OPTION_DONT_DAEMONIZE	'd'
-
-/**
- * @}
- * @{ Long options' names.
- */
-#define LONG_OPTION_HELP		"help"
-#define LONG_OPTION_VERSION		"version"
-#define LONG_OPTION_PORT		"port"
-#define LONG_OPTION_DONT_DAEMONIZE	"nodaemon"
-
-/**
- * @}
- * Options' values' names.
- */
-#define OPTION_VALUE_NAME		"PORT_NUMBER"
-
-/**
- * Options' description.
- */
-#define DESC_OPTION_HELP		"Print this help message."
-#define DESC_OPTION_DONT_DAEMONIZE	"Don't daemonize. "\
-					"By default application is daemonized."
-
-/**
- * If user didn't specify listening port for server, this port is used.
- * \note See list of (un)assigned port numbers:
- * https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.txt
- */
-#define DEFAULT_SERVER_LISTENING_PORT	4440
-
-/**
- * Minimum allowed port number accepted by both server's and client's parser.
- */
-#define MIN_PORT_NUMBER			1025
-
-/**
- * Maximum allowed port number accepted by both server's and client's parser.
- */
-#define MAX_PORT_NUMBER			65535
-
-/**
  * Parse `argv` and save parsed results in \p options and \p selected_options.
  */
-int parse(int argc, char **argv, const char *optstring, const option_t *options, uint32_t *selected_options, void *config, const int n);
+int common_parse(int argc, char **argv, const option_t *options,
+		 common_config_t *base_config, const int n);
 
-void print_help(const option_t *options, const int n, const char *help_prefix, const char *help_postfix);
+int port_save_fun(const struct option_t *option, const char *value, void *config);
 
 /**
  * Checks whether given \p option, represented by single bit, is set.

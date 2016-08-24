@@ -22,7 +22,7 @@ char *concat(const char *s1, const char *s2) {
 		ERR("malloc");
 	strcpy(s, s1);
 	strcat(s, s2);
-	return s; /* User has to free returned allocated space */
+	return s; /** \warning User has to free returned allocated space */
 }
 
 ssize_t bulk_read(int fd, char *buf, size_t nbyte) {

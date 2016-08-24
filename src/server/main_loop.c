@@ -48,19 +48,21 @@ static int wait_for_client_msg(int csocket_fd) {
 	fds[0].events = POLLIN;
 	is_set = TEMP_FAILURE_RETRY(poll(fds, ARRAY_LENGTH(fds),
 					 POLL_TIMEOUT_MILLISECONDS));
-	if (is_set < 0)
+	if (is_set < 0) {
 		ERR("poll");
-	else if (!is_set)
+	} else if (!is_set) {
 		syslog(LOG_WARNING,
 		       "Waiting for client's message has timed out after %dms",
 		       POLL_TIMEOUT_MILLISECONDS);
-	return is_set;
+		return -1;
+	}
+	return 0;
 }
 
 void listen_clients(const server_config_t *config) {
 	ssize_t len;
 	int port = config->base_config.port, ssocket_fd = listen_on_port(port);
-	int csocket_fd, is_set;
+	int csocket_fd, ret;
 	char buf[MSGCOUNT + 1] = { 0 }, *ip;
 	struct sockaddr caddr = { 0 };
 	struct sockaddr_in *caddr_in;
@@ -71,11 +73,11 @@ void listen_clients(const server_config_t *config) {
 		ERR("accept");
 	caddr_in = (struct sockaddr_in*)&caddr;
 	ip = inet_ntoa(caddr_in->sin_addr);
-	syslog(LOG_INFO, "Connection accepted from client %s,"
+	syslog(LOG_INFO, "Connection accepted from client %s, "
 	       "waiting for client message for %dms", ip,
 	       POLL_TIMEOUT_MILLISECONDS);
-	is_set = wait_for_client_msg(csocket_fd);
-	if (is_set == 0 || (len = bulk_recv(csocket_fd, buf, MSGCOUNT, 0)) <= 0) {
+	ret = wait_for_client_msg(csocket_fd);
+	if (ret || (len = bulk_recv(csocket_fd, buf, MSGCOUNT, 0)) <= 0) {
 		if (len < 0)
 			ERR("read");
 		syslog(LOG_NOTICE, "Connection probably lost");

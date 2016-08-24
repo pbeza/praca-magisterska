@@ -6,7 +6,7 @@ configure_file("../../include/${PROJECT_NAME}/config.h.in" "config.h")
 
 # Create executable.
 
-add_executable(${PROJECT_NAME} "main.c" "argv_parser.c")
+add_executable(${PROJECT_NAME} "main.c" "argv_parser.c" "main_loop.c")
 
 # Include headers from ${PROJECT_BINARY_DIR} to allow inclusion dynamically
 # generated headers generated from common/*.in files.

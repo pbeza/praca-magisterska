@@ -51,10 +51,12 @@ endif()
 
 # Make cscope symbols active if cscope is installed.
 
+# TODO This path is relative to build directory ;/
+set(INC_DIR "../../include")
 find_program(CSCOPE_PATH cscope)
 if (EXISTS ${CSCOPE_PATH})
 	set(CSCOPE_OUTPUT_FILES cscope.in.out cscope.out cscope.po.out)
-	add_custom_command(OUTPUT ${CSCOPE_OUTPUT_FILES} COMMAND cscope -b -q -R -s ${CMAKE_CURRENT_SOURCE_DIR})
+	add_custom_command(OUTPUT ${CSCOPE_OUTPUT_FILES} COMMAND cscope -b -q -R -s ${CMAKE_CURRENT_SOURCE_DIR} -s ${INC_DIR})
 	add_custom_target(cscope DEPENDS ${CSCOPE_OUTPUT_FILES})
 else()
 	message(WARNING "cscope is not installed - consider installing it")
