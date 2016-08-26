@@ -6,16 +6,21 @@ configure_file("../../include/${PROJECT_NAME}/config.h.in" "config.h")
 
 # Create executable.
 
-add_executable(${PROJECT_NAME} "main.c" "argv_parser.c" "main_loop.c")
+add_executable(${PROJECT_NAME} "main.c" "argv_parser.c" "main_loop.c" "client_thread.c")
 
 # Include headers from ${PROJECT_BINARY_DIR} to allow inclusion dynamically
 # generated headers generated from server/*.in files.
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_BINARY_DIR})
 
+# Find and link against pthread library
+
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+find_package(Threads REQUIRED)
+
 # Link the executable to the common library.
 
-target_link_libraries (${PROJECT_NAME} LINK_PUBLIC common)
+target_link_libraries (${PROJECT_NAME} LINK_PUBLIC common ${CMAKE_THREAD_LIBS_INIT})
 
 # Generate manual from --help output.
 

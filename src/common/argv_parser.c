@@ -204,8 +204,8 @@ int port_save_fun(const struct option_t *option, const char *value, void *config
 	UNUSED(option);
 	common_config_t *c = (common_config_t*)config;
 	if (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER) {
-		syslog(LOG_ERR, "Port number is out of range. Port number must "
-		       "be from range [%d,%d].", MIN_PORT_NUMBER, MAX_PORT_NUMBER);
+		printf("Port number is out of range. Port number must "
+		       "be from range [%d,%d].\n", MIN_PORT_NUMBER, MAX_PORT_NUMBER);
 		return -1;
 	}
 	c->port = port;

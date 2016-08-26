@@ -20,12 +20,13 @@
 /* #define UNIQ_DAEMON_PID_PATH		"/var/run/" PROJECT_NAME ".pid" */
 
 static void daemon_work(const server_config_t *config) {
-	listen_clients(config);
+	accept_clients(config);
 }
 
 static void server_work(const server_config_t *config) {
 	const common_config_t *base_config = &(config->base_config);
 	int pid_file_fd = 0; /* file with PID to allow one instance of daemon */
+
 	if (!is_option_set(base_config->selected_options, DONT_DAEMONIZE_OPTION) &&
 	    sysv_daemonize(UNIQ_DAEMON_PID_PATH, &pid_file_fd) < 0) {
 		printf("Cannot create SysV daemon - check syslog for details\n");
@@ -41,7 +42,9 @@ int main(int argc, char** argv) {
 	int exit = parse(argc, argv, &config);
 	if (!exit) {
 		openlog(PROJECT_NAME, LOG_PID | LOG_CONS | LOG_ODELAY, LOG_USER);
+		syslog(LOG_INFO, "Starting server");
 		server_work(&config);
+		syslog(LOG_INFO, "Exiting server - bye!");
 		closelog();
 	}
 	return EXIT_SUCCESS;

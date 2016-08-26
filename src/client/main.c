@@ -20,8 +20,13 @@
 /* #define UNIQ_DAEMON_PID_PATH		"/var/run/" PROJECT_NAME ".pid" */
 
 static void daemon_work(const client_config_t *config) {
-	if (connect_server(config) < 0) {
+	int fd = connect_server(config);
+	if (fd < 0) {
 		syslog(LOG_WARNING, "Can't connect to server - aborting");
+		return;
+	}
+	if (send_hello_to_server(fd) < 0) {
+		syslog(LOG_ERR, "Can't send data to server");
 		return;
 	}
 }
@@ -44,7 +49,9 @@ int main(int argc, char** argv) {
 	int exit = parse(argc, argv, &config);
 	if (!exit) {
 		openlog(PROJECT_NAME, LOG_PID | LOG_CONS | LOG_ODELAY, LOG_USER);
+		syslog(LOG_INFO, "Starting client");
 		client_work(&config);
+		syslog(LOG_INFO, "Exiting client - bye!");
 		closelog();
 	}
 	return EXIT_SUCCESS;

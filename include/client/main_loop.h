@@ -8,4 +8,6 @@
 
 int connect_server(const client_config_t *config);
 
+int send_hello_to_server(int fd);
+
 #endif

@@ -1,13 +1,19 @@
 #define _GNU_SOURCE /* TEMP_FAILURE_RETRY */
 
 #include <poll.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include "common/network.h"
 #include "main_loop.h"
 
 #define POLL_TIMEOUT_MILLISECONDS	10 * 1000
 
+/**
+ * If `connect` function was interrupted by `EINTR`, connection is established
+ * asynchronously. This function handles this case.
+ */
 static int poll_for_asynchronous_connection(int fd) {
 	int is_set, status;
 	socklen_t size = sizeof(int);
@@ -55,5 +61,13 @@ int connect_server(const client_config_t *config) {
 			ERR("connect");
 		}
 	}
+	return fd;
+}
+
+int send_hello_to_server(int fd) {
+	const char *msg = "Ala ma kota, a kot ma ale"; /* \todo */
+	sleep(10); /* \todo temporary */
+	if (bulk_send(fd, msg, strlen(msg), 0) < 0)
+		ERR("bulk_send failed - can't send data to server");
 	return 0;
 }
