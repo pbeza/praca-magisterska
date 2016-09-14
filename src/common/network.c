@@ -1,5 +1,3 @@
-#define _GNU_SOURCE /* TEMP_FAILURE_RETRY */
-
 #include <sys/socket.h>
 #include <unistd.h>
 

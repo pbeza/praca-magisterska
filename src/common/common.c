@@ -1,5 +1,3 @@
-#define _GNU_SOURCE /* TEMP_FAILURE_RETRY */
-
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -18,11 +16,13 @@ char *concat(const char *s1, const char *s2) {
 	const int n1 = strlen(s1);
 	const int n2 = strlen(s2);
 	char *s = malloc(n1 + n2 + 1);
-	if (!s)
-		ERR("malloc");
-	strcpy(s, s1);
-	strcat(s, s2);
-	return s; /** \warning User has to free returned allocated space */
+	if (!s) {
+		syslog_errno("malloc()");
+	} else {
+		strcpy(s, s1);
+		strcat(s, s2);
+	}
+	return s; /** \warning User has to free() returned allocated space */
 }
 
 ssize_t bulk_read(int fd, char *buf, size_t nbyte) {

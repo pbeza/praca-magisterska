@@ -15,6 +15,10 @@
 cmake_minimum_required(VERSION 3.1)
 project(mgr VERSION 0.1 LANGUAGES C)
 
+###############################################################################
+# Setting constants, options and printing basic information                   #
+###############################################################################
+
 # Few constant values.
 
 set(AUTHOR_FULL_NAME "Patryk Bęza")
@@ -38,7 +42,20 @@ message(STATUS "Detected system: ${CMAKE_SYSTEM} ${CMAKE_HOST_SYSTEM_PROCESSOR}.
 
 configure_file("README.md.in" "README.md")
 
-# Make ctags symbols active if ctags is installed.
+###############################################################################
+# Common for both server and client third party libraries and applications    #
+###############################################################################
+
+# OPENSSL - Provides safe communication channel between server and client.
+
+find_package(OpenSSL REQUIRED)
+include_directories(${OPENSSL_INCLUDE_DIR})
+
+###############################################################################
+# Handy (but not required) tools for developing this project                  #
+###############################################################################
+
+# CTAGS - Make ctags symbols active if ctags is installed.
 
 find_program(CTAGS_PATH ctags)
 if (EXISTS ${CTAGS_PATH})
@@ -49,10 +66,9 @@ else()
 	message(WARNING "ctags is not installed - consider installing it")
 endif()
 
-# Make cscope symbols active if cscope is installed.
+# CSCOPE - Make cscope symbols active if cscope is installed.
 
-# TODO This path is relative to build directory ;/
-set(INC_DIR "../../include")
+set(INC_DIR "../../include") # TODO This path is relative to build directory ;/
 find_program(CSCOPE_PATH cscope)
 if (EXISTS ${CSCOPE_PATH})
 	set(CSCOPE_OUTPUT_FILES cscope.in.out cscope.out cscope.po.out)
@@ -71,6 +87,10 @@ else()
 	add_custom_target(dev_symbols DEPENDS ctags cscope)
 endif()
 
+###############################################################################
+# Compiler's settings                                                         #
+###############################################################################
+
 # Set warning level for GCC to maximum possible.
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUC)
@@ -79,23 +99,36 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUC)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GCC_CODE_QUALITY_FLAGS}")
 endif()
 
-# Add ${PROJECT_BINARY_DIR} to directories with headers to allow inclusion files
-# from common directory, using 'common/' path prefix.
+###############################################################################
+# Including all subprojects                                                   #
+###############################################################################
+
+# Headers commonfor both server and client. Add ${PROJECT_BINARY_DIR} to
+# headers directories to allow inclusion files from common directory, using
+# 'common/' path prefix.
 
 include_directories(${PROJECT_BINARY_DIR})
 
-# Add subprojects.
+# Add all subdirectories with subprojects - every subproject has its own CMake.
 
 add_subdirectory(common)
 add_subdirectory(server)
 add_subdirectory(client)
 
-# Generate Doxygen based documentation if Doxygen is installed.
+###############################################################################
+# Documentation                                                               #
+###############################################################################
+
+# DOXYGEN - Generate Doxygen-based documentation if Doxygen is installed.
 
 find_package(Doxygen REQUIRED)
 set(DOXYGEN_TEMPLATE_FILENAME "doxygen_template.dox")
 configure_file("../doc/doxygen/${DOXYGEN_TEMPLATE_FILENAME}.in" ${DOXYGEN_TEMPLATE_FILENAME})
 add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${DOXYGEN_TEMPLATE_FILENAME} DEPENDS srv_doc cli_doc VERBATIM)
+
+###############################################################################
+# Printing all CMake variables for debug purposes if requested to do so       #
+###############################################################################
 
 # Print list of all the CMake variables if requested to do so.
 

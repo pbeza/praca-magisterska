@@ -1,7 +1,6 @@
 /** \file
  * Commonly used functions and macros like \a MIN, \a MAX, \a ARRAY_LENGTH etc.
  */
-
 #ifndef _COMMON_H
 #define _COMMON_H
 
@@ -15,16 +14,28 @@
 #define STR(x)				STR_HELPER(x)
 
 /**
- * Macro reporting fatal errors (via syslog), killing all processes in process'
- * group and exiting.
- * \note If this macro was implemented as function, than printing line number
- * of occured error using \a __LINE__ macro would be misleading.
+ * Evaluate \p expression, and repeat as long as it returns -1 with `errno'
+ * set to EINTR.
+ * \note This macro is copied from unistd.h to make it more portable and to not
+ * `define _GNU_SOURCE`.
  */
-#define ERR(err_msg)			(closelog(),\
-					syslog(LOG_EMERG, "%s:%d - %s - %m\n",\
-						__FILE__, __LINE__, err_msg),\
-					kill(0, SIGKILL),\
-					exit(EXIT_FAILURE))
+#define TEMP_FAILURE_RETRY(expression)	(__extension__\
+					({ long int __result;\
+					do __result = (long int) (expression);\
+					while (__result == -1L && errno == EINTR);\
+					__result; }))
+
+/**
+ * Macro reporting fatal (emergency) errors (via syslog).
+ *
+ * \note If this macro was implemented as function, than printing line number
+ * of occured error using \a FILE and \a __LINE__ macros would be misleading.
+ */
+#define syslog_errno(err_msg)		(\
+					syslog(LOG_CRIT, "CRITICAL ERROR "\
+					       "%s:%d - %s - %m\n",\
+						__FILE__, __LINE__, err_msg)\
+					)
 
 #define MIN(X, Y)			(((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y)			(((X) > (Y)) ? (X) : (Y))

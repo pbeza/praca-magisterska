@@ -141,10 +141,10 @@ static void print_help(const option_t *options, const int n,
 	printf(project_prefix);
 	for (i = 0; i < n; i++) {
 		opt = &options[i];
-		printf("--%s -%c%s%s\n\t%s\n",
-			opt->long_option,
+		printf("-%c, --%s%s%s\n\t%s\n",
 			opt->short_option,
-			opt->help_value_name ? " " : "",
+			opt->long_option,
+			opt->help_value_name ? "=" : " ",
 			opt->help_value_name ? opt->help_value_name : "",
 			opt->help_desc);
 	}
@@ -153,22 +153,28 @@ static void print_help(const option_t *options, const int n,
 }
 
 /**
- * Parse `argv` (of length \p argc), save results in \p allowed_options array
- * and in \p selected_options integer.
+ * Parse `argv` (of length \p argc), save results in \p config.
  */
 int common_parse(int argc, char **argv, const option_t *allowed_options,
-		 common_config_t *base_config, const int n) {
+		 void *config, const int n) {
 	char *optstring;
 	int opt, ret = 0;
-	uint32_t *selected_options = &base_config->selected_options;
+	common_config_t *base_config = (common_config_t*)config;
 #ifndef POSIXLY_CORRECT
 	struct option *long_options = (struct option*)calloc(n + 1, sizeof(struct option));
-	if (!long_options)
-		ERR("calloc");
+	if (!long_options) {
+		syslog_errno("calloc()");
+		return -1;
+	}
 	convert_to_getopt_long_options(long_options, allowed_options, n);
 #endif
-	if (!(optstring = (char*)calloc(2 * n, sizeof(char))))
-		ERR("calloc");
+	if (!(optstring = (char*)calloc(2 * n, sizeof(char)))) {
+		syslog_errno("calloc()");
+#ifndef POSIXLY_CORRECT
+		free(long_options);
+#endif
+		return -1;
+	}
 	options_to_optstring(allowed_options, n, optstring);
 	while ((opt = GETOPT(argc, argv, optstring
 #ifndef POSIXLY_CORRECT
@@ -179,7 +185,7 @@ int common_parse(int argc, char **argv, const option_t *allowed_options,
 			print_missing_value();
 		} else if (opt == PARSER_UNRECOGNIZED_OPTION) {
 			print_unrecognized_option();
-		} if (save_option(allowed_options, opt, selected_options, base_config, n) < 0) {
+		} if (save_option(allowed_options, opt, &base_config->selected_options, config, n) < 0) {
 			ret = -1;
 			break;
 		}
@@ -188,12 +194,11 @@ int common_parse(int argc, char **argv, const option_t *allowed_options,
 #ifndef POSIXLY_CORRECT
 	free(long_options);
 #endif
-	if (is_option_set(*selected_options, HELP_OPTION)) {
+	if (is_print_help_set(base_config)) {
 		print_help(allowed_options, n, base_config->help_prefix);
 		ret = -1;
-	} else if (is_option_set(*selected_options, VERSION_OPTION)) {
-		print_version(base_config->project_name,
-			      base_config->project_version);
+	} else if (is_print_version_set(base_config)) {
+		print_version(base_config->project_name, base_config->project_version);
 		ret = -1;
 	}
 	return ret;
@@ -216,4 +221,7 @@ int port_save_fun(const struct option_t *option, const char *value, void *config
  * See:
  * http://stackoverflow.com/questions/16245521/c99-inline-function-in-c-file/16245669#16245669
  */
-int is_option_set(uint32_t selected_options, int opt);
+int is_option_set(const common_config_t *common_config, int opt);
+int is_dont_daemonize_set(const common_config_t *common_config);
+int is_print_help_set(const common_config_t *common_config);
+int is_print_version_set(const common_config_t *common_config);

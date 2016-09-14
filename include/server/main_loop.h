@@ -6,6 +6,6 @@
 
 #include "argv_parser.h"
 
-void accept_clients(const server_config_t *config);
+int accept_clients(const server_config_t *config);
 
 #endif
