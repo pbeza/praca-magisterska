@@ -195,6 +195,8 @@ pipe_status:
  * Work of the parent that made first `fork()` with respect to `daemon(7)` manual.
  * Parent makes blocking `read()` on \p pipe_fd[0] to know whether daemon was
  * created successfully or not.
+ *
+ * \returns 0 if daemon was created successfully. Otherwise -1.
  */
 static int parent_work(int pipe_fd[]) {
 	int ret = -1;
@@ -257,9 +259,7 @@ int sysv_daemonize(const char *pid_fpath, int *pid_fd) {
 			syslog_errno("close() after fork() failure");
 	} else if (pid) {
 		/* 15. Exit if daemon was created successfully. */
-		if (parent_work(pipe_fd) < 0)
-			kill(0, SIGKILL);
-		else
+		if (!parent_work(pipe_fd))
 			exit(EXIT_SUCCESS);
 	} else {
 		if ((ret = first_child_work(pipe_fd, pid_fpath, pid_fd)) < 0)
