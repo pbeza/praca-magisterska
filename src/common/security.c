@@ -75,7 +75,10 @@ static int syslog_ssl_cb(const char *str, size_t len, void *u) {
 }
 
 void syslog_ssl_err(const char *msg) {
-	syslog_errno(msg);
+	if (errno)
+		syslog_errno(msg);
+	else
+		syslog(LOG_ERR, msg);
 	ERR_print_errors_cb(syslog_ssl_cb, NULL);
 }
 
@@ -123,7 +126,7 @@ int handle_ssl_error_want(int ssl_status, const SSL *ssl, int socket) {
 			ret = 0;
 		break;
 	case SSL_ERROR_SYSCALL:
-		syslog(LOG_ERR, "SSL_connect() returned SSL_ERROR_SYSCALL");
+		syslog(LOG_ERR, "SSL_get_error() = SSL_ERROR_SYSCALL");
 		break;
 	case SSL_ERROR_WANT_CONNECT:
 		syslog(LOG_WARNING, "Need to rerun SSL_connect()");

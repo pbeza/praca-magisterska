@@ -6,6 +6,20 @@
 
 #include <openssl/ssl.h>
 
+/**
+ * This is list of suites that specify algorithms for: encryption,
+ * authentication and key exchange. This list include only suites that provide
+ * Perfect Forward Security (PFS).
+ *
+ * \note To allow strong, non-PFS suites, add `HIGH` keyword after `kEDH`. To
+ * learn more see:
+ * https://www.feistyduck.com/library/openssl-cookbook/online/ch-openssl.html#openssl-cipher-suites-all-together
+ */
+#define CIPHER_LIST			"kEECDH+ECDSA kEECDH kEDH +SHA "\
+					"!aNULL !eNULL !LOW !3DES !MD5 !EXP "\
+					"!DSS !PSK !SRP !kECDH !CAMELLIA "\
+					"!IDEA !RC4 !SEED @STRENGTH"
+
 int init_ssl_conn(SSL_CTX *ssl_ctx, SSL **ssl, int csocket);
 
 int bidirectional_shutdown_handshake(SSL *ssl);

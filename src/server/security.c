@@ -50,11 +50,17 @@ int init_ssl_ctx(security_config_t *config) {
 	 */
 	SSL_CTX_set_options(config->ssl_ctx, SSL_OP_NO_SSLv3 | SSL_OP_SINGLE_DH_USE);
 
-	/** \todo Use only cipers that support Perfect Forward Secrecy. See:
+	/** Use only cipers that ensure Perfect Forward Secrecy (PFS), which
+	 * (for now) are ECDHE (faster) and DHE (slower) cipher suites. See:
 	 * https://www.feistyduck.com/library/openssl-cookbook/online/ch-openssl.html#openssl-cipher-suites-all-together
-	 *
-	 * SSL_CTX_set_cipher_list(config->ssl_ctx, "CIPHERS_LIST_TODO")
+	 * https://vincent.bernat.im/en/blog/2011-ssl-perfect-forward-secrecy.html
 	 */
+	SSL_CTX_set_cipher_list(config->ssl_ctx, CIPHER_LIST);
+
+	if (!SSL_CTX_set_ecdh_auto(config->ssl_ctx, 1)) {
+		syslog_ssl_err("SSL_CTX_set_ecdh_auto()");
+		goto cleanup_ctx;
+	}
 
 	/** \todo Introduce client's certificate verification. See:
 	  * SSL_get_verify_result() and example in SSL_get_verify_result()
