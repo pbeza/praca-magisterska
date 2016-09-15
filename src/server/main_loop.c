@@ -54,8 +54,6 @@ static void* thread_work_wrapper(void *arg) {
 	thread_arg_t *thread_arg = (thread_arg_t*)arg;
 	void *ret = thread_work(thread_arg);
 
-	free(arg);
-
 	atomic_remove_client_counter();
 
 	syslog(LOG_INFO, "Closing client's socket and exiting from thread "
@@ -66,6 +64,8 @@ static void* thread_work_wrapper(void *arg) {
 
 	if (TEMP_FAILURE_RETRY(close(thread_arg->csocket)) < 0)
 		syslog_errno("Can't close() socket dedicated for client");
+
+	free(arg); /* Note that thread_arg is casted from arg */
 
 	return ret;
 }
