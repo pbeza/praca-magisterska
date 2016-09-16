@@ -122,6 +122,36 @@
 	name={RFC},
 	description={\emph{Request for Comments}. Zbiór technicznych dokumentacji związanych z~protokołami sieciowymi i~ogólnie z~sieciami komputerowymi, w~szczególności z Internetem, publikowany przez \emph{Internet Engineering Task Force (IETF)}~\cite{rfc-editor}. Każdy dokument \gls{rfc} ma~unikatowy numer identyfikacyjny używany w~odniesieniach. Błędy w~\gls{rfc} są~publikowane w erratach, a~większe zmiany następują przez opublikowanie nowego \gls{rfc}, anulujący poprzedni. Idea dokumentów \gls{rfc} pojawiła się jako część projektu ARPANET w~\gls{darpa}}
 }
+\newglossaryentry{rsa}
+{
+	name={RSA},
+	description={\emph{Rivest-Shamir-Adleman} Asymetryczny algorytm kryptograficzny z~kluczem publicznym, zaprojektowany w~1977r. przez \emph{Rona Rivesta}, \emph{Adi Szamira} i \emph{Leonarda Adlemana}~\cite{wiki:rsa,rsa}. Był to~pierwszy algorytm, który może być stosowany zarówno do szyfrowania jak i~podpisów cyfrowych}
+}
+\newglossaryentry{dh}
+{
+	name={Diffie-Hellman},
+	description={Algorytm pozwalający dwóm stronom na~ustalenie tajnego klucza w~niezabezpieczonej sieci~\cite{mimuw-ssl-w04}. Efemeryczna wersja tego protokołu jest używana w~celu osiągnięcia własności \glslink{pfs}{Perfect Forward Secrecy}}
+}
+\newglossaryentry{pfs}
+{
+	name={PFS},
+	description={\emph{Perfect Forward Secrecy}. Własność bezpiecznego protokołu komunikacji, która zapewnia, że~skompromitowanie klucza długoterminowego, takiego jak np. klucza prywatnego w~\gls{rsa}, nie skompromituje kluczy sesyjnych~\cite{wiki:pfs}. W~konsekwencji własność ta zabezpiecza przed odszyfrowaniem zaszyfrowanej komunikacji przez atakującego, nawet jeśli po~jakimś czasie wejdzie w~posiadanie obu kluczy prywatnych rozmówców}
+}
+\newglossaryentry{openssl}
+{
+	name={OpenSSL},
+	description={Popularna, wieloplatformowa biblioteka kryptograficzna napisana w~języku~\texttt{C}, opublikowana na~licencji typu \gls{copyleft}{copyleft}~\cite{openssl}}
+}
+\newglossaryentry{ssl/tls}
+{
+	name={SSL/TLS},
+	description={Protokół kryptograficzny zapewniający bezpieczeństwo transmisji danych w~sieciach komputerowych. Często utożsamiany z~nazwą \emph{SSL} ze względu na~to, że \emph{TLS} jest następcą \emph{SSL}, a~nazwa \emph{SSL} została przez lata rozpowszechniona. Przykładowymi implementacjami \gls{ssl/tls} są biblioteki: \gls{openssl}, \emph{GnuTLS}, \emph{LibreSSL} i~\emph{BoringSSL} (dwie ostatnie z~nich są \emph{forkiem} biblioteki \gls{openssl}}
+}
+\newglossaryentry{ca}
+{
+	name={CA},
+	description={\emph{Certificate authority}. Urząd/centrum certyfikacji, czyli podmiot wystawiający certyfikaty cyfrowe, potwierdzajce własność klucza publicznego przez wskazanie podmiotu certyfikatu}
+}
 \newacronym{cpu}{CPU}{\emph{Central Processing Unit}. Procesor}
 \newacronym{api}{API}{\emph{Application Programming Interface}}
 \newacronym{bom}{BOM}{\emph{Byte Order Mark}. Znacznik kolejności bajtów}

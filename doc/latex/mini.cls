@@ -13,7 +13,7 @@
 
 \RequirePackage[utf8]{inputenc}
 \RequirePackage[OT4]{fontenc} % TODO OT4 vs T1
-\RequirePackage[polish]{babel}
+%\RequirePackage[polish]{babel} % psuje \leq i definiuje \lll
 \RequirePackage[OT4]{polski} % TODO OT4 needed?
 
 % Dostosowanie marginesów strony
@@ -54,6 +54,18 @@
 	\href{#1}{\texttt{#2}}%
 }
 
+% Zwykły \gls z verbatim font
+
+\newcommand\glstt[1]{%
+	\texttt{\gls{#1}}%
+}
+
+% Zwykły \glslink z verbatim font
+
+\newcommand\glslinktt[2]{%
+	\glslink{#1}{\texttt{#2}}%
+}
+
 %\let\oldhref\href
 %\renewcommand{\href}[2]{\oldhref{#1}{#2}}
 
@@ -83,7 +95,7 @@
 	numbers=left,
 	stepnumber=1,
 	numbersep=10pt,
-	belowcaptionskip=1\baselineskip,
+%	belowcaptionskip=0.1\baselineskip,
 	breaklines=true,
 	frame=l,
 %	xleftmargin=\parindent,
@@ -105,7 +117,6 @@
 
 \lstset{
 	prebreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
-	escapechar=@,
 	style=customc,
 	literate=%
 	{ą}{{\k{a}}}1
@@ -208,10 +219,11 @@
 
 % Paczki dla matematycznych formuł
 
-%\RequirePackage{mathtools} % do not use old amsmath package
+\RequirePackage{mathtools} % do not use old amsmath package
 %\RequirePackage{amsthm}
 %\RequirePackage{amsfonts}
 %\RequirePackage{amssymb}
+\RequirePackage{mathabx}
 
 % Ustawienie wcięć na początku każdego akapitu
 

@@ -39,6 +39,7 @@ To self-sign certificate:
 To verify certificate:
 
     openssl x509 -text -in certificate.crt -noout
+    openssl verify -verbose certificate.crt
 
 ### To convert PEM certificate to PKCS12 format for Wireshark ###
 
