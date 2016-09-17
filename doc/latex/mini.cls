@@ -13,7 +13,8 @@
 
 \RequirePackage[utf8]{inputenc}
 \RequirePackage[OT4]{fontenc} % TODO OT4 vs T1
-%\RequirePackage[polish]{babel} % psuje \leq i definiuje \lll
+\RequirePackage[polish]{babel}
+\let\lll\undefined % fix przed załadowaniem amssymb (konflikt \lll)
 \RequirePackage[OT4]{polski} % TODO OT4 needed?
 
 % Dostosowanie marginesów strony

@@ -7,34 +7,40 @@
 
 Kod źródłowy projektu został napisany w~języku~\texttt{C}. Kod jest zgodny ze standardem~\gls{posix}. W~rozdziale przedstawiono szczegóły implementacyjne projektu.
 
-\section{Formatowanie kodu}
-
-Formatowanie kodu źródłowego jest w~większości zgodne z~wytycznymi zaproponowanymi przez programistów \glslink{kernel}{jądra} systemu \gls{gnulinux}~\cite{kernel-coding-style}. Jednym z~niewielu odstępstw od~tych wytycznych jest rozmiar tabulacji równy 4~znakom, a~nie~8.
-
-%------------------------------------------------------------------------------
-
 \section{Wykorzystane biblioteki}
-\subsection{\texttt{OpenSSL}}
+\subsection{OpenSSL}
 
-Dla~zapewnienia bezpieczeństwa komunikacji między serwerem i~jego klientami, wykorzystano bibliotekę \texttt{OpenSSL}, która udostępnia wiele sprawdzonych algorytmów kryptograficznych mogących zwiększyć bezpieczeństwo komunikacji. Biblioteka ta pozwoliła na stosunkowo łatwe szyfrowanie połączenia między serwerem i klientami, co jednak nie jest wystarczającym zabezpieczeniem. % TODO
+Istnieje wiele bibliotek kryptograficznych, które, pod warunkiem poprawnego użycia, mogą istotnie poprawić bezpieczeństwo protokołu. Najpopularniejsze z~nich~to: \emph{\gls{openssl}}, \emph{GnuTLS}, \emph{LibreSSL} i~\emph{BoringSSL}. Biblioteką istniejącą najdłużej z~wymienionych jest \gls{openssl}. Biblioteka GnuTLS powstała w~odpowiedzi na~\gls{openssl} ze względu na to, że \gls{openssl} nie jest opublikowana na~licencji kompatybilnej z~licencją~\gls{gpl}, przez co liczne projekty korzystające z~tej licencji (np.~\emph{Wireshark}), nie mogą korzystać z~\gls{openssl}. Biblioteki LibreSSL i~BoringSSL są~\emph{fork'ami} biblioteki \gls{openssl}. Ponadto BoringSSL powstał w~\emph{Google} na~potrzeby użycia w~różnych produktach tej firmy, w~szczególności w~przeglądarce internetowej \emph{Chrome}. Długa historia \gls{openssl}, mnogość bibliotek pokrewnych, mających źródło w~kodzie źródłowym \gls{openssl} oraz względnie duża społeczność kryptologów zgromadzonych wokół tego projektu, spowodowały, że biblioteka \gls{openssl} została użyta do~zapewnienia bezpieczeństwa opracowanego protokołu sieciowego.
 
-\subsection{\texttt{glibc}}
+\gls{openssl} udostępnia wiele metod i~algorytmów kryptograficznych, które przetrwały wiele lat kryptoanaliz (np.~\gls{aes}, \gls{rsa}) i~są powszechnie uważane za bezpieczne, pod warunkiem poprawnego ich~wykorzystania i~zastosowania kluczy o~odpowiednio dużej długości. Wykorzystanie tej biblioteki w~kontekście komunikacji między klientem i~serwerem zostało opisane w~rozdziale~\ref{sec:security}, dotyczącym bezpieczeństwa opracowanego protokołu.
+
+\subsection{glibc}
 
 %------------------------------------------------------------------------------
 
 \section{Utworzenie daemona systemowego}
 
-\noindent Utworzenie \emph{\glslink{daemon}{daemona}} systemowego w~systemach \glslink{unix-like-system}{*niksowych} polega na~wykonaniu następujących kroków~\cite{creating-daemon-stackoverflow}:
-\begin{itemize}
-	\item Utworzenie procesu~\texttt{A}.
-	\item Utworzenie procesu potomnego \texttt{B} przez proces \texttt{A}, przez wywołanie funkcji \texttt{fork} przez proces \texttt{A} i~pozwolenie na zakończenie działania procesu~\texttt{A}.
-	\item Utworzenie nowej sesji przez wywołanie funkcji \texttt{setsid} przez proces~\texttt{B}. W~ten sposób proces \texttt{B}~zostaje liderem nowej sesji i~jest odłączony od~kontrolującego go~terminala~(\texttt{CTTY}).
-	\item Obsłużenie lub zignorowanie sygnałów systemowych.
-	\item Utworzenie procesu potomnego \texttt{C}~przez wywołanie funkcji \texttt{fork} przez proces~\texttt{B} i pozwolenie na zakończenie się procesu~\texttt{B}. W~ten sposób pozbywamy się procesów, które były liderami sesji, a~tylko takie mogą pozyskać \texttt{TTY} ponownie.
-	\item Zmiana aktualnego katalogu zgodnie z~potrzebami przez wywołanie funkcji \texttt{chdir}.
-	\item Zmiana \emph{umaski} zgodnie z~potrzebami przez wywołanie funkcji \texttt{umask}.
-	\item Zamknięcie deskryptorów, które zostały odziedziczone po~rodzicach.
-\end{itemize}
+Poprawne utworzenie tradycyjnego \glslink{unix-like-system}{*niksowego} \glslink{daemon}{daemona} systemowego, nazywanego popularnie \emph{SysV daemon} (w~odróżnieniu od~\emph{systemd daemon}), czyli procesu nie mającego dostępu do~terminala i~pracującego w~tle, nie jest procesem trywialnym, tzn. nie sprowadza się~do wywołania funkcji \texttt{daemon()}, która co~prawda istnieje w~niektórych systemach i~pochodzi z~systemu~BSD, ale implementuje tylko podzbiór operacji zalecanych przez manual~\texttt{daemon(7)}.
+
+Poniżej przedstawiono algorytm tworzenia tradycyjnego daemona systemowego. Algorytm ten składa się z~15 kroków wymienionych w~manualu \texttt{daemon(7)}~\cite{creating-daemon}.%\cite{creating-daemon-stackoverflow}
+\begin{enumerate}
+	\item Zamknąć wszystkie deskryptory plików poza standardowym wejściem~(\texttt{stdin}), wyjściem~(\texttt{stdout}) i~wyjściem diagnostycznym~(\texttt{stderr}).
+	\item Ustawić domyślne \glslink{signal-handler}{signal handlery} (\texttt{SIG\_DFL}) dla~wszystkich sygnałów funkcją~\texttt{sigaction()}.
+	\item Zresetować maskę sygnałów używając funkcji~\texttt{sigprocmask()}.
+	\item Usunąć własne zmienne środowiskowe, a~zmodyfikowane wcześniej zmienne środowiskowe przywrócić do~ich domyślnych wartości, aby~nie mogły one negatywnie wpłynąć na~działanie daemona.
+	\item Stworzyć nowy proces~\texttt{A} przez wywołanie funkcji \texttt{fork()}.
+	\item W~procesie \texttt{A} wywołać funkcję \texttt{setsid()}, aby odłączyć się od~terminala i~stworzyć nową, niezależną sesję.
+	\item W~procesie \texttt{A} wywołać funkcję \texttt{fork()}, która stworzy proces-dziecko~\texttt{B}, który zostanie daemonem. Dzięki temu, że~\texttt{fork()} został wywołany drugi raz, upewniamy się, że daemon nie będzie miał szansy odzyskania dostępu do~terminala, od którego został odłączony.
+	\item W~procesie \texttt{A} wywołać funkcję \texttt{exit()}, dzięki czamu proces~\texttt{B} zmieni rodzica na~proces \texttt{init}, którego \texttt{PID} jest równy~1.
+	\item W~procesie \texttt{B} przekierować standardowe wejście~(\texttt{stdin}), wyjście~(\texttt{stdout}) i~wyjście diagnostyczne~(\texttt{stderr}) do \path{/dev/null}.
+	\item W~procesie \texttt{B} ustawić \texttt{umask} na~0, aby późniejsze wywołania funkcji takich jak \texttt{open()}, \texttt{mkdir()} itp. miały bezpośrednią kontrolę dostępu tworzonych plików i~katalogów.
+	\item W~procesie \texttt{B} zmienić aktualny katalog (ang.~\emph{Current Working Directory~(CWD)}) na~katalog root~\path{/}, aby uniknąć sytuacji w~której daemon blokowałby punkty montowania od~bycia odmontowanym np.~komendą~\texttt{umount}.
+	\item W~procesie \texttt{B} zapisać \texttt{PID} procesu~\texttt{B} do~pliku tekstowego np.~\path{/run/mydaemon.pid}, aby upewnić się, że~istnieje tylko jedna instancja działającego daemona. Krok ten musi być zaimplementowany w~taki sposób, aby uniknąć wyścigu~(ang.~\emph{race condition}), tzn. tak, aby sprawdzenie czy~\texttt{PID} procesu zapisanego w~pliku nie należy do daemona oraz zapisanie nowego \texttt{PID} w~tym pliku, było atomowe. W~praktyce, zamiast czytać zawartość pliku, można użyć mechanizmu blokowania pliku funkcją~\texttt{lockf()}. Tak długo jak plik będzie blokowany przez instancję daemona, żadna inna instancja daemona nie zmieni zawartości pliku.
+	\item W~procesie \texttt{B} możliwie maksymalnie obniżyć uprawnienia daemona np.~funkcjami \texttt{setuid()} i~\texttt{setgid()}. Dzięki temu daemon w~przypadku np.~wadliwego działania lub błędu bezpieczeństwa, nie będzie miał uprawnień do~czynienia tak dużych szkód jakie miałby, gdyby miał pełne prawa użytkownika~\texttt{root}.
+	\item W~procesie \texttt{B} powiadomić proces, który rozpoczął cały algorytm, tj.~proces-rodzic zakończonego już procesu~\texttt{B}, że~tworzenie daemona się~powiodło. Można to~zaimplementować używając łącza nienazwanego~(ang.~\emph{unnamed pipe}), stworzonego przed pierwszym wywołaniem funkcji~\texttt{fork()}, dzięki czemu takie łącze byłoby dostępne w~rodzicu procesu~\texttt{A} i~procesie~\texttt{B}.
+	\item W~rodzicu, który zainicjował algorytm, czyli w~rodzicu procesu~\texttt{A}, wywołać funkcję~\texttt{exit()}.
+\end{enumerate}
+Po~wykonaniu powyższych kroków, proces~\texttt{B} jest poprawnie stworzonym, klasycznym daemonem typu~SysV. W~praktyce kroki od~1~do~4 są~zbędne jeśli daemon jest tworzony na~początku uruchomienia programu, przed dokonaniem istotnych zmian, których skutki cofnęłyby pierwsze 4~kroki opisanego wyżej algorytmu.
 
 %------------------------------------------------------------------------------
 
@@ -44,35 +50,42 @@ Aplikacja jest w~pełni zgodna ze~standardem \gls{posix}, dlatego do~obsługi w�
 
 %------------------------------------------------------------------------------
 
-\section{Obsługa sygnałów systemowych}
+%\section{Obsługa sygnałów systemowych}
+%
+%%------------------------------------------------------------------------------
+%
+%\section{Zmienne globalne}
+%
+%Zmienne globalne zostały wykorzystane tylko tam gdzie to~konieczne, tzn.~w:
+%\begin{itemize}
+%	\item \glslink{signal-handler}{signal handlerach}\footnote{Zmienne te~muszą być typu \texttt{volatile sig\_atomic\_t}.},
+%\end{itemize}
+%
+%%------------------------------------------------------------------------------
+%
+%\section{Zmienne \texttt{volatile}}
+%
+%%------------------------------------------------------------------------------
+%
+%\section{Semafory, mutexy}
+%
+%%------------------------------------------------------------------------------
+%
+%\section{Shared memory segments and message queues}
+%
+%%------------------------------------------------------------------------------
+%
+%\section{Wybrane makra}
+%
+%\begin{lstlisting}[language=c,numbers=none,caption={Makro wykonujące wyrażenie dopóki kod błędu jest równy \texttt{EINTR}}]
+%TEMP_FAILURE_RETRY(expr)
+%\end{lstlisting}
+%
+%%------------------------------------------------------------------------------
 
-%------------------------------------------------------------------------------
+\section{Formatowanie kodu}
 
-\section{Zmienne globalne}
-\noindent Zmienne globalne zostały wykorzystane tylko tam gdzie to~konieczne, tzn.~w:
-\begin{itemize}
-	\item \glslink{signal-handler}{signal handlerach}\footnote{Zmienne te~muszą być typu \texttt{volatile sig\_atomic\_t}.},
-\end{itemize}
-
-%------------------------------------------------------------------------------
-
-\section{Zmienne \texttt{volatile}}
-
-%------------------------------------------------------------------------------
-
-\section{Semafory, mutexy}
-
-%------------------------------------------------------------------------------
-
-\section{Shared memory segments and message queues}
-
-%------------------------------------------------------------------------------
-
-\section{Wybrane makra}
-
-\begin{lstlisting}[language=c,numbers=none,caption={Makro wykonujące wyrażenie dopóki kod błędu jest równy \texttt{EINTR}}]
-TEMP_FAILURE_RETRY(expr)
-\end{lstlisting}
+Formatowanie kodu źródłowego jest w~większości zgodne z~wytycznymi zaproponowanymi przez programistów \glslink{kernel}{jądra} systemu \gls{gnulinux}~\cite{kernel-coding-style}. Jednym z~niewielu odstępstw od~wytycznych jest rozmiar tabulacji równy 4~znakom, a~nie~8.
 
 %------------------------------------------------------------------------------
 
@@ -105,7 +118,7 @@ Do pisania kodu źródłowego projektu oraz niniejszej dokumentacji wykorzystano
 
 \subsubsection{Wykorzystane wtyczki \texttt{vim}}
 
-\noindent Lista wtyczek \texttt{vim}, wykorzystanych w czasie implementacji:
+Lista wtyczek \texttt{vim}, wykorzystanych w czasie implementacji:
 \begin{itemize}
 	\item\texttt{NerdTree} --- narzędzie do wyświetlania drzewa systemu plików i~nawigowania po nim~\cite{nerdtree-vimorg,nerdtree-github},
 	\item\texttt{ctags} --- narzędzie do~generowania metainformacji do~wygodnego nawigowania po kodzie źródłowym~\cite{ctags},
