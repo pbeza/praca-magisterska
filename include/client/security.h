@@ -1,5 +1,5 @@
 /** \file
- * Client's OpenSSL security implementation.
+ * Handling client-specific security issues.
  */
 #ifndef _CLIENT_SECURITY_H
 #define _CLIENT_SECURITY_H
@@ -29,7 +29,5 @@ typedef struct security_config_t {
 int init_ssl_ctx(security_config_t *config);
 
 int start_ssl_handshake(int socket, SSL *ssl);
-
-int cleanup_ssl_ctx(security_config_t *config);
 
 #endif

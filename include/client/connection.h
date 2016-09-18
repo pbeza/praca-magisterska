@@ -1,5 +1,5 @@
 /** \file
- * Making connection with server's daemon.
+ * Establishing connection with server within client's daemon.
  */
 #ifndef _CLIENT_CONNECTION_H
 #define _CLIENT_CONNECTION_H

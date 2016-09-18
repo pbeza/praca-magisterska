@@ -1,3 +1,7 @@
+/** \file
+ * Implementation of commonly used miscellaneous simple functions and macros
+ * like \a MIN, \a MAX, \a ARRAY_LENGTH etc.
+ */
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -5,12 +9,21 @@
 
 #include "common.h"
 
-/*int sethandler(void (*f)(int), int sig) {
-	struct sigaction act;
-	memset(&act, 0, sizeof(struct sigaction));
+volatile sig_atomic_t last_signal = 0;
+
+static void sigint_handler(int sig) {
+	last_signal = sig;
+}
+
+static int sethandler(void (*f)(int), int sig) {
+	struct sigaction act = { 0 };
 	act.sa_handler = f;
 	return sigaction(sig, &act, NULL);
-}*/
+}
+
+int set_sigint_handler() {
+	return sethandler(sigint_handler, SIGINT);
+}
 
 char *concat(const char *s1, const char *s2) {
 	const int n1 = strlen(s1);

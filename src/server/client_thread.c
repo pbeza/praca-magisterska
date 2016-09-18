@@ -1,3 +1,6 @@
+/** \file
+ * Implementation of thread dedicated to talk with single client.
+ */
 #include <poll.h>
 #include <stdlib.h>
 #include <syslog.h>

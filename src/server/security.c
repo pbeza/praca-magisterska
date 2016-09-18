@@ -1,3 +1,6 @@
+/** \file
+ * Implementation of handling server-specific security issues.
+ */
 #include <syslog.h>
 
 #include <openssl/err.h>
@@ -21,18 +24,19 @@ static int pem_passwd_cb(char *buf, int size, int rwflag, void *userdata) {
 }
 
 /**
+ * Initialize SSL context using settings read from \p config.
+ *
  * See examples:
- * https://svn.forgerock.org/openam/trunk/opensso/products/webagents/am/source/connection.cpp
- * http://stackoverflow.com/questions/33265014/openssl-communication-between-client-and-server
+ * - https://svn.forgerock.org/openam/trunk/opensso/products/webagents/am/source/connection.cpp
+ * - http://stackoverflow.com/questions/33265014/openssl-communication-between-client-and-server
  */
 int init_ssl_ctx(security_config_t *config) {
 	SSL_load_error_strings();
 	SSL_library_init();
-	OpenSSL_add_all_algorithms(); /* \todo Specify only used algorithms */
+	OpenSSL_add_all_algorithms(); /* \todo Specify used algorithms only */
 
-	/** OpenSSL_add_all_algorithms() can fail - see manual */
 	if (ERR_peek_error()) {
-		syslog_ssl_err("Adding all algorithms probably has failed");
+		syslog_ssl_err("OpenSSL_add_all_algorithms()");
 		goto cleanup_strings;
 	}
 
@@ -40,21 +44,16 @@ int init_ssl_ctx(security_config_t *config) {
 	config->ssl_ctx = SSL_CTX_new(config->ssl_method);
 
 	if (!config->ssl_ctx) {
-		syslog_ssl_err("Can't create OpenSSL context");
+		syslog_ssl_err("SSL_CTX_new()");
 		goto cleanup_evp;
 	}
 
-	/** Limit set of connection methods to most secure + regenerate
+	/* Limit set of connection methods to most secure + regenerate
 	 * Diffie-Hellman key during each handshake. Note that SSL_OP_NO_SSLv2
 	 * option is set by default.
 	 */
 	SSL_CTX_set_options(config->ssl_ctx, SSL_OP_NO_SSLv3 | SSL_OP_SINGLE_DH_USE);
 
-	/** Use only cipers that ensure Perfect Forward Secrecy (PFS), which
-	 * (for now) are ECDHE (faster) and DHE (slower) cipher suites. See:
-	 * https://www.feistyduck.com/library/openssl-cookbook/online/ch-openssl.html#openssl-cipher-suites-all-together
-	 * https://vincent.bernat.im/en/blog/2011-ssl-perfect-forward-secrecy.html
-	 */
 	SSL_CTX_set_cipher_list(config->ssl_ctx, CIPHER_LIST);
 
 	if (!SSL_CTX_set_ecdh_auto(config->ssl_ctx, 1)) {
@@ -71,15 +70,11 @@ int init_ssl_ctx(security_config_t *config) {
 
 	/** \todo Consider using `SSL_CTX_set_mode()` with probably useful
 	 * options, e.g.: SSL_MODE_AUTO_RETRY and SSL_MODE_ENABLE_PARTIAL_WRITE.
-	 *
-	 * \todo Manual says that `SSL_CTX_use_certificate_chain_file` should
-	 * be preferred.
-	 *
-	 * \todo Use `SSL_CTX_set_cipher_list`
 	 */
 
-	if (SSL_CTX_use_certificate_file(config->ssl_ctx, config->certificate_path, SSL_FILETYPE_PEM) != 1) {
-		syslog_ssl_err("Can't load certificate from file");
+	if (SSL_CTX_use_certificate_chain_file(config->ssl_ctx,
+					       config->certificate_path) != 1) {
+		syslog_ssl_err("Can't load PEM certificate chain file");
 		goto cleanup_ctx;
 	}
 
@@ -92,7 +87,6 @@ int init_ssl_ctx(security_config_t *config) {
 		goto cleanup_ctx;
 	}
 
-	/* Check the private against the known certificate */
 	if (SSL_CTX_check_private_key(config->ssl_ctx) != 1) {
 		syslog_ssl_err("Private key doesn't match server's certificate");
 		goto cleanup_ctx;
@@ -103,9 +97,9 @@ int init_ssl_ctx(security_config_t *config) {
 cleanup_ctx:
 	SSL_CTX_free(config->ssl_ctx);
 cleanup_evp:
-	EVP_cleanup(); /* Can fail - see manual */
+	EVP_cleanup();
 	if (ERR_peek_error())
-		syslog_ssl_err("EVP_cleanup() probably has failed");
+		syslog_ssl_err("EVP_cleanup()");
 cleanup_strings:
 	ERR_free_strings();
 
@@ -140,17 +134,4 @@ int accept_client_handshake(SSL *ssl, int socket) {
 		       "reached, giving up", MAX_SSL_ACCEPT_RETRIES);
 
 	return -1;
-}
-
-int cleanup_ssl_ctx(security_config_t *config) {
-	int ret = 0;
-	/** \todo See manual if you use SSL_CTX_sess_set_remove_cb() with SSL_CTX_free() */
-	SSL_CTX_free(config->ssl_ctx);
-	EVP_cleanup(); /* Can fail - see manual */
-	if (ERR_peek_error()) {
-		syslog_ssl_err("EVP_cleanup() probably has failed");
-		ret = -1;
-	}
-	ERR_free_strings();
-	return ret;
 }

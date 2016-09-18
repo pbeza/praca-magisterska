@@ -1,5 +1,5 @@
 /** \file
- * Common network-related functions.
+ * Common for both client and server network-related functions.
  */
 #ifndef _NETWORK_H
 #define _NETWORK_H

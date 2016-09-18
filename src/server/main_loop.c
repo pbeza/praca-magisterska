@@ -1,3 +1,6 @@
+/** \file
+ * Implementation of the main loop of the server's daemon.
+ */
 #include <arpa/inet.h>
 #include <errno.h>
 #include <pthread.h>
@@ -140,10 +143,17 @@ static int accept_client(int ssocket) {
 	socklen_t caddr_len = 0;
 	struct sockaddr caddr = { 0 };
 	struct sockaddr_in *caddr_in;
-	int csocket = TEMP_FAILURE_RETRY(accept(ssocket, &caddr, &caddr_len));
+	int csocket;
+
+	do {
+		csocket = accept(ssocket, &caddr, &caddr_len);
+	} while (csocket < 0 && errno == EINTR && last_signal != SIGINT);
 
 	if (csocket < 0) {
-		syslog_errno("Failed to accept() client");
+		if (last_signal == SIGINT)
+			syslog(LOG_INFO, "SIGINT while accept(), exiting...");
+		else
+			syslog_errno("Failed to accept() client");
 		return -1;
 	}
 
@@ -224,7 +234,7 @@ int accept_clients(const server_config_t *config) {
 		return -1;
 	}
 
-	while (1) { /** \todo daemon should be cancelable/abortable */
+	while (last_signal != SIGINT) {
 		syslog(LOG_INFO, "Server's main thread waiting for a new client...");
 
 		if ((csocket = accept_client(ssocket)) < 0) {
@@ -235,7 +245,7 @@ int accept_clients(const server_config_t *config) {
 		syslog(LOG_INFO, "New client accepted successfully on socket "
 		       "no. %d", csocket);
 
-		/* `thread_arg` MUST be free() */
+		/* `thread_arg` MUST be free()'d */
 		if (!(thread_arg = init_thread_arg(config, csocket))) {
 			syslog(LOG_ERR, "Failed to create thread's data thus "
 			       "connection with client will be closed");
@@ -252,6 +262,9 @@ int accept_clients(const server_config_t *config) {
 			ret = 0;
 		}
 	}
+
+	/* TODO TODO TODO */
+	syslog(LOG_INFO, "Gracefully closing connections with clients from within threads");
 
 	if (TEMP_FAILURE_RETRY(close(ssocket)) < 0) {
 		syslog_errno("Closing server socket has failed");

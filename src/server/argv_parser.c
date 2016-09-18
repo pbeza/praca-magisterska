@@ -1,3 +1,6 @@
+/** \file
+ * Implementation of server's `argv` parser.
+ */
 #include <getopt.h>
 #include <stdio.h>
 #include <unistd.h>

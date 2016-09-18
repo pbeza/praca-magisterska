@@ -1,3 +1,6 @@
+/** \file
+ * Implementation of handling client-specific security issues.
+ */
 #include <unistd.h>
 
 #include <openssl/err.h>
@@ -12,7 +15,7 @@
 #define SSL_CERT_MAX_VERIFY_DEPTH	32
 
 /**
- * \todo This initializaiton is simmilar to server's initialization. Make common
+ * \todo This initializaiton is similar to server's initialization. Make common
  * things common.
  */
 int init_ssl_ctx(security_config_t *config) {
@@ -21,7 +24,7 @@ int init_ssl_ctx(security_config_t *config) {
 	OpenSSL_add_all_algorithms();
 
 	if (ERR_peek_error()) {
-		syslog_ssl_err("Adding all algorithms probably has failed");
+		syslog_ssl_err("OpenSSL_add_all_algorithms()");
 		goto cleanup_strings;
 	}
 
@@ -29,7 +32,7 @@ int init_ssl_ctx(security_config_t *config) {
 	config->ssl_ctx = SSL_CTX_new(config->ssl_method);
 
 	if (!config->ssl_ctx) {
-		syslog_ssl_err("Can't create OpenSSL context");
+		syslog_ssl_err("SSL_CTX_new()");
 		goto cleanup_evp;
 	}
 
@@ -38,7 +41,7 @@ int init_ssl_ctx(security_config_t *config) {
 
 	/* TODO TODO TODO */
 	if (!SSL_CTX_load_verify_locations(config->ssl_ctx,
-				      "../config/server/certificate.crt",
+				      "../config/server/certificate.pem",
 				      /*"/etc/ssl/certs/IGC_A.pem",*/
 				      NULL
 				      /*"../config/server"*/)) {
@@ -53,23 +56,11 @@ int init_ssl_ctx(security_config_t *config) {
 cleanup_evp:
 	EVP_cleanup();
 	if (ERR_peek_error())
-		syslog_ssl_err("EVP_cleanup() probably has failed");
+		syslog_ssl_err("EVP_cleanup()");
 cleanup_strings:
 	ERR_free_strings();
 
 	return -1;
-}
-
-int cleanup_ssl_ctx(security_config_t *config) {
-	int ret = 0;
-	SSL_CTX_free(config->ssl_ctx);
-	EVP_cleanup();
-	if (ERR_peek_error()) {
-		syslog_ssl_err("EVP_cleanup() probably has failed");
-		ret = -1;
-	}
-	ERR_free_strings();
-	return ret;
 }
 
 /*static void syslog_cert_info(const X509 *cert) {
@@ -83,8 +74,8 @@ int cleanup_ssl_ctx(security_config_t *config) {
 }*/
 
 static int verify_cert(const SSL *ssl) {
-	X509 *cert;
 	int ret;
+	X509 *cert;
 
 	cert = SSL_get_peer_certificate(ssl);
 	if (!cert) {

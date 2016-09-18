@@ -1,10 +1,9 @@
 /** \file
- * Server's OpenSSL security implementation.
+ * Handling server-specific security issues.
  */
 #ifndef _SERVER_SECURITY_H
 #define _SERVER_SECURITY_H
 
-#include <openssl/err.h>
 #include <openssl/ssl.h>
 
 #include "common/security.h"
@@ -12,7 +11,7 @@
 /**
  * Default path to file with server's certificate.
  */
-#define DEFAULT_CERTIFICATE_PATH	"../config/server/certificate.crt"
+#define DEFAULT_CERTIFICATE_PATH	"../config/server/certificate.pem"
 
 /**
  * Default path to file with server's private key.
@@ -22,7 +21,8 @@
 /**
  * Default password for server's private key unless specified neither in `argv`
  * nor in server's configuration file.
- * \warning For safety reasons default password should be unset.
+ *
+ * \warning For safety reasons default password should be unset (set to empty).
  */
 #define DEFAULT_PRIVATE_KEY_PASS	""
 
@@ -52,7 +52,5 @@ typedef struct security_config_t {
 int init_ssl_ctx(security_config_t *security_config);
 
 int accept_client_handshake(SSL *ssl, int socket);
-
-int cleanup_ssl_ctx(security_config_t *config);
 
 #endif

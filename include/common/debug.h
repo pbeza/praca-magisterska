@@ -1,5 +1,6 @@
 /** \file
  * Debug functions and macros printing errors on \a DEBUG_STREAM.
+ *
  * \note Note that most of the time `syslog` is used for logging and debug.
  * Daemonized application is not able to print on `stdout` and `stderr`.
  */

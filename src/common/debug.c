@@ -1,3 +1,6 @@
+/** \file
+ * Implementation of debug functions and macros printing errors on \a DEBUG_STREAM.
+ */
 #include <assert.h>
 #include <string.h>
 #include <stdarg.h>

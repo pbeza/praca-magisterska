@@ -1,5 +1,6 @@
 /** \file
- * Commonly used functions and macros like \a MIN, \a MAX, \a ARRAY_LENGTH etc.
+ * Commonly used miscellaneous simple functions and macros like \a MIN, \a MAX,
+ * \a ARRAY_LENGTH etc.
  */
 #ifndef _COMMON_H
 #define _COMMON_H
@@ -12,6 +13,14 @@
 
 #define STR_HELPER(x)			#x
 #define STR(x)				STR_HELPER(x)
+
+/**
+ * Global variable to remember last signal number. This is useful for handling
+ * SIGINT (Ctrl+C) signal.
+ *
+ * \note This is one of the few justified global variables in the project.
+ */
+extern volatile sig_atomic_t last_signal;
 
 /**
  * Evaluate \p expression, and repeat as long as it returns -1 with `errno'
@@ -66,6 +75,8 @@
  * Returns length of given stack based array.
  */
 #define ARRAY_LENGTH(x)			(sizeof(x) / sizeof((x)[0]))
+
+int set_sigint_handler();
 
 /**
  * Concatenate two strings by reserving memory for concatenated word and copying

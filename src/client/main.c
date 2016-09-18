@@ -32,36 +32,49 @@ static int daemon_work(client_config_t *client_config) {
 	security_config_t *security_config = &client_config->security_config;
 	int fd, ret = 0;
 
+	if (set_sigint_handler() < 0) {
+		syslog_errno("Setting SIGINT handler has failed");
+		return -1;
+	}
+
 	if ((fd = connect_server(addr)) < 0) {
 		syslog(LOG_ERR, "Can't connect to server");
 		return -1;
 	}
+
 	if (init_ssl_conn(security_config->ssl_ctx, &security_config->ssl, fd) < 0) {
 		syslog(LOG_ERR, "Initializing SSL structure has failed");
 		ret = -1;
 		goto disconnect;
 	}
+
 	if (start_ssl_handshake(fd, security_config->ssl) < 0) {
 		syslog(LOG_ERR, "SSL handshake with server has failed");
 		ret = -1;
 		goto cleanup_ssl;
 	}
+
 	syslog_ssl_summary(security_config->ssl);
+
 	if (run_protocol(security_config->ssl, fd) < 0) {
 		syslog(LOG_ERR, "Running protocol has failed");
 		ret = -1;
 	}
+
 	if (bidirectional_shutdown_handshake(security_config->ssl) < 0) {
 		syslog(LOG_ERR, "Shutdown handshake has failed");
 		ret = -1;
 	}
+
 cleanup_ssl:
 	SSL_free(security_config->ssl);
+
 disconnect:
 	if (disconnect_server(fd) < 0) {
 		syslog(LOG_ERR, "Can't gracefully disconnect from server");
 		ret = -1;
 	}
+
 	return ret;
 }
 
@@ -97,8 +110,9 @@ static int client_work(client_config_t *config) {
  */
 static int run(client_config_t *config) {
 	int ret = 0;
+	security_config_t *security_config = &config->security_config;
 
-	if (init_ssl_ctx(&config->security_config) < 0) {
+	if (init_ssl_ctx(security_config) < 0) {
 		fprintf(stderr, "Can't initialize OpenSSL.\n");
 		return -1;
 	}
@@ -108,7 +122,7 @@ static int run(client_config_t *config) {
 		ret = -1;
 	}
 
-	if (cleanup_ssl_ctx(&config->security_config) < 0) {
+	if (cleanup_ssl_ctx(security_config->ssl_ctx) < 0) {
 		syslog_ssl_err("Cleaning up SSL context has failed");
 		return -1;
 	}

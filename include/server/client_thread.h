@@ -1,5 +1,5 @@
 /** \file
- * Thread dedicated for communication with single client.
+ * Thread dedicated to talk with single client.
  */
 #ifndef _CLIENT_THREAD_H
 #define _CLIENT_THREAD_H

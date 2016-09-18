@@ -1,3 +1,7 @@
+/** \file
+ * Implementation of handling common for both server and client OpenSSL security
+ * issues.
+ */
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 #include <poll.h>
@@ -147,4 +151,16 @@ int handle_ssl_error_want(int ssl_status, const SSL *ssl, int socket) {
 void syslog_ssl_summary(const SSL *ssl) {
 	syslog(LOG_INFO, "SSL protocol version of a connection: %s,"
 	       "SSL cipher name: %s", SSL_get_version(ssl), SSL_get_cipher(ssl));
+}
+
+int cleanup_ssl_ctx(SSL_CTX *ssl_ctx) {
+	int ret = 0;
+	SSL_CTX_free(ssl_ctx);
+	EVP_cleanup();
+	if (ERR_peek_error()) {
+		syslog_ssl_err("EVP_cleanup()");
+		ret = -1;
+	}
+	ERR_free_strings();
+	return ret;
 }

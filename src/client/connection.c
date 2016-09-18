@@ -1,3 +1,6 @@
+/** \file
+ * Implementation of establishing connection with server within client's daemon.
+ */
 #include <poll.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -12,7 +15,7 @@
 #define MAX_SSL_WRITE_RETRIES		5
 
 /**
- * If `connect` function was interrupted by `EINTR`, connection is established
+ * If `connect()` was interrupted by `EINTR`, connection is established
  * asynchronously. This function handles this troublesome case.
  */
 static int poll_for_asynchronous_connection(int fd) {

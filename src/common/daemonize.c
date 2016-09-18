@@ -1,7 +1,13 @@
 /** \file
- * Functions for daemonizing application with respect to 15 steps introduced by
- * SysV init guide:
+ * Implementation of common for both server and client daemonization process,
+ * implemented with respect to the `daemon(7)` manual.
+ *
+ * \note Refer manual `daemon(7)` manual to understand why this implementation
+ * consists of 15 steps pointed out within source code comments:
  * https://www.freedesktop.org/software/systemd/man/daemon.html#SysV%20Daemons
+ *
+ * \todo For now only SysV traditional daemon is supported. Implement systemd
+ * daemon support.
  */
 #include <ctype.h>
 #include <fcntl.h>

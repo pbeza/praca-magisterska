@@ -1,3 +1,6 @@
+/** \file
+ * Implementation of client's `argv` parser.
+ */
 #include <arpa/inet.h>
 #include <getopt.h>
 #include <stdio.h>

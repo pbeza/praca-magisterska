@@ -20,13 +20,19 @@
 
 /**
  * Daemon's work. Unless daemonization was switched off, this function is being
- * ran in daemon's process. From now on, logging is done only via `syslog`.
+ * ran in daemon's process. From now on, logging is done via `syslog` _only_.
  */
 static int daemon_work(const server_config_t *config) {
+	if (set_sigint_handler() < 0) {
+		syslog_errno("Setting SIGINT handler has failed");
+		return -1;
+	}
+
 	if (accept_clients(config) < 0) {
 		syslog(LOG_ERR, "Critical fail in function accepting clients");
 		return -1;
 	}
+
 	return 0;
 }
 
@@ -67,8 +73,9 @@ static int server_work(const server_config_t *config) {
  */
 static int run(server_config_t *config) {
 	int ret = 0;
+	security_config_t *security_config = &config->security_config;
 
-	if (init_ssl_ctx(&config->security_config) < 0) {
+	if (init_ssl_ctx(security_config) < 0) {
 		fprintf(stderr, "Can't initialize OpenSSL.\n");
 		return -1;
 	}
@@ -78,7 +85,7 @@ static int run(server_config_t *config) {
 		ret = -1;
 	}
 
-	if (cleanup_ssl_ctx(&config->security_config) < 0) {
+	if (cleanup_ssl_ctx(security_config->ssl_ctx) < 0) {
 		syslog_ssl_err("Cleaning up SSL context has failed");
 		return -1;
 	}

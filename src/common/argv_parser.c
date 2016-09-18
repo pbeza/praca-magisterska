@@ -1,3 +1,7 @@
+/** \file
+ * Implementation of the universal `argv` options representation and basic
+ * parser used by both server and client.
+ */
 #include <assert.h>
 #include <getopt.h>
 #include <stdio.h>

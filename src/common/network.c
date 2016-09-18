@@ -1,5 +1,10 @@
+/** \file
+ * Implementation of common for both client and server network-related functions.
+ */
 #include <sys/socket.h>
 #include <unistd.h>
+
+#include "network.h"
 
 #include "common.h"
 

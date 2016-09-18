@@ -1,5 +1,5 @@
 /** \file
- * Server's basic configuration.
+ * Server's basic configuration partly propagated from `CMake` file.
  */
 #ifndef _SERVER_CONFIG_H
 #define _SERVER_CONFIG_H

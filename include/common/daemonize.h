@@ -1,7 +1,6 @@
 /** \file
- * Common daemonization process, implemented with respect to the `daemon(7)`
- * manual. For now only SysV traditional daemon is supported.
- * \todo Implement systemd daemon support.
+ * Common for both server and client daemonization process, implemented with
+ * respect to the `daemon(7)` manual.
  */
 #ifndef _DAEMONIZE_H
 #define _DAEMONIZE_H
