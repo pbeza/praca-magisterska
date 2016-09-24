@@ -8,7 +8,7 @@
 
 #include "security.h"
 
-#include "common/common.h"
+#include "common/misc.h"
 #include "common/security.h"
 
 #define MAX_SSL_ACCEPT_RETRIES		5

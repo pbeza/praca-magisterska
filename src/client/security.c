@@ -8,8 +8,7 @@
 
 #include "security.h"
 
-#include "common/common.h"
-#include "common/security.h"
+#include "common/misc.h"
 
 #define MAX_CONNECTION_RETRY_COUNT	3
 #define SSL_CERT_MAX_VERIFY_DEPTH	32
@@ -41,10 +40,8 @@ int init_ssl_ctx(security_config_t *config) {
 
 	/* TODO TODO TODO */
 	if (!SSL_CTX_load_verify_locations(config->ssl_ctx,
-				      "../config/server/certificate.pem",
-				      /*"/etc/ssl/certs/IGC_A.pem",*/
-				      NULL
-				      /*"../config/server"*/)) {
+					   config->trusted_cert_file,
+					   config->trusted_cert_dir)) {
 		syslog_ssl_err("Loading certificate verify locations has failed");
 		goto cleanup_evp;
 	}

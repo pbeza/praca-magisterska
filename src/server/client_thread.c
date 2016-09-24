@@ -6,11 +6,10 @@
 #include <syslog.h>
 #include <unistd.h>
 
+#include <openssl/ssl.h>
+
 #include "client_thread.h"
 
-#include "argv_parser.h"
-#include "common/common.h"
-#include "common/network.h"
 #include "common/security.h"
 
 #define MSG_POLL_TIMEOUT_MILLISECONDS	30 * 1000
@@ -38,7 +37,7 @@ static int wait_for_client_msg(int csocket) {
 	return 0;
 }
 
-int read_hello_from_client(SSL *ssl, int socket, char *buf) {
+static int read_hello_from_client(SSL *ssl, int socket, char *buf) {
 	int ret, retries;
 
 	for (retries = 0; retries < MAX_SSL_READ_RETRIES; retries++) {
@@ -85,7 +84,7 @@ static void start_protocol(int fd, SSL *ssl) {
 
 void* thread_work(thread_arg_t *thread_arg) {
 	const server_config_t *server_config = thread_arg->server_config;
-	const security_config_t *security_config = &server_config->security_config;
+	const security_config_t *security_config = SECURITY_CONFIG(server_config);
 
 	int fd = thread_arg->csocket;
 

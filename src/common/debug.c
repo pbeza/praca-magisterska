@@ -6,7 +6,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include "common.h"
 #include "debug.h"
 
 #ifdef DEBUG

@@ -5,19 +5,22 @@
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
+#include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
 #include <unistd.h>
 
 #include "main_loop.h"
 
-#include "argv_parser.h"
 #include "client_thread.h"
-#include "common/common.h"
-#include "common/network.h"
 
 #define BACKLOG				MIN(64, SOMAXCONN)
-#define MAX_CLIENTS_THREADS		2 /* \todo increase to 1 << 14 = 16384 */
+
+#ifdef DEBUG
+#define MAX_CLIENTS_THREADS		2
+#else
+#define MAX_CLIENTS_THREADS		1 << 14
+#endif
 
 static volatile int clients_number = 0;
 static pthread_mutex_t clients_number_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -223,7 +226,8 @@ static int create_initialized_server_socket(uint16_t port) {
  * Main loop of server infinitely accepting connections from clients.
  */
 int accept_clients(const server_config_t *config) {
-	int port = config->base_config.port,
+	const base_config_t *base_config = BASE_CONFIG(config);
+	int port = base_config->port,
 	    ssocket,
 	    csocket,
 	    ret = 0;
@@ -238,7 +242,8 @@ int accept_clients(const server_config_t *config) {
 		syslog(LOG_INFO, "Server's main thread waiting for a new client...");
 
 		if ((csocket = accept_client(ssocket)) < 0) {
-			syslog(LOG_ERR, "Failed to accept client connection");
+			if (last_signal != SIGINT)
+				syslog(LOG_ERR, "Failed to accept client connection");
 			continue;
 		}
 

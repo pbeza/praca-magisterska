@@ -8,7 +8,7 @@
 
 #include "connection.h"
 
-#include "common/network.h"
+#include "common/misc.h"
 #include "common/security.h"
 
 #define POLL_TIMEOUT_MILLISECONDS	10 * 1000

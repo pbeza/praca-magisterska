@@ -13,7 +13,7 @@
 # Visit www.cmake.org to learn more about CMake.
 
 cmake_minimum_required(VERSION 3.1)
-project(mgr VERSION 0.1 LANGUAGES C)
+project(appsync VERSION 0.1 LANGUAGES C)
 
 ###############################################################################
 # Setting constants, options and printing basic information                   #
@@ -21,10 +21,14 @@ project(mgr VERSION 0.1 LANGUAGES C)
 
 # Few constant values.
 
-set(AUTHOR_FULL_NAME "Patryk Bęza")
+set(AUTHOR "Patryk Bęza")
 set(AUTHOR_EMAIL "patryk.beza@gmail.com")
-set(AUTHOR "${AUTHOR_FULL_NAME} (${AUTHOR_EMAIL})")
 set(DOXYGEN_LANGUAGE "English" CACHE STRING "Doxygen documentation language")
+set(MAIN_PROJECT_NAME ${PROJECT_NAME})
+
+# Add directory with CMake find modules scripts for not (yet) supported software.
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # User-configurable variables.
 
@@ -43,13 +47,18 @@ message(STATUS "Detected system: ${CMAKE_SYSTEM} ${CMAKE_HOST_SYSTEM_PROCESSOR}.
 configure_file("README.md.in" "README.md")
 
 ###############################################################################
-# Common for both server and client third party libraries and applications    #
+# Common for both client and server third party libraries and applications    #
 ###############################################################################
 
-# OPENSSL - Provides safe communication channel between server and client.
+# OPENSSL - Provides safe communication channel between client and server.
 
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
+
+# LIBCONFIG - Provides easy way to read/write from/to configuration file.
+
+find_package(LibConfig REQUIRED)
+include_directories(${LIBCONFIG_INCLUDE_DIR})
 
 ###############################################################################
 # Handy (but not required) tools for developing this project                  #
@@ -68,7 +77,7 @@ endif()
 
 # CSCOPE - Make cscope symbols active if cscope is installed.
 
-set(INC_DIR "../../include") # TODO This path is relative to build directory ;/
+set(INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 find_program(CSCOPE_PATH cscope)
 if (EXISTS ${CSCOPE_PATH})
 	set(CSCOPE_OUTPUT_FILES cscope.in.out cscope.out cscope.po.out)
@@ -103,7 +112,7 @@ endif()
 # Including all subprojects                                                   #
 ###############################################################################
 
-# Headers commonfor both server and client. Add ${PROJECT_BINARY_DIR} to
+# Headers common for both client and server. Add ${PROJECT_BINARY_DIR} to
 # headers directories to allow inclusion files from common directory, using
 # 'common/' path prefix.
 

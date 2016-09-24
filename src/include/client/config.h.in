@@ -1,0 +1,108 @@
+/** \file
+ * Client's basic configuration partly propagated from `CMake` file.
+ */
+#ifndef _CLIENT_CONFIG_H
+#define _CLIENT_CONFIG_H
+
+#include <netinet/in.h>
+
+#include "common/config.h"
+
+#include "security.h"
+
+/**
+ * Project name populated from CMake file.
+ */
+#cmakedefine PROJECT_NAME		"@PROJECT_NAME@"
+
+/**
+ * Project version number populated from CMake file.
+ */
+#cmakedefine PROJECT_VERSION		"@PROJECT_VERSION@"
+
+/**
+ * Client's usage.
+ */
+#define USAGE				PROJECT_NAME " [ options ] server_ipv4"
+
+/**
+ * First part of the client's `--help` section explaining app's usage and purpose.
+ */
+#define HELP_PREFIX			"Usage: " USAGE "\n\n"\
+					"Starts client which connects to specified server to synchronize installed\n"\
+					"applications and their configuration.\n\n"\
+					COMMON_HELP(DEFAULT_CONFIG_FILE_PATH)\
+					"\n\nOptions:\n\n"
+
+/**
+ * Default client's configuration file path.
+ *
+ * \note This path can be overwritten using appropriate `argv[]` parameter.
+ * \note This macro is in `ifdef` to not need access to `/etc` subdir.
+ */
+#ifdef DEBUG
+#define DEFAULT_CONFIG_FILE_PATH	"../config/server/server.conf"
+#else
+#define DEFAULT_CONFIG_FILE_PATH	"/etc/" MAIN_PROJECT_NAME "/" PROJECT_NAME "/server.config"
+#endif
+
+/**
+ * Path to file with daemon's PID to disallow multiple instances of the daemon.
+ * See: http://www.pathname.com/fhs/2.2/fhs-5.13.html
+ *
+ * \note This macro is in `ifdef` to not need root access to `/var/run` while
+ * debugging.
+ */
+#ifdef DEBUG
+#define UNIQ_DAEMON_INSTANCE_PID_PATH	"/tmp/" PROJECT_NAME ".pid"
+#else
+#define UNIQ_DAEMON_INSTANCE_PID_PATH	"/var/run/" PROJECT_NAME ".pid"
+#endif
+
+/**
+ * Options' IDs. Refer common \a option_code for more details.
+ */
+typedef enum {
+	TRUSTED_CERT_FILE_OPTION_ID = __LAST_COMMON_OPTION_ID,
+	TRUSTED_CERT_DIR_OPTION_ID
+} client_option_code;
+
+/**
+ * Client configuration - both precompiled and parsed from `argv[]`.
+ */
+typedef struct client_config_t {
+	/**
+	 * Basic application configuration. `base_config_t` structure is used
+	 * by both client and server.
+	 *
+	 * \warning This MUST be first member of the struct because we take
+	 * advantage of C primitive inheritance. C says that no padding appears
+	 * before the first member of a struct. For more details refer:
+	 * http://stackoverflow.com/questions/1114349/struct-inheritance-in-c
+	 */
+	base_config_t base_config;
+	/**
+	 * Client's OpenSSL configuration.
+	 */
+	security_config_t security_config;
+	/**
+	 * Server address, eg. IP number and port.
+	 */
+	struct sockaddr_in serv_addr;
+	/**
+	 * Pointer to `argv[]` parameter with server's IP.
+	 */
+	char *serv_ip_str;
+} client_config_t;
+
+/**
+ * Precompiled application configuration ie. configuration before parsing `argv[]`.
+ */
+static const client_config_t INIT_CONFIG = {
+	.base_config = INIT_BASE_CONFIG(PROJECT_NAME, PROJECT_VERSION, HELP_PREFIX, DEFAULT_CONFIG_FILE_PATH, UNIQ_DAEMON_INSTANCE_PID_PATH),
+	.security_config = INIT_SECURITY_CONFIG,
+	.serv_addr = { 0 },
+	.serv_ip_str = NULL,
+};
+
+#endif

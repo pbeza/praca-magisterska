@@ -1,0 +1,42 @@
+%
+% Ze względu na custom'owy styl zastosowany w glossaries zamiast '\\' używamy '\\&' (bo słownik to tabelka dwukolumnowa).
+% Na końcu każdego wpisu w słowniku dodaje się automatycznie znak kropki '.' i nowej linii '\\'.
+%
+
+\newglossaryentry{gnulinux}
+{
+	name={GNU/Linux},
+	description={System operacyjny \emph{GNU} napisany przez Richarda Stallmana, z jądrem \emph{Linux}, napisanym przez \emph{Linusa Torvalds'a}}
+}
+\newglossaryentry{RAM}
+{
+	name={RAM},
+	description={\textit{Random Access Memory}.\\&Podstawowy  rodzaj  pamięci  cyfrowej
+   wykorzystywana w komputerach}
+}
+\newglossaryentry{RSA}
+{
+	name={RSA},
+	description={Jeden z pierwszych i obecnie najpopularniejszych asymetrycznych algorytmów kryptograficznych z kluczem publicznym, zaprojektowany w 1977 przez Rona Rivesta, Adi Shamira oraz Leonarda Adlemana. Pierwszy algorytm, który może być stosowany zarówno do szyfrowania jak i do podpisów cyfrowych. Bezpieczeństwo szyfrowania opiera się na trudności faktoryzacji dużych liczb złożonych. Jego nazwa pochodzi od pierwszych liter nazwisk jego twórców}
+}
+\newglossaryentry{ASCII}
+{
+	name={ASCII},
+	description={\textit{American Standard Code for Information Interchange}.\\&7-bitowy kod przyporządkowujący liczby z zakresu 0-127: literom (alfabetu angielskiego), cyfrom, znakom przestankowym i innym symbolom oraz poleceniom sterującym}
+}
+\newglossaryentry{kernel}
+{
+	name={kernel},
+	description={Jądro \gls{OpenCL}.\\&Program uruchamiany w środowisku OpenCL na urządzeniu docelowym, a kompilowany na urządzeniu host}
+}
+\newglossaryentry{UTF8}
+{
+	name={UTF-8},
+	description={\textit{UCS Transformation Format 8-bit}.\\&System kodowania \emph{Unicode}, wykorzystujący od 8 do 32 bitów do zakodowania pojedynczego znaku, w pełni kompatybilny z \gls{ASCII}}
+}
+\newacronym{SHA-0}{SHA-0}{\textit{Secure Hash Algorithm}.\\&Rodzina powiązanych ze sobą kryptograficznych funkcji skrótu zaprojektowanych przez NSA (\emph{National Security Agency})}
+\newacronym{DES}{DES}{\textit{Data Encryption Standard}.\\&Symetryczny szyfr blokowy zaprojektowany w 1975 roku przez \emph{IBM} na zlecenie ówczesnego Narodowego Biura Standardów USA}
+\newacronym{CPU}{CPU}{\textit{Central Processing Unit}.\\&Procesor}
+\newacronym{API}{API}{\textit{Application Programming Interface}.\\&Interfejs Programowania Aplikacji}
+\newacronym{BOM}{BOM}{\textit{Byte Order Mark}.\\&Znacznik kolejności bajtów}
+\newacronym{IDE}{IDE}{\textit{Integrated Development Environment}.\\&Zintegrowane Środowisko Programistyczne}

@@ -6,7 +6,7 @@
 
 #include "network.h"
 
-#include "common.h"
+#include "misc.h"
 
 ssize_t bulk_recv(int socket, char *buffer, size_t length, int flags) {
 	int c;

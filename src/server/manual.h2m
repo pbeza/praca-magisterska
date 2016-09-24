@@ -1,5 +1,5 @@
 [NAME]
-synchron-cli - client synchronizing its software and configuration with server
+appsync-srv - server serving software and configuration for clients
 
 [OPTIONS]
 Allowed options:
@@ -8,4 +8,4 @@ Allowed options:
 Simple usage examples: TODO
 
 [SEE ALSO]
-synchron-srv(1)
+appsync-cli(1)

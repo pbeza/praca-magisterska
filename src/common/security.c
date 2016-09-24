@@ -1,13 +1,14 @@
 /** \file
- * Implementation of handling common for both server and client OpenSSL security
+ * Implementation of handling common for both client and server OpenSSL security
  * issues.
  */
-#include <openssl/err.h>
-#include <openssl/ssl.h>
 #include <poll.h>
 #include <syslog.h>
 
-#include "common.h"
+#include <openssl/err.h>
+#include <openssl/ssl.h>
+
+#include "misc.h"
 #include "security.h"
 
 #define SSL_POLL_TIMEOUT_MILLISECONDS	5 * 1000

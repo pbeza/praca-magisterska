@@ -1,0 +1,194 @@
+/** \file
+ * Common configuration for both client and server.
+ */
+#ifndef _BASE_CONFIG_H
+#define _BASE_CONFIG_H
+
+#include <stdint.h>
+
+#include "../../include/common/misc.h"
+
+/**
+ * Main name of the whole project.
+ *
+ * \warning Don't confuse the main project name with subprojects names (like
+ * _server_ or _client_).
+ */
+#cmakedefine MAIN_PROJECT_NAME		"@MAIN_PROJECT_NAME@"
+
+/**
+ * Author of the project.
+ */
+#cmakedefine AUTHOR			"@AUTHOR@"
+
+/**
+ * Author's e-mail.
+ */
+#cmakedefine AUTHOR_EMAIL		"@AUTHOR_EMAIL@"
+
+/**
+ * If `CMAKE_BUILD_TYPE=Debug`, then `DEBUG` is defined. Useful for eg. defining
+ * function printing debug messages.
+ */
+#cmakedefine DEBUG
+
+/**
+ * Processor architecture (eg. `x86_64`).
+ */
+#define HOST_SYSTEM_PROCESSOR		"@CMAKE_HOST_SYSTEM_PROCESSOR@"
+
+/**
+ * Short version of the license.
+ */
+#define COPYRIGHT			"Copyright (C) 2016 @AUTHOR@."\
+					"\nLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>."\
+					"\nThis is free software: you are free to change and redistribute it."\
+					"\nThere is NO WARRANTY, to the extent permitted by law.\n"
+
+/**
+ * Common help section for both client and server to be printed before options
+ * section.
+ */
+#define COMMON_HELP(default_config_file_path)\
+					"Most of the below listed options have their default values which can be\n"\
+					"overwritten by " default_config_file_path " configuration file."
+
+/**
+ * Copyright postfix mentioning project's author.
+ */
+#define COPYRIGHT_POSTFIX		"Written by " AUTHOR " (" AUTHOR_EMAIL ").\n"
+
+/**
+ * If user didn't specify listening port for server, this port is used.
+ * \note See list of (un)assigned port numbers:
+ * https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.txt
+ */
+#define DEFAULT_SERVER_LISTENING_PORT	4440
+
+/**
+ * Common initial config for both client and server.
+ */
+#define INIT_BASE_CONFIG(proj_name, proj_ver, help_pre, conf_path, daemon_pid_path)\
+					{\
+					.project_name = proj_name,\
+					.project_version = proj_ver,\
+					.help_prefix = help_pre,\
+					.selected_options = 0,\
+					.config_file_path = conf_path,\
+					.pid_path = daemon_pid_path,\
+					.port = DEFAULT_SERVER_LISTENING_PORT\
+					}
+
+/**
+ * Fetch pointer to base configuration from pointer to server's configuration.
+ */
+#define BASE_CONFIG(config)		( &(config)->base_config )
+
+/**
+ * Options' IDs.
+ * \note Option ID is used as a bit index in `uint32_t` variable to mark active
+ * options. Therefore IDs must be positive integers less than 32.
+ * \warning Server's and client's IDs must be greater than common IDs.
+ */
+typedef enum {
+	HELP_OPTION_ID,
+	VERSION_OPTION_ID,
+	PORT_OPTION_ID,
+	DONT_DAEMONIZE_OPTION_ID,
+	CONFIG_FILE_ID,
+	__LAST_COMMON_OPTION_ID /* for reference in server's and client's parsers */
+} option_code;
+
+/**
+ * Represents single runtime option read from `argv[]`.
+ */
+typedef struct option_t {
+	/**
+	 * Unique ID enumerated from 0.
+	 * \note *Rationale* This ID can be used as a index in array of options.
+	 */
+	const uint8_t id;
+	/**
+	  * Single character representing short option for `getopt()`.
+	  */
+	char short_option;
+#ifndef POSIXLY_CORRECT
+	/**
+	 * String representing long option for `getopt_long()`.
+	 * \note This variable is not defined if `POSIXLY_CORRECT` is defined.
+	 */
+	const char *long_option;
+#endif
+	/**
+	 * Help description displayed when `--help` is present.
+	 */
+	const char *help_desc;
+	/**
+	 * Parameter's value named displayed in `--help`.
+	 * If parameter has no value use `NULL`.
+	 */
+	const char *help_value_name;
+	/**
+	 * Function handler called when this option is present in `argv[]`.
+	 * If this function pointer is `NULL`, no function is called.
+	 */
+	int (*save)(const struct option_t *option, const char *value, void *config);
+} option_t;
+
+/**
+ * Common settings for client and server.
+ */
+typedef struct base_config_t {
+	/**
+	 * Project name propagated from CMake.
+	 */
+	const char *project_name;
+	/**
+	 * Project version propagated from CMake.
+	 */
+	const char *project_version;
+	/**
+	 * First section of project's help explaining apps' usage and purpose.
+	 */
+	const char *help_prefix;
+	/**
+	 * Selected runtime options are represented by single bits set to 1.
+	 */
+	uint32_t selected_options;
+	/**
+	 * Full path to application configuration file.
+	 * \note Default path is defined statically but can be overwritten using
+	 * appropriate `argv[]` parameter.
+	 */
+	const char *config_file_path;
+	/**
+	 * Path to file with daemon's PID to disallow multiple instances of the
+	 * daemon. See: http://www.pathname.com/fhs/2.2/fhs-5.13.html
+	 */
+	const char *pid_path;
+	/**
+	 * Server's listening port. Client uses this port to connect to server.
+	 */
+	uint16_t port;
+} base_config_t;
+
+/**
+ * Checks whether given \p option, represented by single bit, is set.
+ */
+inline int is_option_set(const base_config_t *base_config, int option) {
+	return IS_SETBIT(base_config->selected_options, option);
+}
+
+inline int is_dont_daemonize_set(const base_config_t *base_config) {
+	return is_option_set(base_config, DONT_DAEMONIZE_OPTION_ID);
+}
+
+inline int is_print_help_set(const base_config_t *base_config) {
+	return is_option_set(base_config, HELP_OPTION_ID);
+}
+
+inline int is_print_version_set(const base_config_t *base_config) {
+	return is_option_set(base_config, VERSION_OPTION_ID);
+}
+
+#endif

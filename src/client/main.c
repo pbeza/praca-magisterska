@@ -4,20 +4,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "argv_parser.h"
 #include "common/daemonize.h"
 #include "common/security.h"
+#include "config_parser.h"
 #include "connection.h"
 #include "security.h"
-
-/**
- * Path to file with daemon's PID to disallow multiple instances of the daemon.
- * See: http://www.pathname.com/fhs/2.2/fhs-5.13.html
- *
- * \todo Need root to access `/var/run` directory.
- */
-#define UNIQ_DAEMON_INSTANCE_PID_PATH	"/tmp/" PROJECT_NAME ".pid"
-/*#define UNIQ_DAEMON_INSTANCE_PID_PATH	"/var/run/" PROJECT_NAME ".pid"*/
 
 static int run_protocol(SSL *ssl, int socket) {
 	if (send_hello_to_server(ssl, socket) < 0) {
@@ -27,9 +18,10 @@ static int run_protocol(SSL *ssl, int socket) {
 	return 0;
 }
 
-static int daemon_work(client_config_t *client_config) {
-	const struct sockaddr_in *addr = &client_config->serv_addr;
-	security_config_t *security_config = &client_config->security_config;
+static int daemon_work(const base_config_t *base_config) {
+	client_config_t *config = (client_config_t*)base_config;
+	const struct sockaddr_in *addr = &config->serv_addr;
+	security_config_t *security_config = SECURITY_CONFIG(config);
 	int fd, ret = 0;
 
 	if (set_sigint_handler() < 0) {
@@ -78,46 +70,22 @@ disconnect:
 	return ret;
 }
 
-static int client_work(client_config_t *config) {
-	const common_config_t *base_config = &config->base_config;
-	int start_daemon = !is_dont_daemonize_set(base_config),
-	    pid_fd,
-	    ret = 0;
-
-	if (start_daemon && sysv_daemonize(UNIQ_DAEMON_INSTANCE_PID_PATH, &pid_fd) < 0) {
-		fprintf(stderr, "Cannot create SysV daemon. Check syslog for details.\n");
-		return -1;
-	}
-
-	if (daemon_work(config) < 0) {
-		syslog(LOG_ERR, "Daemon work has failed");
-		ret = -1;
-	}
-
-	if (start_daemon && TEMP_FAILURE_RETRY(close(pid_fd)) < 0) {
-		syslog_errno("Closing one instance PID-file has failed");
-		return -1;
-	}
-
-	return ret;
-}
-
 /**
  * Wrapper for client's 3 main stages:
  * 1. SSL context initialization,
  * 2. work,
- * 3. cleanup.
+ * 3. SSL context cleanup.
  */
 static int run(client_config_t *config) {
 	int ret = 0;
-	security_config_t *security_config = &config->security_config;
+	security_config_t *security_config = SECURITY_CONFIG(config);
 
 	if (init_ssl_ctx(security_config) < 0) {
 		fprintf(stderr, "Can't initialize OpenSSL.\n");
 		return -1;
 	}
 
-	if (client_work(config) < 0) {
+	if (daemonize((const base_config_t*)config, daemon_work) < 0) {
 		syslog(LOG_ERR, "Client work has failed");
 		ret = -1;
 	}
@@ -143,13 +111,10 @@ int main(int argc, char** argv) {
 	openlog(PROJECT_NAME, LOG_PID | LOG_CONS | LOG_ODELAY, LOG_USER);
 	syslog(LOG_INFO, "Starting client. Hello!");
 
-	if (parse(argc, argv, &config) < 0) {
-		syslog(LOG_INFO, "Parser decided to exit - "
-		       "refer stdout/stderr for more details");
-	} else {
-		if (run(&config) < 0)
-			syslog(LOG_ERR, "Running client has failed");
-	}
+	if (load_config(argc, argv, &config) < 0) {
+		syslog(LOG_INFO, "Loading config has failed");
+	} else if (run(&config) < 0)
+		syslog(LOG_ERR, "Running client has failed");
 
 	syslog(LOG_INFO, "Exiting client. Bye!");
 	closelog();

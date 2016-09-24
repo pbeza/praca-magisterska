@@ -1,5 +1,5 @@
 /** \file
- * Implementation of common for both server and client daemonization process,
+ * Implementation of common for both client and server daemonization process,
  * implemented with respect to the `daemon(7)` manual.
  *
  * \note Refer manual `daemon(7)` manual to understand why this implementation
@@ -18,7 +18,6 @@
 #include <unistd.h>
 
 #include "daemonize.h"
-#include "common.h"
 
 /**
  * Access permission bits of the file mode for text file with PID.
@@ -39,7 +38,7 @@
  *
  * \return 0 if this is the first daemon running. -1 if daemon is already running.
  */
-static int assure_single_daemon_instance(const char *pid_fpath, int *fd) {
+static int assure_one_daemon_instance(const char *pid_fpath, int *fd) {
 	char pid_str[MAX_DIGITS_IN_PID + 1] = { 0 };
 
 	*fd = TEMP_FAILURE_RETRY(open(pid_fpath, O_CREAT | O_RDWR, UNIQ_DAEMON_FILE_PERMISSION));
@@ -50,10 +49,10 @@ static int assure_single_daemon_instance(const char *pid_fpath, int *fd) {
 
 	/* File locking to allow one daemon instance. Process' exit unlocks it. */
 	if (TEMP_FAILURE_RETRY(lockf(*fd, F_TLOCK, 0)) < 0) {
-		if (errno != EAGAIN && errno != EACCES)
-			syslog_errno("lockf()");
-		else
+		if (errno == EAGAIN || errno == EACCES)
 			syslog(LOG_DEBUG, "PID file is already locked");
+		else
+			syslog_errno("lockf()");
 		goto close_fd;
 	}
 
@@ -138,7 +137,7 @@ static int daemon_work(const char *pid_fpath, int *pid_fd) {
 	}
 
 	/* 12. Make sure that other instance of daemon is not working. */
-	if (assure_single_daemon_instance(pid_fpath, pid_fd) < 0) {
+	if (assure_one_daemon_instance(pid_fpath, pid_fd) < 0) {
 		syslog(LOG_WARNING, "Another instance of daemon is running");
 		return -1;
 	}
@@ -225,6 +224,8 @@ cleanup_read_pipe:
 }
 
 /**
+ * Daemonize current process with respect to `daemon(7)` SysV manual.
+ *
  * \note To understand why this daemonizing implementation consists of 15 steps
  * enumerated within comments, see `daemon(7)` manual:
  * https://www.freedesktop.org/software/systemd/man/daemon.html#SysV%20Daemons
@@ -270,6 +271,39 @@ int sysv_daemonize(const char *pid_fpath, int *pid_fd) {
 	} else {
 		if ((ret = first_child_work(pipe_fd, pid_fpath, pid_fd)) < 0)
 			exit(EXIT_FAILURE);
+	}
+
+	return ret;
+}
+
+/**
+ * Start daemon if daemonization is not switched off. Ensure that only one
+ * daemon can run and run daemon's work.
+ */
+int daemonize(const base_config_t *config, int (*daemon_work)(const base_config_t*)) {
+
+	int pid_fd;
+	int ret = 0;
+	int start_daemon = !is_dont_daemonize_set(config);
+
+	if (start_daemon) {
+		if (sysv_daemonize(config->pid_path, &pid_fd) < 0) {
+			fprintf(stderr, "Cannot create SysV daemon. Refer syslog for details.\n");
+			return -1;
+		}
+	} else if (assure_one_daemon_instance(config->pid_path, &pid_fd) < 0) {
+		fprintf(stderr, "Another instance of daemon is running.\n");
+		return -1;
+	}
+
+	if (daemon_work(config) < 0) {
+		syslog(LOG_ERR, "Daemon work has failed");
+		ret = -1;
+	}
+
+	if (TEMP_FAILURE_RETRY(close(pid_fd)) < 0) {
+		syslog_errno("Closing one instance PID-file has failed");
+		return -1;
 	}
 
 	return ret;
