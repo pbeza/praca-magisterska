@@ -51,12 +51,22 @@
  */
 #define COMMON_HELP(default_config_file_path)\
 					"Most of the below listed options have their default values which can be\n"\
-					"overwritten by " default_config_file_path " configuration file."
+					"overwritten by '" default_config_file_path "' configuration file."
 
 /**
  * Copyright postfix mentioning project's author.
  */
 #define COPYRIGHT_POSTFIX		"Written by " AUTHOR " (" AUTHOR_EMAIL ").\n"
+
+/**
+ * Minimum allowed port number accepted by both server's and client's parser.
+ */
+#define MIN_PORT_NUMBER			1025
+
+/**
+ * Maximum allowed port number accepted by both server's and client's parser.
+ */
+#define MAX_PORT_NUMBER			65535
 
 /**
  * If user didn't specify listening port for server, this port is used.
@@ -80,6 +90,12 @@
 					}
 
 /**
+ * @{ Accepted variables to be used in client's and server's configuration files.
+ */
+#define CONFIG_FILE_PORT		"PORT"
+
+/**
+ * @}
  * Fetch pointer to base configuration from pointer to server's configuration.
  */
 #define BASE_CONFIG(config)		( &(config)->base_config )

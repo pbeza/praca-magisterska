@@ -12,16 +12,6 @@
 #include "config_parser_argv.h"
 
 /**
- * Minimum allowed port number accepted by both server's and client's parser.
- */
-#define MIN_PORT_NUMBER			1025
-
-/**
- * Maximum allowed port number accepted by both server's and client's parser.
- */
-#define MAX_PORT_NUMBER			65535
-
-/**
  * Parser `getopt` return code in case of missing option's value.
  */
 #define PARSER_MISSING_VALUE		':'
@@ -253,7 +243,7 @@ int config_file_save_cb(const option_t *option, const char *value, void *config)
 }
 
 void print_no_file_msg_argv(char short_option, const char *long_option, const char *file) {
-	printf("Error parsing --%s [-%c] option value. "
+	fprintf(stderr, "Error parsing --%s [-%c] option value. "
 	       "File '%s' doesn't exist or has insufficient read rights.\n",
 	       long_option,
 	       short_option,

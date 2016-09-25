@@ -12,7 +12,7 @@
 /**
  * @{ Short options' names.
  */
-#define SHORT_OPTION_CERTIFICATE_PATH	'c'
+#define SHORT_OPTION_CERTIFICATE_PATH	'r'
 #define SHORT_OPTION_PRIVATE_KEY_PATH	'k'
 #define SHORT_OPTION_PRIVATE_KEY_PASS	's'
 
@@ -42,7 +42,7 @@
 					"section in `SSL_CTX_use_certificate_chain_file` manual to learn\n\t"\
 					"more."
 #define DESC_OPTION_PRIVATE_KEY_PATH	"Path to the file with server's private key in PEM format."
-#define DESC_OPTION_PRIVATE_KEY_PASS	"Password for reading private key. Warning: This option may be\n\t"\
+#define DESC_OPTION_PRIVATE_KEY_PASS	"Password protecting private key. Warning: This option may be\n\t"\
 					"useful only for debugging and may be removed or limited to\n\t"\
 					"debug compilation in the future. Specifying password as a\n\t"\
 					"command line option is NOT recommended since everyone can see\n\t"\
@@ -50,7 +50,7 @@
 
 /**
  * @}
- * @{ Server's options defined as as \a option_t structures.
+ * @{ Server specific options defined as as \a option_t structures.
  */
 #define CERTIFICATE_PATH_OPTION		OPTION(CERTIFICATE_PATH_OPTION_ID,\
 					       SHORT_OPTION_CERTIFICATE_PATH,\
@@ -87,7 +87,7 @@ static int cert_path_save_cb(const option_t *option, const char *value, void *co
 		return -1;
 	}
 
-	s->certificate_path = value;
+	strncpy(s->certificate_path, value, PATH_MAX_LEN);
 
 	return 0;
 }
@@ -104,7 +104,7 @@ static int priv_key_path_save_cb(const option_t *option, const char *value, void
 		return -1;
 	}
 
-	s->private_key_path = value;
+	strncpy(s->private_key_path, value, PATH_MAX_LEN);
 
 	return 0;
 }

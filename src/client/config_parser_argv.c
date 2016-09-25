@@ -38,7 +38,7 @@
 
 /**
  * @}
- * @{ Client's options defined as as \a option_t structures.
+ * @{ Client specific options defined as as \a option_t structures.
  */
 #define TRUSTED_CERT_FILE_OPTION	OPTION(TRUSTED_CERT_FILE_OPTION_ID,\
 					       SHORT_OPTION_TRUSTED_CERT_FILE,\
@@ -100,7 +100,7 @@ static int init_server_addr(client_config_t *config) {
 
 	/* Don't use `inet_aton` because it doesn't support IPv6. */
 	if (inet_pton(AF_INET, config->serv_ip_str, &addr->sin_addr.s_addr) <= 0) {
-		printf("Unexpected format of IPv4.\n");
+		fprintf(stderr, "Unexpected format of IPv4.\n");
 		return -1;
 	}
 
@@ -114,10 +114,10 @@ static int read_srv_ip_from_argv(int argc, char **argv, client_config_t *config)
 	if (d == 1) {
 		config->serv_ip_str = last;
 	} else if (d == 0 && !(strlen(last) == 2 && !strncmp(last, "--", 2))) {
-		printf("Missing server's IP. See --" LONG_OPTION_HELP ".\n");
+		fprintf(stderr, "Missing server's IP. See --" LONG_OPTION_HELP ".\n");
 		return -1;
 	} else {
-		printf("Unexpected options. See --" LONG_OPTION_HELP ".\n");
+		fprintf(stderr, "Unexpected options. See --" LONG_OPTION_HELP ".\n");
 		return -1;
 	}
 

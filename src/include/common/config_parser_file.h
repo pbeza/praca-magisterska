@@ -26,6 +26,8 @@
 
 int common_read_config_from_file(const config_t *config, base_config_t *base_config);
 
-void print_no_file_msg_conf(const char *file);
+int read_path_from_conf(const config_t *config, base_config_t *base_config,
+			int option_id, const char *config_var_path,
+			char *config_save_path, int is_required);
 
 #endif

@@ -38,7 +38,6 @@ int init_ssl_ctx(security_config_t *config) {
 	SSL_CTX_set_options(config->ssl_ctx, SSL_OP_NO_SSLv3 | SSL_OP_SINGLE_DH_USE);
 	SSL_CTX_set_cipher_list(config->ssl_ctx, CIPHER_LIST);
 
-	/* TODO TODO TODO */
 	if (!SSL_CTX_load_verify_locations(config->ssl_ctx,
 					   config->trusted_cert_file,
 					   config->trusted_cert_dir)) {

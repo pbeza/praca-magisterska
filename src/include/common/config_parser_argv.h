@@ -17,7 +17,7 @@
 #define SHORT_OPTION_VERSION		'v'
 #define SHORT_OPTION_PORT		'p'
 #define SHORT_OPTION_DONT_DAEMONIZE	'd'
-#define SHORT_OPTION_CONFIG_FILE	'f'
+#define SHORT_OPTION_CONFIG_FILE	'c'
 
 /**
  * @}
@@ -47,7 +47,7 @@
 					"whether application is daemonized or not, it uses syslog for logging.\n\t"\
 					"Standard output is used only for printing help message and argv[]\n\t"\
 					"parser error messages."
-#define DESC_OPTION_CONFIG_FILE		"Path to configuration file."
+#define DESC_OPTION_CONFIG_FILE		"Path to configuration file. If not provided, default path will be used." 
 
 /**
  * @}

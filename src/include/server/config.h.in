@@ -33,18 +33,6 @@
 					"\n\nOptions:\n\n"
 
 /**
- * Default server's configuration file path.
- *
- * \note This path can be overwritten using appropriate `argv[]` parameter.
- * \note This macro is in `ifdef` to not need access to `/etc` subdir.
- */
-#ifdef DEBUG
-#define DEFAULT_CONFIG_FILE_PATH	"../config/server/server.conf"
-#else
-#define DEFAULT_CONFIG_FILE_PATH	"/etc/" MAIN_PROJECT_NAME "/" PROJECT_NAME "/server.config"
-#endif
-
-/**
  * Path to file with daemon's PID to disallow multiple instances of the
  * daemon.
  *
@@ -58,6 +46,26 @@
 #endif
 
 /**
+ * Default server's configuration file path.
+ *
+ * \note This path can be overwritten using appropriate `argv[]` parameter.
+ * \note This macro is in `ifdef` to not need access to `/etc` subdir.
+ */
+#ifdef DEBUG
+#define DEFAULT_CONFIG_FILE_PATH	"../config/server/server.conf"
+#else
+#define DEFAULT_CONFIG_FILE_PATH	"/etc/" MAIN_PROJECT_NAME "/" PROJECT_NAME "/server.conf"
+#endif
+
+/**
+ * @{ Accepted variables to be used in server's configuration file.
+ */
+#define CONFIG_FILE_PRIV_KEY_PASS	"PRIVATE_KEY_PASSWORD"
+#define CONFIG_FILE_PRIV_KEY_PATH	"PRIVATE_KEY_PATH"
+#define CONFIG_FILE_CERTIFICATE_PATH	"CERT_PATH"
+
+/**
+ * @}
  * Options' IDs. Refer common \a option_code for more details.
  */
 typedef enum {

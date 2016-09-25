@@ -35,18 +35,6 @@
 					"\n\nOptions:\n\n"
 
 /**
- * Default client's configuration file path.
- *
- * \note This path can be overwritten using appropriate `argv[]` parameter.
- * \note This macro is in `ifdef` to not need access to `/etc` subdir.
- */
-#ifdef DEBUG
-#define DEFAULT_CONFIG_FILE_PATH	"../config/server/server.conf"
-#else
-#define DEFAULT_CONFIG_FILE_PATH	"/etc/" MAIN_PROJECT_NAME "/" PROJECT_NAME "/server.config"
-#endif
-
-/**
  * Path to file with daemon's PID to disallow multiple instances of the daemon.
  * See: http://www.pathname.com/fhs/2.2/fhs-5.13.html
  *
@@ -60,6 +48,25 @@
 #endif
 
 /**
+ * Default client's configuration file path.
+ *
+ * \note This path can be overwritten using appropriate `argv[]` parameter.
+ * \note This macro is in `ifdef` to not need access to `/etc` subdir.
+ */
+#ifdef DEBUG
+#define DEFAULT_CONFIG_FILE_PATH	"../config/client/client.conf"
+#else
+#define DEFAULT_CONFIG_FILE_PATH	"/etc/" MAIN_PROJECT_NAME "/" PROJECT_NAME ".conf"
+#endif
+
+/**
+ * @{ Accepted variables to be used in client's configuration file.
+ */
+#define CONFIG_FILE_TRUSTED_CERT_FILE	"CA_CERT_FILE"
+#define CONFIG_FILE_TRUSTED_CERT_DIR	"CA_CERT_DIR"
+
+/**
+ * @}
  * Options' IDs. Refer common \a option_code for more details.
  */
 typedef enum {
