@@ -8,7 +8,9 @@
 
 #include <openssl/ssl.h>
 
-int connect_server(const struct sockaddr_in *addr);
+#include "config.h"
+
+int connect_server(client_config_t *config);
 
 int disconnect_server(int socket);
 

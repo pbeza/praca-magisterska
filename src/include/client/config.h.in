@@ -95,11 +95,11 @@ typedef struct client_config_t {
 	/**
 	 * Server address, eg. IP number and port.
 	 */
-	struct sockaddr_in serv_addr;
+	struct sockaddr serv_addr;
 	/**
-	 * Pointer to `argv[]` parameter with server's IP.
+	 * Pointer to `argv[]` parameter with server's address (IP or host name).
 	 */
-	char *serv_ip_str;
+	char *serv_addr_str;
 } client_config_t;
 
 /**
@@ -109,7 +109,7 @@ static const client_config_t INIT_CONFIG = {
 	.base_config = INIT_BASE_CONFIG(PROJECT_NAME, PROJECT_VERSION, HELP_PREFIX, DEFAULT_CONFIG_FILE_PATH, UNIQ_DAEMON_INSTANCE_PID_PATH),
 	.security_config = INIT_SECURITY_CONFIG,
 	.serv_addr = { 0 },
-	.serv_ip_str = NULL,
+	.serv_addr_str = NULL,
 };
 
 #endif

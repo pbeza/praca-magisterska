@@ -2,6 +2,7 @@
  * Implementation of client's `argv[]` parser.
  */
 #include <arpa/inet.h>
+#include <errno.h>
 #include <getopt.h>
 #include <string.h>
 #include <unistd.h>
@@ -33,7 +34,7 @@
  * @{ Options' description.
  */
 #define DESC_OPTION_VERSION		"Print client's version number."
-#define DESC_OPTION_TRUSTED_CERT_FILE	"Path to trusted CA certificate in PEM format."
+#define DESC_OPTION_TRUSTED_CERT_FILE	"Path to server's trusted CA certificate in PEM format."
 #define DESC_OPTION_TRUSTED_CERT_DIR	"Path to directory with CA trusted certificates in PEM format."
 
 /**
@@ -89,39 +90,21 @@ static int trusted_cert_dir_save_cb(const option_t *option, const char *value, v
 	return 0;
 }
 
-static int init_server_addr(client_config_t *config) {
-	struct sockaddr_in *addr = &config->serv_addr;
-	const base_config_t *base_config = BASE_CONFIG(config);
-	uint16_t port = base_config->port;
-
-	memset(addr, 0, sizeof(struct sockaddr_in));
-	addr->sin_family = AF_INET;
-	addr->sin_port = htons(port);
-
-	/* Don't use `inet_aton` because it doesn't support IPv6. */
-	if (inet_pton(AF_INET, config->serv_ip_str, &addr->sin_addr.s_addr) <= 0) {
-		fprintf(stderr, "Unexpected format of IPv4.\n");
-		return -1;
-	}
-
-	return 0;
-}
-
-static int read_srv_ip_from_argv(int argc, char **argv, client_config_t *config) {
+static int read_srv_addr_from_argv(int argc, char **argv, client_config_t *config) {
 	int d = argc - optind;
 	char *last = argv[argc - 1];
 
 	if (d == 1) {
-		config->serv_ip_str = last;
+		config->serv_addr_str = last;
 	} else if (d == 0 && !(strlen(last) == 2 && !strncmp(last, "--", 2))) {
-		fprintf(stderr, "Missing server's IP. See --" LONG_OPTION_HELP ".\n");
+		fprintf(stderr, "Missing server's address. See --" LONG_OPTION_HELP ".\n");
 		return -1;
 	} else {
 		fprintf(stderr, "Unexpected options. See --" LONG_OPTION_HELP ".\n");
 		return -1;
 	}
 
-	return init_server_addr(config);
+	return 0;
 }
 
 int read_config_from_argv(int argc, char **argv, client_config_t *config) {
@@ -132,5 +115,5 @@ int read_config_from_argv(int argc, char **argv, client_config_t *config) {
 	};
 	const int n = ARRAY_LENGTH(allowed_options);
 	return common_read_config_from_argv(argc, argv, allowed_options, (void*)config, n) < 0 ?
-		-1 : read_srv_ip_from_argv(argc, argv, config);
+		-1 : read_srv_addr_from_argv(argc, argv, config);
 }

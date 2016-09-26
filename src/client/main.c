@@ -20,7 +20,6 @@ static int run_protocol(SSL *ssl, int socket) {
 
 static int daemon_work(const base_config_t *base_config) {
 	client_config_t *config = (client_config_t*)base_config;
-	const struct sockaddr_in *addr = &config->serv_addr;
 	security_config_t *security_config = SECURITY_CONFIG(config);
 	int fd, ret = 0;
 
@@ -29,7 +28,7 @@ static int daemon_work(const base_config_t *base_config) {
 		return -1;
 	}
 
-	if ((fd = connect_server(addr)) < 0) {
+	if ((fd = connect_server(config)) < 0) {
 		syslog(LOG_ERR, "Can't connect to server");
 		return -1;
 	}
@@ -112,7 +111,7 @@ int main(int argc, char** argv) {
 	syslog(LOG_INFO, "Starting client. Hello!");
 
 	if (load_config(argc, argv, &config) < 0) {
-		syslog(LOG_INFO, "Loading config has failed");
+		syslog(LOG_INFO, "Loading configuration has failed");
 	} else if (run(&config) < 0)
 		syslog(LOG_ERR, "Running client has failed");
 

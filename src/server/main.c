@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 	syslog(LOG_INFO, "Starting server. Hello!");
 
 	if (load_config(argc, argv, &config) < 0)
-		syslog(LOG_INFO, "Loading config has failed");
+		syslog(LOG_INFO, "Loading configuration has failed");
 	else if (run(&config) < 0)
 		syslog(LOG_ERR, "Running server has failed");
 

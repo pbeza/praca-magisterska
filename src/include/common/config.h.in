@@ -101,6 +101,11 @@
 #define BASE_CONFIG(config)		( &(config)->base_config )
 
 /**
+ * Fetch server's port numbert from pointer to client or server configuration.
+ */
+#define PORT(config)			( BASE_CONFIG(config)->port )
+
+/**
  * Options' IDs.
  * \note Option ID is used as a bit index in `uint32_t` variable to mark active
  * options. Therefore IDs must be positive integers less than 32.
