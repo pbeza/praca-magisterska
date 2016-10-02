@@ -19,7 +19,7 @@ W~niniejszym rozdziale przedstawiono biblioteki, które wykorzystano w~implement
 
 Podstawową biblioteką którą wykorzystano do~implementacji projektu jest biblioteka systemowa \texttt{glibc}, która jest liderem wśród bibliotek implementujących standard~ISO~C. Przykładowymi alternatywami są~biblioteki takie jak \texttt{musl} i~$\mu\texttt{Clibc}$, które są~często spotykane w~systemach wbudowanych ze~względu na~mniejsze obciążenie pamięci zarówno statycznej, jak i~dynamicznej. Biblioteki te~implementują standard~ISO~C wraz z~rozszerzeniami w~sposób maksymalnie oszczędny, tzn.~w~taki sposób, aby jak najoszczędniej dysponować pamięcią i~dostępem do~procesora. Przykładowe zastosowania tak odchudzonych bibliotek można znaleźć zarówno w~profesjonalnych rozwiązaniach jak i~w~konfiguracji płytek przeznaczonych do~nauki systemów wbudowanych, takich jak \emph{Raspberry~Pi}, \emph{Banana~Pi} czy~\emph{Orange~Pi}. Do~stworzenia własnej dystrybucji \gls{gnulinux} przeznaczonej na~takie systemy można skorzystać z~takich narzędzi jak np.~\emph{Buildroot} czy~\emph{OpenWRT}.
 
-W~ramach implementacji i~testów projektu nie przetestowano działania aplikacji z~bibliotekami implementującymi standard~ISO~C innymi niż~\texttt{glibc}. W~przypadku dalszego rozwoju niniejszego projektu, możnaby było dostosować implementację do~działania z~bibliotekami, które pozwoliłyby na~działanie programu na~najoszczędniejszych platformach wbudowanych, dla~których biblioteka~\texttt{glibc} byłaby zbyt wymagająca. Byłoby to~szczególnie pożądane w~przypadku obsługi starszych maszyn vendingowych, bankomatów i~biletomatów, które mogą nie mieć wystarczającej ilości miejsca, aby obsłużyć standardową bibliotekę~\texttt{glibc}.
+W~ramach implementacji i~testów projektu nie przetestowano działania aplikacji z~bibliotekami implementującymi standard~ISO~C innymi niż~\texttt{glibc}. W~przypadku dalszego rozwoju niniejszego projektu, można by było dostosować implementację do~działania z~bibliotekami, które pozwoliłyby na~działanie programu na~najoszczędniejszych platformach wbudowanych, dla~których biblioteka~\texttt{glibc} byłaby zbyt wymagająca. Byłoby to~szczególnie pożądane w~przypadku obsługi starszych maszyn vendingowych, bankomatów i~biletomatów, które mogą nie mieć wystarczającej ilości miejsca, aby obsłużyć standardową bibliotekę~\texttt{glibc}.
 
 %---------------------------------------
 
@@ -33,7 +33,7 @@ Istnieje wiele bibliotek kryptograficznych, które, pod warunkiem poprawnego uż
 
 \subsection{libconfig}
 
-Zarówno aplikacja kliencka, jak i~serwerowa, mogą być konfigurowane przez parametry podane przy uruchamianiu programu, jak i~przez konfigurację czytaną z~pliku tekstowego. Konfiguracja programu wyspecyfikowana w~parametrach wywołania programu nadpisuje konfigurację wczytaną z~pliku konfiguracyjnego, która z~kolei nadpisuje wartości domyślne, zapisane w~kodzie programu. Oznacza to w~szczególności, że jeśli ten sam parametr jest wyspecyfikowany zarówno jako parametr wywołania programu, jak i~w konfiguracji wczytanej z~pliku konfiguracyjnego, to~przyjmowana jest tylko wartość parametru z~wywołania programu (tzn.~ze zmiennej~\texttt{**argv}).
+Zarówno aplikacja kliencka, jak i~serwerowa, mogą być konfigurowane przez parametry podane przy uruchamianiu programu, jak i~przez konfigurację czytaną z~pliku tekstowego. Konfiguracja programu, określona parametrami jego wywołania, nadpisuje konfigurację wczytaną z~pliku konfiguracyjnego, która z~kolei nadpisuje wartości domyślne, zapisane w~kodzie programu. Oznacza to w~szczególności, że jeśli ten sam parametr jest wyspecyfikowany zarówno jako parametr wywołania programu, jak i~w konfiguracji wczytanej z~pliku konfiguracyjnego, to~przyjmowana jest tylko wartość parametru z~wywołania programu (tzn.~ze zmiennej~\texttt{**argv}).
 
 Do~czytania konfiguracji z~pliku została wykorzystana biblioteka \texttt{libconfig}. Biblioteka ta~również umożliwia zapisanie konfiguracji do~pliku, jednak ta funkcjonalność nie została wykorzystana. Format konfiguracji przypomina formatowanie~JSON, chociaż składnia nie jest identyczna.
 
@@ -211,6 +211,6 @@ Do sprawnego poruszania się po drzewie katalogów projektu wykorzystano menadż
 
 \section{Formatowanie kodu}
 
-Dokonano starań, aby formatowanie kodu źródłowego było zgodne z~wytycznymi zaproponowanymi przez programistów \glslink{kernel}{jądra} systemu \gls{gnulinux}~\cite{kernel-coding-style}. Wszystkie ewntualne przypadki złamania konwencji formatowania kodu są~niecelowe.
+Dokonano starań, aby formatowanie kodu źródłowego było zgodne z~wytycznymi zaproponowanymi przez programistów \glslink{kernel}{jądra} systemu \gls{gnulinux}~\cite{kernel-coding-style}. Wszystkie ewentualne przypadki złamania konwencji formatowania kodu są~niecelowe.
 
 \end{document}
