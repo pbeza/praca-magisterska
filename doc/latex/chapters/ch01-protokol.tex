@@ -7,6 +7,8 @@
 
 W~tym rozdziale opisano sieciowy protokół komunikacji między serwerem i~klientem.
 
+%------------------------------------------------------------------------------
+
 \section{Bezpieczeństwo}
 \label{sec:security}
 
@@ -21,6 +23,8 @@ Umożliwienie przejęcia kontroli nad wszystkimi klientami byłoby prawdopodobni
 W~celu maksymalnego zaostrzenia rygorów bezpieczeństwa protokołu, do powyższych własności można dodać również inne, w~szczególności, własność \emph{\glslink{pfs}{Perfect Forward Secrecy~(PFS)}} (patrz rozdział~\ref{sec:pfs}).
 
 W~kolejnych podrozdziałach zostaną opisane metody, które zostały wykorzystane do~zapewnienia poszczególnych elementów, składających się na~bezpieczeństwo protokołu. Wszystkie opisane dalej algorytmy i~metody kryptograficzne zostały wykorzystane przez niniejszy projekt przez wykorzystanie popularnej, otwartoźródłowej biblioteki kryptograficznej~\gls{openssl}, implementującej protokół kryptograficzny~\gls{ssl/tls}.
+
+%---------------------------------------
 
 \subsection{SSL/TLS}
 \label{sec:ssl-tls}
@@ -48,6 +52,8 @@ kEECDH+ECDSA kEECDH kEDH +SHA !aNULL !eNULL !LOW !3DES !MD5 !EXP !DSS !PSK !SRP 
 \end{lstlisting}
 
 Pełny opis słów kluczowych można znaleźć w~dokumentacji \gls{openssl} oraz w~darmowej, regularnie aktualizowanej elektronicznej książce\footnote{Jest ona częścią większej książki pt.~,,Bulletproof SSL and TLS"~(ISBN:~978-1907117046). Projekt \gls{openssl} ma~raczej opinię słabo udokumentowanego, dlatego te~książki mają spore znaczenie praktyczne.} pt.~,,OpenSSL Cookbook" autorstwa Ivana Ristić'a, polecanej na~oficjalnej stronie internetowej projektu~\gls{openssl}~\cite{openssl-cookbook-suites}.
+
+%---------------------------------------
 
 \subsection{Uwierzytelnienie}
 
@@ -93,17 +99,23 @@ Aby sprawdzić czy~certyfikat jest przez nas zaufany, wystarczy wydać komendę:
 $ openssl verify -verbose certificate.pem
 \end{lstlisting}
 
+%---------------------------------------
+
 \subsection{Poufność}
 
 Poufność komunikacji nie jest tak krytyczna jak uwierzytelnienie serwera, jednak jest również istotna, ponieważ atakujący podsłuchujący komunikację między serwerem i~klientami, mógłby się~wiele dowiedzieć o~wersjach i~konfiguracji oprogramowania klientów. Dzięki zdobytej wiedzy, atakujący mógłby przeanalizować np.~czy oprogramowanie klientów jest przestarzałe i~podatne na~ataki, czy konfiguracja oprogramowania pozwala na~wykorzystanie luk bezpieczeństwa.
 
 Komunikacja między serwerem i~klientem jest szyfrowana symetrycznym, blokowym szyfrem \gls{aes} z~kluczem 256-bitowym~(preferowane podczas negocjacji) lub 128-bitowym. Dla~obu długości klucza możliwe jest działanie w~trybie~GCM\footnote{\emph{Galois/Counter Mode}.}~(preferowane) lub~domyślnym.
 
+%---------------------------------------
+
 \subsection{Integralność}
 
 Integralność komunikacji jest konieczna, aby zapobiec atakom typu \emph{man in the middle}, polegającym na~modyfikacji komunikacji między serwerem i~klientem, niezależnie od~tego czy jest ona~szyfrowana czy nie.
 
 Algorytm używany do~sprawdzania integralności wiadomości jest negocjowany tak jak algorytmy używane do~zapewnienia uwierzytelnienia, szyfrowania i~ustalenia wspólnego klucza dla symetrycznego algorytmu szyfrującego komunikację (patrz rozdział~\ref{sec:ssl-tls}). Możliwe algorytmy to: \emph{AEAD}\footnote{Ściśle rzecz biorąc tryb AEAD~(ang.~\emph{Authenticated Encryption with Associated Data}) jest klasą wiązania bloków zaszyfrowanych w~blokowym algorytmie szyfrującym (ang.~\emph{Block cipher mode of operation}. \gls{aes} pracujący w trybie GCM należy do~tej klasy, dzięki czemu integralność jest zapewniana ,,przy okazji" szyfrowania komunikacji.}, \emph{SHA384}, \emph{SHA256} i~\emph{SHA1}.
+
+%---------------------------------------
 
 \subsection{Perfect Forward Secrecy}
 \label{sec:pfs}
@@ -136,7 +148,9 @@ Ilustracja~\ref{fig:dh} obrazowo przedstawia w~jaki sposób działa algorytm \gl
 	\label{fig:dh}
 \end{figure}
 
-\subsection{Wynegocjowany zestaw kryptograficzny}
+%---------------------------------------
+
+\subsection{Zestawy kryptograficzne}
 
 W~praktyce, podczas testów, w~czasie których nawiązywano połączenie \gls{ssl/tls} pomiędzy klientem i~serwerem uruchamianym na~systemie z~zainstalowanym \gls{openssl} w~wersji \texttt{1.0.2h}, strony połączenia zawsze negocjowały zestaw algorytmów \texttt{ECDHE-RSA-AES256-GCM-SHA384}, który oznacza użycie najnowszego dostępnej wersji protokołu~\glslink{ssl/tls}{TLS}, tj.~protokołu~TLSv1.2, zapewniającego:
 \begin{enumerate}

@@ -150,6 +150,10 @@
 %\RequirePackage{tikz}
 %\usetikzlibrary{matrix}
 
+% Nierozjechane linki w tytułowiej stronie informacyjnej
+
+\RequirePackage{listliketab}
+
 % Włączenie nagłówków na każdej stronie z informacją o numerze strony i tytułem
 
 \RequirePackage{fancyhdr}
@@ -257,6 +261,8 @@
 \def\@author{\@latex@error{No author given}\@ehc}
 \def\supervisor#1{\gdef\@supervisor{#1}}
 \def\@supervisor{\@latex@error{No supervisor given}\@ehc}
+\def\supervisoremail#1{\gdef\@supervisoremail{#1}}
+\def\@supervisoremail{\@latex@error{No supervisor e-mail given}\@ehc}
 \def\discipline#1{\gdef\@discipline{#1}}
 \def\@discipline{\@latex@error{No discipline given}\@ehc}
 \def\monthyear#1{\gdef\@monthyear{#1}}

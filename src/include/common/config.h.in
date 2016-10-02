@@ -41,7 +41,8 @@
  * Short version of the license.
  */
 #define COPYRIGHT			"Copyright (C) 2016 @AUTHOR@."\
-					"\nLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>."\
+					"\nLicense GPLv3+ with exception for OpenSSL. See full license to learn more."\
+					"\nGNU GPL version 3 or later <http://gnu.org/licenses/gpl.html> with exception."\
 					"\nThis is free software: you are free to change and redistribute it."\
 					"\nThere is NO WARRANTY, to the extent permitted by law.\n"
 

@@ -7,18 +7,39 @@
 
 Kod źródłowy projektu został napisany w~języku~\texttt{C}. Kod jest zgodny ze standardem~\gls{posix}. W~rozdziale przedstawiono szczegóły implementacyjne projektu.
 
+%------------------------------------------------------------------------------
+
 \section{Wykorzystane biblioteki}
-\subsection{OpenSSL}
 
-Istnieje wiele bibliotek kryptograficznych, które, pod warunkiem poprawnego użycia, mogą istotnie poprawić bezpieczeństwo protokołu. Najpopularniejsze z~nich~to: \emph{\gls{openssl}}, \emph{GnuTLS}, \emph{LibreSSL} i~\emph{BoringSSL}. Biblioteką istniejącą najdłużej z~wymienionych jest \gls{openssl}. Biblioteka GnuTLS powstała w~odpowiedzi na~\gls{openssl} ze względu na to, że \gls{openssl} nie jest opublikowana na~licencji kompatybilnej z~licencją~\gls{gpl}, przez co liczne projekty korzystające z~tej licencji (np.~\emph{Wireshark}), nie mogą korzystać z~\gls{openssl}. Biblioteki LibreSSL i~BoringSSL są~\emph{fork'ami} biblioteki \gls{openssl}. Ponadto BoringSSL powstał w~\emph{Google} na~potrzeby użycia w~różnych produktach tej firmy, w~szczególności w~przeglądarce internetowej \emph{Chrome}. Długa historia \gls{openssl}, mnogość bibliotek pokrewnych, mających źródło w~kodzie źródłowym \gls{openssl} oraz względnie duża społeczność kryptologów zgromadzonych wokół tego projektu, spowodowały, że biblioteka \gls{openssl} została użyta do~zapewnienia bezpieczeństwa opracowanego protokołu sieciowego.
+W~niniejszym rozdziale przedstawiono biblioteki, które wykorzystano w~implementacji projektu.
 
-\gls{openssl} udostępnia wiele metod i~algorytmów kryptograficznych, które przetrwały wiele lat kryptoanaliz (np.~\gls{aes}, \gls{rsa}) i~są powszechnie uważane za bezpieczne, pod warunkiem poprawnego ich~wykorzystania i~zastosowania kluczy o~odpowiednio dużej długości. Wykorzystanie tej biblioteki w~kontekście komunikacji między klientem i~serwerem zostało opisane w~rozdziale~\ref{sec:security}, dotyczącym bezpieczeństwa opracowanego protokołu.
+%---------------------------------------
 
 \subsection{glibc}
 
+Podstawową biblioteką którą wykorzystano do~implementacji projektu jest biblioteka systemowa \texttt{glibc}, która jest liderem wśród bibliotek implementujących standard~ISO~C. Przykładowymi alternatywami są~biblioteki takie jak \texttt{musl} i~$\mu\texttt{Clibc}$, które są~często spotykane w~systemach wbudowanych ze~względu na~mniejsze obciążenie pamięci zarówno statycznej, jak i~dynamicznej. Biblioteki te~implementują standard~ISO~C wraz z~rozszerzeniami w~sposób maksymalnie oszczędny, tzn.~w~taki sposób, aby jak najoszczędniej dysponować pamięcią i~dostępem do~procesora. Przykładowe zastosowania tak odchudzonych bibliotek można znaleźć zarówno w~profesjonalnych rozwiązaniach jak i~w~konfiguracji płytek przeznaczonych do~nauki systemów wbudowanych, takich jak \emph{Raspberry~Pi}, \emph{Banana~Pi} czy~\emph{Orange~Pi}. Do~stworzenia własnej dystrybucji \gls{gnulinux} przeznaczonej na~takie systemy można skorzystać z~takich narzędzi jak np.~\emph{Buildroot} czy~\emph{OpenWRT}.
+
+W~ramach implementacji i~testów projektu nie przetestowano działania aplikacji z~bibliotekami implementującymi standard~ISO~C innymi niż~\texttt{glibc}. W~przypadku dalszego rozwoju niniejszego projektu, możnaby było dostosować implementację do~działania z~bibliotekami, które pozwoliłyby na~działanie programu na~najoszczędniejszych platformach wbudowanych, dla~których biblioteka~\texttt{glibc} byłaby zbyt wymagająca. Byłoby to~szczególnie pożądane w~przypadku obsługi starszych maszyn vendingowych, bankomatów i~biletomatów, które mogą nie mieć wystarczającej ilości miejsca, aby obsłużyć standardową bibliotekę~\texttt{glibc}.
+
+%---------------------------------------
+
+\subsection{OpenSSL}
+
+Istnieje wiele bibliotek kryptograficznych, które, pod warunkiem poprawnego użycia, mogą istotnie poprawić bezpieczeństwo protokołu. Najpopularniejsze z~nich~to: \emph{\gls{openssl}}, \emph{GnuTLS}, \emph{LibreSSL} i~\emph{BoringSSL}. Biblioteką istniejącą najdłużej z~wymienionych jest \gls{openssl}. Biblioteka GnuTLS powstała w~odpowiedzi na~\gls{openssl} ze względu na to, że \gls{openssl} nie jest opublikowana na~licencji kompatybilnej z~licencją~\glslink{gpl}{GPL}, przez co liczne projekty korzystające licencji~\glslink{gpl}{GPL} (np.~\emph{Wireshark}), nie mogą korzystać z~\gls{openssl}. Biblioteki LibreSSL i~BoringSSL są~\emph{fork'ami} biblioteki \gls{openssl}. BoringSSL powstał w~\emph{Google} na~potrzeby użycia w~różnych produktach tej firmy, w~szczególności w~przeglądarce internetowej \emph{Chrome}. Długa historia \gls{openssl}, mnogość bibliotek pokrewnych, mających źródło w~kodzie źródłowym \gls{openssl} oraz względnie duża społeczność kryptologów zgromadzonych wokół tego projektu, spowodowały, że biblioteka \gls{openssl} została użyta do~zapewnienia bezpieczeństwa opracowanego protokołu sieciowego.
+
+\gls{openssl} udostępnia wiele metod i~algorytmów kryptograficznych, które przetrwały wiele lat kryptoanaliz (np.~\gls{aes}, \gls{rsa}) i~są powszechnie uważane za bezpieczne, pod warunkiem poprawnego ich~wykorzystania i~zastosowania kluczy o~odpowiednio dużej długości. Wykorzystanie tej biblioteki w~kontekście komunikacji między klientem i~serwerem zostało opisane w~rozdziale~\ref{sec:security}, dotyczącym bezpieczeństwa opracowanego protokołu.
+
+%---------------------------------------
+
+\subsection{libconfig}
+
+Zarówno aplikacja kliencka, jak i~serwerowa, mogą być konfigurowane przez parametry podane przy uruchamianiu programu, jak i~przez konfigurację czytaną z~pliku tekstowego. Konfiguracja programu wyspecyfikowana w~parametrach wywołania programu nadpisuje konfigurację wczytaną z~pliku konfiguracyjnego, która z~kolei nadpisuje wartości domyślne, zapisane w~kodzie programu. Oznacza to w~szczególności, że jeśli ten sam parametr jest wyspecyfikowany zarówno jako parametr wywołania programu, jak i~w konfiguracji wczytanej z~pliku konfiguracyjnego, to~przyjmowana jest tylko wartość parametru z~wywołania programu (tzn.~ze zmiennej~\texttt{**argv}).
+
+Do~czytania konfiguracji z~pliku została wykorzystana biblioteka \texttt{libconfig}. Biblioteka ta~również umożliwia zapisanie konfiguracji do~pliku, jednak ta funkcjonalność nie została wykorzystana. Format konfiguracji przypomina formatowanie~JSON, chociaż składnia nie jest identyczna.
+
 %------------------------------------------------------------------------------
 
-\section{Utworzenie daemona systemowego}
+\section{Tworzenie daemona systemowego}
 
 Poprawne utworzenie tradycyjnego \glslink{unix-like-system}{*niksowego} \glslink{daemon}{daemona} systemowego, nazywanego popularnie \emph{SysV daemon} (w~odróżnieniu od~\emph{systemd daemon}), czyli procesu nie mającego dostępu do~terminala i~pracującego w~tle, nie jest procesem trywialnym, tzn. nie sprowadza się~do wywołania funkcji \texttt{daemon()}, która co~prawda istnieje w~niektórych systemach i~pochodzi z~systemu~BSD, ale implementuje tylko podzbiór operacji zalecanych przez manual~\texttt{daemon(7)}.
 
@@ -42,11 +63,13 @@ Poniżej przedstawiono algorytm tworzenia tradycyjnego daemona systemowego. Algo
 \end{enumerate}
 Po~wykonaniu powyższych kroków, proces~\texttt{B} jest poprawnie stworzonym, klasycznym daemonem typu~SysV. W~praktyce kroki od~1~do~4 są~zbędne jeśli daemon jest tworzony na~początku uruchomienia programu, przed dokonaniem istotnych zmian, których skutki cofnęłyby pierwsze 4~kroki opisanego wyżej algorytmu.
 
+Aplikacja klienta i~serwera tworzą daemona systemowego w~powyższy sposób. Kod tworzący daemona jest współdzielony między klientem i~serwerem, ale~linkowanie obiektu powstałego z~kodu tworzącego daemona jest statyczne.
+
 %------------------------------------------------------------------------------
 
 \section{Procesy i wątki}
 
-Aplikacja jest w~pełni zgodna ze~standardem \gls{posix}, dlatego do~obsługi wątków wykorzystano biblioteki \texttt{pthread}, wchodząca w~skład tego standardu~\cite{pthreads-posix-manual}.
+Aplikacja jest w~pełni zgodna ze~standardem \gls{posix}, dlatego do~obsługi wątków wykorzystano biblioteki \texttt{pthread}, wchodząca w~skład tego standardu~\cite{pthreads-posix-manual}. Wykorzystanie wątków jest szczególnie istotne po~stronie serwera. Każdy klient jest obsługiwany przez osobny wątek serwera. Do~celów synchronizacji dostępu do~zasobów dzielonych przez wątki wykorzystano muteksy~\texttt{pthread\_mutex\_t} i~rodzinę funkcji im~towarzyszących.
 
 %------------------------------------------------------------------------------
 
@@ -81,11 +104,6 @@ Aplikacja jest w~pełni zgodna ze~standardem \gls{posix}, dlatego do~obsługi w�
 %TEMP_FAILURE_RETRY(expr)
 %\end{lstlisting}
 %
-%%------------------------------------------------------------------------------
-
-\section{Formatowanie kodu}
-
-Formatowanie kodu źródłowego jest w~większości zgodne z~wytycznymi zaproponowanymi przez programistów \glslink{kernel}{jądra} systemu \gls{gnulinux}~\cite{kernel-coding-style}.
 
 %------------------------------------------------------------------------------
 
@@ -93,7 +111,9 @@ Formatowanie kodu źródłowego jest w~większości zgodne z~wytycznymi zapropon
 
 W~tym rozdziale opisano z~jakich narzędzi i~jakiej konfiguracji korzystano w~trakcie implementacji niniejszej pracy.
 
-\subsection{\texttt{cmake}}
+%---------------------------------------
+
+\subsection{cmake}
 
 Do kompilacji kodu źródłowego wykorzystano \texttt{CMake}, który jest elastycznym, rozszerzalnym oprogramowaniem do~zarządzania procesem kompilacji i~instalacji oprogramowania na~różnych platformach i~systemach operacyjnych~\cite{cmake}. Jego konfiguracja sprowadza się do~napisania plików konfiguracyjnych o~zwyczajowej nazwie \mbox{\texttt{CMakeLists.txt}}, umieszczonych w~podkatalogach z~kodem źródłowym projektu. Wynikiem uruchomienia \texttt{cmake} na~\glslink{unix-like-system}{systemach *uniksowych} jest klasyczny plik \texttt{Makefile}~\cite{gnu-makefile-manual}.
 
@@ -109,16 +129,27 @@ make cscope
 make ctags
 \end{lstlisting}
 
-\subsubsection{Generowanie dokumentacji \texttt{Doxygen}}
-\subsubsection{Generowanie paczek \texttt{deb} i innych}
+%---------------------------------------
 
-\subsection{Edytor tekstu \texttt{vim}}
+\subsection{Doxygen}
 
-Do pisania kodu źródłowego projektu oraz niniejszej dokumentacji wykorzystano edytor tekstu~\texttt{vim} w~wersji~7.4, rozbudowany o wtyczki~(\emph{ang.~plugins}).
+%---------------------------------------
 
-\subsubsection{Wykorzystane wtyczki \texttt{vim}}
+\subsection{Valgrind}
 
-Lista wtyczek \texttt{vim}, wykorzystanych w czasie implementacji:
+%---------------------------------------
+
+\subsection{Generowanie paczek \texttt{deb} i~innych}
+
+%---------------------------------------
+
+\subsection{Narzędzia użytkowe}
+
+%---------------------------------------
+
+\subsubsection{Edytor tekstu vim}
+
+Do pisania kodu źródłowego projektu oraz niniejszej dokumentacji wykorzystano edytor tekstu~\texttt{vim} w~wersji~7.4, rozbudowany o wtyczki~(\emph{ang.~plugins}). Poniżej przedstawiono listę wtyczek \texttt{vim}, wykorzystanych w czasie implementacji:
 \begin{itemize}
 	\item\texttt{NerdTree} --- narzędzie do wyświetlania drzewa systemu plików i~nawigowania po nim~\cite{nerdtree-vimorg,nerdtree-github},
 	\item\texttt{ctags} --- narzędzie do~generowania metainformacji do~wygodnego nawigowania po kodzie źródłowym~\cite{ctags},
@@ -127,8 +158,8 @@ Lista wtyczek \texttt{vim}, wykorzystanych w czasie implementacji:
 	\item\texttt{cscope} --- narzędzie do~wygodnego przeglądania kodu źródłowego, bardziej rozbudowane od \texttt{ctags}~\cite{cscope}.
 \end{itemize}
 
-\subsubsection{Konfiguracja \texttt{.vimrc}}
-
+Konfiguracja \path{~/.vimrc}:
+TODO
 % TODO dodać inne ustawienia z .vimrc
 
 \paragraph{ctags}
@@ -162,14 +193,24 @@ endfunction
 au BufEnter /* call LoadCscope()
 \end{lstlisting}
 
-\subsection{\texttt{latexmk}}
+%---------------------------------------
+
+\subsection{latexmk}
 
 \begin{lstlisting}[language=bash,numbers=none,caption={Uruchomienie ciągłej kompilacji \LaTeX do PDF}]
 latexmk -pvc -pdf
 \end{lstlisting}
 
-\subsection{Menadżer plików \texttt{Midnight Commander}}
+%---------------------------------------
+
+\subsection{Menadżer plików Midnight Commander}
 
 Do sprawnego poruszania się po drzewie katalogów projektu wykorzystano menadżer plików \texttt{Midnight~Commander}.
+
+%------------------------------------------------------------------------------
+
+\section{Formatowanie kodu}
+
+Dokonano starań, aby formatowanie kodu źródłowego było zgodne z~wytycznymi zaproponowanymi przez programistów \glslink{kernel}{jądra} systemu \gls{gnulinux}~\cite{kernel-coding-style}. Wszystkie ewntualne przypadki złamania konwencji formatowania kodu są~niecelowe.
 
 \end{document}
