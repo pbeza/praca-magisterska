@@ -298,6 +298,31 @@
 
 \usepackage{dirtree}
 
+% Graficzne schematy protokołów.
+
+\RequirePackage{bytefield}
+\RequirePackage{multirow}
+
+\let\oldbitbox\bitbox
+\renewcommand{\bitbox}[2]{%
+	\oldbitbox{#1}{\texttt{#2}}%
+}
+
+\let\oldwordbox\wordbox
+\renewcommand{\wordbox}[3][lrbt]{%
+	\oldwordbox[#1]{#2}{\texttt{#3}}%
+}
+
+% Zmiana nazw tabeli (AtBeginDocument, aby zmusić paczkę babel)
+
+\AtBeginDocument{%
+	\renewcommand\tablename{Tabela}
+}
+
+% Nie rób nowej linii przed wypunktowaniami
+
+\newcommand\mynobreakpar{\par\nobreak\@afterheading}
+
 % Strona tytułowa
 
 \renewcommand{\maketitle}{

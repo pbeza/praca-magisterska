@@ -31,8 +31,8 @@ Wersja angielska tytułu pracy:
 \label{cel-i-zakres}
 
 \noindent Celem niniejszej pracy jest:
-\blockcquote{formularz-zgloszenia-pracy}{Zaprojektowanie i~zaimplementowanie protokołu umożliwiającego propagowanie zmian w~systemie plików, pakietów oraz elementów konfiguracji do~stacji roboczych pod kontrolą systemu operacyjnego \glslink{gnulinux}{Linux/GNU} lub~innego systemu \glslink{unix-like-system}{\emph{*nix}}, a~także elastycznego standardu opisu zmian oraz narzędzi dla~ich rejestrowania i~dostosowywania. Proponowaną architekturą jest model klient--serwer. Konkretny obraz zmian może być przeznaczony dla~konkretnej dystrybucji, jednakże stworzone rozwiązania praktyczne powinny dawać się w~prosty sposób dostosowywać do~popularnych dystrybucji systemu \glslink{gnulinux}{Linux/GNU} oraz systemów \glslink{unix-like-system}{\emph{*nix}}.}
-W~uproszczeniu, cel niniejszej pracy to zaprojektowanie i~zaimplementowanie narzędzia dla~systemów \glslink{gnulinux}{GNU/Linux} do~zarządzania synchronizacją oprogramowania i~jego konfiguracji na~grupie komputerów. Oprogramowanie takie często nazywa się~oprogramowaniem typu \emph{Software Configuration Management~(SCM})~\cite{wiki:scm}.
+\blockcquote{formularz-zgloszenia-pracy}{Zaprojektowanie i~zaimplementowanie protokołu umożliwiającego propagowanie zmian w~systemie plików, pakietów oraz elementów konfiguracji do~stacji roboczych pod kontrolą systemu operacyjnego \glslink{gnulinux}{Linux/GNU} lub~innego systemu \glslink{unix-like-system}{*nix}, a~także elastycznego standardu opisu zmian oraz narzędzi dla~ich rejestrowania i~dostosowywania. Proponowaną architekturą jest model klient--serwer. Konkretny obraz zmian może być przeznaczony dla~konkretnej dystrybucji, jednakże stworzone rozwiązania praktyczne powinny dawać się w~prosty sposób dostosowywać do~popularnych dystrybucji systemu \glslink{gnulinux}{Linux/GNU} oraz systemów \glslink{unix-like-system}{*nix}.}
+W~uproszczeniu, celem niniejszej pracy jest zaprojektowanie i~zaimplementowanie narzędzia dla~systemów \glslink{unix-like-system}{*niksowych} do~zarządzania synchronizacją oprogramowania i~jego konfiguracji na~grupie komputerów. Oprogramowanie takie często nazywa się~oprogramowaniem typu \emph{Software Configuration Management~(SCM})~\cite{wiki:scm}.
 
 %------------------------------------------------------------------------------
 
@@ -46,14 +46,16 @@ W praktyce problem dystrybuowania jednolitego oprogramowania jest szczególnie o
 
 \section{Zastosowania}
 
-Zastosowania rozwiązania problemu dystrybuowania jednolitego oprogramowania możemy znaleźć wszędzie tam gdzie istnieje grupa ludzi, procesów, maszyn lub~innych podmiotów, z~których każdy wykorzystuje to~samo lub podobnie skonfigurowane oprogramowanie na~urządzeniu wyposażonym w~system operacyjny, podłączonym do~sieci komputerowej opartej o~\gls{tcpip}. W~szczególności mogą to~być grupy serwerów pracujących w~podobnym środowisku, np.~maszyny developerskie, testowe i~produkcyjne, \emph{load-balancery}, serwery działające w~ramach systemu rozproszonego, laboratoria komputerowe na~uczelniach, w szkołach, bibliotekach, biura, komputery administracji publicznej, w~szczególności w~urzędach, bankomaty, biletomaty, maszyny vendingowe, komputery kasjerów w~hipermarketach, komputery osobiste osób korzystających z~kilku(nastu) komputerów.
+Zastosowania rozwiązania problemu dystrybuowania jednolitego oprogramowania możemy znaleźć wszędzie tam gdzie istnieje grupa ludzi, procesów, maszyn lub~innych podmiotów, z~których każdy wykorzystuje to~samo lub podobnie skonfigurowane oprogramowanie na~urządzeniu wyposażonym w~system operacyjny, podłączonym do~sieci komputerowej opartej o~\gls{tcpip}. W~szczególności mogą to~być grupy serwerów pracujących w~podobnym środowisku, np.~maszyny developerskie, testowe i~produkcyjne, \emph{load-balancery}, serwery działające w~ramach systemu rozproszonego, laboratoria komputerowe na~uczelniach, w szkołach, bibliotekach, biura, komputery administracji publicznej, w~szczególności w~urzędach, bankomaty, biletomaty, automatach sprzedających~(automaty vendingowe), komputery kasjerów w~hipermarketach, komputery osobiste osób korzystających z~kilku(nastu) komputerów.
 
 %------------------------------------------------------------------------------
 
 \section{Istniejące rozwiązania}
 \label{sec:istniejace-rozwiazania}
 
-W~niniejszym rozdziale przedstawiono przegląd wybranych, najpopularniejszych obecnie rozwiązań dla~problemu dystrybuowania oprogramowania na~wiele komputerów połączonych siecią komputerową~\cite{leading-scms,wiki:scm-comparison}. Wymienione w~tym rozdziale aplikacje, poza możliwością synchronizacji zainstalowanego oprogramowania i~konfiguracji, pozwalają również na~inne manipulacje systemem operacyjnym, np.~zapewnienie istnienia zadanego użytkownika w~systemie czy zapewnienie działanie zadanego \emph{\glslink{daemon}{daemona}}.
+W~niniejszym rozdziale przedstawiono przegląd czterech wybranych, prawdopodobnie najpopularniejszych obecnie rozwiązań dla~problemu dystrybuowania oprogramowania na~sieć komputerów~\cite{leading-scms,wiki:scm-comparison}.
+
+Wymienione w~tym rozdziale aplikacje, poza możliwością synchronizacji zainstalowanego oprogramowania i~konfiguracji, pozwalają również na~inne manipulacje systemem operacyjnym, np.~zapewnienie istnienia zadanego użytkownika w~systemie czy zapewnienie działanie zadanego \glslink{demon}{demona}. Takie oprogramowanie jest nazywane często w~skrócie~\emph{Software configuration management (SCM)} implementującym podejście \emph{Infrastructure as~Code}~\cite{wiki:iac,wiki:scm}.
 
 %---------------------------------------
 
@@ -88,7 +90,7 @@ file { 'motd':
 }
 \end{lstlisting}
 
-\begin{lstlisting}[numbers=none,caption={Manifest Puppet gwarantujący, że \emph{\gls{daemon}} \hreftt{https://httpd.apache.org/}{httpd} jest włączony i~działa},label=puppet-httpd-example]
+\begin{lstlisting}[numbers=none,caption={Manifest Puppet gwarantujący, że \gls{demon} \hreftt{https://httpd.apache.org/}{httpd} jest włączony i~działa},label=puppet-httpd-example]
 service { 'httpd':
   ensure => running,
   enable => true,
@@ -125,7 +127,7 @@ Klientami mogą być systemy działające pod kontrolą m.in.: \emph{AIX}, \emph
 
 Użytkownikami Chefa, tak jak w~przypadku Puppeta, jest wiele dużych firm i~uniwersytetów, takich jak: \emph{Airbnb}, \emph{Disney}, \emph{Mozilla}, \emph{Facebook}, \emph{HP Public Cloud}, \emph{Prezi}, \emph{Uniwersytet Minnesoty}~\cite{chef-customers,puppet-chef-disney}.
 
-Odpowiednikiem plików konfiguracyjnych, które w~Puppet nazywane są~\emph{manifestami}, są~pliki nazywane w~nomenklaturze Chef \emph{przepisami}~(ang.~\emph{recipe}). Przykładowe przepisy przedstawiono w~przykładach~\ref{chef-apache-example}, \ref{chef-user-example} i~\ref{chef-service-example}. Więcej przykładów można znaleźć w~bogatej w~przyładowe przepisy dokumentacji Chef~\cite{chef-examples}.
+Odpowiednikiem plików konfiguracyjnych, które w~Puppet nazywane są~\emph{manifestami}, są~pliki nazywane w~nomenklaturze Chef \emph{przepisami}~(ang.~\emph{recipe}). Przykładowe przepisy przedstawiono w~przykładach~\ref{chef-apache-example}, \ref{chef-user-example} i~\ref{chef-service-example}. Więcej przykładów można znaleźć w~bogatej w~przykładowe przepisy dokumentacji Chef~\cite{chef-examples}.
 
 \begin{lstlisting}[numbers=none,caption={Przepis Chef gwarantujący, że serwer Apache zostanie zainstalowany niezależnie od~tego jak~się~nazywa paczka oprogramowania go~dostarczająca},label=chef-apache-example]
 package 'Install Apache' do
@@ -157,10 +159,6 @@ end
 
 %---------------------------------------
 
-\subsection{Salt}
-
-%---------------------------------------
-
 \subsection{Ansible}
 
 Ansible jest rozwiązaniem do~zarządzania oprogramowaniem różniącym się od~Puppet i~Chef tym, że~do~konfiguracji klientów \glslink{unix-like-system}{*nixowych} używa~SSH, a~do~klientów Windows WinRM i~PowerShell, dzięki czemu klienci nie~muszą uruchamiać żadnych dodatkowych procesów działających w~tle. Autorzy projektu Ansible podkreślają, że~w~przeciwieństwie do~konkurencji, Ansible nie jest skomplikowany, przez co~jego szybkie opanowanie jest łatwe.
@@ -168,6 +166,12 @@ Ansible jest rozwiązaniem do~zarządzania oprogramowaniem różniącym się od~
 Ansible może zostać uruchomiony na~wielu różnych systemach~\glslink{unix-like-system}{*nixowych}, takich systemach jak~np.~\emph{Red~Hat}, \emph{Debian}, \emph{CentOS}, \emph{OS~X}, \emph{BSD}. System Windows może działać tylko w~roli klienta. Konfiguracja Ansible jest przechowywana w~plikach tekstowych~YAML.
 
 Ansible został opublikowany na~licencji~\glslink{gpl}{GPL} w~wersji~3, a~jego pierwsza wersja została wydana w~2012~roku. Projekt jest napisany w~języku \texttt{Python}~\cite{ansible,ansible-github}.
+
+%---------------------------------------
+
+\subsection{Salt}
+
+Salt, nazywany też SaltStack, to~otwartoźdłowe oprogramowanie napisane w~Pythonie i~opublikowane na~licencji \glslink{apache2.0-license}{Apache~2.0} mające podobną funkcjonalność do~opisanych dotychczas rozwiązań problemu synchronizacji oprogramowania. Pierwsza wersja Salt powstała w~2011~roku, a~więc jest to~najmłodsze rozwiązanie wśród przedstawionych~\cite{saltstack}.
 
 %------------------------------------------------------------------------------
 

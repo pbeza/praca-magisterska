@@ -5,7 +5,87 @@
 \chapter{Protokół komunikacji}
 \label{chapter:protokol}
 
-W~tym rozdziale opisano sieciowy protokół komunikacji między serwerem i~klientem.
+Opracowany protokół komunikacji między serwerem i~klientem opiera się na~protokole~TCP. Bezpieczeństwo protokołu zapewnia wykorzystanie biblioteki OpenSSL. Oba te~elementy, tzn.~opracowany protokół aplikacji oraz~wykorzystana biblioteka OpenSSL, działają w~warstwie aplikacji modelu~TCP/IP, co~przedstawia tabela~\ref{fig:protocol-big-view}.
+
+W~niniejszym rozdziale opisano wszystkie rodzaje pakietów przesyłanych między klientem i~serwerem oraz~sposób wykorzystania biblioteki OpenSSL w~projekcie.
+
+\begin{table}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{l|l|l|l}
+	   & Warstwy modelu OSI & Warstwy modelu TCP/IP~(DoD)       & Wykorzystane protokoły \\\hline\hline
+	1. & Aplikacji          & \multirow{3}{*}{Aplikacji}        & \multirow{3}{*}{\parbox{3cm}{\textbf{Opracowany protokół + SSL}}} \\\cline{1-2}
+	2. & Prezentacji        &                                   & \\\cline{1-2}
+	3. & Sesji              &                                   & \\\hline
+	4. & Transportowa       & Transportowa                      & TCP \\\hline
+	5. & Sieciowa           & Internetu                         & IPv4 \\\hline
+	6. & Łącza danych       & \multirow{2}{*}{Dostępu do sieci} & \multirow{2}{*}{Ethernet} \\\cline{1-2}
+	7. & Fizyczna           &                                   &
+\end{tabular}
+\caption{Wykorzystane protokoły sieciowe i~ich umiejscowienie w~modelach OSI~i~TCP/IP~(DoD)}
+\label{fig:protocol-big-view}
+\end{table}
+
+%------------------------------------------------------------------------------
+
+\section{Rodzaje pakietów}
+
+W~opracowanym protokole występuje kilka typów pakietów, które są~wysyłane między klientem i~serwerem. W~zależności od~etapu i~okoliczności komunikacji wykorzystywany jest różny typ pakietu. Pakiety są~łatwo rozróżnialne między sobą dzięki polu \texttt{TYPE} pakietu, określającym jego rodzaj. Pole \texttt{TYPE} jest częścią nagłówka pakietu. Nagłówek pakietu jest wspólny dla~wszystkich rodzajów pakietów. Rysunek~\ref{fig:packet-common} przedstawia schemat pamięci części wspólnej wszystkich pakietów, czyli nagłówek pakietu.
+
+\begin{figure}
+	\centering
+	\begin{bytefield}{32}
+		\bitheader{0,3,4,7,8,11,12,15,16,19,20,23,24,27,28,31}\\
+		\begin{leftwordgroup}{Część wspólna\\wszystkich pakietów}
+			\bitbox{4}{\texttt{VER}} & \bitbox{4}{\color{lightgray}\rule{\width}{\height}} & \bitbox{8}{TYPE} & \bitbox{8}{PKG\_MGR} & \bitbox{8}{\color{lightgray}\rule{\width}{\height}}
+		\end{leftwordgroup}\\
+		\begin{leftwordgroup}{Pola zależne\\od~typu pakietu}
+			\wordbox[lrt]{2}{\vdots}\\
+			\skippedwords\\
+			\wordbox[lrb]{2}{\vdots}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+	\caption{Schemat wszystkich pakietów opracowanego protokołu}
+	\label{fig:packet-common}
+\end{figure}
+
+Znaczenie poszczególnych pól w~nagłówku:\mynobreakpar
+\begin{enumerate}
+\item \texttt{VER} (\emph{Version}, 4~bity) --- Wersja protokołu. Jedyna akceptowalna wartość to~$1$. Pole to~zostało wprowadzone z~myślą o~ewentualnych przyszłych wersjach projektu, w~których mogłyby zajść duże zmiany w~układzie pól pakietów.
+\item \texttt{TYPE} (8~bitów) --- Typ pakietu określający rolę jaką pakiet odgrywa w~komunikacji. Wszystkie typy pakietów zostały opisane w~dalszej części niniejszej pracy.
+\item \texttt{PKG\_MGR} (\emph{Package manager}, 8~bitów) --- Rodzaj używanego przez klienta menadżera pakietów.
+\end{enumerate}
+
+W~tym rozdziale zostaną omówione rodzaje przesyłanych pakietów, wykorzystywanych w~opracowanym protokole m.in.~do~zarządzania oprogramowaniem klientów, obsługą sytuacji awaryjnych i~do~diagnostyki.
+
+%---------------------------------------
+
+\subsection{Żądanie aktualizacji}
+
+Pakiet z~żądaniem aktualizacji oprogramowania jest przesyłany do~serwera przez klienta i~oznacza chęć dostosowania oprogramowania klienta do~wzorca serwera. Taki rodzaj pakietu jest symbolicznie oznaczany w~kodzie programu nazwą \texttt{FULL\_UPGRADE}. Nazwa ta, jak również nazwy innych pakietów przesyłanych w~ramach opracowanego protokołu, są~zdefiniowane jako typ wyliczeniowy~\texttt{enum~packet\_t} w~jednym z~plików nagłówkowych współdzielonych przez program serwera i~klienta. Typ pakietu jest przesyłany w~każdym pakiecie przesyłanym między klientem i~serwerem.
+
+Serwer może mieć wiele wzorców oprogramowania dla~różnych klientów, dlatego klient przesyła do~serwera numer~wybranego zestawu konfiguracji. Numery konfiguracji odpowiadają różnym zapotrzebowaniom konfiguracji komputerów. Przykładowo, laboratorium komputerowe przeznaczone na~potrzebny nauki systemów CAD/CAM może mieć inny zestaw oprogramowania od~tego używanego w~salach w~bibliotece, co~może być odzwierciedlone w~przypisaniu innych numerów oprogramowania dla~komputerów w~tych salach.
+
+\begin{figure}[h]
+	\centering
+	\begin{bytefield}{32}
+		\bitheader{0,3,4,7,8,11,12,15,16,19,20,23,24,27,28,31}\\
+		\begin{leftwordgroup}{Część wspólna\\wszystkich pakietów}
+			\bitbox{4}{Version} & \bitbox{4}{\color{lightgray}\rule{\width}{\height}} & \bitbox{8}{Type} & \bitbox{8}{Distro} & \bitbox{8}{\color{lightgray}\rule{\width}{\height}}
+		\end{leftwordgroup}\\
+		\bitbox{16}{Config set} & \bitbox{16}{Not used}\\
+		\wordbox{1}{Length}\\
+		\begin{rightwordgroup}{Payload}
+			\wordbox[lrt]{2}{$N$ data words}\\
+			\skippedwords\\
+			\wordbox[lrb]{2}{}
+		\end{rightwordgroup}\\
+		\begin{rightwordgroup}{Footer}
+			\wordbox{1}{Checksum}
+		\end{rightwordgroup}
+	\end{bytefield}
+	\caption{Pakiet~\texttt{FULL\_UPGRADE}}
+	\label{fig:packet-full-upgrade}
+\end{figure}
 
 %------------------------------------------------------------------------------
 
@@ -14,7 +94,7 @@ W~tym rozdziale opisano sieciowy protokół komunikacji między serwerem i~klien
 
 Uwzględnienie bezpieczeństwa protokołu jest krytyczne dla projektu, ponieważ umożliwia on~serwerowi na zarządzanie konfiguracją wszystkich klientów. Zaniedbanie bezpieczeństwa protokołu lub~jego wadliwa implementacja, umożliwiłaby atakującemu system, na~przejęcie kontroli nad~wszystkimi klientami, np.~przez przesłanie klientom złośliwych aktualizacji oprogramowania lub~konfiguracji.
 
-Umożliwienie przejęcia kontroli nad wszystkimi klientami byłoby prawdopodobnie najgorszym z~możliwych scenariuszy zarówno dla użytkowników jak i~administratora atakowanej sieci, jednak niedbała implementacja protokołu mogłaby umożliwiać również wiele innych rodzajów ataków, np. \emph{replay attack} i~\emph{man in the middle~(MITM)}. W~celu uniknięcia podatności protokołu na~wymienione i~inne, popularne rodzaje ataków, należy zagwarwantować bezpieczeństwo protokołu co~najmniej pod względem:
+Umożliwienie przejęcia kontroli nad wszystkimi klientami byłoby prawdopodobnie najgorszym z~możliwych scenariuszy zarówno dla użytkowników jak i~administratora atakowanej sieci, jednak niedbała implementacja protokołu mogłaby umożliwiać również wiele innych rodzajów ataków, np. \emph{replay attack} i~\emph{man in the middle~(MITM)}. W~celu uniknięcia podatności protokołu na~wymienione i~inne, popularne rodzaje ataków, należy zagwarantować bezpieczeństwo protokołu co~najmniej pod względem:
 \begin{enumerate}
 \item uwierzytelnienia co~najmniej serwera,
 \item poufności komunikacji,
@@ -105,7 +185,7 @@ $ openssl verify -verbose certificate.pem
 
 Poufność komunikacji nie jest tak krytyczna jak uwierzytelnienie serwera, jednak jest również istotna, ponieważ atakujący podsłuchujący komunikację między serwerem i~klientami, mógłby się~wiele dowiedzieć o~wersjach i~konfiguracji oprogramowania klientów. Dzięki zdobytej wiedzy, atakujący mógłby przeanalizować np.~czy oprogramowanie klientów jest przestarzałe i~podatne na~ataki, czy konfiguracja oprogramowania pozwala na~wykorzystanie luk bezpieczeństwa.
 
-Komunikacja między serwerem i~klientem jest szyfrowana symetrycznym, blokowym szyfrem \gls{aes} z~kluczem 256-bitowym~(preferowane podczas negocjacji) lub 128-bitowym. Dla~obu długości klucza możliwe jest działanie w~trybie~GCM\footnote{\emph{Galois/Counter Mode}.}~(preferowane) lub~domyślnym.
+Komunikacja między serwerem i~klientem jest szyfrowana symetrycznym, blokowym szyfrem \gls{aes} z~kluczem 256-bitowym~(preferowane podczas negocjacji) lub~128-bitowym. Dla~obu długości klucza możliwe jest działanie w~trybie~GCM\footnote{\emph{Galois/Counter Mode}.}~(preferowane) lub~domyślnym.
 
 %---------------------------------------
 
@@ -124,20 +204,20 @@ Własność \emph{\glslink{pfs}{Perfect Forward Secrecy}~(PFS)} umożliwia zacho
 
 W~uproszczeniu problem polega na tym, że~w~przypadku wykorzystania~\gls{rsa} do~ustalenia klucza sesyjnego dla~symetrycznego algorytmu szyfrującego, strona~A komunikacji, używa klucza publicznego strony~B do~zaszyfrowania losowego klucza sesyjnego\footnote{W~rzeczywistości \emph{Pre-Master Key}, z~którego dopiero jest wyliczany ostateczny klucz sesyjny.}~i wysyła go~do~B. Po~skompromitowaniu klucza prywatnego strony~B, atakujący może odczytać całą komunikację między stronami A~i~B, deszyfrując najpierw klucz sesyjny, a~następnie całą komunikację między serwerem i~klientem.
 
-\gls{pfs} radzi sobie z~tym problemem rezygnując z~przesyłania zaszyfrowanego klucza sesyjnego, wprowadzając zamiast tego efemeryczny algorytm \glslink{dh}{Diffiego-Hellmana} w~postaci klasycznej~(\glslink{dh}{EDH})~i krzywoeliptycznej~(ECDHE)~\cite{mimuw-ssl-w04,openssl-cookbook-suites}. Efemeryczny algorytm \glslink{dh}{Diffiego-Hellmana} różni się od~nieefemerycznego tym, że~w~efemerycznej wersji algorytmu parmetry algorytmu nie~są stałe, tzn. np.~nie są zapisane w~certyfikacie. Wersja krzywoliniowa co do~pomysłu nie różni się istotnie od~wersji klasycznej, tylko działa na krzywych eliptycznych. Wersja krzywoeliptyczna charakteryzuje się~lepszą wydajnością na~większości procesorów ze~względu na~fakt, że~do zapewnienia takiego samego poziomu bezpieczeństwa jakie gwarantuje~\gls{rsa} z~kluczem o~długości 3072~bitów, potrzeba krzywoeliptycznego odpowiednika o~długości 256~bitów.
+\gls{pfs} radzi sobie z~tym problemem rezygnując z~przesyłania zaszyfrowanego klucza sesyjnego, wprowadzając zamiast tego efemeryczny algorytm \glslink{dh}{Diffiego-Hellmana} w~postaci klasycznej~(\glslink{dh}{EDH})~i krzywoeliptycznej~(ECDHE)~\cite{mimuw-ssl-w04,openssl-cookbook-suites}. Efemeryczny algorytm \glslink{dh}{Diffiego-Hellmana} różni się od~nieefemerycznego tym, że~w~efemerycznej wersji algorytmu parametry algorytmu nie~są stałe, tzn. np.~nie są zapisane w~certyfikacie. Wersja krzywoliniowa co do~pomysłu nie różni się istotnie od~wersji klasycznej, tylko działa na krzywych eliptycznych. Wersja krzywoeliptyczna charakteryzuje się~lepszą wydajnością na~większości procesorów ze~względu na~fakt, że~do zapewnienia takiego samego poziomu bezpieczeństwa jakie gwarantuje~\gls{rsa} z~kluczem o~długości 3072~bitów, potrzeba krzywoeliptycznego odpowiednika o~długości 256~bitów.
 
 Poniżej został przedstawiony schemat przebiegu klasycznego algorytmu \glslink{dh}{Diffiego-Hellmana}.
 
 \begin{enumerate}
-\item A i B uzgadniają skończoną, cykliczną groupę~$G$ rzędu~$p$, gdzie $p$ jest liczbą pierwszą i~generator $g$ tej grupy. Atakujący może znać~$g$ oraz~$p$.
+\item A i~B uzgadniają skończoną, cykliczną grupę~$G$ rzędu~$p$, gdzie $p$ jest liczbą pierwszą i~generator $g$ tej grupy. Atakujący może znać~$g$ oraz~$p$.
 \item A wybiera tajną liczbę całkowitą $1 \leq a < n$ i~wysyła do~B liczbę $A=g^a \pmod{p}$.
 \item B wybiera tajną liczbę całkowitą $1 \leq b < n$ i~wysyła do~A liczbę $B=g^b \pmod{p}$.
 \item A oblicza $s=B^a \pmod{p}$.
 \item B oblicza $s=A^b \pmod{p}$.
-\item A i B współdzielą tajną liczbę~$s$.
+\item A i~B współdzielą tajną liczbę~$s$.
 \end{enumerate}
 
-Podsłuchujący atakujący, aby~poznać liczbę $s$, musiałby rozwiązać tzw.~problem Diffiego-Hellmana, który jest problemem równie trudnym w~sensie teorii złożoności, jak problem algorytmu dyskretnego. Liczby $a$ i~$b$ są~przed wysłaniem podpisywane kluczem prywantym w celu uniknięcia ataku~\emph{man in the middle}.
+Podsłuchujący atakujący, aby~poznać liczbę $s$, musiałby rozwiązać tzw.~problem Diffiego-Hellmana, który jest problemem równie trudnym w~sensie teorii złożoności, jak problem algorytmu dyskretnego. Liczby $a$ i~$b$ są~przed wysłaniem podpisywane kluczem prywatnym w celu uniknięcia ataku~\emph{man in the middle}.
 
 Ilustracja~\ref{fig:dh} obrazowo przedstawia w~jaki sposób działa algorytm \glslink{dh}{Diffiego-Hellmana}.
 

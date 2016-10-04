@@ -5,7 +5,11 @@
 \chapter{Implementacja}
 \label{chapter:implementacja}
 
-Kod źródłowy projektu został napisany w~języku~\texttt{C}. Kod jest zgodny ze standardem~\gls{posix}. W~rozdziale przedstawiono szczegóły implementacyjne projektu.
+Kod źródłowy projektu został napisany wyłącznie w~języku~\texttt{C}, co~wyróżnia projekt na~tle istniejących rozwiązań przedstawionych w~rozdziale~\ref{sec:istniejace-rozwiazania}. Wszystkie one~zostały bowiem napisane w~językach skryptowych, co~może uniemożliwić ich uruchomienie na~najoszczędniejszych systemach wbudowanych, które mogą nie~być zdolne do~uruchamiania interpreterów języków skryptowych. Programy wykonywane przez interpreter oraz~wykonywane na~maszynach wirtualnych (np.~Javy i~.NET) pochłaniają dużo więcej pamięci niż~ich odpowiedniki napisane w~języku~\texttt{C}, skompilowane do~kodu maszynowego. Wybór języka \texttt{C}~stanowi więc zaletę zaproponowanej implementacji, osiągniętej jednak kosztem łatwej przenośności na~systemy nie\glslink{unix-like-system}{*nixowe}.
+
+Podczas implementacji dokonano wszelkich starań, aby~kod źródłowy projektu był zgodny ze standardem~\gls{posix}. Wszelkie ewentualne odstępstwa od~standardu są~niezamierzone.
+
+W~niniejszym rozdziale przedstawiono szczegóły implementacyjne projektu, w~szczególności zastosowane biblioteki i~użyte struktury danych.
 
 %------------------------------------------------------------------------------
 
@@ -17,9 +21,9 @@ W~niniejszym rozdziale przedstawiono biblioteki, które wykorzystano w~implement
 
 \subsection{glibc}
 
-Podstawową biblioteką którą wykorzystano do~implementacji projektu jest biblioteka systemowa \texttt{glibc}, która jest liderem wśród bibliotek implementujących standard~ISO~C. Przykładowymi alternatywami są~biblioteki takie jak \texttt{musl} i~$\mu\texttt{Clibc}$, które są~często spotykane w~systemach wbudowanych ze~względu na~mniejsze obciążenie pamięci zarówno statycznej, jak i~dynamicznej. Biblioteki te~implementują standard~ISO~C wraz z~rozszerzeniami w~sposób maksymalnie oszczędny, tzn.~w~taki sposób, aby jak najoszczędniej dysponować pamięcią i~dostępem do~procesora. Przykładowe zastosowania tak odchudzonych bibliotek można znaleźć zarówno w~profesjonalnych rozwiązaniach jak i~w~konfiguracji płytek przeznaczonych do~nauki systemów wbudowanych, takich jak \emph{Raspberry~Pi}, \emph{Banana~Pi} czy~\emph{Orange~Pi}. Do~stworzenia własnej dystrybucji \gls{gnulinux} przeznaczonej na~takie systemy można skorzystać z~takich narzędzi jak np.~\emph{Buildroot} czy~\emph{OpenWRT}.
+Podstawową biblioteką którą wykorzystano do~implementacji projektu jest biblioteka systemowa \texttt{glibc}, która jest najczęściej używaną biblioteką implementującą standard~ISO~C. Alternatywami mogłyby być~biblioteki takie jak np.~\texttt{musl} i~$\mu\texttt{Clibc}$, które ze~względu na~mniejsze wykorzystanie zasobów systemowych, są~często wykorzystywane w~systemach wbudowanych. Biblioteki te~implementują standard~ISO~C wraz z~rozszerzeniami w~sposób maksymalnie oszczędny, tzn.~w~taki sposób, aby~jak najoszczędniej dysponować zasobami takimi jak~pamięć i~czas procesora. Przykładowe zastosowania tak odchudzonych bibliotek można znaleźć zarówno w~profesjonalnych rozwiązaniach systemów wbudowanych, jak i~w~konfiguracji płytek przeznaczonych do~ich nauki, takich jak \emph{Raspberry~Pi}, \emph{Banana~Pi} czy~\emph{Orange~Pi}. Do~stworzenia własnej dystrybucji \gls{gnulinux} przeznaczonej na~takie systemy można skorzystać z~takich narzędzi jak np.~\emph{Buildroot}, \emph{OpenWRT} i~\emph{Yocto}.
 
-W~ramach implementacji i~testów projektu nie przetestowano działania aplikacji z~bibliotekami implementującymi standard~ISO~C innymi niż~\texttt{glibc}. W~przypadku dalszego rozwoju niniejszego projektu, można by było dostosować implementację do~działania z~bibliotekami, które pozwoliłyby na~działanie programu na~najoszczędniejszych platformach wbudowanych, dla~których biblioteka~\texttt{glibc} byłaby zbyt wymagająca. Byłoby to~szczególnie pożądane w~przypadku obsługi starszych maszyn vendingowych, bankomatów i~biletomatów, które mogą nie mieć wystarczającej ilości miejsca, aby obsłużyć standardową bibliotekę~\texttt{glibc}.
+Podczas testów aplikacji testowano jej~działanie wyłącznie z~linkowaną dynamicznie biblioteką \texttt{glibc}. W~przypadku dalszego rozwoju niniejszego projektu, można by było dostosować implementację do~działania z~bibliotekami, które pozwoliłyby na~działanie programu na~najoszczędniejszych platformach wbudowanych, dla~których biblioteka~\texttt{glibc} byłaby zbyt wymagająca. Byłoby to~szczególnie pożądane w~przypadku obsługi starszych maszyn, które mogą nie mają wystarczającej ilości miejsca, aby~obsłużyć standardową bibliotekę~\texttt{glibc}, ale~są na~tyle rozbudowane, że~nie są systemami typu~\emph{bare metal}, tzn.~mają system operacyjny.
 
 %---------------------------------------
 
@@ -33,41 +37,41 @@ Istnieje wiele bibliotek kryptograficznych, które, pod warunkiem poprawnego uż
 
 \subsection{libconfig}
 
-Zarówno aplikacja kliencka, jak i~serwerowa, mogą być konfigurowane przez parametry podane przy uruchamianiu programu, jak i~przez konfigurację czytaną z~pliku tekstowego. Konfiguracja programu, określona parametrami jego wywołania, nadpisuje konfigurację wczytaną z~pliku konfiguracyjnego, która z~kolei nadpisuje wartości domyślne, zapisane w~kodzie programu. Oznacza to w~szczególności, że jeśli ten sam parametr jest wyspecyfikowany zarówno jako parametr wywołania programu, jak i~w konfiguracji wczytanej z~pliku konfiguracyjnego, to~przyjmowana jest tylko wartość parametru z~wywołania programu (tzn.~ze zmiennej~\texttt{**argv}).
+Zarówno aplikacja kliencka, jak i~serwerowa, mogą być konfigurowane przez parametry podane przy uruchamianiu programu, jak i~przez konfigurację czytaną z~pliku tekstowego. Konfiguracja programu, określona parametrami jego wywołania, nadpisuje konfigurację wczytaną z~pliku konfiguracyjnego, która z~kolei nadpisuje wartości domyślne, zapisane w~kodzie programu. Oznacza to~w~szczególności, że jeśli ten sam parametr jest wyspecyfikowany zarówno jako parametr wywołania programu, jak i~w konfiguracji wczytanej z~pliku konfiguracyjnego, to~przyjmowana jest tylko wartość parametru z~wywołania programu (tzn.~ze zmiennej~\texttt{**argv}).
 
 Do~czytania konfiguracji z~pliku została wykorzystana biblioteka \texttt{libconfig}. Biblioteka ta~również umożliwia zapisanie konfiguracji do~pliku, jednak ta funkcjonalność nie została wykorzystana. Format konfiguracji przypomina formatowanie~JSON, chociaż składnia nie jest identyczna.
 
 %------------------------------------------------------------------------------
 
-\section{Tworzenie daemona systemowego}
+\section{Tworzenie demona systemowego}
 
-Poprawne utworzenie tradycyjnego \glslink{unix-like-system}{*niksowego} \glslink{daemon}{daemona} systemowego, nazywanego popularnie \emph{SysV daemon} (w~odróżnieniu od~\emph{systemd daemon}), czyli procesu nie mającego dostępu do~terminala i~pracującego w~tle, nie jest procesem trywialnym, tzn. nie sprowadza się~do wywołania funkcji \texttt{daemon()}, która co~prawda istnieje w~niektórych systemach i~pochodzi z~systemu~BSD, ale implementuje tylko podzbiór operacji zalecanych przez manual~\texttt{daemon(7)}.
+Poprawne utworzenie tradycyjnego \glslink{unix-like-system}{*niksowego} \glslink{demon}{demona} systemowego, nazywanego popularnie \emph{SysV daemon} (w~odróżnieniu od~\emph{systemd daemon}), czyli procesu nie mającego dostępu do~terminala i~pracującego w~tle, nie jest procesem trywialnym, tzn. nie sprowadza się~do~wywołania funkcji \texttt{daemon()}, która co~prawda istnieje w~niektórych systemach i~pochodzi z~systemu~BSD, ale implementuje tylko podzbiór operacji zalecanych przez manual~\texttt{daemon(7)}.
 
-Poniżej przedstawiono algorytm tworzenia tradycyjnego daemona systemowego. Algorytm ten składa się z~15 kroków wymienionych w~manualu \texttt{daemon(7)}~\cite{creating-daemon}.%\cite{creating-daemon-stackoverflow}
+Poniżej przedstawiono algorytm tworzenia tradycyjnego demona systemowego. Algorytm ten składa się z~15 kroków wymienionych w~manualu \texttt{daemon(7)}~\cite{creating-daemon}.%\cite{creating-daemon-stackoverflow}
 \begin{enumerate}
 	\item Zamknąć wszystkie deskryptory plików poza standardowym wejściem~(\texttt{stdin}), wyjściem~(\texttt{stdout}) i~wyjściem diagnostycznym~(\texttt{stderr}).
 	\item Ustawić domyślne \glslink{signal-handler}{signal handlery} (\texttt{SIG\_DFL}) dla~wszystkich sygnałów funkcją~\texttt{sigaction()}.
 	\item Zresetować maskę sygnałów używając funkcji~\texttt{sigprocmask()}.
-	\item Usunąć własne zmienne środowiskowe, a~zmodyfikowane wcześniej zmienne środowiskowe przywrócić do~ich domyślnych wartości, aby~nie mogły one negatywnie wpłynąć na~działanie daemona.
+	\item Usunąć własne zmienne środowiskowe, a~zmodyfikowane wcześniej zmienne środowiskowe przywrócić do~ich domyślnych wartości, aby~nie mogły one negatywnie wpłynąć na~działanie demona.
 	\item Stworzyć nowy proces~\texttt{A} przez wywołanie funkcji \texttt{fork()}.
-	\item W~procesie \texttt{A} wywołać funkcję \texttt{setsid()}, aby odłączyć się od~terminala i~stworzyć nową, niezależną sesję.
-	\item W~procesie \texttt{A} wywołać funkcję \texttt{fork()}, która stworzy proces-dziecko~\texttt{B}, który zostanie daemonem. Dzięki temu, że~\texttt{fork()} został wywołany drugi raz, upewniamy się, że daemon nie będzie miał szansy odzyskania dostępu do~terminala, od którego został odłączony.
-	\item W~procesie \texttt{A} wywołać funkcję \texttt{exit()}, dzięki czamu proces~\texttt{B} zmieni rodzica na~proces \texttt{init}, którego \texttt{PID} jest równy~1.
-	\item W~procesie \texttt{B} przekierować standardowe wejście~(\texttt{stdin}), wyjście~(\texttt{stdout}) i~wyjście diagnostyczne~(\texttt{stderr}) do \path{/dev/null}.
-	\item W~procesie \texttt{B} ustawić \texttt{umask} na~0, aby późniejsze wywołania funkcji takich jak \texttt{open()}, \texttt{mkdir()} itp. miały bezpośrednią kontrolę dostępu tworzonych plików i~katalogów.
-	\item W~procesie \texttt{B} zmienić aktualny katalog (ang.~\emph{Current Working Directory~(CWD)}) na~katalog root~\path{/}, aby uniknąć sytuacji w~której daemon blokowałby punkty montowania od~bycia odmontowanym np.~komendą~\texttt{umount}.
-	\item W~procesie \texttt{B} zapisać \texttt{PID} procesu~\texttt{B} do~pliku tekstowego np.~\path{/run/mydaemon.pid}, aby upewnić się, że~istnieje tylko jedna instancja działającego daemona. Krok ten musi być zaimplementowany w~taki sposób, aby uniknąć wyścigu~(ang.~\emph{race condition}), tzn. tak, aby sprawdzenie czy~\texttt{PID} procesu zapisanego w~pliku nie należy do daemona oraz zapisanie nowego \texttt{PID} w~tym pliku, było atomowe. W~praktyce, zamiast czytać zawartość pliku, można użyć mechanizmu blokowania pliku funkcją~\texttt{lockf()}. Tak długo jak plik będzie blokowany przez instancję daemona, żadna inna instancja daemona nie zmieni zawartości pliku.
-	\item W~procesie \texttt{B} możliwie maksymalnie obniżyć uprawnienia daemona np.~funkcjami \texttt{setuid()} i~\texttt{setgid()}. Dzięki temu daemon w~przypadku np.~wadliwego działania lub błędu bezpieczeństwa, nie będzie miał uprawnień do~czynienia tak dużych szkód jakie miałby, gdyby miał pełne prawa użytkownika~\texttt{root}.
-	\item W~procesie \texttt{B} powiadomić proces, który rozpoczął cały algorytm, tj.~proces-rodzic zakończonego już procesu~\texttt{B}, że~tworzenie daemona się~powiodło. Można to~zaimplementować używając łącza nienazwanego~(ang.~\emph{unnamed pipe}), stworzonego przed pierwszym wywołaniem funkcji~\texttt{fork()}, dzięki czemu takie łącze byłoby dostępne w~rodzicu procesu~\texttt{A} i~procesie~\texttt{B}.
+	\item W~procesie \texttt{A} wywołać funkcję \texttt{setsid()}, aby~odłączyć się od~terminala i~stworzyć nową, niezależną sesję.
+	\item W~procesie \texttt{A} wywołać funkcję \texttt{fork()}, która stworzy proces-dziecko~\texttt{B}, który zostanie demonem. Dzięki temu, że~\texttt{fork()} został wywołany drugi raz, upewniamy się, że demon nie będzie miał szansy odzyskania dostępu do~terminala, od którego został odłączony.
+	\item W~procesie \texttt{A} wywołać funkcję \texttt{exit()}, dzięki czemu proces~\texttt{B} zmieni rodzica na~proces \texttt{init}, którego \texttt{PID} jest równy~1.
+	\item W~procesie \texttt{B} przekierować standardowe wejście~(\texttt{stdin}), wyjście~(\texttt{stdout}) i~wyjście diagnostyczne~(\texttt{stderr}) do~\path{/dev/null}.
+	\item W~procesie \texttt{B} ustawić \texttt{umask} na~0, aby~późniejsze wywołania funkcji takich jak \texttt{open()}, \texttt{mkdir()} itp. miały bezpośrednią kontrolę dostępu tworzonych plików i~katalogów.
+	\item W~procesie \texttt{B} zmienić aktualny katalog (ang.~\emph{Current Working Directory~(CWD)}) na~katalog root~\path{/}, aby~uniknąć sytuacji w~której demon blokowałby punkty montowania od~bycia odmontowanym np.~komendą~\texttt{umount}.
+	\item W~procesie \texttt{B} zapisać \texttt{PID} procesu~\texttt{B} do~pliku tekstowego np.~\path{/run/mydaemon.pid}, aby~upewnić się, że~istnieje tylko jedna instancja działającego demona. Krok ten musi być zaimplementowany w~taki sposób, aby~uniknąć wyścigu~(ang.~\emph{race condition}), tzn.~tak, aby~sprawdzenie czy~\texttt{PID} procesu zapisanego w~pliku nie należy do~demona oraz~zapisanie nowego \texttt{PID} w~tym pliku, było atomowe. W~praktyce, zamiast czytać zawartość pliku, można użyć mechanizmu blokowania pliku funkcją~\texttt{lockf()}. Tak długo jak plik będzie blokowany przez instancję demona, żadna inna instancja demona nie zmieni zawartości pliku.
+	\item W~procesie \texttt{B} możliwie maksymalnie obniżyć uprawnienia demona np.~funkcjami \texttt{setuid()} i~\texttt{setgid()}. Dzięki temu demon w~przypadku np.~wadliwego działania lub~błędu bezpieczeństwa, nie będzie miał uprawnień do~czynienia tak dużych szkód jakie miałby, gdyby miał pełne prawa użytkownika~\texttt{root}.
+	\item W~procesie \texttt{B} powiadomić proces, który rozpoczął cały algorytm, tj.~proces-rodzic zakończonego już procesu~\texttt{B}, że~tworzenie demona się~powiodło. Można to~zaimplementować używając łącza nienazwanego~(ang.~\emph{unnamed pipe}), stworzonego przed pierwszym wywołaniem funkcji~\texttt{fork()}, dzięki czemu takie łącze byłoby dostępne w~rodzicu procesu~\texttt{A} i~procesie~\texttt{B}.
 	\item W~rodzicu, który zainicjował algorytm, czyli w~rodzicu procesu~\texttt{A}, wywołać funkcję~\texttt{exit()}.
 \end{enumerate}
-Po~wykonaniu powyższych kroków, proces~\texttt{B} jest poprawnie stworzonym, klasycznym daemonem typu~SysV. W~praktyce kroki od~1~do~4 są~zbędne jeśli daemon jest tworzony na~początku uruchomienia programu, przed dokonaniem istotnych zmian, których skutki cofnęłyby pierwsze 4~kroki opisanego wyżej algorytmu.
+Po~wykonaniu powyższych kroków, proces~\texttt{B} jest poprawnie stworzonym, klasycznym demonem typu~SysV. W~praktyce kroki od~1~do~4 są~zbędne jeśli demon jest tworzony na~początku uruchomienia programu, przed dokonaniem istotnych zmian, których skutki cofnęłyby pierwsze 4~kroki opisanego wyżej algorytmu.
 
-Aplikacja klienta i~serwera tworzą daemona systemowego w~powyższy sposób. Kod tworzący daemona jest współdzielony między klientem i~serwerem, ale~linkowanie obiektu powstałego z~kodu tworzącego daemona jest statyczne.
+Aplikacja klienta i~serwera tworzą demona systemowego w~powyższy sposób. Kod tworzący demona jest współdzielony między klientem i~serwerem, ale~linkowanie obiektu powstałego z~kodu tworzącego demona jest statyczne.
 
 %------------------------------------------------------------------------------
 
-\section{Procesy i wątki}
+\section{Procesy i~wątki}
 
 Aplikacja jest w~pełni zgodna ze~standardem \gls{posix}, dlatego do~obsługi wątków wykorzystano biblioteki \texttt{pthread}, wchodząca w~skład tego standardu~\cite{pthreads-posix-manual}. Wykorzystanie wątków jest szczególnie istotne po~stronie serwera. Każdy klient jest obsługiwany przez osobny wątek serwera. Do~celów synchronizacji dostępu do~zasobów dzielonych przez wątki wykorzystano muteksy~\texttt{pthread\_mutex\_t} i~rodzinę funkcji im~towarzyszących.
 
@@ -115,7 +119,7 @@ W~tym rozdziale opisano z~jakich narzędzi i~jakiej konfiguracji korzystano w~tr
 
 \subsection{cmake}
 
-Do kompilacji kodu źródłowego wykorzystano \texttt{CMake}, który jest elastycznym, rozszerzalnym oprogramowaniem do~zarządzania procesem kompilacji i~instalacji oprogramowania na~różnych platformach i~systemach operacyjnych~\cite{cmake}. Jego konfiguracja sprowadza się do~napisania plików konfiguracyjnych o~zwyczajowej nazwie \mbox{\texttt{CMakeLists.txt}}, umieszczonych w~podkatalogach z~kodem źródłowym projektu. Wynikiem uruchomienia \texttt{cmake} na~\glslink{unix-like-system}{systemach *uniksowych} jest klasyczny plik \texttt{Makefile}~\cite{gnu-makefile-manual}.
+Do~kompilacji kodu źródłowego wykorzystano \texttt{CMake}, który jest elastycznym, rozszerzalnym oprogramowaniem do~zarządzania procesem kompilacji i~instalacji oprogramowania na~różnych platformach i~systemach operacyjnych~\cite{cmake}. Jego konfiguracja sprowadza się do~napisania plików konfiguracyjnych o~zwyczajowej nazwie \mbox{\texttt{CMakeLists.txt}}, umieszczonych w~podkatalogach z~kodem źródłowym projektu. Wynikiem uruchomienia \texttt{cmake} na~\glslink{unix-like-system}{systemach *uniksowych} jest klasyczny plik \texttt{Makefile}~\cite{gnu-makefile-manual}.
 
 \begin{lstlisting}[language=bash,numbers=none,caption={Uruchomienie \texttt{cmake} w~trybie \texttt{Debug}}]
 cmake -D CMAKE_BUILD_TYPE=Debug ..
@@ -149,9 +153,9 @@ make ctags
 
 \subsubsection{Edytor tekstu vim}
 
-Do pisania kodu źródłowego projektu oraz niniejszej dokumentacji wykorzystano edytor tekstu~\texttt{vim} w~wersji~7.4, rozbudowany o wtyczki~(\emph{ang.~plugins}). Poniżej przedstawiono listę wtyczek \texttt{vim}, wykorzystanych w czasie implementacji:
+Do~pisania kodu źródłowego projektu oraz niniejszej dokumentacji wykorzystano edytor tekstu~\texttt{vim} w~wersji~7.4, rozbudowany o wtyczki~(\emph{ang.~plugins}). Poniżej przedstawiono listę wtyczek \texttt{vim}, wykorzystanych w czasie implementacji:
 \begin{itemize}
-	\item\texttt{NerdTree} --- narzędzie do wyświetlania drzewa systemu plików i~nawigowania po nim~\cite{nerdtree-vimorg,nerdtree-github},
+	\item\texttt{NerdTree} --- narzędzie do~wyświetlania drzewa systemu plików i~nawigowania po nim~\cite{nerdtree-vimorg,nerdtree-github},
 	\item\texttt{ctags} --- narzędzie do~generowania metainformacji do~wygodnego nawigowania po kodzie źródłowym~\cite{ctags},
 	% http://stackoverflow.com/questions/934233/cscope-or-ctags-why-choose-one-over-the-other
 	% http://cscope.sourceforge.net/cscope_maps.vim
@@ -179,7 +183,7 @@ gdzie zmienna systemowa \gls{PWD} oznacza aktualny katalog roboczy.
 
 \paragraph{Cscope}
 
-Analogiczną konfigurację ustawiono, aby włączyć automatyczne szukanie plików pomocniczych dla~obsługi \texttt{Cscope} w~edytorze~\texttt{vim}~\cite{cscope,cscope-autoload}. Do~\path{~/.vimrc} dodano:
+Analogiczną konfigurację ustawiono, aby~włączyć automatyczne szukanie plików pomocniczych dla~obsługi \texttt{Cscope} w~edytorze~\texttt{vim}~\cite{cscope,cscope-autoload}. Do~\path{~/.vimrc} dodano:
 \begin{lstlisting}[language=tex,numbers=none,caption={Konfiguracja \texttt{Cscope} w~\texttt{.vimrc}}]
 function! LoadCscope()
   let db = findfile("cscope.out", "build,.;$HOME")
@@ -197,7 +201,7 @@ au BufEnter /* call LoadCscope()
 
 \subsection{latexmk}
 
-\begin{lstlisting}[language=bash,numbers=none,caption={Uruchomienie ciągłej kompilacji \LaTeX do PDF}]
+\begin{lstlisting}[language=bash,numbers=none,caption={Uruchomienie ciągłej kompilacji \LaTeX do~PDF}]
 latexmk -pvc -pdf
 \end{lstlisting}
 
@@ -205,12 +209,12 @@ latexmk -pvc -pdf
 
 \subsection{Menadżer plików Midnight Commander}
 
-Do sprawnego poruszania się po drzewie katalogów projektu wykorzystano menadżer plików \texttt{Midnight~Commander}.
+Do~sprawnego poruszania się po drzewie katalogów projektu wykorzystano menadżer plików \texttt{Midnight~Commander}.
 
 %------------------------------------------------------------------------------
 
 \section{Formatowanie kodu}
 
-Dokonano starań, aby formatowanie kodu źródłowego było zgodne z~wytycznymi zaproponowanymi przez programistów \glslink{kernel}{jądra} systemu \gls{gnulinux}~\cite{kernel-coding-style}. Wszystkie ewentualne przypadki złamania konwencji formatowania kodu są~niecelowe.
+Dokonano starań, aby~formatowanie kodu źródłowego było zgodne z~wytycznymi zaproponowanymi przez programistów \glslink{kernel}{jądra} systemu \gls{gnulinux}~\cite{kernel-coding-style}. Wszystkie ewentualne przypadki złamania konwencji formatowania kodu są~niecelowe.
 
 \end{document}
