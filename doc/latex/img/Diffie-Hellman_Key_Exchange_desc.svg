@@ -1,0 +1,721 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   id="svg3462"
+   height="647.17444"
+   width="1110.2511"
+   version="1.1">
+  <metadata
+     id="metadata3548">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs3546">
+    <filter
+       height="1.0469773"
+       y="-0.023488672"
+       width="1.016117"
+       x="-0.0080584753"
+       id="filter5070"
+       style="color-interpolation-filters:sRGB">
+      <feGaussianBlur
+         id="feGaussianBlur5072"
+         stdDeviation="0.25617334" />
+    </filter>
+  </defs>
+  <flowRoot
+     transform="translate(-246.6672,-760.06664)"
+     style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     id="flowRoot3550"
+     xml:space="preserve"><flowRegion
+       id="flowRegion3552"><rect
+         y="461.40094"
+         x="124.03251"
+         height="110.14087"
+         width="195.47523"
+         id="rect3554" /></flowRegion><flowPara
+       id="flowPara3556"></flowPara></flowRoot>  <flowRoot
+     transform="translate(-246.6672,-760.06664)"
+     style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     id="flowRoot3602"
+     xml:space="preserve"><flowRegion
+       id="flowRegion3604"><rect
+         style="font-size:20px"
+         y="419.28372"
+         x="126.29409"
+         height="47.711102"
+         width="189.44113"
+         id="rect3606" /></flowRegion><flowPara
+       id="flowPara3608" /></flowRoot>  <g
+     transform="translate(-4.9535156e-6,-3.0517583e-7)"
+     id="g6783">
+    <g
+       id="g6727"
+       transform="translate(0.61106301,0)">
+      <g
+         transform="translate(-12,0)"
+         id="g6640">
+        <g
+           id="g8032"
+           transform="translate(328.57515,6.1174943)">
+          <ellipse
+             cx="45.75"
+             cy="630.25"
+             rx="45"
+             ry="10"
+             id="ellipse4052"
+             style="fill:#796300;stroke:#000000;stroke-width:1.5" />
+          <path
+             d="m 0.75,630.25 0,-60 90,0 0,60"
+             id="path7000"
+             style="fill:#796300;stroke:#000000;stroke-width:1.5" />
+          <use
+             transform="translate(0,-60)"
+             id="use7002"
+             xlink:href="#ellipse4052"
+             x="0"
+             y="0"
+             width="100%"
+             height="100%" />
+        </g>
+        <g
+           id="g8042"
+           transform="translate(328.57515,6.1174943)">
+          <ellipse
+             cx="45.75"
+             cy="520.25"
+             rx="45"
+             ry="10"
+             id="ellipse4294"
+             style="fill:#ff5a00;stroke:#000000;stroke-width:1.5" />
+          <path
+             d="m 0.75,520.25 0,-20 90,0 0,20"
+             id="path7008"
+             style="fill:#ff5a00;stroke:#000000;stroke-width:1.5" />
+          <use
+             transform="translate(0,-20)"
+             id="use7010"
+             xlink:href="#ellipse4294"
+             x="0"
+             y="0"
+             width="100%"
+             height="100%" />
+        </g>
+        <g
+           id="g8066"
+           transform="translate(328.57515,6.1174943)">
+          <g
+             id="g6343">
+            <path
+               d="m 0.75,450.25 0,-60 90,0 0,60"
+               id="path7020"
+               style="fill:#ffffff;stroke:#000000;stroke-width:1.5" />
+            <ellipse
+               cx="45.75"
+               cy="390.25"
+               rx="45"
+               ry="10"
+               id="ellipse7022"
+               style="fill:#ffffff;stroke:#000000;stroke-width:1.5" />
+          </g>
+          <g
+             id="g7024">
+            <ellipse
+               cx="45.75"
+               cy="450.25"
+               rx="45"
+               ry="10"
+               id="ellipse4329"
+               style="fill:#93bbff;stroke:#000000;stroke-width:1.5" />
+            <path
+               d="m 0.75,450.25 0,-40 90,0 0,40"
+               id="path7027"
+               style="fill:#93bbff;stroke:#000000;stroke-width:1.5" />
+            <use
+               transform="translate(0,-40)"
+               id="use7029"
+               xlink:href="#ellipse4329"
+               x="0"
+               y="0"
+               width="100%"
+               height="100%" />
+          </g>
+        </g>
+        <use
+           transform="translate(-335.09734,-160)"
+           id="use8089"
+           xlink:href="#g8082"
+           x="0"
+           y="0"
+           width="100%"
+           height="100%" />
+        <use
+           transform="translate(0,-340)"
+           id="use8047"
+           xlink:href="#g8042"
+           x="0"
+           y="0"
+           width="100%"
+           height="100%" />
+        <g
+           id="g8096"
+           transform="translate(328.57515,6.1174943)">
+          <use
+             transform="translate(0,-340)"
+             id="use7050"
+             xlink:href="#g6343"
+             x="0"
+             y="0"
+             width="100%"
+             height="100%" />
+          <g
+             id="g7052">
+            <use
+               transform="translate(0,20)"
+               id="use7054"
+               xlink:href="#ellipse3879"
+               x="0"
+               y="0"
+               width="100%"
+               height="100%" />
+            <path
+               d="m 0.75,110.25 0,-20 90,0 0,20"
+               id="path7056"
+               style="fill:#ffff00;stroke:#000000;stroke-width:1.5" />
+            <ellipse
+               cx="45.75"
+               cy="90.25"
+               rx="45"
+               ry="10"
+               id="ellipse3879"
+               style="fill:#ffff00;stroke:#000000;stroke-width:1.5" />
+          </g>
+        </g>
+        <use
+           transform="translate(1.2207031e-5,339.99121)"
+           id="use7067"
+           xlink:href="#text5587"
+           x="0"
+           y="0"
+           width="100%"
+           height="100%" />
+        <use
+           transform="translate(1.2207031e-5,340)"
+           id="use7073"
+           xlink:href="#text5569"
+           x="0"
+           y="0"
+           width="100%"
+           height="100%" />
+        <text
+           x="374.32513"
+           y="217.01007"
+           id="text5587"
+           xml:space="preserve"
+           style="font-weight:bold;font-size:18px;text-anchor:middle"><tspan
+             id="tspan3525">=</tspan></text>
+        <text
+           x="374.32513"
+           y="147.01007"
+           id="text5569"
+           xml:space="preserve"
+           style="font-weight:bold;font-size:18px;text-anchor:middle"><tspan
+             id="tspan3532">+</tspan></text>
+        <text
+           x="374.83765"
+           y="30.68"
+           id="text7107"
+           xml:space="preserve"
+           style="font-weight:bold;font-size:40px;text-anchor:middle"><tspan
+             id="tspan3539"
+             style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:40px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold'">Alice</tspan></text>
+      </g>
+      <g
+         transform="translate(12,0)"
+         id="g6674">
+        <use
+           transform="translate(335.09734,4.2578124e-6)"
+           id="use8037"
+           xlink:href="#g8032"
+           x="0"
+           y="0"
+           width="100%"
+           height="100%" />
+        <g
+           id="g8052"
+           transform="translate(328.67249,6.1174943)">
+          <ellipse
+             cx="380.75"
+             cy="520.25"
+             rx="45"
+             ry="10"
+             id="ellipse4315"
+             style="fill:#5dcac5;stroke:#000000;stroke-width:1.5" />
+          <path
+             d="m 335.75,520.25 0,-20 90,0 0,20"
+             id="path7014"
+             style="fill:#5dcac5;stroke:#000000;stroke-width:1.5" />
+          <use
+             transform="translate(0,-20)"
+             id="use7016"
+             xlink:href="#ellipse4315"
+             x="0"
+             y="0"
+             width="100%"
+             height="100%" />
+        </g>
+        <g
+           id="g8082"
+           transform="translate(328.67249,6.1174943)">
+          <use
+             transform="translate(335,0)"
+             id="use7032"
+             xlink:href="#g6343"
+             x="0"
+             y="0"
+             width="100%"
+             height="100%" />
+          <g
+             id="g7034">
+            <ellipse
+               cx="380.75"
+               cy="450.25"
+               rx="45"
+               ry="10"
+               id="ellipse3980"
+               style="fill:#ffbf61;stroke:#000000;stroke-width:1.5" />
+            <path
+               d="m 335.75,450.25 0,-40 90,0 0,40"
+               id="path7037"
+               style="fill:#ffbe60;stroke:#000000;stroke-width:1.5" />
+            <use
+               transform="translate(0,-40)"
+               id="use7039"
+               xlink:href="#ellipse3980"
+               x="0"
+               y="0"
+               width="100%"
+               height="100%" />
+          </g>
+        </g>
+        <use
+           transform="translate(335.09734,-160)"
+           id="use8075"
+           xlink:href="#g8066"
+           x="0"
+           y="0"
+           width="100%"
+           height="100%" />
+        <use
+           transform="translate(0,-340)"
+           id="use8057"
+           xlink:href="#g8052"
+           x="0"
+           y="0"
+           width="100%"
+           height="100%" />
+        <use
+           transform="translate(335.09734,4.2578124e-6)"
+           id="use8103"
+           xlink:href="#g8096"
+           x="0"
+           y="0"
+           width="100%"
+           height="100%" />
+        <use
+           transform="translate(335.09736,339.99121)"
+           id="use7065"
+           xlink:href="#text5587"
+           x="0"
+           y="0"
+           width="100%"
+           height="100%" />
+        <use
+           transform="translate(335.09736,340)"
+           id="use7071"
+           xlink:href="#text5569"
+           x="0"
+           y="0"
+           width="100%"
+           height="100%" />
+        <use
+           transform="translate(335.09736,4.2578124e-6)"
+           id="use7090"
+           xlink:href="#text5587"
+           x="0"
+           y="0"
+           width="100%"
+           height="100%" />
+        <use
+           transform="translate(335.09736,4.2578124e-6)"
+           id="use7098"
+           xlink:href="#text5569"
+           x="0"
+           y="0"
+           width="100%"
+           height="100%" />
+        <text
+           x="708.50562"
+           y="30.68"
+           id="text7111"
+           xml:space="preserve"
+           style="font-weight:bold;font-size:40px;text-anchor:middle"><tspan
+             id="tspan3542"
+             style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:40px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold'">Bob</tspan></text>
+      </g>
+    </g>
+    <g
+       id="g6696">
+      <g
+         transform="translate(326.24227,6.1174943)"
+         id="g9027">
+        <path
+           style="stroke:#000000;stroke-width:1.5"
+           id="path3183"
+           d="M 91.5,301 335,379.5" />
+        <path
+           id="path3185"
+           d="m 326.375,372.78125 2.40625,4.71875 -4.71875,2.40625 13.65625,0.4687" />
+      </g>
+      <use
+         height="100%"
+         width="100%"
+         y="0"
+         x="0"
+         xlink:href="#g9027"
+         id="use7083"
+         transform="matrix(-1,0,0,1,1081.4732,4.2578124e-6)" />
+      <text
+         style="font-weight:bold;font-size:18px;text-anchor:middle"
+         xml:space="preserve"
+         id="text7061"
+         y="616.52875"
+         x="540.48315"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:31.25px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold'"
+           id="tspan3507">Common secret</tspan></text>
+      <text
+         style="font-weight:bold;font-size:18px;text-anchor:middle"
+         xml:space="preserve"
+         id="text7086"
+         y="274.36993"
+         x="539.8894"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:31.25px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold'"
+           id="tspan3522">Public transport</tspan></text>
+      <text
+         style="font-weight:bold;font-size:23.75px;text-anchor:middle"
+         xml:space="preserve"
+         id="text5541"
+         y="186.52875"
+         x="540.82178"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:31.25px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold'"
+           id="tspan3529">Secret colours</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:23.75px;line-height:125%;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         x="433.88818"
+         y="530.29083"
+         id="text6306"><tspan
+           x="433.88818"
+           y="530.29083"
+           id="tspan6308"><tspan
+             x="433.88818"
+             y="530.29083"
+             style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:31.25px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold'"
+             id="tspan6310">Secret colours</tspan></tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         x="570.50482"
+         y="390.69073"
+         id="text6312"><tspan
+           x="573.10492"
+           y="390.69073"
+           id="tspan6314"><tspan
+             x="570.50482"
+             y="390.69073"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.75px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor';text-align:center;text-anchor:middle"
+             id="tspan6316">(assume that </tspan></tspan><tspan
+           x="542.74603"
+           y="414.12823"
+           id="tspan6318"><tspan
+             x="540.14594"
+             y="414.12823"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.75px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor';text-align:center;text-anchor:middle"
+             id="tspan6320">mixture separationis </tspan></tspan><tspan
+           x="580.68549"
+           y="437.56573"
+           id="tspan6322"><tspan
+             x="580.68549"
+             y="437.56573"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.75px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor';text-align:center;text-anchor:middle"
+             id="tspan6324">expensive)</tspan></tspan></text>
+      <g
+         transform="translate(328.67277,-8.4949057)"
+         id="g5132">
+        <text
+           x="211.81039"
+           y="88.252525"
+           id="text7103"
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold';text-anchor:middle"><tspan
+             id="tspan3536"
+             style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:31.25px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold'">Common paint</tspan></text>
+        <text
+           x="213.02568"
+           y="118.08353"
+           id="text7103-9"
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold';text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"><tspan
+             id="tspan3536-5"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:33.75px;font-family:'TeX Gyre Termes Math';-inkscape-font-specification:'TeX Gyre Termes Math';stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"><tspan
+   style="fill:#ffff00"
+   id="tspan5076">p</tspan> = <tspan
+   style="fill:#ffff00"
+   id="tspan5074">23</tspan>, <tspan
+   style="fill:#ffff00"
+   id="tspan5078">g</tspan> = <tspan
+   style="fill:#ffff00"
+   id="tspan5080">5</tspan></tspan></text>
+      </g>
+    </g>
+  </g>
+  <g
+     transform="translate(-6.0000049,-3.0517583e-7)"
+     id="g6599">
+    <text
+       x="263.78159"
+       y="189.46979"
+       id="text7103-9-7"
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold';text-anchor:middle;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter5070)"><tspan
+         id="tspan3536-5-1"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:37.5px;font-family:'TeX Gyre Termes Math';-inkscape-font-specification:'TeX Gyre Termes Math';opacity:1;fill:#ff0000;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
+           style="fill:#ff5a00;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           id="tspan5020">a</tspan><tspan
+           id="tspan3762"
+           style="font-size:37.5px;fill:#000000;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"> = </tspan><tspan
+           style="fill:#ff5a00;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           id="tspan5022">6</tspan></tspan></text>
+    <g
+       id="g5306"
+       transform="translate(314.83691,-128.22036)">
+      <text
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold';text-anchor:middle;fill:#ff5a00;fill-opacity:1;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+         xml:space="preserve"
+         id="text7103-9-7-3"
+         y="387.26056"
+         x="-198.33292"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:37.5px;font-family:'TeX Gyre Termes Math';-inkscape-font-specification:'TeX Gyre Termes Math';fill:#ff5a00;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+           id="tspan3536-5-1-4"><tspan
+             id="tspan5024"
+             style="fill:#000000;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"><tspan
+   id="tspan5046"
+   style="fill:#ffbe60;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none">A</tspan> = <tspan
+   id="tspan5082"
+   style="fill:#ffff00">g</tspan></tspan><tspan
+             id="tspan3688"
+             style="font-size:37.5px;baseline-shift:super;fill:#ff5a00;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none">a</tspan><tspan
+             id="tspan5026"
+             style="fill:#000000;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"> mod </tspan><tspan
+             id="tspan5034"
+             style="fill:#ffff00;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none">p</tspan></tspan></text>
+      <text
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold';text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+         xml:space="preserve"
+         id="text7103-9-7-3-7"
+         y="434.71976"
+         x="-156.76796"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:37.5px;font-family:'TeX Gyre Termes Math';-inkscape-font-specification:'TeX Gyre Termes Math';stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+           id="tspan3536-5-1-4-2"><tspan
+   id="tspan5116"
+   style="fill:#ffbe60">A</tspan> = <tspan
+   id="tspan5084"
+   style="fill:#ffff00">5</tspan><tspan
+   id="tspan3688-7"
+   style="font-size:37.5px;baseline-shift:super;fill:#ff5a00;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none">6</tspan> mod <tspan
+   id="tspan5088"
+   style="fill:#ffff00">23</tspan> = <tspan
+   id="tspan5118"
+   style="fill:#ffbe60">8</tspan></tspan></text>
+    </g>
+    <g
+       id="g5372"
+       transform="translate(308.83633,116.71123)">
+      <text
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold';text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+         xml:space="preserve"
+         id="text7103-9-7-5"
+         y="482.17896"
+         x="-193.42068"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:37.5px;font-family:'TeX Gyre Termes Math';-inkscape-font-specification:'TeX Gyre Termes Math';fill:#ff0000;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+           id="tspan3536-5-1-6"><tspan
+             id="tspan5106"
+             style="font-size:37.5px;fill:#796300">s</tspan><tspan
+             style="font-size:37.5px;fill:#000000;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+             id="tspan3762-0"> = <tspan
+   id="tspan5126"
+   style="font-size:37.5px;fill:#93bbff">B</tspan></tspan><tspan
+             style="font-size:37.5px;fill:#000000"
+             id="tspan3917"><tspan
+   id="tspan5128"
+   style="font-size:37.5px;baseline-shift:super;fill:#ff5a00">a</tspan> mod <tspan
+   id="tspan5182"
+   style="fill:#ffff00">23</tspan></tspan></tspan></text>
+      <text
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold';text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+         xml:space="preserve"
+         id="text7103-9-7-5-2"
+         y="529.63818"
+         x="-155.00517"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:37.5px;font-family:'TeX Gyre Termes Math';-inkscape-font-specification:'TeX Gyre Termes Math';fill:#ff0000;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+           id="tspan3536-5-1-6-0"><tspan
+             id="tspan5104"
+             style="fill:#796300">s</tspan><tspan
+             style="font-size:37.5px;fill:#000000;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+             id="tspan3762-0-8"> = </tspan><tspan
+             id="tspan3967"
+             style="font-size:37.5px;fill:#000000;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"><tspan
+   id="tspan5090"
+   style="fill:#93bbff">19</tspan><tspan
+   id="tspan3969"
+   style="font-size:37.5px;baseline-shift:super;fill:#ff5a00;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none">6</tspan> mod <tspan
+   id="tspan5092"
+   style="fill:#ffff00">23</tspan> = <tspan
+   id="tspan5108"
+   style="fill:#796300">2</tspan></tspan></tspan></text>
+    </g>
+  </g>
+  <g
+     transform="translate(24,-6.0473634e-6)"
+     id="g5964">
+    <text
+       x="809.48059"
+       y="189.00499"
+       id="text7103-9-7-2"
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold';text-anchor:middle;fill:#c83737;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"><tspan
+         id="tspan3536-5-1-46"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:37.5px;font-family:'TeX Gyre Termes Math';-inkscape-font-specification:'TeX Gyre Termes Math';fill:#c83737;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"><tspan
+           style="fill:#5dcac5"
+           id="tspan5144">b</tspan><tspan
+           style="fill:#000000"
+           id="tspan5168"> = </tspan><tspan
+           style="fill:#5dcac5"
+           id="tspan5170">15</tspan></tspan></text>
+    <g
+       id="g5357"
+       transform="translate(318.83631,-124.26409)">
+      <text
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold';text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+         xml:space="preserve"
+         id="text7103-9-7-3-4"
+         y="386.79575"
+         x="545.34387"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:37.5px;font-family:'TeX Gyre Termes Math';-inkscape-font-specification:'TeX Gyre Termes Math';stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+           id="tspan3536-5-1-4-9"><tspan
+   id="tspan5120"
+   style="fill:#93bbff">B</tspan> = <tspan
+   id="tspan5096"
+   style="fill:#ffff00">g</tspan><tspan
+   id="tspan3688-8"
+   style="font-size:37.5px;baseline-shift:super;fill:#5dcac5;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none">b</tspan> mod <tspan
+   id="tspan5098"
+   style="fill:#ffff00">p</tspan></tspan></text>
+      <text
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold';text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+         xml:space="preserve"
+         id="text7103-9-7-3-4-4"
+         y="434.25494"
+         x="604.5968"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:37.5px;font-family:'TeX Gyre Termes Math';-inkscape-font-specification:'TeX Gyre Termes Math';stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+           id="tspan3536-5-1-4-9-4"><tspan
+   id="tspan5122"
+   style="fill:#93bbff">B</tspan> = <tspan
+   id="tspan5094"
+   style="fill:#ffff00">5</tspan><tspan
+   id="tspan3688-8-0"
+   style="font-size:37.5px;baseline-shift:super;fill:#5dcac5;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none">15</tspan> mod <tspan
+   id="tspan5100"
+   style="fill:#ffff00">23</tspan> = <tspan
+   id="tspan5124"
+   style="fill:#93bbff">19</tspan></tspan></text>
+    </g>
+    <g
+       id="g5391"
+       transform="translate(318.83633,116.48531)">
+      <text
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold';text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+         xml:space="preserve"
+         id="text7103-9-7-5-0"
+         y="481.71417"
+         x="549.10065"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:37.5px;font-family:'TeX Gyre Termes Math';-inkscape-font-specification:'TeX Gyre Termes Math';fill:#ff0000;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+           id="tspan3536-5-1-6-4"><tspan
+             id="tspan5112"
+             style="font-size:37.5px;fill:#796300">s</tspan><tspan
+             style="font-size:37.5px;fill:#000000;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+             id="tspan3762-0-0"> = <tspan
+   id="tspan5142"
+   style="fill:#ffbe60">A</tspan><tspan
+   style="font-size:64.99999762%;baseline-shift:super;fill:#5dcac5"
+   id="tspan5178">b</tspan> mod <tspan
+   style="fill:#ffff00"
+   id="tspan5164">23</tspan></tspan></tspan></text>
+      <text
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18px;font-family:'TeX Gyre Adventor';-inkscape-font-specification:'TeX Gyre Adventor Bold';text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+         xml:space="preserve"
+         id="text7103-9-7-5-2-9"
+         y="529.17334"
+         x="588.70996"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:37.5px;font-family:'TeX Gyre Termes Math';-inkscape-font-specification:'TeX Gyre Termes Math';fill:#ff0000;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+           id="tspan3536-5-1-6-0-9"><tspan
+             id="tspan5110"
+             style="fill:#796300">s</tspan><tspan
+             style="font-size:37.5px;fill:#000000;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+             id="tspan3762-0-8-2"> = <tspan
+   id="tspan5180"
+   style="fill:#ffbe60">8</tspan></tspan><tspan
+             style="font-size:37.5px;baseline-shift:super;fill:#5dcac5;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+             id="tspan4012">15</tspan><tspan
+             id="tspan3967-3"
+             style="font-size:37.5px;fill:#000000;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"> mod <tspan
+   id="tspan5102"
+   style="fill:#ffff00">23</tspan> = <tspan
+   id="tspan5114"
+   style="fill:#796300">2</tspan></tspan></tspan></text>
+    </g>
+  </g>
+  <text
+     id="text5154"
+     y="-366.1394"
+     x="286.17639"
+     style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     xml:space="preserve"><tspan
+       y="-366.1394"
+       x="286.17639"
+       id="tspan5156"></tspan></text>
+  <flowRoot
+     transform="translate(-246.6672,-760.06664)"
+     style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     id="flowRoot5186"
+     xml:space="preserve"><flowRegion
+       id="flowRegion5188"><rect
+         y="77.396286"
+         x="-448.50156"
+         height="654.89166"
+         width="422.70279"
+         id="rect5190" /></flowRegion><flowPara
+       id="flowPara5192"></flowPara></flowRoot></svg>

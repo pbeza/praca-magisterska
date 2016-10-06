@@ -228,7 +228,7 @@
 %\RequirePackage{amsthm}
 %\RequirePackage{amsfonts}
 %\RequirePackage{amssymb}
-\RequirePackage{mathabx}
+%\RequirePackage{mathabx}
 
 % Ustawienie wcięć na początku każdego akapitu
 
