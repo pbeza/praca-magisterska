@@ -5,11 +5,11 @@
 \chapter{Implementacja}
 \label{chapter:implementacja}
 
-Kod źródłowy projektu został napisany wyłącznie w~języku~\texttt{C}, co~wyróżnia projekt na~tle istniejących rozwiązań przedstawionych w~rozdziale~\ref{sec:istniejace-rozwiazania}. Wszystkie one~zostały bowiem napisane w~językach skryptowych, co~może uniemożliwić ich uruchomienie na~najoszczędniejszych systemach wbudowanych, które mogą nie~być zdolne do~uruchamiania interpreterów języków skryptowych. Programy wykonywane przez interpreter oraz~wykonywane na~maszynach wirtualnych (np.~Javy i~.NET) pochłaniają dużo więcej pamięci niż~ich odpowiedniki napisane w~języku~\texttt{C}, skompilowane do~kodu maszynowego. Wybór języka \texttt{C}~stanowi więc zaletę zaproponowanej implementacji, osiągniętej jednak kosztem łatwej przenośności na~systemy nie\glslink{unix-like-system}{*nixowe}.
+Kod źródłowy projektu został napisany wyłącznie w~języku~\texttt{C}, co~wyróżnia projekt na~tle istniejących rozwiązań przedstawionych w~rozdziale~\ref{sec:istniejace-rozwiazania}. Wszystkie one~zostały bowiem napisane w~językach skryptowych, co~może uniemożliwić ich uruchomienie na~najoszczędniejszych systemach wbudowanych, które mogą nie~być zdolne do~uruchamiania interpreterów języków skryptowych. Programy wykonywane przez interpreter oraz~wykonywane na~maszynach wirtualnych (np.~Javy i~.NET) pochłaniają dużo więcej pamięci niż~ich odpowiedniki napisane w~języku~\texttt{C}, skompilowane do~kodu maszynowego. Wybór języka \texttt{C}~stanowi więc zaletę zaproponowanej implementacji, osiągniętej jednak kosztem złożoności kodu źródłowego.
 
 Podczas implementacji dokonano wszelkich starań, aby~kod źródłowy projektu był zgodny ze standardem~\gls{posix}. Wszelkie ewentualne odstępstwa od~standardu są~niezamierzone.
 
-W~niniejszym rozdziale przedstawiono szczegóły implementacyjne projektu, w~szczególności zastosowane biblioteki i~użyte struktury danych.
+W~niniejszym rozdziale przedstawiono szczegóły implementacyjne projektu, w~szczególności zastosowane biblioteki i~narzędzia pomocnicze.
 
 %------------------------------------------------------------------------------
 
@@ -124,7 +124,7 @@ Do~kompilacji kodu źródłowego wykorzystano \texttt{CMake}, który jest elasty
 Listing~\ref{lst:cmake-debug} przedstawia sposób w~jaki \texttt{CMake} był uruchamiany w~czasie prac nad~projektem. Słowo kluczowe \texttt{Debug} powoduje, że~w~czasie kompilacji projektu są~dodatkowo generowane:
 \begin{itemize}
 \item Symbole debugowania, które umożliwiają czytelne debugowanie w~debuggerze~\texttt{gdb}.
-\item Symbole dla~narzędzi \texttt{ctags} i~\texttt{cscope}~\cite{ctags,cscope}. Alternatywnie symbole te~wygenerować ręcznie, tak jak przedstawiono na~listingu~\ref{lst:cmake-developer-symbols}.
+\item Symbole dla~narzędzi \texttt{ctags} i~\texttt{cscope}~\cite{ctags,cscope} ułatwiających nawigowanie po~kodzie źródłowym aplikacji. Alternatywnie symbole te~można wygenerować ręcznie, tak jak przedstawiono na~listingu~\ref{lst:cmake-developer-symbols}.
 \end{itemize}
 Kod dołączony do~niniejszej pracy na~płycie~CD (patrz rozdział~\ref{cd-appendix}) został skompilowany z~flagą~\texttt{Release}~\cite{cmake-compilation-type-manual,cmake-compilation-type-stackoverflow}. Pełną listę opcji (ang.~\emph{targets}) dla~wygenerowanego pliku~\path{Makefile} zostaje wyświetlona komendą \texttt{make~help}.
 
@@ -176,7 +176,7 @@ Wireshark jest narzędziem do~analizowania pakietów i~dlatego był jednym z~naj
 
 \subsubsection{Edytor tekstu vim}
 
-Do~pisania kodu źródłowego projektu oraz niniejszej dokumentacji wykorzystano edytor tekstu~\texttt{vim} w~wersji~7.4, rozbudowany o wtyczki. Poniżej przedstawiono listę wtyczek \texttt{vim}, wykorzystanych w czasie implementacji:
+Do~pisania kodu źródłowego projektu oraz niniejszej dokumentacji wykorzystano edytor tekstu~\texttt{vim} w~wersji~8.0, rozbudowany o wtyczki. Poniżej przedstawiono listę wtyczek \texttt{vim}, wykorzystanych w czasie implementacji:
 \begin{itemize}
 	\item\texttt{NerdTree} --- narzędzie do~wyświetlania drzewa systemu plików i~nawigowania po nim~\cite{nerdtree-vimorg,nerdtree-github},
 	\item\texttt{ctags} --- narzędzie do~generowania metainformacji do~wygodnego nawigowania po kodzie źródłowym~\cite{ctags},
@@ -185,8 +185,8 @@ Do~pisania kodu źródłowego projektu oraz niniejszej dokumentacji wykorzystano
 	\item\texttt{cscope} --- narzędzie do~wygodnego przeglądania kodu źródłowego, bardziej rozbudowane od \texttt{ctags}~\cite{cscope}.
 \end{itemize}
 
-Konfiguracja \path{~/.vimrc}:
-TODO
+%Konfiguracja \path{~/.vimrc}:
+%TODO
 % TODO dodać inne ustawienia z .vimrc
 
 %-------------------
@@ -226,7 +226,7 @@ au BufEnter /* call LoadCscope()
 
 \subsection{latexmk}
 
-Do~skompilowania dokumentacji napisanej w~\LaTeX posłużył \texttt{latexmk}, który jest wygodnym skryptem napisanym w~języku \texttt{Perl}, udostępnianym w~wielu dystrybucjach \gls{gnulinux} jako paczka oprogramowania \texttt{latexmk}. Narzędzie to~automatyzuje proces kompilacji kodu i~umożliwia np.~ciągłe uruchamianie kompilacji kodu dopóki w~wygenerowanym dokumencie przestaną zachodzić zmiany\footnote{Kompilacja kodu \LaTeX jest procesem wieloprzebiegowym.}. Jest to~szczególnie pożądane w~przypadku odwołań. wznowienie kompilacji po~wykryciu zajścia zmian w~edytowanym dokumencie. Innym przydatną funkcjonalnością tego narzędzia jest tryb kompilacji ciągłej, który umożliwia automatyczne uruchamianie ponownej kompilacji po~wykryciu zmian w~edytowanym pliku. Dzięki temu istnieje możliwość podglądania zmian w~wygenerowanym dokumencie \emph{on-line}. Listing~\ref{cmake-online-compilation} przedstawia sposób uruchomienia \texttt{latexmk} w~trybie ciągłej kompilacji.
+Niniejsza dokumentacja została napisana w~\LaTeX, a~do jej~skompilowania posłużył \texttt{latexmk}, który jest wygodnym skryptem napisanym w~języku \texttt{Perl}, udostępnianym w~wielu dystrybucjach \gls{gnulinux} jako paczka oprogramowania o~tej samej nazwie. Narzędzie to~automatyzuje proces kompilacji kodu i~umożliwia np.~uruchamianie kompilacji kodu dopóki w~wygenerowanym dokumencie przestaną zachodzić zmiany, co~jest szczególnie pożądane w~przypadku zmian cytowań i~referencji w~tekście pracy\footnote{Kompilacja kodu \LaTeX jest procesem wieloprzebiegowym.}. Inną przydatną funkcjonalnością tego narzędzia jest tryb kompilacji ciągłej, który umożliwia automatyczne uruchamianie ponownej kompilacji po~wykryciu zmian w~edytowanym pliku. Dzięki temu istnieje możliwość podglądania zmian w~wygenerowanym dokumencie \emph{on-line}. Listing~\ref{cmake-online-compilation} przedstawia sposób uruchomienia \texttt{latexmk} w~trybie ciągłej kompilacji.
 
 \begin{lstlisting}[label=cmake-online-compilation,language=bash,numbers=none,caption={Uruchomienie ciągłej kompilacji domyślnego pliku \LaTeX, znalezionego w~aktualnym katalogu roboczym, do~pliku wyjściowego w~formacie~PDF}]
 latexmk -pvc -pdf
@@ -245,6 +245,6 @@ W~czasie projektu wykorzystano również inne narzędzia użytkowe:
 
 \section{Formatowanie kodu}
 
-Dokonano starań, aby~formatowanie kodu źródłowego było zgodne z~wytycznymi zaproponowanymi przez programistów \glslink{kernel}{jądra} systemu \gls{gnulinux}~\cite{kernel-coding-style}. Wszystkie ewentualne przypadki łamania konwencji formatowania kodu są~niecelowe.
+Dokonano wszelkich starań, aby~formatowanie kodu źródłowego było zgodne z~wytycznymi zaproponowanymi przez programistów \glslink{kernel}{jądra} systemu \gls{gnulinux}~\cite{kernel-coding-style}. Wszystkie ewentualne przypadki łamania konwencji formatowania kodu są~niecelowe.
 
 \end{document}

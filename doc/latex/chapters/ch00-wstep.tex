@@ -20,7 +20,7 @@
 \begin{displayquote}
 \inserttitle.
 \end{displayquote}
-Wersja angielska tytułu pracy:
+Angielska wersja tytułu pracy:
 \begin{displayquote}
 \inserttitleaux.
 \end{displayquote}
@@ -38,24 +38,24 @@ W~uproszczeniu, celem niniejszej pracy jest zaprojektowanie i~zaimplementowanie 
 
 \section{Motywacja}
 
-Motywacją do~napisania pracy magisterskiej na~przedstawiony temat jest problem, z~którym zmagają się~administratorzy głównie średnich i dużych sieci komputerowych na~całym świecie, niezależnie od~używanego przez nich systemu operacyjnego --- problem automatycznego dystrybuowania ujednoliconego oprogramowania i~jego konfiguracji na~komputery połączone siecią komputerową~\cite{so-problem-intro}. W~ogólności nie~muszą to~być komputery takie jak serwery czy stacje robocze --- choć to~głównie z~nimi administratorzy komputerowi mają do~czynienia. Omawiany problem może dotyczyć również niektórych połączonych w~sieć systemów wbudowanych nie będących systemami typu~\mbox{\emph{bare~metal}}, tzn.~pracujących pod kontrolą systemu operacyjnego.
+Motywacją do~napisania pracy magisterskiej na~przedstawiony w~rozdziale~\ref{cel-i-zakres} temat, jest problem, z~którym zmagają się~administratorzy głównie średnich i dużych sieci komputerowych na~całym świecie, niezależnie od~używanego przez nich systemu operacyjnego --- problem automatycznego dystrybuowania ujednoliconego oprogramowania i~jego konfiguracji na~komputery połączone siecią komputerową~\cite{so-problem-intro}. W~ogólności nie~muszą to~być komputery takie jak serwery czy stacje robocze --- choć to~głównie z~nimi administratorzy komputerowi mają do~czynienia. Omawiany problem może dotyczyć również niektórych systemów wbudowanych nie będących systemami typu~\mbox{\emph{bare~metal}}, tzn.~pracujących pod kontrolą systemu operacyjnego.
 
-W praktyce problem dystrybuowania jednolitego oprogramowania jest szczególnie odczuwalny przez administratorów, którzy zarządzają dużym zbiorem komputerów --- serwerów lub~stacji roboczych --- z~których każdy musi mieć ten~sam lub podobny zestaw zainstalowanych programów i~konfiguracji dedykowanej dla~zainstalowanego oprogramowania. Popularne sposoby radzenia sobie z~tym problemem są~uciążliwe w~praktyce, a~istniejące rozwiązania w~pełni automatyzujące cały proces synchronizacji oprogramowania i~konfiguracji~(patrz rozdział~\ref{sec:istniejace-rozwiazania}), są stosunkowo młode i~słabo rozpowszechnione wśród większości administratorów komputerowych.
+W praktyce problem dystrybuowania jednolitego oprogramowania jest szczególnie odczuwalny przez administratorów, którzy zarządzają dużym zbiorem komputerów --- serwerów lub~stacji roboczych --- z~których każdy musi mieć ten~sam lub podobny zestaw zainstalowanych programów i~konfiguracji dedykowanej dla~zainstalowanego oprogramowania. Popularne sposoby radzenia sobie z~tym problemem są~w~praktyce uciążliwe, a~istniejące rozwiązania w~pełni automatyzujące cały proces synchronizacji oprogramowania i~konfiguracji~(patrz rozdział~\ref{sec:istniejace-rozwiazania}), są stosunkowo młode i~słabo rozpowszechnione wśród większości administratorów komputerowych.
 
 %------------------------------------------------------------------------------
 
 \section{Zastosowania}
 
-Zastosowania rozwiązania problemu dystrybuowania jednolitego oprogramowania możemy znaleźć wszędzie tam gdzie istnieje grupa ludzi, procesów, maszyn lub~innych podmiotów, z~których każdy wykorzystuje to~samo lub podobnie skonfigurowane oprogramowanie na~urządzeniu wyposażonym w~system operacyjny, podłączonym do~sieci komputerowej opartej o~\gls{tcpip}. W~szczególności mogą to~być grupy serwerów pracujących w~podobnym środowisku, np.~maszyny developerskie, testowe i~produkcyjne, \emph{load-balancery}, serwery działające w~ramach systemu rozproszonego, laboratoria komputerowe na~uczelniach, w szkołach, bibliotekach, biura, komputery administracji publicznej, w~szczególności w~urzędach, bankomaty, biletomaty, automatach sprzedających~(automaty vendingowe), komputery kasjerów w~hipermarketach, komputery osobiste osób korzystających z~kilku(nastu) komputerów.
+Zastosowania rozwiązania problemu dystrybuowania jednolitego oprogramowania można znaleźć wszędzie tam gdzie istnieje grupa ludzi, procesów lub~komputerów, z~których każdy wykorzystuje to~samo lub podobnie skonfigurowane oprogramowanie na~urządzeniu wyposażonym w~system operacyjny, podłączonym do~sieci komputerowej opartej o~\gls{tcpip}. W~szczególności mogą to~być grupy serwerów pracujących w~podobnym środowisku, np.~maszyny developerskie, testowe i~produkcyjne, \emph{load-balancery}, serwery działające w~ramach systemu rozproszonego, laboratoria komputerowe na~uczelniach, w szkołach i~bibliotekach, biura, komputery administracji publicznej (w~szczególności w~urzędach), bankomaty, biletomaty, automaty sprzedające~(tzn.~automaty \emph{vendingowe}), komputery kasjerów w~hipermarketach, komputery osobiste osób korzystających z~kilku(nastu) komputerów.
 
 %------------------------------------------------------------------------------
 
 \section{Istniejące rozwiązania}
 \label{sec:istniejace-rozwiazania}
 
-W~niniejszym rozdziale przedstawiono przegląd czterech wybranych, prawdopodobnie najpopularniejszych obecnie rozwiązań dla~problemu dystrybuowania oprogramowania na~sieć komputerów~\cite{leading-scms,wiki:scm-comparison}.
+W~niniejszym rozdziale przedstawiono przegląd czterech, prawdopodobnie jednych z~najpopularniejszych obecnie rozwiązań dla~problemu dystrybuowania oprogramowania w~sieci~\cite{leading-scms,wiki:scm-comparison}.
 
-Wymienione w~tym rozdziale aplikacje, poza możliwością synchronizacji zainstalowanego oprogramowania i~konfiguracji, pozwalają również na~inne manipulacje systemem operacyjnym, np.~zapewnienie istnienia zadanego użytkownika w~systemie czy zapewnienie działanie zadanego \glslink{demon}{demona}. Takie oprogramowanie jest nazywane często w~skrócie~\emph{Software configuration management (SCM)} implementującym podejście \emph{Infrastructure as~Code}~\cite{wiki:iac,wiki:scm}.
+Wymienione w~tym rozdziale aplikacje, poza możliwością synchronizacji zainstalowanego oprogramowania i~konfiguracji, pozwalają również na~inne manipulacje systemem operacyjnym, np.~zapewnienie istnienia zadanego użytkownika w~systemie czy zapewnienie działanie zadanego \glslink{demon}{demona}. Takie oprogramowanie jest nazywane często w~skrócie~\emph{Software configuration management (SCM)}, implementującym podejście \emph{Infrastructure as~Code}~\cite{wiki:iac,wiki:scm}.
 
 %---------------------------------------
 
@@ -100,26 +100,28 @@ service { 'httpd':
 W~nomenklaturze Puppeta istnieje co~najmniej kilka słów kluczowych, które odpowiadają abstrakcyjnym typom danych reprezentującym klientów i~ich oprogramowanie. Najważniejsze z~nich to:
 \begin{itemize}
 \item \texttt{class} --- Nazwany blok kodu Puppet przechowywany w~module. Służy do~konfiguracji dużej części funkcjonalności aplikacji. Konfiguracja węzła pozwala zadeklarować parametryzowane użycie wielu różnych klas. Deklaracja klasy może być co~najwyżej jedna.
-\item \texttt{module} --- Zbiór klas konfigurujący całą aplikację. Społeczność Puppet dostarcza na~stronie internetowej \hreftt{https://forge.puppet.com/}{forge.puppet.com} wielu użytecznych modułów do~różnych rodzajów złożonego oprogramowania. Najpopularniejsze z~nich są~weryfikowane przez programistów Puppet i~otrzymują status \emph{Puppet Supported} lub~\emph{Puppet Approved}.
+\item \texttt{module} --- Zbiór klas konfigurujący całą aplikację. Społeczność Puppet dostarcza na~stronie internetowej \hreftt{https://forge.puppet.com/}{forge.puppet.com} wielu użytecznych modułów do~różnych rodzajów złożonego oprogramowania. Najpopularniejsze z~nich są~weryfikowane przez programistów Puppet i~otrzymują status \emph{Puppet Supported} lub~\emph{Puppet Approved}, przez co~są postrzegane jako zaufane.
 \item \texttt{node} --- Reprezentacja jednego lub wielu klientów.
-\item wbudowane typy zasobów, takie jak: \texttt{cron}, \texttt{exec}, \texttt{file}, \texttt{group}, \texttt{host}, \texttt{maillist}, \texttt{mount}, \texttt{package}, \texttt{router}, \texttt{service}, \texttt{ssh\_authorized\_key}, \texttt{user}, \texttt{vlan}, \texttt{zone}, \texttt{zone\_pool} i~wiele innych. Listę tą można rozszerzać o~własne typy danych np.~przez ładowanie modułów~\cite{puppet-resources-types}.
+\item Wbudowane typy zasobów, takie jak: \texttt{cron}, \texttt{exec}, \texttt{file}, \texttt{group}, \texttt{host}, \texttt{maillist}, \texttt{mount}, \texttt{package}, \texttt{router}, \texttt{service}, \texttt{ssh\_authorized\_key}, \texttt{user}, \texttt{vlan}, \texttt{zone}, \texttt{zone\_pool} i~wiele innych. Listę tą można rozszerzać o~własne typy danych np.~przez załadowanie dodatkowych modułów~\cite{puppet-resources-types}.
 \end{itemize}
-W~praktyce pożądane jest automatyczne odpytywanie serwera przez klienta. Konfiguracja serwera odpowiadająca za~zdefiniowanie klas oprogramowania dla~poszczególnych klientów jest przechowywana w~pliku zwyczajowo nazywanym \path{site.pp}. Klient Puppeta domyślnie odpytuje serwer o~zmiany oprogramowania co~30~minut.
+W~praktyce pożądane jest automatyczne odpytywanie serwera przez klienta. Klient Puppeta domyślnie odpytuje serwer o~zmiany oprogramowania co~30~minut. Konfiguracja serwera odpowiadająca za~zdefiniowanie klas oprogramowania dla~poszczególnych klientów jest przechowywana w~pliku zwyczajowo nazywanym \path{site.pp}.
 
-W~przykładach~\ref{puppet-openssh-example}, \ref{puppet-motd-example}, \ref{puppet-httpd-example} zostały trzy różne zasoby, odpowiednio: paczka oprogramowania~(\texttt{package}), plik~(\texttt{file}) oraz~serwis~(\texttt{service}). Puppet udostępnia również inne rodzaje zasobów takie jak: użytkownik~(\texttt{user}), grupa~(\texttt{group}), zdarzenie cykliczne~(\texttt{cron}), wykonanie komendy~(\texttt{exec}), wpis w~pliku \path{/etc/hosts}~(\texttt{host})\footnote{Lub odpowiedniku pliku \path{/etc/hosts} w~systemach nie unixowych.}. Pełną listę wbudowanych typów zasobów można uzyskać wywołując komendę \texttt{puppet describe --list}. Aby~dowiedzieć się~więcej o~wybranym typie zasobu \texttt{X}, wystarczy wydać polecenie:
+\urldef\etchosts\path{%SystemRoot%\system32\drivers\etc\hosts}
+
+W~przykładach~\ref{puppet-openssh-example}, \ref{puppet-motd-example}, \ref{puppet-httpd-example} zostały użyte trzy różne zasoby, odpowiednio: paczka oprogramowania~(\texttt{package}), plik~(\texttt{file}) oraz~serwis~(\texttt{service}). Puppet udostępnia również inne rodzaje zasobów takie jak: użytkownik~(\texttt{user}), grupa~(\texttt{group}), zdarzenie cykliczne~(\texttt{cron}), wykonanie komendy~(\texttt{exec}), wpis w~pliku \path{/etc/hosts}\footnote{Lub odpowiedniku pliku \path{/etc/hosts} w~systemach nie \glslink{unix-like-system}{*nixowych}, np.~\etchosts~w~nowych wersjach systemów Windows.}. Pełną listę wbudowanych typów zasobów można uzyskać wywołując komendę \texttt{puppet describe --list}. Aby~dowiedzieć się~więcej o~wybranym typie zasobu \texttt{X}, wystarczy wydać polecenie:
 \begin{center}
 \texttt{puppet describe~X}
 \end{center}
 
-Puppet składa się~z~wielu narzędzi towarzyszących. Jednym z~nich jest \texttt{facter}, który na~żądanie zbiera informacje o~systemie i~wyświetla je w~jednym z~możliwych formatów: \emph{JSON}, \emph{YAML} lub~\emph{plaintext}, który jest formatem domyślnym. Wywołanie komendy \texttt{facter} (bez dodatkowych parametrów) wyświetla wszystkie dane o~systemie, jakie zebrało to~narzędzie.
+Puppet składa się~z~wielu narzędzi towarzyszących. Jednym z~nich jest \texttt{facter}, który na~żądanie zbiera informacje o~systemie i~wyświetla je w~jednym z~możliwych formatów: JSON, YAML lub~\emph{plaintext}, który jest formatem domyślnym. Wywołanie komendy \texttt{facter} bez dodatkowych parametrów, wyświetla wszystkie dane o~systemie, jakie zebrało to~narzędzie.
 
-Dla~nowych użytkowników Puppeta została przygotowana przez opiekunów projektu maszyna wirtualna z~samouczkiem, tak, aby użytkownik nie~był skazany na~naukę Puppeta na~własnym systemie~\cite{puppet-vm-tutorial}. W~przypadku błędnej konfiguracji Puppeta, stan maszyny wirtualnej z~samouczkiem może być~łatwo przywrócony, co może nie~być takie proste w~przypadku eksperymentowania na~własnym systemie.
+Dla~nowych użytkowników Puppeta została przygotowana przez opiekunów projektu maszyna wirtualna z~samouczkiem, tak, aby użytkownik nie~był skazany na~naukę Puppeta na~własnym systemie~\cite{puppet-vm-tutorial}. W~przypadku błędnej konfiguracji Puppeta, stan maszyny wirtualnej z~samouczkiem może być~łatwo przywrócony, co może nie~być takie proste w~przypadku nieudanych prób eksperymentów na~własnym systemie.
 
 %---------------------------------------
 
 \subsection{Chef}
 
-Chef jest oprogramowaniem napisanym w~językach programowania \texttt{Ruby} (tak jak Puppet) i~\texttt{Erlang} (zastosowanym tylko do~API w~części serwerowej). Projekt został zapoczątkowany przez \href{https://blog.chef.io/author/adam/}{\emph{Adama Jacoba}} na~potrzeby firmy consultingowej, ale~po~zaprezentowaniu go~\href{https://en.wikipedia.org/wiki/Jesse_Robbins}{\emph{Jesse Robinsowi}}, został został opublikowany na~zasadach licencji \glslink{apache2.0-license}{Apache~2.0} i~zaadaptowany do~użycia w~firmie \emph{Amazon}. Pierwsza wersja Chef została opublikowana w~2009~roku.
+Chef jest oprogramowaniem napisanym w~językach programowania \texttt{Ruby} (tak jak Puppet) i~\texttt{Erlang} (zastosowanym tylko do~API w~części serwerowej). Projekt został zapoczątkowany przez \href{https://blog.chef.io/author/adam/}{Adama Jacoba} na~potrzeby firmy consultingowej, ale~po~zaprezentowaniu go~\href{https://en.wikipedia.org/wiki/Jesse_Robbins}{Jesse Robinsowi}, został został opublikowany na~zasadach licencji \glslink{apache2.0-license}{Apache~2.0} i~zaadaptowany do~użycia w~firmie \emph{Amazon}. Pierwsza wersja Chef została opublikowana w~2009~roku.
 
 Chef działa w~architekturze klient-serwer. Serwer może być uruchomiony na~systemach operacyjnych: \emph{CentOS}, \emph{Oracle Linux}, \emph{Red Hat Enterprise Linux} i~\emph{Ubuntu}. Serwer można również próbować uruchomić na~systemach \emph{Mac~OS~X} i~\emph{Microsoft Windows} --- dokumentacja Chef wyszczególnia te~systemy jako nieprzetestowane pod kątem współpracy z~Chef~\cite{chef-supported-platforms}.
 
@@ -127,7 +129,7 @@ Klientami mogą być systemy działające pod kontrolą m.in.: \emph{AIX}, \emph
 
 Użytkownikami Chefa, tak jak w~przypadku Puppeta, jest wiele dużych firm i~uniwersytetów, takich jak: \emph{Airbnb}, \emph{Disney}, \emph{Mozilla}, \emph{Facebook}, \emph{HP Public Cloud}, \emph{Prezi}, \emph{Uniwersytet Minnesoty}~\cite{chef-customers,puppet-chef-disney}.
 
-Odpowiednikiem plików konfiguracyjnych, które w~Puppet nazywane są~\emph{manifestami}, są~pliki nazywane w~nomenklaturze Chef \emph{przepisami}~(ang.~\emph{recipe}). Przykładowe przepisy przedstawiono w~przykładach~\ref{chef-apache-example}, \ref{chef-user-example} i~\ref{chef-service-example}. Więcej przykładów można znaleźć w~bogatej w~przykładowe przepisy dokumentacji Chef~\cite{chef-examples}.
+Odpowiednikiem plików konfiguracyjnych, które w~Puppet nazywane są~\emph{manifestami}, są~pliki nazywane w~nomenklaturze Chef \emph{przepisami}~(ang.~\emph{recipe}). Przykładowe przepisy przedstawiono w~przykładach~\ref{chef-apache-example}, \ref{chef-user-example} i~\ref{chef-service-example}. Więcej przykładów można znaleźć w,~bogatej w~przykładowe przepisy, dokumentacji Chef~\cite{chef-examples}.
 
 \begin{lstlisting}[numbers=none,caption={Przepis Chef gwarantujący, że serwer Apache zostanie zainstalowany niezależnie od~tego jak~się~nazywa paczka oprogramowania go~dostarczająca},label=chef-apache-example]
 package 'Install Apache' do
@@ -173,10 +175,16 @@ Ansible został opublikowany na~licencji~\glslink{gpl}{GPL} w~wersji~3, a~jego p
 
 Salt, nazywany też SaltStack, to~otwartoźdłowe oprogramowanie napisane w~Pythonie i~opublikowane na~licencji \glslink{apache2.0-license}{Apache~2.0} mające podobną funkcjonalność do~opisanych dotychczas rozwiązań problemu synchronizacji oprogramowania. Pierwsza wersja Salt powstała w~2011~roku, a~więc jest to~najmłodsze rozwiązanie wśród przedstawionych~\cite{saltstack}.
 
+%---------------------------------------
+%
+%\subsection{Inne}
+%
+%Otter, CFEngine, Bcfg2
+%
 %------------------------------------------------------------------------------
-
-\section{Środowisko projektu}
-
+%
+%\section{Środowisko projektu}
+%
 %------------------------------------------------------------------------------
 
 \section{Zawartość pracy}
@@ -184,7 +192,7 @@ Salt, nazywany też SaltStack, to~otwartoźdłowe oprogramowanie napisane w~Pyth
 \noindent Niniejsza praca magisterska składa się z~dwóch głównych części:
 \begin{enumerate}
 	\item Niniejszej dokumentacji napisanej w \LaTeX,
-	\item Aplikacji, w~tym wersji skompilowanej, kodu źródłowego i~dokumentacji wygenerowanej z~komentarzy w~kodzie.
+	\item Aplikacji w~wersji binarnej i~źródłowej oraz~towarzyszącej jej dokumentacji wygenerowanej programem Doxygen z~komentarzy w~kodzie źródłowym.
 \end{enumerate}
 Aplikacja składa się~również z~dwóch części, co~jest naturalne biorąc pod uwagę przyjętą architekturę klient-serwer~(por.~rozdział~\ref{cel-i-zakres}):
 \begin{enumerate}
@@ -194,21 +202,21 @@ Aplikacja składa się~również z~dwóch części, co~jest naturalne biorąc po
 
 %------------------------------------------------------------------------------
 
-\section{Źródła wiedzy}
+\section{Bibliografia}
 
-W~czasie prac nad implementacją projektu, korzystano z~wielu pomocnych dokumentacji, materiałów dydaktycznych i~innych źródeł wiedzy takich jak np.~programistyczne dyskusyjne, fora programistyczne, np.~\hreftt{http://stackoverflow.com/}{stackoverflow.com}, \hreftt{http://superuser.com/}{superuser.com}.
+W~czasie prac nad implementacją projektu, korzystano z~pomocnych dokumentacji, materiałów dydaktycznych i~innych źródeł wiedzy, takich jak np.~listy dyskusyjne i~programistyczne fora \hreftt{http://stackoverflow.com/}{stackoverflow.com} i~\hreftt{http://superuser.com/}{superuser.com}.
 
 \noindent Na~szczególne wyróżnienie zasługują źródła, z~których korzystano najwięcej:
 \begin{enumerate}
 	\item dokumentacje:
 	\begin{enumerate}
-		\item dokumentacja TLDP~\cite{tldp},
-		\item dokumentacja deweloperów dla wybranych dystrybucji/systemów~\cite{archlinux-wiki,gentoo-wiki},
 		\item dokumentacja POSIX~\cite{posix},
+		\item dokumentacja deweloperów dla wybranych dystrybucji/systemów~\cite{archlinux-wiki,gentoo-wiki},
 		\item dokumentacja wybranego języka programowania i innych użytych narzędzi~\cite{glibc-doc},
-		\item (opcjonalnie) dokumenty IETF (\gls{rfc})~\cite{rfc-editor},
+		\item dokumenty IETF (\gls{rfc})~\cite{rfc-editor},
+		\item dokumentacja TLDP~\cite{tldp},
 		\item dokumenty W3C~\cite{w3c},
-		\item \hreftt{http://www.tcpipguide.com/}{tcpipguide.com}, czyli szczegółowy przegląd protokołu TCP/IP i~pokrewnych protokołów, opublikowany również w~formie obszernej\footnote{Książka ma~1616 stron.} książki autorstwa \mbox{Charlesa~M.~Kozieroka} pt.~\textit{The~TCP/IP Guide}\footnote{ISBN:~\href{https://www.nostarch.com/tcpip.htm}{9781593270476}. Wydawnictwo \emph{No Starch Press}.}.
+		\item \hreftt{http://www.tcpipguide.com/}{tcpipguide.com}, czyli szczegółowy przegląd protokołu TCP/IP i~pokrewnych protokołów, opublikowany również w~formie obszernej\footnote{Książka ma~1616 stron.} książki autorstwa \mbox{Charlesa} \mbox{Kozieroka} pt.~\textit{The~TCP/IP Guide}\footnote{ISBN:~\href{https://www.nostarch.com/tcpip.htm}{9781593270476}. Wydawnictwo \emph{No Starch Press}.}.
 		\item dokumentacja biblioteki OpenSSL~\cite{openssl-doc},
 		\item dokumentacja biblioteki libconfig~\cite{libconfig-doc}.
 	\end{enumerate}
@@ -218,7 +226,7 @@ W~czasie prac nad implementacją projektu, korzystano z~wielu pomocnych dokument
 		\item ,,UNIX'' --- przedmiot prowadzony przez mgra~inż.~Marcina~Borkowskiego~\cite{borkowski}.
 	\end{enumerate}
 \end{enumerate}
-Kompletny spis bibliografii, cytowanej w~niniejszej dokumentacji, znajduje się~na~jej końcu.
+Kompletny spis odwołań cytowanych w~niniejszej dokumentacji, znajduje się~na~jej końcu.
 
 %------------------------------------------------------------------------------
 
@@ -232,6 +240,6 @@ Lista wykorzystanych bibliotek i~odpowiadających im~licencji, na~prawach które
 \item \textbf{OpenSSL} --- podwójna licencja \emph{SSLeay License} i~\emph{OpenSSL License}~\cite{openssl-license}.
 \end{itemize}
 
-W~związku z~obowiązującym \emph{art.~15a~ustawy z~dnia 4~lutego~1994r. o~prawie autorskim i~prawach pokrewnych}~\cite{papp}, kod źródłowy aplikacji powstałej w~ramach niniejszej pracy, może zostać opublikowany na~warunkach licencji wybranej przez autora pracy po~upływie co~najmniej 6~miesięcy od~momentu obrony autora niniejszej pracy, pod warunkiem, że~Uczelnia, tj.~Politechnika Warszawska, sama nie~opublikuje jej przez ten~czas. Jeśli warunek ten~będzie spełniony, aplikacja zostanie opublikowana w~repozytorium \hreftt{https://github.com/}{github.com} na warunkach zmodyfikowanej licencji \glslink{gpl}{GNU~GPL~3} z~dodanym wyjątkiem dla biblioteki OpenSSL. Bez~dodania wyjątku, podwójna licencja OpenSSL jest niekompatybilna z~rodziną licencji~\glslink{gpl}{GPL}~\cite{openssl-license-incompatibility,openssl-license-incompatibility-2}. Pełny tekst licencji znajduje się w~pliku tekstowym \path{LICENSE}, dołączonym do~projektu.
+%W~związku z~obowiązującym \emph{art.~15a~ustawy z~dnia 4~lutego~1994r. o~prawie autorskim i~prawach pokrewnych}~\cite{papp}, kod źródłowy aplikacji powstałej w~ramach niniejszej pracy, może zostać opublikowany na~warunkach licencji wybranej przez autora pracy po~upływie co~najmniej 6~miesięcy od~momentu obrony autora niniejszej pracy, pod warunkiem, że~Uczelnia, tj.~Politechnika Warszawska, sama nie~opublikuje jej przez ten~czas. Jeśli warunek ten~będzie spełniony, aplikacja zostanie opublikowana w~repozytorium \hreftt{https://github.com/}{github.com} na warunkach zmodyfikowanej licencji \glslink{gpl}{GNU~GPL~3} z~dodanym wyjątkiem dla biblioteki OpenSSL. Bez~dodania wyjątku, podwójna licencja OpenSSL jest niekompatybilna z~rodziną licencji~\glslink{gpl}{GPL}~\cite{openssl-license-incompatibility,openssl-license-incompatibility-2}. Pełny tekst licencji znajduje się w~pliku tekstowym \path{LICENSE}, dołączonym do~projektu.
 
 \end{document}

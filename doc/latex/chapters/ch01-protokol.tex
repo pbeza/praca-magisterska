@@ -5,15 +5,16 @@
 \chapter{Protokół komunikacji}
 \label{chapter:protokol}
 
-Opracowany protokół komunikacji między serwerem i~klientem opiera się na~protokole~TCP. Bezpieczeństwo protokołu zapewnia wykorzystanie biblioteki OpenSSL. Oba te~elementy, tzn.~opracowany protokół aplikacji oraz~wykorzystana biblioteka OpenSSL, działają w~warstwie aplikacji modelu~TCP/IP, co~przedstawia tabela~\ref{fig:protocol-big-view}.
+Opracowany protokół komunikacji, użyty między serwerem i~klientem, opiera się na~protokole~TCP. Bezpieczeństwo protokołu zapewnia wykorzystanie biblioteki OpenSSL, która implementuje protokół~SSL/TLS. Oba te~elementy, tzn.~opracowany protokół aplikacji oraz~wykorzystana biblioteka OpenSSL, działają w~warstwie aplikacji modelu~\gls{tcpip}, co~przedstawia tabela~\ref{fig:protocol-big-view}.
 
-W~niniejszym rozdziale opisano wszystkie rodzaje pakietów przesyłanych między klientem i~serwerem oraz~sposób wykorzystania biblioteki OpenSSL w~projekcie.
+W~niniejszym rozdziale opisano wszystkie rodzaje pakietów przesyłanych między klientem i~serwerem oraz~sposób i~przyczynę wykorzystania biblioteki OpenSSL w~projekcie.
 
 \begin{table}
-\renewcommand{\arraystretch}{1.5}
+\centering
+\renewcommand{\arraystretch}{1.3}
 \begin{tabular}{l|l|l|l}
 	   & Warstwy modelu OSI & Warstwy modelu TCP/IP~(DoD)       & Wykorzystane protokoły \\\hline\hline
-	1. & Aplikacji          & \multirow{3}{*}{Aplikacji}        & \multirow{3}{*}{\parbox{3cm}{\textbf{Opracowany protokół + SSL}}} \\\cline{1-2}
+	1. & Aplikacji          & \multirow{3}{*}{Aplikacji}        & \multirow{3}{*}{\parbox{3.5cm}{Opracowany \mbox{protokół} + SSL/TLS}} \\\cline{1-2}
 	2. & Prezentacji        &                                   & \\\cline{1-2}
 	3. & Sesji              &                                   & \\\hline
 	4. & Transportowa       & Transportowa                      & TCP \\\hline
@@ -29,70 +30,190 @@ W~niniejszym rozdziale opisano wszystkie rodzaje pakietów przesyłanych między
 
 \section{Rodzaje pakietów}
 
-W~opracowanym protokole występuje kilka typów pakietów, które są~wysyłane między klientem i~serwerem. W~zależności od~etapu i~okoliczności komunikacji wykorzystywany jest różny typ pakietu. Pakiety są~łatwo rozróżnialne między sobą dzięki polu \texttt{TYPE} pakietu, określającym jego rodzaj. Pole \texttt{TYPE} jest częścią nagłówka pakietu. Nagłówek pakietu jest wspólny dla~wszystkich rodzajów pakietów. Rysunek~\ref{fig:packet-common} przedstawia schemat pamięci części wspólnej wszystkich pakietów, czyli nagłówek pakietu.
+W~opracowanym protokole występuje kilka typów pakietów, które są~wysyłane między klientem i~serwerem. W~zależności od~etapu i~okoliczności komunikacji, wykorzystywany jest różny typ pakietu. Pakiety są~rozróżnialne między sobą dzięki polu \texttt{TYPE} pakietu, określającym jego rodzaj. Pole \texttt{TYPE} jest jednym z~elementów nagłówka pakietu. Nagłówek pakietu jest wspólny dla~wszystkich rodzajów pakietów. Rysunek~\ref{fig:packet-common} przedstawia schemat pamięci wszystkich rodzajów pakietów.
+
+\newcommand\packetheader{%
+	\begin{leftwordgroup}{Nagłówek\\pakietu}%
+		\bitbox{4}{VER}%
+		\bitbox{12}{FLAGS}%
+		\bitbox{16}{TYPE}%
+	\end{leftwordgroup}\\
+}
 
 \begin{figure}
 	\centering
 	\begin{bytefield}{32}
 		\bitheader{0,3,4,7,8,11,12,15,16,19,20,23,24,27,28,31}\\
-		\begin{leftwordgroup}{Część wspólna\\wszystkich pakietów}
-			\bitbox{4}{\texttt{VER}} & \bitbox{4}{\color{lightgray}\rule{\width}{\height}} & \bitbox{8}{TYPE} & \bitbox{8}{PKG\_MGR} & \bitbox{8}{\color{lightgray}\rule{\width}{\height}}
-		\end{leftwordgroup}\\
-		\begin{leftwordgroup}{Pola zależne\\od~typu pakietu}
-			\wordbox[lrt]{2}{\vdots}\\
+		\packetheader
+		\begin{leftwordgroup}{Pola zależne od~typu\\pakietu określonego\\przez pole \texttt{TYPE}}
+			\wordbox[lrt]{1}{\vdots}\\
 			\skippedwords\\
 			\wordbox[lrb]{2}{\vdots}
 		\end{leftwordgroup}\\
 	\end{bytefield}
-	\caption{Schemat wszystkich pakietów opracowanego protokołu}
+	\caption{Wspólny schemat pamięci wszystkich pakietów opracowanego protokołu}
 	\label{fig:packet-common}
 \end{figure}
 
-Znaczenie poszczególnych pól w~nagłówku:\mynobreakpar
+% Inne propozycje co może zawierać nagłówek (może się przydać, a może nie):
+% language, encoding, length, md5
+
+Znaczenie poszczególnych pól nagłówka:\mynobreakpar
 \begin{enumerate}
-\item \texttt{VER} (\emph{Version}, 4~bity) --- Wersja protokołu. Jedyna akceptowalna wartość to~$1$. Pole to~zostało wprowadzone z~myślą o~ewentualnych przyszłych wersjach projektu, w~których mogłyby zajść duże zmiany w~układzie pól pakietów.
-\item \texttt{TYPE} (8~bitów) --- Typ pakietu określający rolę jaką pakiet odgrywa w~komunikacji. Wszystkie typy pakietów zostały opisane w~dalszej części niniejszej pracy.
-\item \texttt{PKG\_MGR} (\emph{Package manager}, 8~bitów) --- Rodzaj używanego przez klienta menadżera pakietów.
+	\item \texttt{VER} (\emph{Protocol Version}, 4~bity) --- Wersja protokołu. Jedyna akceptowalna obecnie wartość to~$1$. Pole to~jest znane z~różnych, powszechnie używanych protokołów i~zostało wprowadzone z~myślą o~ewentualnych przyszłych wersjach protokołu, w~których mogłyby zajść duże zmiany w~układzie pól pakietów.
+
+	Strona połączenia, która otrzyma pakiet z~nieznaną wersją protokołu odpowiada pakietem typu \texttt{PROTO\_FAILURE} z~ustawionym kodem błędu \texttt{UNKNOWN\_PROTO\_VER}.
+
+	\item \texttt{FLAGS} (\emph{Protocol Flags}, 12~bitów) --- Maska bitowa określająca flagi protokołu. Znaczenie flag protokołu zależy od~typu pakietu, czyli od~pola \texttt{TYPE}.
+
+	Strona połączenia, która otrzyma pakiet z~ustawionymi bitami, które nie mają zdefiniowanego znaczenia w~wersji protokołu \texttt{VER}, odpowiadają pakietem \texttt{PROTO\_FAILURE} z~ustawionym kodem błędu~\texttt{UNKNOWN\_FLAG}.
+	%	\begin{itemize}
+	%		\item $\texttt{0000}_{\texttt{(2)}} = \texttt{0}_{\texttt{(10)}}$ --- Wszystkie flagi wyczyszczone.
+	%		\item $\texttt{0001}_{\texttt{(2)}} = \texttt{1}_{\texttt{(10)}}$ --- Wartość na~razie niewykorzystana. (TODO)
+	%		\item $\texttt{0010}_{\texttt{(2)}} = \texttt{2}_{\texttt{(10)}}$ --- Wartość na~razie niewykorzystana. (TODO)
+	%		\item $\texttt{0100}_{\texttt{(2)}} = \texttt{3}_{\texttt{(10)}}$ --- Wartość na~razie niewykorzystana. (TODO)
+	%		\item $\texttt{1000}_{\texttt{(2)}} = \texttt{4}_{\texttt{(10)}}$ --- Wartość na~razie niewykorzystana. (TODO)
+	%	\end{itemize}
+
+	\item \texttt{TYPE} (\emph{Packet Type}, 16~bitów) --- Typ pakietu określający jaką rolę pakiet odgrywa w~komunikacji. Dopuszczalne wartości odpowiadające kolejnym liczbom naturalnym\footnote{Przyjmujemy konwencję, że~$0$ należy do liczb naturalnych ($0\in\mathbb{N}$).}:
+	\begin{itemize}
+		\item \texttt{FULL\_UPGRADE\_REQUEST (0x00)} --- Żądanie aktualizacji wysłane przez klienta do~serwera~(patrz rozdział~\ref{full-upgrade-request}).
+		\item \texttt{FULL\_UPGRADE\_RESPONSE (0x01)} --- Odpowiedź serwera na~żądanie aktualizacji \texttt{FULL\_UPGRADE\_REQUEST} wysłane przez klienta~(patrz rozdział~\ref{full-upgrade-response}).
+		\item \texttt{PROTO\_FAILURE (0x02)} --- Błąd połączenia~(patrz rozdział~\ref{proto-failure}).
+	\end{itemize}
+
+	Strona połączenia, która otrzyma pakiet z~niezdefiniowaną w~protokole w~wersji \texttt{VER}, wartością pola \texttt{TYPE}, odpowiada pakietem \texttt{PROTO\_FAILURE} z~ustawionym kodem błędu \texttt{UNKNOWN\_PACKET\_TYPE}.
 \end{enumerate}
 
-W~tym rozdziale zostaną omówione rodzaje przesyłanych pakietów, wykorzystywanych w~opracowanym protokole m.in.~do~zarządzania oprogramowaniem klientów, obsługą sytuacji awaryjnych i~do~diagnostyki.
+W~dalszej części rozdziału zostaną omówione rodzaje przesyłanych pakietów, wykorzystywanych w~opracowanym protokole m.in.~do~zarządzania oprogramowaniem klientów i~obsługą sytuacji awaryjnych.
 
 %---------------------------------------
 
-\subsection{Żądanie aktualizacji}
+\subsection{Żądanie aktualizacji klienta}
+\label{full-upgrade-request}
 
-Pakiet z~żądaniem aktualizacji oprogramowania jest przesyłany do~serwera przez klienta i~oznacza chęć dostosowania oprogramowania klienta do~wzorca serwera. Taki rodzaj pakietu jest symbolicznie oznaczany w~kodzie programu nazwą \texttt{FULL\_UPGRADE}. Nazwa ta, jak również nazwy innych pakietów przesyłanych w~ramach opracowanego protokołu, są~zdefiniowane jako typ wyliczeniowy~\texttt{enum~packet\_t} w~jednym z~plików nagłówkowych współdzielonych przez program serwera i~klienta. Typ pakietu jest przesyłany w~każdym pakiecie przesyłanym między klientem i~serwerem.
-
-Serwer może mieć wiele wzorców oprogramowania dla~różnych klientów, dlatego klient przesyła do~serwera numer~wybranego zestawu konfiguracji. Numery konfiguracji odpowiadają różnym zapotrzebowaniom konfiguracji komputerów. Przykładowo, laboratorium komputerowe przeznaczone na~potrzebny nauki systemów CAD/CAM może mieć inny zestaw oprogramowania od~tego używanego w~salach w~bibliotece, co~może być odzwierciedlone w~przypisaniu innych numerów oprogramowania dla~komputerów w~tych salach.
+Pakiet z~żądaniem aktualizacji oprogramowania jest przesyłany przez klienta do~serwera i~oznacza chęć dostosowania oprogramowania klienta do~wzorca serwera. Taki rodzaj pakietu jest symbolicznie oznaczany w~kodzie programu nazwą \texttt{FULL\_UPGRADE\_REQUEST}~(patrz~rys.~\ref{fig:packet-full-upgrade-request}). Nazwa ta, jak również nazwy innych pakietów przesyłanych w~ramach opracowanego protokołu, są~zdefiniowane jako typ wyliczeniowy~\texttt{enum~packet\_t} w~jednym z~plików nagłówkowych współdzielonych przez program serwera i~klienta. Typ pakietu jest przesyłany w~nagłówku każdego pakietu przesyłanego między klientem i~serwerem.
 
 \begin{figure}[h]
 	\centering
 	\begin{bytefield}{32}
 		\bitheader{0,3,4,7,8,11,12,15,16,19,20,23,24,27,28,31}\\
-		\begin{leftwordgroup}{Część wspólna\\wszystkich pakietów}
-			\bitbox{4}{Version} & \bitbox{4}{\color{lightgray}\rule{\width}{\height}} & \bitbox{8}{Type} & \bitbox{8}{Distro} & \bitbox{8}{\color{lightgray}\rule{\width}{\height}}
-		\end{leftwordgroup}\\
-		\bitbox{16}{Config set} & \bitbox{16}{Not used}\\
-		\wordbox{1}{Length}\\
-		\begin{rightwordgroup}{Payload}
-			\wordbox[lrt]{2}{$N$ data words}\\
-			\skippedwords\\
-			\wordbox[lrb]{2}{}
-		\end{rightwordgroup}\\
-		\begin{rightwordgroup}{Footer}
-			\wordbox{1}{Checksum}
-		\end{rightwordgroup}
+		\packetheader
+		\bitbox{16}{CONFIG\_SET} & \bitbox{8}{COMPR\_TYPE} & \bitbox{8}{PKG\_MGR}\\
+		\wordbox{1}{LAST\_UPGRADE\_TIME}\\
 	\end{bytefield}
-	\caption{Pakiet~\texttt{FULL\_UPGRADE}}
-	\label{fig:packet-full-upgrade}
+	\caption{Schemat pamięci pakietu typu~\texttt{FULL\_UPGRADE\_REQUEST}}
+	\label{fig:packet-full-upgrade-request}
 \end{figure}
+
+Serwer może mieć wiele wzorców oprogramowania dla~różnych klientów, dlatego klient przesyła do~serwera numer~wybranego zestawu konfiguracji. Numery konfiguracji odpowiadają różnym zapotrzebowaniom konfiguracji komputerów. Przykładowo, laboratorium komputerowe przeznaczone na~potrzebny nauki systemów CAD/CAM może mieć inny zestaw oprogramowania od~tego używanego w~salach w~bibliotece, co~jest odzwierciedlone przez przypisanie różnych numerów oprogramowania dla~komputerów w~tych salach. Maksymalna ilość różnych zestawów konfiguracji jest zdeterminowana przez 16-sto bitowy rozmiar pola i~wynosi~$2^{16}=65536$.
+
+Aktualizacja oprogramowania klienta może się wiązać z~przesłaniem znacznej ilości danych~(rzędu setek megabajtów lub kilku gigabajtów), szczególnie gdy klient synchronizuje się z~serwerem po~raz pierwszy lub synchronizacja nie była uruchamiana od~dłuższego czasu. Istnieje więc potrzeba potrzeba zastosowania bezstratnej kompresji przesyłanego oprogramowania. Pole \texttt{COMPR\_TYPE} pakietu typu \texttt{FULL\_UPGRADE\_REQUEST}, umożliwia ustawienie jednej z~kilku predefiniowanych rodzajów kompresji.
+
+Znaczenie poszczególnych pól dla pakietu typu \texttt{FULL\_UPGRADE\_REQUEST}:\mynobreakpar
+\begin{enumerate}
+	\item \texttt{CONFIG\_SET} (\emph{Configuration Setting Number}, 16~bitów) --- Numer konfiguracji z~zakresu $[0;2^{16}-1]\cap\mathbb{Z}$, któremu odpowiada zestaw oprogramowania przeznaczony dla~klienta. Numery konfiguracji służą do~rozróżniania zapotrzebowania komputerów na~oprogramowanie. Przykładowo komputery w~pracowniach komputerowych i~w~bibliotece mogą mieć przydzielone różne numery \texttt{CONFIG\_SET}, ponieważ komputery te~wymagają różnej konfiguracji i~oprogramowania.
+	\item \texttt{COMPR\_TYPE} (\emph{Compression Type}, 8~bitów) --- Sposób kompresji jaki zostanie użyty do~spakowania pakietów, które zostaną przesłane do~klienta. Szerokość pola pozwala na~zdefiniowanie maksymalnie~$2^8=256$ rodzajów kompresji. W~pierwszej wersji protokołu istnieje 6~rodzajów akceptowanych wartości, które odpowiadają kolejnym liczbom naturalnym:
+		\begin{itemize}
+			\item \texttt{NO\_COMPRESSION (0x00)} --- brak kompresji,
+			\item \texttt{TAR\_GZ\_COMPRESSION (0x01)} --- kompresja do~archiwum \path{*.tar.gz} komendą \texttt{tar~czf},
+			\item \texttt{TAR\_BZ2\_COMPRESSION (0x02)} --- kompresja do~archiwum \path{*.tar.bz2} komendą \texttt{tar~cjf},
+			\item \texttt{TAR\_XZ\_COMPRESSION (0x03)} --- kompresja do~archiwum \path{*.tar.xz} komendą \texttt{tar~cJf},
+			\item \texttt{RAR\_COMPRESSION (0x04)} --- kompresja do~archiwum \path{*.rar} komendą \texttt{rar~a},
+			\item \texttt{ZIP\_COMPRESSION (0x05)} --- kompresja do~archiwum \path{*.zip} komendą \texttt{zip}.
+		\end{itemize}
+	Jeśli serwer otrzyma pakiet z~nieznanym sposobem kompresji odpowiada pakietem typu \texttt{PROTO\_FAILURE} z~ustawionym kodem błędu \texttt{UNKNOWN\_COMPR\_TYPE}.
+	\item \texttt{PKG\_MGR} (\emph{Package Manager}, 8~bitów) --- Rodzaj menadżera pakietów używanego przez klienta. W~zależności od~wartości tego pola, klient otrzyma paczki oprogramowania przeznaczone dla~różnych menadżerów pakietów. Ośmiobitowa szerokość pola umożliwia rozszerzenie wsparcia dla~nowych menadżerów pakietów w~kolejnych wersjach protokołu. Dopuszczalne wartości tego pola odpowiadają kolejnym liczbom naturalnym:
+		\begin{itemize}
+			\item \texttt{DPKG\_PKG\_MGR (0x00)} --- Paczki oprogramowania \texttt{*.deb} przeznaczone dla~systemów korzystających z~menadżera pakietów \texttt{dpkg}\footnote{W~praktyce wykorzystywane są~menadżery pakietów \texttt{apt-get} i~\texttt{aptitude}, które ,,rozumieją'' zależności pomiędzy pakietami i~korzystają z~niskopoziomowego~\texttt{dpkg}.}, wykorzystanego w~takich dystrybucjach \gls{gnulinux} jak np.~\emph{Debian} i~systemy bazujące na~nim, np.~\emph{Ubuntu}, \emph{Knoppix}, \emph{Linux~Mint} czy~\emph{Damn Small Linux~(DSL)},
+			\item \texttt{TAR\_XZ\_PKG\_MGR (0x01)} --- Paczki oprogramowania \texttt{*.pkg.tar.xz} przeznaczone dla~systemów korzystających z~menadżera pakietów \texttt{pacman}, wykorzystanego w~systemie \emph{Arch~Linux}.
+		\end{itemize}
+	\item \texttt{LAST\_UPGRADE\_TIME} (\emph{Last Upgrade Time}, 32~bity) --- Czas ostatniej synchronizacji oprogramowania klienta z~serwerem. Na~podstawie tego pola serwer wie które pakiety i~elementy konfiguracji muszą zostać przesłane do~klienta, a~które zostały już przesłane. Jeśli pole to~jest wyzerowane, to~serwer prześle klientowi wszystkie pakiety jakie są~przewidziane dla~danego \texttt{CONFIG\_SET}. W~szczególności jest to~użyteczne, gdy klient przesyła pakiet typu \texttt{FULL\_UPGRADE\_REQUEST} po~raz pierwszy.
+\end{enumerate}
+
+Algorytm działania sewera po~otrzymaniu pakietu typu~\texttt{FULL\_UPGRADE\_REQUEST}:\mynobreakpar
+\begin{enumerate}
+	\item Sprawdź czy~pakiet przesłany przez klienta jest poprawnie sformatowany, tzn.~czy ma~oczekiwaną długość i~czy wszystkie pola pakietu są~akceptowalne. W~szczególności sprawdź czy~menadżer pakietów przesłany w~polu~\texttt{PKG\_MGR} jest wspierany przez serwer. Jeśli pakiet nie jest sformatowany poprawnie, prześlij pakiet \texttt{PROTO\_FAILURE} z~kodem błędu odpowiadającym przyczynie niepowodzenia.
+	\item\label{create-file} Zapisz w~katalogu \path{/var/run} plik tekstowy zawierający informację o~rozpoczęciu komunikacji z klientem, który zgłosił żądanie typu~\texttt{FULL\_UPGRADE\_REQUEST}. Krok ten ma za~zadanie zagwarantować transakcyjność operacji, tzn. że w~przypadku awaryjnego wyjścia z~programu serwera, serwer po ponownym uruchomieniu będzie miał szansę poinformować administratora w~swoich logach o~niepowodzeniu aktualizacji klienta oraz podjąć kroki mające na~celu przywrócenie integralności stanu serwera.
+	\item Na~podstawie pola \texttt{LAST\_UPGRADE\_TIME} sprawdź czy~klient wymaga aktualizacji. Jeśli klient jest już zaktualizowany, to~prześlij pakiet \texttt{FULL\_UPGRADE\_RESPONSE} (patrz rozdział~\ref{full-upgrade-response}) z~wyzerowanym polem \texttt{LENGTH} i~zakończ połączenie. W~przeciwnym razie przejdź do~kolejnego punktu algorytmu.
+	\item Odczytaj pole \texttt{CONFIG\_SET} otrzymanego pakietu i~na jego podstawie ustal który plik konfiguracyjny odczytać. Plik ten definiuje zestaw oprogramowania dla klienta. W~przypadku odczytania nieobsługiwanej wartości \texttt{CONFIG\_SET}, odeślij pakiet \texttt{PROTO\_FAILURE} z~ustawionym kodem błędu \texttt{UNKNOWN\_CONFIG\_SET}.
+	\item Odczytaj powyższy plik konfiguracyjny. W~przypadku gdy plik ten nie istnieje, nie daje się odczytać, ma nieoczekiwany format lub z~dowolnego innego powodu, uniemożliwiającego dalsze działanie na jego podstawie, prześlij do~klienta pakiet typu \texttt{PROTO\_FAILURE} z~kodem błędu \texttt{SERVER\_INTERNAL\_ERR}. W~przeciwnym przypadku, na~podstawie pliku konfiguracyjnego i~pola \texttt{LAST\_UPGRADE\_TIME} otrzymanego pakietu, ustal listę pakietów, które należy przesłać do~klienta.
+	\item Na~podstawie przygotowanej listy pakietów, pobierz z~cache'a pakiety dla~klienta, a~tych których nie ma w~cache'u, pobierz z~internetu ze~źródła zdefiniowanego w~pliku konfiguracyjnym serwera. Pobrane pliki zapisz w~cache'u, usuwając najdłużej nieużywane pliki z~cache'a jeśli jest osiągnięto limit wykorzystania cache'a. \textbf{Uwaga:} wykonanie tego kroku przez serwer może być czasochłonne ze~względu na~konieczność pobrania pakietów z~internetu. W~przypadku przerwania pobierania dowolnego pakietu z~internetu, serwer przesyła klientowi pakiet typu \texttt{PROTO\_FAILURE} z~kodem błędu \texttt{SERVER\_INTERNAL\_ERR}. W~przypadku zerwania połączenia z~klientem, serwer kontynuuje pobieranie wszystkich pakietów, dzięki czemu klient szybko otrzyma\footnote{Pod warunkiem, że~cache nie zostanie wyczyszczony.} aktualizację oprogramowania po~ponownym wysłaniu pakietu typu \texttt{FULL\_UPGRADE\_REQUEST}.
+	\item Utwórz z~wszystkich pakietów przeznaczonych dla~klienta archiwum typu określonego polem \texttt{COMPR\_TYPE} pakietu. Jeśli kompresja nie powiedzie się z~dowolnego powodu, wyślij pakiet typu \texttt{PROTO\_FAILURE} z~kodem błędu \texttt{SERVER\_INTERNAL\_ERR}.
+	\item Wyślij archiwum z~pakietami do~klienta. Archiwum to~nie jest podpisywane cyfrowo przez serwer, ponieważ przesłanie archiwum odbywa się~w~ramach sesji~SSL/TLS, na~początku której klient uwierzytelnia serwer sprawdzając jego cyfrowy certyfikat.
+	\item Oczekuj na~raport o~powodzeniu instalacji. Odnotuj w~logach raport od~klienta. \textbf{Uwaga:} oczekiwanie może być czasochłonne, dlatego serwer czeka na potwierdzenie przez pewien czas. (TODO: szczegółowy opis jak to obsłużyć).
+	\item Zakończ połączenie i~skasuj plik utworzony w~kroku~\ref{create-file}.
+\end{enumerate}
+
+%---------------------------------------
+
+\subsection{Odpowiedź na żądanie aktualizacji klienta}
+\label{full-upgrade-response}
+
+Po~otrzymaniu przez serwer pakietu typu \texttt{FULL\_UPGRADE\_REQUEST}, serwer analizuje czy klient jest już zaktualizowany, a~jeśli nie, to co~powinien otrzymać od~serwera w~odpowiedzi. Odpowiedź serwera ma~typ pakietu \texttt{FULL\_UPGRADE\_RESPONSE} i~składa się z~następujących pól:
+
+\begin{itemize}
+	\item  \texttt{LENGTH} (\emph{Total Length}, 64~bity) --- Długość pola \texttt{DATA} w~bajtach. Akceptowalne wartości z~przedziału $[0;2^{64}]$. Wartość~$0$ oznacza, że~klient jest już zaktualizowany i~nie potrzebuje dokonywać żadnych zmian, aby~dostosować się do~wzorca serwera.
+	\item \texttt{DATA} (\emph{Upgrade Data}, \texttt{LENGTH}~bitów) --- Archiwum żądanego przez klienta typu (por.~\ref{full-upgrade-request}) z~pakietami i~konfiguracją do~zainstalowania na~kliencie.
+\end{itemize}
+
+\begin{figure}[h]
+	\centering
+	\begin{bytefield}{32}
+		\bitheader{0,3,4,7,8,11,12,15,16,19,20,23,24,27,28,31}\\
+		\packetheader
+		\wordbox{2}{LENGTH}\\
+		\wordbox[lrt]{1}{DATA}\\
+		\skippedwords\\
+		\wordbox[lrb]{2}{\vdots}
+	\end{bytefield}
+	\caption{Schemat pamięci pakietu typu~\texttt{FULL\_UPGRADE\_RESPONSE}}
+	\label{fig:packet-full-upgrade-response}
+\end{figure}
+
+%---------------------------------------
+
+\subsection{Błąd połączenia}
+\label{proto-failure}
+
+Istnieje wiele możliwych sytuacji, w~których dalsza komunikacja między serwerem i~klientem jest bezcelowa i~powinna zostać zakończona. Przykładami takich sytuacji jest~np.~błędnie sformatowany przychodzący pakiet lub~nieobsługiwana wersja protokołu. W~takich przypadkach strona połączenia, która wykryje taką sytuację, powinna zakomunikować drugiej stronie, że~kończy połączenie z~powodu określonego kodem błędu. Pakiety przeznaczone do~tego celu to~pakiety typu \texttt{PROTO\_FAILURE}. Budowa takiego pakietu została przedstawiona na~rysunku~\ref{fig:packet-protocol-failure}, a~dopuszczalne typy błędów zostały opisane w~tabeli~\ref{fig:packet-protocol-failure-desc}.
+
+\begin{figure}[h]
+	\centering
+	\begin{bytefield}{32}
+		\bitheader{0,3,4,7,8,11,12,15,16,19,20,23,24,27,28,31}\\
+		\packetheader
+		\bitbox{16}{ERR\_CODE} & \bitbox{16}{\color{lightgray}\rule{\width}{\height}}\\
+	\end{bytefield}
+	\caption{Schemat pamięci pakietu typu~\texttt{PROTO\_FAILURE}}
+	\label{fig:packet-protocol-failure}
+\end{figure}
+
+\begin{table}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{l|p{1.5cm}|p{8.5cm}}
+	Kod błędu                      & Numer błędu   & Znaczenie kodu błędu\\\hline\hline
+	\texttt{UNKNOWN\_PROTO\_VER}   & \texttt{0x00} & Pole \texttt{VER} określa nieobsługiwaną wersję protokołu.\\\hline
+	\texttt{UNKNOWN\_FLAG}         & \texttt{0x01} & Pole \texttt{FLAGS} ma~ustawione bity, które nie są rozpoznawane w~tej wersji protokołu.\\\hline
+	\texttt{UNKNOWN\_PKG\_MGR}     & \texttt{0x02} & Pole \texttt{PKG\_MGR} określa nieobsługiwany menadżer pakietów.\\\hline
+	\texttt{UNKNOWN\_COMPR\_TYPE}  & \texttt{0x03} & Pole \texttt{COMPR\_TYPE} określa nieznany zestaw oprogramowania.\\\hline
+	\texttt{UNKNOWN\_CONFIG\_SET}  & \texttt{0x04} & Pole \texttt{CONFIG\_SET} określa nieznany zestaw oprogramowania.\\\hline
+	\texttt{UNKNOWN\_PACKET\_TYPE} & \texttt{0x05} & Pole \texttt{TYPE} określa nieznany typ pakietu.\\\hline
+	\texttt{MALFORMED\_PACKET}     & \texttt{0x06} & Pakiet jest niepoprawnie sformatowany z~innego powodu niż powyższe.\\\hline
+	\texttt{SERVER\_INTERNAL\_ERR} & \texttt{0x07} & Wystąpił błąd po~stronie serwera.\\\hline
+	\texttt{CLIENT\_INTERNAL\_ERR} & \texttt{0x08} & Wystąpił błąd po~stronie klienta.
+\end{tabular}
+\caption{Kody błędów dla~pakietu typu \texttt{PROTO\_FAILURE} i~ich znaczenie}
+\label{fig:packet-protocol-failure-desc}
+\end{table}
 
 %------------------------------------------------------------------------------
 
-\section{Bezpieczeństwo}
+\section{Bezpieczeństwo protokołu}
 \label{sec:security}
 
-Uwzględnienie bezpieczeństwa protokołu jest krytyczne dla projektu, ponieważ umożliwia on~serwerowi na zarządzanie konfiguracją wszystkich klientów. Zaniedbanie bezpieczeństwa protokołu lub~jego wadliwa implementacja, umożliwiłaby atakującemu system, na~przejęcie kontroli nad~wszystkimi klientami, np.~przez przesłanie klientom złośliwych aktualizacji oprogramowania lub~konfiguracji.
+Uwzględnienie bezpieczeństwa protokołu jest krytyczne dla~powodzenia projektu protokołu, szczególnie takiego, który umożliwia serwerowi na~zarządzanie konfiguracją dziesiątek, setek lub tysięcy klientów. Zaniedbanie bezpieczeństwa protokołu lub~jego wadliwa implementacja, umożliwiłaby atakującemu system, na~przejęcie kontroli nad~wszystkimi klientami, np.~przez przesłanie klientom złośliwych aktualizacji oprogramowania lub~konfiguracji.
 
 Umożliwienie przejęcia kontroli nad wszystkimi klientami byłoby prawdopodobnie najgorszym z~możliwych scenariuszy zarówno dla użytkowników jak i~administratora atakowanej sieci, jednak niedbała implementacja protokołu mogłaby umożliwiać również wiele innych rodzajów ataków, np. \emph{replay attack} i~\emph{man in the middle~(MITM)}. W~celu uniknięcia podatności protokołu na~wymienione i~inne, popularne rodzaje ataków, należy zagwarantować bezpieczeństwo protokołu co~najmniej pod względem:
 \begin{enumerate}
@@ -113,7 +234,7 @@ Protokół \gls{ssl/tls} jest bardzo elastyczny pod względem doboru algorytmów
 
 Przykładowo, jeśli celem jest dopuszczenie do~użytku wyłącznie zestawów metod kryptograficznych używających algorytmu \glslink{dh}{Diffiego-Hellmana} do~wymiany klucza, a~do szyfrowania szyfru blokowego~\gls{aes}, to filtr będzie miał postać napisu \texttt{DH+AES @STRENGTH}. Słowo kluczowe \texttt{@STRENGTH} służy do posortowania wynikowych zestawów metod kryptograficznych nierosnąco (a~nie ściśle malejąco) względem bezpieczeństwa.
 
-Aby przekonać się jakie algorytmy zostaną zwrócone dla danego filtru, nie~trzeba korzystać z~\glslink{api}{API} biblioteki \gls{openssl}. Wystarczy nam do~tego konsola, co~prezentuje listing~\ref{openssl-console-filter}.\\
+Aby przekonać się jakie algorytmy zostaną zwrócone dla danego filtru, nie~trzeba korzystać z~API biblioteki \gls{openssl}. Wystarczy nam do~tego konsola, co~prezentuje listing~\ref{openssl-console-filter}.\\
 
 \begin{lstlisting}[numbers=none,language=bash,caption={Wynik filtrowania zestawów algorytmów w~konsoli za~pomocą \gls{openssl}},label=openssl-console-filter]
 $ openssl ciphers -v 'DH+AES @STRENGTH'

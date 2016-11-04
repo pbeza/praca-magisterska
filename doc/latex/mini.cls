@@ -43,33 +43,6 @@
 %	includeheadfoot
 %}
 
-% Font URLi i zawijanie bardzo długich adresów URL
-
-\PassOptionsToPackage{hyphens}{url}
-%\RequirePackage[unicode,plainpages=false,hypertexnames=true]{hyperref}
-\RequirePackage[unicode]{hyperref}
-
-% Zwykły \href z verbatim font
-
-\newcommand\hreftt[2]{%
-	\href{#1}{\texttt{#2}}%
-}
-
-% Zwykły \gls z verbatim font
-
-\newcommand\glstt[1]{%
-	\texttt{\gls{#1}}%
-}
-
-% Zwykły \glslink z verbatim font
-
-\newcommand\glslinktt[2]{%
-	\glslink{#1}{\texttt{#2}}%
-}
-
-%\let\oldhref\href
-%\renewcommand{\href}[2]{\oldhref{#1}{#2}}
-
 % Ustawienia wyłączenia podświetlania linków za pomocą kolorowych ramek
 
 %\hypersetup{
@@ -144,12 +117,6 @@
 
 \RequirePackage[justification=centering]{caption}
 
-% Umożliwienie korzystania z przypisów
-
-\RequirePackage{footnote}
-%\RequirePackage{tikz}
-%\usetikzlibrary{matrix}
-
 % Nierozjechane linki w tytułowiej stronie informacyjnej
 
 \RequirePackage{listliketab}
@@ -180,6 +147,42 @@
 \widowpenalty=10000
 \brokenpenalty=10000
 
+% Umożliwienie korzystania z przypisów
+
+\RequirePackage{footnote}
+%\RequirePackage[all]{hypcap}
+%\RequirePackage{tikz}
+%\usetikzlibrary{matrix}
+
+% Font URLi i zawijanie bardzo długich adresów URL (ładować po paczce setspace,
+% żeby działały dobrze skoki do footnote)
+
+%\RequirePackage{url}
+%\PassOptionsToPackage{hyphens}{url}
+%\RequirePackage[unicode,plainpages=false,hypertexnames=true]{hyperref}
+\RequirePackage[unicode]{hyperref}
+
+% Zwykły \href z verbatim font
+
+\newcommand\hreftt[2]{%
+	\href{#1}{\texttt{#2}}%
+}
+
+% Zwykły \gls z verbatim font
+
+\newcommand\glstt[1]{%
+	\texttt{\gls{#1}}%
+}
+
+% Zwykły \glslink z verbatim font
+
+\newcommand\glslinktt[2]{%
+	\glslink{#1}{\texttt{#2}}%
+}
+
+%\let\oldhref\href
+%\renewcommand{\href}[2]{\oldhref{#1}{#2}}
+
 % Ustawienia słownika pojęć (glossaries)
 
 \RequirePackage[nomain,acronym,xindy={language=polish,codepage=utf8},nonumberlist]{glossaries}
@@ -189,9 +192,9 @@
 \renewcommand*{\glspostdescription}{}
 \newglossarystyle{labeling}{%
 	\renewenvironment{theglossary}%
-		{\begin{longtable}{p{.2\linewidth}p{1.5\glsdescwidth}}}%
+		{\begin{longtable}{p{.15\linewidth}p{1.55\glsdescwidth}}}%
 		{\end{longtable}}%
-	\renewcommand*{\glspostdescription}{.\\}%
+	\renewcommand*{\glspostdescription}{\\}%
 	\renewcommand*{\glossaryheader}{}%
 	\renewcommand*{\glsgroupheading}[1]{}%
 	\renewcommand*{\glossaryentryfield}[5]{%
@@ -226,8 +229,7 @@
 
 \RequirePackage{mathtools} % do not use old amsmath package
 %\RequirePackage{amsthm}
-%\RequirePackage{amsfonts}
-%\RequirePackage{amssymb}
+\RequirePackage{amssymb}
 %\RequirePackage{mathabx}
 
 % Ustawienie wcięć na początku każdego akapitu
