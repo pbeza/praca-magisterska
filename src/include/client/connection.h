@@ -14,6 +14,6 @@ int connect_server(client_config_t *config);
 
 int disconnect_server(int socket);
 
-int send_hello_to_server(SSL *ssl, int socket);
+int run_protocol(SSL *ssl, int socket);
 
 #endif

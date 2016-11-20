@@ -14,9 +14,13 @@ add_executable(${PROJECT_NAME} "main.c" "security.c" "config_parser.c" "config_p
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_BINARY_DIR})
 
+# Include client's protocol implementation.
+
+add_subdirectory(protocol)
+
 # Link the executable to the common library.
 
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC common ${OPENSSL_LIBRARIES} ${LIBCONFIG_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC common client-protocol ${OPENSSL_LIBRARIES} ${LIBCONFIG_LIBRARIES})
 
 # Generate manual from --help output.
 

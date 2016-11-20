@@ -170,8 +170,8 @@
 
 % Zwykły \gls z verbatim font
 
-\newcommand\glstt[1]{%
-	\texttt{\gls{#1}}%
+\newcommand\glstt[2]{%
+	\texttt{\glslink{#1}{#2}}%
 }
 
 % Zwykły \glslink z verbatim font

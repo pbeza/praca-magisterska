@@ -10,10 +10,23 @@
 #include "connection.h"
 
 #include "common/misc.h"
-#include "common/security.h"
+#include "protocol/proto_upgrade_request.h"
+#include "protocol/recv_upgrade_response.h"
+#include "security.h"
 
 #define POLL_TIMEOUT_MILLISECONDS	10 * 1000
-#define MAX_SSL_WRITE_RETRIES		5
+
+/**
+ * TODO Make it more flexible - not constant.
+ */
+#define CLIENT_CONFIG_SET		0
+#define CLIENT_COMPRESSION_TYPE		TAR_GZ_COMPRESSION
+#define CLIENT_PACKAGE_MANAGER		DPKG_PKG_MGR
+#define CLIENT_LAST_UPGRADE_TIME	0
+#define SERVER_RESPONSE_SAVE_DIRECTORY	"/tmp/"
+#define SERVER_RESPONSE_SAVE_FILENAME	"received_test.txt"
+#define SERVER_RESPONSE_SAVE_FULL_PATH	SERVER_RESPONSE_SAVE_DIRECTORY \
+					SERVER_RESPONSE_SAVE_FILENAME
 
 /**
  * If `connect()` was interrupted by `EINTR`, connection is established
@@ -156,39 +169,39 @@ int disconnect_server(int socket) {
 }
 
 /**
- * \todo This is very simplified communication model for testing SSL connection.
- * TODO TODO TODO
+ * Simplified communication model. \todo Not finished yet. Work in progress.
  */
-int send_hello_to_server(SSL *ssl, int socket) {
-	int ret, retries;
-	const char *msg = "Ala ma kota, a kot ma ale";
+int run_protocol(SSL *ssl, int socket) {
+	const uint16_t config_set = CLIENT_CONFIG_SET;
+	const compression_type compr_type = CLIENT_COMPRESSION_TYPE;
+	const package_mgr pkg_mgr = CLIENT_PACKAGE_MANAGER;
+	const uint32_t last_upgrade_time = CLIENT_LAST_UPGRADE_TIME;
+	const char *path = SERVER_RESPONSE_SAVE_FULL_PATH;
 
-	for (retries = 0; retries < MAX_SSL_WRITE_RETRIES; retries++) {
-		sleep(6); /* \todo Temporary to test server */
+	syslog(LOG_DEBUG, "Waiting 5 seconds before sending upgrade request...");
+	sleep(5); /* TODO test */
 
-		if ((ret = SSL_write(ssl, msg, strlen(msg))) > 0) {
-			syslog(LOG_DEBUG, "SSL_write() successful, %d bytes sent", ret);
-			return 0;
-		} else if (ret < 0) {
-			syslog_ssl_err("SSL_write() = -1, error or action must be taken");
-		} else {
-			if (SSL_get_error(ssl, ret) == SSL_ERROR_ZERO_RETURN) {
-				syslog(LOG_INFO, "Connection was closed "
-				       "cleanly during SSL_write()");
-				return -1;
-			}
-			syslog_ssl_err("SSL_write() error, probably connection was closed");
-		}
+	syslog(LOG_DEBUG, "Sending upgrade request to server...");
 
-		if ((ret = handle_ssl_error_want(ret, ssl, socket)) < 0) {
-			syslog(LOG_ERR, "Trying to handle SSL_write() error has failed");
-			return -1;
-		}
+	if (send_upgrade_request(socket, ssl, config_set, compr_type, pkg_mgr,
+				 last_upgrade_time) < 0) {
+		syslog(LOG_ERR, "Sending UPGRADE_REQUEST has failed");
+		return -1;
 	}
 
-	if (retries >= MAX_SSL_WRITE_RETRIES)
-		syslog(LOG_ERR, "Maximum number %d of SSL_write() retries "
-		       "reached, giving up", MAX_SSL_WRITE_RETRIES);
+	syslog(LOG_DEBUG, "Upgrade request successfully sent");
 
-	return -1;
+	syslog(LOG_DEBUG, "Waiting 5 seconds before receiving upgrade response");
+	sleep(5); /* TODO test */
+
+	syslog(LOG_DEBUG, "Waiting for server's response...");
+
+	if (recv_upgrade_response(socket, ssl, path) < 0) {
+		syslog(LOG_ERR, "Failed to receive server UPGRADE_RESPONSE");
+		return -1;
+	}
+
+	syslog(LOG_DEBUG, "Server response successfully saved in %s", path);
+
+	return 0;
 }

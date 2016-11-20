@@ -12,6 +12,8 @@
 #include "security.h"
 
 #define SSL_POLL_TIMEOUT_MILLISECONDS	5 * 1000
+#define MAX_SSL_WRITE_RETRIES		5
+#define MAX_SSL_READ_RETRIES		5
 
 int init_ssl_conn(SSL_CTX *ssl_ctx, SSL **ssl, int csocket) {
 	if (!(*ssl = SSL_new(ssl_ctx))) {
@@ -165,3 +167,67 @@ int cleanup_ssl_ctx(SSL_CTX *ssl_ctx) {
 	ERR_free_strings();
 	return ret;
 }
+
+int ssl_send(int socket, SSL *ssl, const char *buf, size_t len) {
+	int ret, retries;
+
+	for (retries = 0; retries < MAX_SSL_WRITE_RETRIES; retries++) {
+
+		if ((ret = SSL_write(ssl, buf, len)) > 0) {
+			syslog(LOG_DEBUG, "SSL_write() successful, %d bytes sent", ret);
+			return ret;
+		} else if (ret < 0) {
+			syslog_ssl_err("SSL_write() = -1, error or action must be taken");
+		} else {
+			if (SSL_get_error(ssl, ret) == SSL_ERROR_ZERO_RETURN) {
+				syslog(LOG_INFO, "Connection was closed "
+				       "cleanly during SSL_write()");
+				return -1;
+			}
+			syslog_ssl_err("SSL_write() error, probably connection was closed");
+		}
+
+		if ((ret = handle_ssl_error_want(ret, ssl, socket)) < 0) {
+			syslog(LOG_ERR, "Trying to handle SSL_write() error has failed");
+			return -1;
+		}
+	}
+
+	if (retries >= MAX_SSL_WRITE_RETRIES)
+		syslog(LOG_ERR, "Maximum number %d of SSL_write() retries "
+		       "reached, giving up", MAX_SSL_WRITE_RETRIES);
+
+	return -1;
+}
+
+int ssl_read(int socket, SSL *ssl, char *buf, int len) {
+	int ret, retries;
+
+	for (retries = 0; retries < MAX_SSL_READ_RETRIES; retries++) {
+		if ((ret = SSL_read(ssl, buf, len)) > 0) {
+			syslog(LOG_DEBUG, "SSL_read() successful, %d bytes read", ret);
+			return ret;
+		} else if (ret < 0) {
+			syslog_ssl_err("SSL_read() = -1, error or action must be taken");
+		} else {
+			if (SSL_get_error(ssl, ret) == SSL_ERROR_ZERO_RETURN) {
+				syslog(LOG_INFO, "Connection was closed "
+				       "cleanly during SSL_read()");
+				return -1;
+			}
+			syslog_ssl_err("SSL_read() error, probably connection was closed");
+		}
+
+		if ((ret = handle_ssl_error_want(ret, ssl, socket)) < 0) {
+			syslog(LOG_ERR, "Trying to handle SSL_read() error has failed");
+			return -1;
+		}
+	}
+
+	if (retries >= MAX_SSL_READ_RETRIES)
+		syslog(LOG_ERR, "Maximum number %d of SSL_read() retries "
+		       "reached, giving up", MAX_SSL_READ_RETRIES);
+
+	return -1;
+}
+

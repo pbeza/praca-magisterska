@@ -14,12 +14,12 @@
 
 #include "client_thread.h"
 
-#define BACKLOG				MIN(64, SOMAXCONN)
-
 #ifdef DEBUG
 #define MAX_CLIENTS_THREADS		2
+#define BACKLOG				8
 #else
 #define MAX_CLIENTS_THREADS		1 << 14
+#define BACKLOG				MIN(64, SOMAXCONN)
 #endif
 
 static volatile int clients_number = 0;
@@ -66,10 +66,12 @@ static void* thread_work_wrapper(void *arg) {
 	       "talking with client; %d clients' thread(s) after this thread "
 	       "terminatation", clients_number);
 
-	syslog(LOG_INFO, "Closing client's socket no. %d", thread_arg->csocket);
-
 	if (TEMP_FAILURE_RETRY(close(thread_arg->csocket)) < 0)
 		syslog_errno("Can't close() socket dedicated for client");
+	else
+		syslog(LOG_INFO, "Closing client's socket no. %d successful",
+		       thread_arg->csocket);
+
 
 	free(arg); /* Note that thread_arg is casted from arg */
 
@@ -248,11 +250,11 @@ int accept_clients(const server_config_t *config) {
 		}
 
 		syslog(LOG_INFO, "New client accepted successfully on socket "
-		       "no. %d", csocket);
+		       "no. %d. Starting thread for client...", csocket);
 
 		/* `thread_arg` MUST be free()'d */
 		if (!(thread_arg = init_thread_arg(config, csocket))) {
-			syslog(LOG_ERR, "Failed to create thread's data thus "
+			syslog(LOG_ERR, "Failed to create thread's data - "
 			       "connection with client will be closed");
 			ret = -1;
 		} else if (try_to_create_thread_for_client(thread_arg) < 0) {
@@ -265,11 +267,13 @@ int accept_clients(const server_config_t *config) {
 			if (TEMP_FAILURE_RETRY(close(csocket)) < 0)
 				syslog_errno("Can't close() socket dedicated for client");
 			ret = 0;
+		} else {
+			syslog(LOG_INFO, "Thread for client created successfully");
 		}
 	}
 
 	/* TODO TODO TODO */
-	syslog(LOG_INFO, "Gracefully closing connections with clients from within threads");
+	syslog(LOG_INFO, "Gracefully closing connections with clients within threads");
 
 	if (TEMP_FAILURE_RETRY(close(ssocket)) < 0) {
 		syslog_errno("Closing server socket has failed");

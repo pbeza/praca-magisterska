@@ -73,7 +73,7 @@ Aplikacja klienta i~serwera tworzą demona systemowego w~powyższy sposób. Kod 
 
 \section{Procesy i~wątki}
 
-Aplikacja jest w~pełni zgodna ze~standardem \gls{posix}, dlatego do~obsługi wątków wykorzystano biblioteki \texttt{pthread}, wchodząca w~skład tego standardu~\cite{pthreads-posix-manual}. Wykorzystanie wątków jest szczególnie istotne po~stronie serwera. Każdy klient jest obsługiwany przez osobny wątek serwera. Do~celów synchronizacji dostępu do~zasobów dzielonych przez wątki wykorzystano muteksy~\texttt{pthread\_mutex\_t} i~rodzinę funkcji im~towarzyszących.
+Aplikacja jest w~pełni zgodna ze~standardem \gls{posix}, dlatego do~obsługi wątków wykorzystano biblioteki \texttt{pthread}, wchodząca w~skład tego standardu~\cite{pthreads-posix-manual}. Wykorzystanie wątków jest szczególnie istotne po~stronie serwera. Każdy klient jest obsługiwany przez osobny wątek serwera. Do~celów synchronizacji dostępu do~zasobów dzielonych przez wątki wykorzystano muteksy~\texttt{pthread\_mutex\_t} i~rodzinę funkcji im~towarzyszących, takich jak np.~\texttt{pthread\_mutex\_lock()}, \texttt{pthread\_mutex\_lock()}.
 
 %------------------------------------------------------------------------------
 
@@ -119,14 +119,14 @@ W~tym rozdziale opisano z~jakich narzędzi i~z~jakich elementów konfiguracji ko
 
 \subsection{cmake}
 
-Do~kompilacji kodu źródłowego wykorzystano \texttt{CMake}, który jest elastycznym, rozszerzalnym oprogramowaniem do~zarządzania procesem kompilacji i~instalacji oprogramowania na~różnych platformach i~systemach operacyjnych, niezależnym od~używanego kompilatora~\cite{cmake}. Jego konfiguracja sprowadza się do~napisania plików konfiguracyjnych o~zwyczajowej nazwie \mbox{\texttt{CMakeLists.txt}}, umieszczonych w~podkatalogach z~kodem źródłowym projektu. Wyniki uruchomienia \texttt{cmake} zależy od~systemu operacyjnego. Na~\glslink{unix-like-system}{systemach *uniksowych} zostaje wygenerowany klasyczny plik \texttt{Makefile}~\cite{gnu-makefile-manual}, którego uruchomienie powoduje kompilację projektu.
+Do~prekonfiguracji kompilacji kodu źródłowego wykorzystano \texttt{CMake}, który jest elastycznym, rozszerzalnym oprogramowaniem do~zarządzania procesem kompilacji i~instalacji oprogramowania na~różnych platformach i~systemach operacyjnych, niezależnym od~używanego kompilatora~\cite{cmake}. Jego konfiguracja sprowadza się do~napisania plików konfiguracyjnych o~zwyczajowej nazwie \mbox{\texttt{CMakeLists.txt}}, umieszczonych w~podkatalogach z~kodem źródłowym projektu. Wyniki uruchomienia \texttt{cmake} zależy od~systemu operacyjnego. Na~\glslink{unix-like-system}{systemach *uniksowych} zostaje wygenerowany klasyczny plik \texttt{Makefile}~\cite{gnu-makefile-manual}, którego uruchomienie powoduje kompilację projektu.
 
 Listing~\ref{lst:cmake-debug} przedstawia sposób w~jaki \texttt{CMake} był uruchamiany w~czasie prac nad~projektem. Słowo kluczowe \texttt{Debug} powoduje, że~w~czasie kompilacji projektu są~dodatkowo generowane:
 \begin{itemize}
 \item Symbole debugowania, które umożliwiają czytelne debugowanie w~debuggerze~\texttt{gdb}.
 \item Symbole dla~narzędzi \texttt{ctags} i~\texttt{cscope}~\cite{ctags,cscope} ułatwiających nawigowanie po~kodzie źródłowym aplikacji. Alternatywnie symbole te~można wygenerować ręcznie, tak jak przedstawiono na~listingu~\ref{lst:cmake-developer-symbols}.
 \end{itemize}
-Kod dołączony do~niniejszej pracy na~płycie~CD (patrz rozdział~\ref{cd-appendix}) został skompilowany z~flagą~\texttt{Release}~\cite{cmake-compilation-type-manual,cmake-compilation-type-stackoverflow}. Pełną listę opcji (ang.~\emph{targets}) dla~wygenerowanego pliku~\path{Makefile} zostaje wyświetlona komendą \texttt{make~help}.
+Kod dołączony do~niniejszej pracy na~płycie~CD (patrz rozdział~\ref{cd-appendix}) został skompilowany z~flagą~\texttt{Release}, dzięki której kod jest zoptymalizowany i~pozbawiony asercji~\cite{cmake-compilation-type-manual,cmake-compilation-type-stackoverflow}. Pełną listę opcji (ang.~\emph{targets}) dla~wygenerowanego pliku~\path{Makefile} zostaje wyświetlona komendą \texttt{make~help}.
 
 \begin{lstlisting}[label=lst:cmake-debug,language=bash,numbers=none,caption={Uruchomienie \texttt{cmake} w~trybie \texttt{Debug}}]
 cmake -D CMAKE_BUILD_TYPE=Debug ..
@@ -140,12 +140,6 @@ make ctags
 
 %---------------------------------------
 
-\subsection{Doxygen}
-
-Dokumentacja kodu projektu została wygenerowana z~komentarzy kodu źródłowego za~pomocą programu~\texttt{Doxygen}~\cite{doxygen}. Komentarze w~kodzie źródłowym zostały dostosowane do~formatu używanego przez projekt \texttt{Doxygen}. Szczegóły dotyczące sposobu generowania dokumentacji zostały ustawione w~pliku konfiguracyjnym \path{doxygen_template.dox.in} czytanym przez \texttt{Doxygen}. Wygenerowana dokumentacja została zapisana w~formatach: \texttt{HTML}, \LaTeX oraz formacie dostosowanym do~czytania dokumentacji komendą~\texttt{man}. Dokumentacja w~formacie \texttt{HTML} wydaje się być najczytelniejsza, ale dla kompletności, do~niniejszej pracy zostały załączone dokumentacje we~wszystkich wymienionych formatach.
-
-%---------------------------------------
-
 \subsection{Valgrind}
 
 Stworzone oprogramowanie zostało przetestowane pod~kątem występowania przecieków pamięci oprogramowaniem \texttt{Valgrind}~\cite{valgrind}. Listing~\ref{lst:valgrind-run} prezentuje sposób przeprowadzonego testu na~aplikacji serwera. Podczas testów \texttt{Valgrind} nie wykrył żadnych wycieków pamięci.
@@ -155,6 +149,12 @@ valgrind --leak-check=full -v ./server/appsync-srv
 \end{lstlisting}
 
 %---------------------------------------
+
+\subsection{Doxygen}
+
+Dokumentacja kodu projektu została wygenerowana z~komentarzy kodu źródłowego za~pomocą programu~\texttt{Doxygen}~\cite{doxygen}. Komentarze w~kodzie źródłowym zostały dostosowane do~formatu używanego przez projekt \texttt{Doxygen}. Szczegóły dotyczące sposobu generowania dokumentacji zostały ustawione w~pliku konfiguracyjnym \path{doxygen_template.dox.in} czytanym przez \texttt{Doxygen}. Wygenerowana dokumentacja została zapisana w~formatach: \texttt{HTML}, \LaTeX oraz formacie dostosowanym do~czytania dokumentacji komendą~\texttt{man}. Dokumentacja w~formacie \texttt{HTML} wydaje się być najczytelniejsza, ale dla kompletności, do~niniejszej pracy zostały załączone dokumentacje we~wszystkich wymienionych formatach.
+
+%---------------------------------------
 %
 %\subsection{Generowanie pakietu oprogramowania}
 %
@@ -162,19 +162,19 @@ valgrind --leak-check=full -v ./server/appsync-srv
 
 %---------------------------------------
 
-\subsection{Narzędzia użytkowe}
+\subsection{help2man}
 
-W~czasie projektu korzystano z~wielu narzędzi użytkowych. W~tym rozdziale zostaną one~krótko przedstawione.
+Poza dokumentacją wygenerowaną przez \texttt{Doxygen}, stworzono dokumentację dającą się~wyświetlić systemową przeglądarką stron podręcznika ekranowego, tj.~komendą~\texttt{man}~\cite{tldp-create-manpage}. W~celu synchronizacji treści pomocy manuala wyświetlanego po~wydaniu komendy~\texttt{man} i~pomocy wyświetlanej po~dodaniu flagi \texttt{-{}-help} do~wywołania programu, wykorzystano skrypt \texttt{help2man}. Skrypt ten został napisany w~języku skryptowym \texttt{Perl} i~jest udostępniany jako paczka oprogramowania o~tej samej nazwie na~wielu popularnych dystrybucjach \gls{gnulinux}. \texttt{help2man} umożliwia automatyczne generowanie plików z~manualem na~podstawie wyniku wywołania programu z~flagą \texttt{-{}-help}. Skrypt ten jest wywoływany przy każdym uruchomieniu narzędzia \texttt{CMake}, dzięki czemu manual zawsze jest aktualny. Dodatkowa konfiguracja \texttt{help2man}, dodająca sekcje nieopisane w~pomocy wyświetlanej po~dodaniu flagi \texttt{-{}-help} do~wywołania programu~(np.~sekcja \texttt{Examples}), została zapisana w~pliku \path{manual.h2m}.
 
 %---------------------------------------
 
-\subsubsection{Wireshark}
+\subsection{Wireshark}
 
 Wireshark jest narzędziem do~analizowania pakietów i~dlatego był jednym z~najczęściej z~używanych narzędzi w~czasie implementacji projektu. Bez Wiresharka podgląd przesyłanych pakietów byłby trudny, szczególnie, że~przesyłane pakiety są~szyfrowane z~wykorzystaniem biblioteki OpenSSL~(patrz rozdział~\ref{sec:security}). Wireshark umożliwia łatwe dekodowanie pakietów po~podaniu klucza prywatnego użytego do~szyfrowania, co~czyni z~niego bardzo wygodne narzędzie do~analizy zaszyfrowanego ruchu sieciowego.
 
 %---------------------------------------
 
-\subsubsection{Edytor tekstu vim}
+\subsection{Edytor tekstu vim}
 
 Do~pisania kodu źródłowego projektu oraz niniejszej dokumentacji wykorzystano edytor tekstu~\texttt{vim} w~wersji~8.0, rozbudowany o wtyczki. Poniżej przedstawiono listę wtyczek \texttt{vim}, wykorzystanych w czasie implementacji:
 \begin{itemize}
@@ -191,10 +191,10 @@ Do~pisania kodu źródłowego projektu oraz niniejszej dokumentacji wykorzystano
 
 %-------------------
 
-\paragraph{ctags}
+\subsubsection{ctags}
 
 W celu włączenia automatycznego ładowania pliku \texttt{tags} przez \texttt{vim}, do~pliku \mbox{\path{~/.vimrc}} dodano następującą konfigurację~\cite{ctags,ctags-tricks}:
-\begin{lstlisting}[language=tex,numbers=none,caption={Konfiguracja \texttt{ctags} w~\texttt{.vimrc}}]
+\begin{lstlisting}[language=tex,numbers=none,caption={Konfiguracja \texttt{ctags} w~pliku \texttt{.vimrc}}]
 set tags=build/tags,tags,./tags;$HOME
 \end{lstlisting}
 Konfiguracja ta powoduje, że \texttt{vim} automatycznie wczytuje plik \texttt{tags}, szukając go kolejno~w:
@@ -204,12 +204,14 @@ Konfiguracja ta powoduje, że \texttt{vim} automatycznie wczytuje plik \texttt{t
 	\item katalogu, w którym znajduje się aktualnie otwarty plik w \texttt{vim},
 	\item katalogach poniżej katalogu \path{$PWD}, ale nie niżej niż \path{$HOME}.
 \end{itemize}
-gdzie zmienna systemowa \gls{PWD} oznacza aktualny katalog roboczy.
+gdzie zmienna systemowa \glstt{PWD}{\$PWD} oznacza aktualny katalog roboczy.
 
-\paragraph{Cscope}
+%-------------------
+
+\subsubsection{Cscope}
 
 Analogiczną konfigurację ustawiono, aby~włączyć automatyczne szukanie plików pomocniczych dla~obsługi \texttt{Cscope} w~edytorze~\texttt{vim}~\cite{cscope,cscope-autoload}. Do~\path{~/.vimrc} dodano:
-\begin{lstlisting}[language=tex,numbers=none,caption={Konfiguracja \texttt{Cscope} w~\texttt{.vimrc}}]
+\begin{lstlisting}[language=tex,numbers=none,caption={Konfiguracja \texttt{Cscope} w~pliku \texttt{.vimrc}}]
 function! LoadCscope()
   let db = findfile("cscope.out", "build,.;$HOME")
   if (!empty(db))

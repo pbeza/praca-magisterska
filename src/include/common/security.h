@@ -44,4 +44,8 @@ void syslog_ssl_summary(const SSL *ssl);
 
 int cleanup_ssl_ctx(SSL_CTX *ssl_ctx);
 
+int ssl_send(int socket, SSL *ssl, const char *buf, size_t len);
+
+int ssl_read(int socket, SSL *ssl, char *buf, int len);
+
 #endif

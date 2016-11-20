@@ -10,14 +10,6 @@
 #include "connection.h"
 #include "security.h"
 
-static int run_protocol(SSL *ssl, int socket) {
-	if (send_hello_to_server(ssl, socket) < 0) {
-		syslog(LOG_ERR, "Can't send data to server");
-		return -1;
-	}
-	return 0;
-}
-
 static int daemon_work(const base_config_t *base_config) {
 	client_config_t *config = (client_config_t*)base_config;
 	security_config_t *security_config = SECURITY_CONFIG(config);

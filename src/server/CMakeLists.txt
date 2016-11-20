@@ -14,6 +14,10 @@ add_executable(${PROJECT_NAME} "main.c" "main_loop.c" "security.c" "config_parse
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_BINARY_DIR})
 
+# Include server's protocol implementation.
+
+add_subdirectory(protocol)
+
 # Find and link against pthread library.
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
@@ -21,7 +25,7 @@ find_package(Threads REQUIRED)
 
 # Link the executable to the common libraries.
 
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC common ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${LIBCONFIG_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC common server-protocol ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${LIBCONFIG_LIBRARIES})
 
 # Generate manual from --help output.
 

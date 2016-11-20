@@ -77,9 +77,10 @@ Znaczenie poszczególnych pól nagłówka:\mynobreakpar
 
 	\item \texttt{TYPE} (\emph{Packet Type}, 16~bitów) --- Typ pakietu określający jaką rolę pakiet odgrywa w~komunikacji. Dopuszczalne wartości odpowiadające kolejnym liczbom naturalnym\footnote{Przyjmujemy konwencję, że~$0$ należy do liczb naturalnych ($0\in\mathbb{N}$).}:
 	\begin{itemize}
-		\item \texttt{FULL\_UPGRADE\_REQUEST (0x00)} --- Żądanie aktualizacji wysłane przez klienta do~serwera~(patrz rozdział~\ref{full-upgrade-request}).
-		\item \texttt{FULL\_UPGRADE\_RESPONSE (0x01)} --- Odpowiedź serwera na~żądanie aktualizacji \texttt{FULL\_UPGRADE\_REQUEST} wysłane przez klienta~(patrz rozdział~\ref{full-upgrade-response}).
-		\item \texttt{PROTO\_FAILURE (0x02)} --- Błąd połączenia~(patrz rozdział~\ref{proto-failure}).
+		\item \texttt{UPGRADE\_REQUEST (0x00)} --- Żądanie aktualizacji wysłane przez klienta do~serwera~(patrz rozdział~\ref{full-upgrade-request}).
+		\item \texttt{UPGRADE\_RESPONSE (0x01)} --- Odpowiedź serwera na~żądanie aktualizacji \texttt{UPGRADE\_REQUEST} wysłane przez klienta~(patrz rozdział~\ref{full-upgrade-response}).
+		\item \texttt{UPGRADE\_STATUS (0x02)} --- Status powodzenia aktualizacji klienta po~otrzymaniu pakietu \texttt{UPGRADE\_RESPONSE}~(patrz rozdział~\ref{full-upgrade-status}).
+		\item \texttt{PROTO\_FAILURE (0x03)} --- Błąd połączenia~(patrz rozdział~\ref{proto-failure}).
 	\end{itemize}
 
 	Strona połączenia, która otrzyma pakiet z~niezdefiniowaną w~protokole w~wersji \texttt{VER}, wartością pola \texttt{TYPE}, odpowiada pakietem \texttt{PROTO\_FAILURE} z~ustawionym kodem błędu \texttt{UNKNOWN\_PACKET\_TYPE}.
@@ -92,7 +93,7 @@ W~dalszej części rozdziału zostaną omówione rodzaje przesyłanych pakietów
 \subsection{Żądanie aktualizacji klienta}
 \label{full-upgrade-request}
 
-Pakiet z~żądaniem aktualizacji oprogramowania jest przesyłany przez klienta do~serwera i~oznacza chęć dostosowania oprogramowania klienta do~wzorca serwera. Taki rodzaj pakietu jest symbolicznie oznaczany w~kodzie programu nazwą \texttt{FULL\_UPGRADE\_REQUEST}~(patrz~rys.~\ref{fig:packet-full-upgrade-request}). Nazwa ta, jak również nazwy innych pakietów przesyłanych w~ramach opracowanego protokołu, są~zdefiniowane jako typ wyliczeniowy~\texttt{enum~packet\_t} w~jednym z~plików nagłówkowych współdzielonych przez program serwera i~klienta. Typ pakietu jest przesyłany w~nagłówku każdego pakietu przesyłanego między klientem i~serwerem.
+Pakiet z~żądaniem aktualizacji oprogramowania jest przesyłany przez klienta do~serwera i~oznacza chęć dostosowania oprogramowania klienta do~wzorca serwera. Taki rodzaj pakietu jest symbolicznie oznaczany w~kodzie programu nazwą \texttt{UPGRADE\_REQUEST}~(patrz~rys.~\ref{fig:packet-full-upgrade-request}). Nazwa ta, jak również nazwy innych pakietów przesyłanych w~ramach opracowanego protokołu, są~zdefiniowane jako typ wyliczeniowy~\texttt{enum~packet\_t} w~jednym z~plików nagłówkowych współdzielonych przez program serwera i~klienta. Typ pakietu jest przesyłany w~nagłówku każdego pakietu przesyłanego między klientem i~serwerem.
 
 \begin{figure}[h]
 	\centering
@@ -102,15 +103,15 @@ Pakiet z~żądaniem aktualizacji oprogramowania jest przesyłany przez klienta d
 		\bitbox{16}{CONFIG\_SET} & \bitbox{8}{COMPR\_TYPE} & \bitbox{8}{PKG\_MGR}\\
 		\wordbox{1}{LAST\_UPGRADE\_TIME}\\
 	\end{bytefield}
-	\caption{Schemat pamięci pakietu typu~\texttt{FULL\_UPGRADE\_REQUEST}}
+	\caption{Schemat pamięci pakietu typu~\texttt{UPGRADE\_REQUEST}}
 	\label{fig:packet-full-upgrade-request}
 \end{figure}
 
 Serwer może mieć wiele wzorców oprogramowania dla~różnych klientów, dlatego klient przesyła do~serwera numer~wybranego zestawu konfiguracji. Numery konfiguracji odpowiadają różnym zapotrzebowaniom konfiguracji komputerów. Przykładowo, laboratorium komputerowe przeznaczone na~potrzebny nauki systemów CAD/CAM może mieć inny zestaw oprogramowania od~tego używanego w~salach w~bibliotece, co~jest odzwierciedlone przez przypisanie różnych numerów oprogramowania dla~komputerów w~tych salach. Maksymalna ilość różnych zestawów konfiguracji jest zdeterminowana przez 16-sto bitowy rozmiar pola i~wynosi~$2^{16}=65536$.
 
-Aktualizacja oprogramowania klienta może się wiązać z~przesłaniem znacznej ilości danych~(rzędu setek megabajtów lub kilku gigabajtów), szczególnie gdy klient synchronizuje się z~serwerem po~raz pierwszy lub synchronizacja nie była uruchamiana od~dłuższego czasu. Istnieje więc potrzeba potrzeba zastosowania bezstratnej kompresji przesyłanego oprogramowania. Pole \texttt{COMPR\_TYPE} pakietu typu \texttt{FULL\_UPGRADE\_REQUEST}, umożliwia ustawienie jednej z~kilku predefiniowanych rodzajów kompresji.
+Aktualizacja oprogramowania klienta może się wiązać z~przesłaniem znacznej ilości danych~(rzędu setek megabajtów lub kilku gigabajtów), szczególnie gdy klient synchronizuje się z~serwerem po~raz pierwszy lub synchronizacja nie była uruchamiana od~dłuższego czasu. Istnieje więc potrzeba potrzeba zastosowania bezstratnej kompresji przesyłanego oprogramowania. Pole \texttt{COMPR\_TYPE} pakietu typu \texttt{UPGRADE\_REQUEST}, umożliwia ustawienie jednej z~kilku predefiniowanych rodzajów kompresji.
 
-Znaczenie poszczególnych pól dla pakietu typu \texttt{FULL\_UPGRADE\_REQUEST}:\mynobreakpar
+Znaczenie poszczególnych pól dla pakietu typu \texttt{UPGRADE\_REQUEST}:\mynobreakpar
 \begin{enumerate}
 	\item \texttt{CONFIG\_SET} (\emph{Configuration Setting Number}, 16~bitów) --- Numer konfiguracji z~zakresu $[0;2^{16}-1]\cap\mathbb{Z}$, któremu odpowiada zestaw oprogramowania przeznaczony dla~klienta. Numery konfiguracji służą do~rozróżniania zapotrzebowania komputerów na~oprogramowanie. Przykładowo komputery w~pracowniach komputerowych i~w~bibliotece mogą mieć przydzielone różne numery \texttt{CONFIG\_SET}, ponieważ komputery te~wymagają różnej konfiguracji i~oprogramowania.
 	\item \texttt{COMPR\_TYPE} (\emph{Compression Type}, 8~bitów) --- Sposób kompresji jaki zostanie użyty do~spakowania pakietów, które zostaną przesłane do~klienta. Szerokość pola pozwala na~zdefiniowanie maksymalnie~$2^8=256$ rodzajów kompresji. W~pierwszej wersji protokołu istnieje 6~rodzajów akceptowanych wartości, które odpowiadają kolejnym liczbom naturalnym:
@@ -128,17 +129,17 @@ Znaczenie poszczególnych pól dla pakietu typu \texttt{FULL\_UPGRADE\_REQUEST}:
 			\item \texttt{DPKG\_PKG\_MGR (0x00)} --- Paczki oprogramowania \texttt{*.deb} przeznaczone dla~systemów korzystających z~menadżera pakietów \texttt{dpkg}\footnote{W~praktyce wykorzystywane są~menadżery pakietów \texttt{apt-get} i~\texttt{aptitude}, które ,,rozumieją'' zależności pomiędzy pakietami i~korzystają z~niskopoziomowego~\texttt{dpkg}.}, wykorzystanego w~takich dystrybucjach \gls{gnulinux} jak np.~\emph{Debian} i~systemy bazujące na~nim, np.~\emph{Ubuntu}, \emph{Knoppix}, \emph{Linux~Mint} czy~\emph{Damn Small Linux~(DSL)},
 			\item \texttt{TAR\_XZ\_PKG\_MGR (0x01)} --- Paczki oprogramowania \texttt{*.pkg.tar.xz} przeznaczone dla~systemów korzystających z~menadżera pakietów \texttt{pacman}, wykorzystanego w~systemie \emph{Arch~Linux}.
 		\end{itemize}
-	\item \texttt{LAST\_UPGRADE\_TIME} (\emph{Last Upgrade Time}, 32~bity) --- Czas ostatniej synchronizacji oprogramowania klienta z~serwerem. Na~podstawie tego pola serwer wie które pakiety i~elementy konfiguracji muszą zostać przesłane do~klienta, a~które zostały już przesłane. Jeśli pole to~jest wyzerowane, to~serwer prześle klientowi wszystkie pakiety jakie są~przewidziane dla~danego \texttt{CONFIG\_SET}. W~szczególności jest to~użyteczne, gdy klient przesyła pakiet typu \texttt{FULL\_UPGRADE\_REQUEST} po~raz pierwszy.
+	\item \texttt{LAST\_UPGRADE\_TIME} (\emph{Last Upgrade Time}, 32~bity) --- Czas ostatniej synchronizacji oprogramowania klienta z~serwerem. Na~podstawie tego pola serwer wie które pakiety i~elementy konfiguracji muszą zostać przesłane do~klienta, a~które zostały już przesłane. Jeśli pole to~jest wyzerowane, to~serwer prześle klientowi wszystkie pakiety jakie są~przewidziane dla~danego \texttt{CONFIG\_SET}. W~szczególności jest to~użyteczne, gdy klient przesyła pakiet typu \texttt{UPGRADE\_REQUEST} po~raz pierwszy.
 \end{enumerate}
 
-Algorytm działania sewera po~otrzymaniu pakietu typu~\texttt{FULL\_UPGRADE\_REQUEST}:\mynobreakpar
+Algorytm działania sewera po~otrzymaniu pakietu typu~\texttt{UPGRADE\_REQUEST}:\mynobreakpar
 \begin{enumerate}
 	\item Sprawdź czy~pakiet przesłany przez klienta jest poprawnie sformatowany, tzn.~czy ma~oczekiwaną długość i~czy wszystkie pola pakietu są~akceptowalne. W~szczególności sprawdź czy~menadżer pakietów przesłany w~polu~\texttt{PKG\_MGR} jest wspierany przez serwer. Jeśli pakiet nie jest sformatowany poprawnie, prześlij pakiet \texttt{PROTO\_FAILURE} z~kodem błędu odpowiadającym przyczynie niepowodzenia.
-	\item\label{create-file} Zapisz w~katalogu \path{/var/run} plik tekstowy zawierający informację o~rozpoczęciu komunikacji z klientem, który zgłosił żądanie typu~\texttt{FULL\_UPGRADE\_REQUEST}. Krok ten ma za~zadanie zagwarantować transakcyjność operacji, tzn. że w~przypadku awaryjnego wyjścia z~programu serwera, serwer po ponownym uruchomieniu będzie miał szansę poinformować administratora w~swoich logach o~niepowodzeniu aktualizacji klienta oraz podjąć kroki mające na~celu przywrócenie integralności stanu serwera.
-	\item Na~podstawie pola \texttt{LAST\_UPGRADE\_TIME} sprawdź czy~klient wymaga aktualizacji. Jeśli klient jest już zaktualizowany, to~prześlij pakiet \texttt{FULL\_UPGRADE\_RESPONSE} (patrz rozdział~\ref{full-upgrade-response}) z~wyzerowanym polem \texttt{LENGTH} i~zakończ połączenie. W~przeciwnym razie przejdź do~kolejnego punktu algorytmu.
+	\item\label{create-file} Zapisz w~katalogu \path{/var/run} plik tekstowy zawierający informację o~rozpoczęciu komunikacji z klientem, który zgłosił żądanie typu~\texttt{UPGRADE\_REQUEST}. Krok ten ma za~zadanie zagwarantować transakcyjność operacji, tzn. że w~przypadku awaryjnego wyjścia z~programu serwera, serwer po ponownym uruchomieniu będzie miał szansę poinformować administratora w~swoich logach o~niepowodzeniu aktualizacji klienta oraz podjąć kroki mające na~celu przywrócenie integralności stanu serwera.
+	\item Na~podstawie pola \texttt{LAST\_UPGRADE\_TIME} sprawdź czy~klient wymaga aktualizacji. Jeśli klient jest już zaktualizowany, to~prześlij pakiet \texttt{UPGRADE\_RESPONSE} (patrz rozdział~\ref{full-upgrade-response}) z~wyzerowanym polem \texttt{LENGTH} i~zakończ połączenie. W~przeciwnym razie przejdź do~kolejnego punktu algorytmu.
 	\item Odczytaj pole \texttt{CONFIG\_SET} otrzymanego pakietu i~na jego podstawie ustal który plik konfiguracyjny odczytać. Plik ten definiuje zestaw oprogramowania dla klienta. W~przypadku odczytania nieobsługiwanej wartości \texttt{CONFIG\_SET}, odeślij pakiet \texttt{PROTO\_FAILURE} z~ustawionym kodem błędu \texttt{UNKNOWN\_CONFIG\_SET}.
 	\item Odczytaj powyższy plik konfiguracyjny. W~przypadku gdy plik ten nie istnieje, nie daje się odczytać, ma nieoczekiwany format lub z~dowolnego innego powodu, uniemożliwiającego dalsze działanie na jego podstawie, prześlij do~klienta pakiet typu \texttt{PROTO\_FAILURE} z~kodem błędu \texttt{SERVER\_INTERNAL\_ERR}. W~przeciwnym przypadku, na~podstawie pliku konfiguracyjnego i~pola \texttt{LAST\_UPGRADE\_TIME} otrzymanego pakietu, ustal listę pakietów, które należy przesłać do~klienta.
-	\item Na~podstawie przygotowanej listy pakietów, pobierz z~cache'a pakiety dla~klienta, a~tych których nie ma w~cache'u, pobierz z~internetu ze~źródła zdefiniowanego w~pliku konfiguracyjnym serwera. Pobrane pliki zapisz w~cache'u, usuwając najdłużej nieużywane pliki z~cache'a jeśli jest osiągnięto limit wykorzystania cache'a. \textbf{Uwaga:} wykonanie tego kroku przez serwer może być czasochłonne ze~względu na~konieczność pobrania pakietów z~internetu. W~przypadku przerwania pobierania dowolnego pakietu z~internetu, serwer przesyła klientowi pakiet typu \texttt{PROTO\_FAILURE} z~kodem błędu \texttt{SERVER\_INTERNAL\_ERR}. W~przypadku zerwania połączenia z~klientem, serwer kontynuuje pobieranie wszystkich pakietów, dzięki czemu klient szybko otrzyma\footnote{Pod warunkiem, że~cache nie zostanie wyczyszczony.} aktualizację oprogramowania po~ponownym wysłaniu pakietu typu \texttt{FULL\_UPGRADE\_REQUEST}.
+	\item Na~podstawie przygotowanej listy pakietów, pobierz z~cache'a pakiety dla~klienta, a~tych których nie ma w~cache'u, pobierz z~internetu ze~źródła zdefiniowanego w~pliku konfiguracyjnym serwera. Pobrane pliki zapisz w~cache'u, usuwając najdłużej nieużywane pliki z~cache'a jeśli jest osiągnięto limit wykorzystania cache'a. \textbf{Uwaga:} wykonanie tego kroku przez serwer może być czasochłonne ze~względu na~konieczność pobrania pakietów z~internetu. W~przypadku przerwania pobierania dowolnego pakietu z~internetu, serwer przesyła klientowi pakiet typu \texttt{PROTO\_FAILURE} z~kodem błędu \texttt{SERVER\_INTERNAL\_ERR}. W~przypadku zerwania połączenia z~klientem, serwer kontynuuje pobieranie wszystkich pakietów, dzięki czemu klient szybko otrzyma\footnote{Pod warunkiem, że~cache nie zostanie wyczyszczony.} aktualizację oprogramowania po~ponownym wysłaniu pakietu typu \texttt{UPGRADE\_REQUEST}.
 	\item Utwórz z~wszystkich pakietów przeznaczonych dla~klienta archiwum typu określonego polem \texttt{COMPR\_TYPE} pakietu. Jeśli kompresja nie powiedzie się z~dowolnego powodu, wyślij pakiet typu \texttt{PROTO\_FAILURE} z~kodem błędu \texttt{SERVER\_INTERNAL\_ERR}.
 	\item Wyślij archiwum z~pakietami do~klienta. Archiwum to~nie jest podpisywane cyfrowo przez serwer, ponieważ przesłanie archiwum odbywa się~w~ramach sesji~SSL/TLS, na~początku której klient uwierzytelnia serwer sprawdzając jego cyfrowy certyfikat.
 	\item Oczekuj na~raport o~powodzeniu instalacji. Odnotuj w~logach raport od~klienta. \textbf{Uwaga:} oczekiwanie może być czasochłonne, dlatego serwer czeka na potwierdzenie przez pewien czas. (TODO: szczegółowy opis jak to obsłużyć).
@@ -150,11 +151,11 @@ Algorytm działania sewera po~otrzymaniu pakietu typu~\texttt{FULL\_UPGRADE\_REQ
 \subsection{Odpowiedź na żądanie aktualizacji klienta}
 \label{full-upgrade-response}
 
-Po~otrzymaniu przez serwer pakietu typu \texttt{FULL\_UPGRADE\_REQUEST}, serwer analizuje czy klient jest już zaktualizowany, a~jeśli nie, to co~powinien otrzymać od~serwera w~odpowiedzi. Odpowiedź serwera ma~typ pakietu \texttt{FULL\_UPGRADE\_RESPONSE} i~składa się z~następujących pól:
+Po~otrzymaniu przez serwer pakietu typu \texttt{UPGRADE\_REQUEST}, serwer analizuje czy klient jest już zaktualizowany, a~jeśli nie, to co~powinien otrzymać od~serwera w~odpowiedzi. Odpowiedź serwera ma~typ pakietu \texttt{UPGRADE\_RESPONSE} i~składa się z~następujących pól:
 
 \begin{itemize}
 	\item  \texttt{LENGTH} (\emph{Total Length}, 64~bity) --- Długość pola \texttt{DATA} w~bajtach. Akceptowalne wartości z~przedziału $[0;2^{64}]$. Wartość~$0$ oznacza, że~klient jest już zaktualizowany i~nie potrzebuje dokonywać żadnych zmian, aby~dostosować się do~wzorca serwera.
-	\item \texttt{DATA} (\emph{Upgrade Data}, \texttt{LENGTH}~bitów) --- Archiwum żądanego przez klienta typu (por.~\ref{full-upgrade-request}) z~pakietami i~konfiguracją do~zainstalowania na~kliencie.
+	\item \texttt{DATA} (\emph{Upgrade Data}, \texttt{LENGTH}~bitów) --- Archiwum żądanego przez klienta typu (por.~\ref{full-upgrade-request}) z~pakietami i~konfiguracją do~zainstalowania na~kliencie. Rozmiar tego pola wynosi~\texttt{LENGTH} bajtów.
 \end{itemize}
 
 \begin{figure}[h]
@@ -167,8 +168,26 @@ Po~otrzymaniu przez serwer pakietu typu \texttt{FULL\_UPGRADE\_REQUEST}, serwer 
 		\skippedwords\\
 		\wordbox[lrb]{2}{\vdots}
 	\end{bytefield}
-	\caption{Schemat pamięci pakietu typu~\texttt{FULL\_UPGRADE\_RESPONSE}}
+	\caption{Schemat pamięci pakietu typu~\texttt{UPGRADE\_RESPONSE}}
 	\label{fig:packet-full-upgrade-response}
+\end{figure}
+
+%---------------------------------------
+
+\subsection{Status powodzenia instalacji oprogramowania}
+\label{full-upgrade-status}
+
+Klient po~otrzymaniu od~serwera oprogramowania w~pakiecie typu \texttt{UPGRADE\_RESPONSE}, instaluje je, a~następnie informuje serwer o~powodzeniu lub~niepowodzeniu aktualizacji wysyłając do~serwera pakiet \texttt{UPGRADE\_STATUS} z~ustawionym kodem statusu~\texttt{STATUS\_CODE}~(patrz rys.~\ref{fig:packet-full-upgrade-status}).
+
+\begin{figure}[h]
+	\centering
+	\begin{bytefield}{32}
+		\bitheader{0,3,4,7,8,11,12,15,16,19,20,23,24,27,28,31}\\
+		\packetheader
+		\wordbox{1}{STATUS\_CODE}
+	\end{bytefield}
+	\caption{Schemat pamięci pakietu typu~\texttt{UPGRADE\_STATUS}}
+	\label{fig:packet-full-upgrade-status}
 \end{figure}
 
 %---------------------------------------
@@ -252,7 +271,7 @@ Filtr złożony ze~słów kluczowych, wykorzystany w~implementacji projektu zar�
 kEECDH+ECDSA kEECDH kEDH +SHA !aNULL !eNULL !LOW !3DES !MD5 !EXP !DSS !PSK !SRP !kECDH !CAMELLIA !IDEA !RC4 !SEED @STRENGTH
 \end{lstlisting}
 
-Pełny opis słów kluczowych można znaleźć w~dokumentacji \gls{openssl} oraz w~darmowej, regularnie aktualizowanej elektronicznej książce\footnote{Jest ona częścią większej książki pt.~,,Bulletproof SSL and TLS"~(ISBN:~978-1907117046). Projekt \gls{openssl} ma~raczej opinię słabo udokumentowanego, dlatego te~książki mają spore znaczenie praktyczne.} pt.~,,OpenSSL Cookbook" autorstwa Ivana Ristić'a, polecanej na~oficjalnej stronie internetowej projektu~\gls{openssl}~\cite{openssl-cookbook-suites}.
+Pełny opis słów kluczowych można znaleźć w~dokumentacji \gls{openssl} oraz w~darmowej, regularnie aktualizowanej elektronicznej książce\footnote{Jest ona częścią większej książki pt.~,,Bulletproof SSL and TLS"~(ISBN:~978-1907117046). Projekt \gls{openssl} ma~raczej opinię słabo udokumentowanego, dlatego te~książki mają spore znaczenie praktyczne.} pt.~,,OpenSSL Cookbook'' autorstwa Ivana Ristić'a, polecanej na~oficjalnej stronie internetowej projektu~\gls{openssl}~\cite{openssl-cookbook-suites}.
 
 %---------------------------------------
 
@@ -342,7 +361,7 @@ Podsłuchujący atakujący, aby~poznać liczbę $s$, musiałby rozwiązać tzw.~
 
 Ilustracja~\ref{fig:dh} obrazowo przedstawia w~jaki sposób działa algorytm \glslink{dh}{Diffiego-Hellmana}.
 
-\begin{figure}[hb]
+\begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{img/Diffie-Hellman_Key_Exchange_desc}
 	\caption{Zobrazowanie działania algorytmu Diffiego-Hellmana (źródło: Wikipedia)}

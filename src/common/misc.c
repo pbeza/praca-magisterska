@@ -39,12 +39,12 @@ char *concat(const char *s1, const char *s2) {
 }
 
 ssize_t bulk_read(int fd, char *buf, size_t nbyte) {
-	int c;
+	ssize_t c;
 	size_t len = 0;
 	do {
 		c = TEMP_FAILURE_RETRY(read(fd, buf, nbyte));
 		if (c < 0) return c;
-		if (c == 0) return len;
+		if (c == 0) break;
 		buf += c;
 		len += c;
 		nbyte -= c;
@@ -52,15 +52,28 @@ ssize_t bulk_read(int fd, char *buf, size_t nbyte) {
 	return len;
 }
 
+ssize_t bulk_pread(int fd, char *buf, size_t nbyte, off_t offset) {
+	ssize_t c, len = 0;
+	do {
+		c = TEMP_FAILURE_RETRY(pread(fd, buf, nbyte, offset));
+		if (c < 0) return c;
+		if (c == 0) break;
+		buf += c;
+		len += c;
+		nbyte -= c;
+		offset += c;
+	} while (nbyte > 0);
+	return len;
+}
+
 ssize_t bulk_write(int fd, char *buf, size_t nbyte) {
-	int c;
-	size_t len = 0;
+	ssize_t c, len = 0;
 	do {
 		c = TEMP_FAILURE_RETRY(write(fd, buf, nbyte));
 		if (c < 0) return c;
 		buf += c;
 		len += c;
 		nbyte -= c;
-	} while(nbyte > 0);
+	} while (nbyte > 0);
 	return len;
 }

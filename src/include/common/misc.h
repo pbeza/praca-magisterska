@@ -93,6 +93,8 @@ char *concat(const char *s1, const char *s2);
 
 ssize_t bulk_read(int fd, char *buf, size_t nbyte);
 
+ssize_t bulk_pread(int fd, char *buf, size_t nbyte, off_t offset);
+
 ssize_t bulk_write(int fd, char *buf, size_t nbyte);
 
 #endif
