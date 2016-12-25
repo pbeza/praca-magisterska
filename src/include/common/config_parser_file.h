@@ -26,8 +26,12 @@
 
 int common_read_config_from_file(const config_t *config, base_config_t *base_config);
 
-int read_path_from_conf(const config_t *config, base_config_t *base_config,
-			int option_id, const char *config_var_path,
-			char *config_save_path, int is_required);
+int read_file_path_from_conf(const config_t *config, base_config_t *base_config,
+			     int option_id, const char *config_var_path,
+			     char *config_save_path, int is_required);
+
+int read_dir_path_from_conf(const config_t *config, base_config_t *base_config,
+			    int option_id, const char *config_var_path,
+			    char *config_save_path, int is_required);
 
 #endif

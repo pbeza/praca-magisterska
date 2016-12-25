@@ -1,5 +1,5 @@
-# This is main CMake of the project. Simplest compilation (should suffice for
-# most users):
+# This is main CMake file of the project.
+# Simplest compilation (should suffice for most users):
 #
 #   cd src && mkdir build && cd build && cmake .. && make && make install
 #

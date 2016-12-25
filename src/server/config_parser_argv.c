@@ -3,6 +3,7 @@
  */
 #include <getopt.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "config_parser_argv.h"
@@ -15,6 +16,7 @@
 #define SHORT_OPTION_CERTIFICATE_PATH	'r'
 #define SHORT_OPTION_PRIVATE_KEY_PATH	'k'
 #define SHORT_OPTION_PRIVATE_KEY_PASS	's'
+#define SHORT_OPTION_CONFIG_SET_DIR	'b'
 
 /**
  * @}
@@ -23,6 +25,7 @@
 #define LONG_OPTION_CERTIFICATE_PATH	"cert-path"
 #define LONG_OPTION_PRIVATE_KEY_PATH	"privkey-path"
 #define LONG_OPTION_PRIVATE_KEY_PASS	"privkey-pass"
+#define LONG_OPTION_CONFIG_SET_DIR	"config-set-dir"
 
 /**
  * @}
@@ -31,6 +34,7 @@
 #define CERTIFICATE_PATH_VALUE_NAME	"CERTIFICATE_PATH"
 #define PRIVATE_KEY_PATH_VALUE_NAME	"PRIVATE_KEY_PATH"
 #define PRIVATE_KEY_PASS_VALUE_NAME	"PRIVATE_KEY_PASSWORD"
+#define CONFIG_SET_DIR_VALUE_NAME	"CONFIG_SET_DIR"
 
 /**
  * @}
@@ -47,6 +51,7 @@
 					"debug compilation in the future. Specifying password as a\n\t"\
 					"command line option is NOT recommended since everyone can see\n\t"\
 					"this password (using `ps` command). Use configuration file instead."
+#define DESC_OPTION_CONFIG_SET_DIR	"Path to directory with clients' software configuration sets."
 
 /**
  * @}
@@ -70,9 +75,16 @@
 					       DESC_OPTION_PRIVATE_KEY_PASS,\
 					       PRIVATE_KEY_PASS_VALUE_NAME,\
 					       priv_key_pass_save_cb)
+#define CONFIG_SET_DIR_OPTION		OPTION(CONFIG_SET_DIR_OPTION_ID,\
+					       SHORT_OPTION_CONFIG_SET_DIR,\
+					       LONG_OPTION_CONFIG_SET_DIR,\
+					       DESC_OPTION_CONFIG_SET_DIR,\
+					       CONFIG_SET_DIR_VALUE_NAME,\
+					       config_set_dir_save_cb)
 #define SET_OF_SERVER_OPTIONS		CERTIFICATE_PATH_OPTION,\
 					PRIVATE_KEY_PATH_OPTION,\
-					PRIVATE_KEY_PASS_OPTION
+					PRIVATE_KEY_PASS_OPTION,\
+					CONFIG_SET_DIR_OPTION
 
 /**
  * @}
@@ -119,6 +131,23 @@ static int priv_key_pass_save_cb(const option_t *option, const char *value, void
 	security_config_t *s = SECURITY_CONFIG(c);
 	UNUSED(option);
 	strncpy(s->private_key_pass, value, MAX_PRIV_KEY_PASS_LEN);
+	return 0;
+}
+
+/**
+ * Function callback saving configuration set directory path in server's
+ * configuration.
+ */
+static int config_set_dir_save_cb(const option_t *option, const char *value, void *config) {
+	server_config_t *c = (server_config_t*)config;
+
+	if (check_if_dir_exists(value) < 0) {
+		print_no_dir_msg_argv(option->short_option, option->long_option, value);
+		return -1;
+	}
+
+	strncpy(c->configuration_sets_dir, value, PATH_MAX_LEN);
+
 	return 0;
 }
 

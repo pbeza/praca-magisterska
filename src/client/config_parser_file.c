@@ -11,17 +11,23 @@ static int client_read_config_from_file(config_t *config, client_config_t *clien
 	base_config_t *base_config = BASE_CONFIG(client_config);
 	security_config_t *security_config = SECURITY_CONFIG(client_config);
 
-	if (read_path_from_conf(config, base_config, TRUSTED_CERT_FILE_OPTION_ID,
-				CONFIG_FILE_TRUSTED_CERT_FILE,
-				security_config->trusted_cert_file, 0) < 0) {
+	if (read_file_path_from_conf(config,
+				     base_config,
+				     TRUSTED_CERT_FILE_OPTION_ID,
+				     CONFIG_FILE_TRUSTED_CERT_FILE,
+				     security_config->trusted_cert_file,
+				     0) < 0) {
 		syslog(LOG_ERR, "Failed to read trusted certificate file path "
 		       "from configuration file");
 		return -1;
 	}
 
-	if (read_path_from_conf(config, base_config, TRUSTED_CERT_DIR_OPTION_ID,
-				CONFIG_FILE_TRUSTED_CERT_DIR,
-				security_config->trusted_cert_dir, 0) < 0) {
+	if (read_dir_path_from_conf(config,
+				    base_config,
+				    TRUSTED_CERT_DIR_OPTION_ID,
+				    CONFIG_FILE_TRUSTED_CERT_DIR,
+				    security_config->trusted_cert_dir,
+				    0) < 0) {
 		syslog(LOG_ERR, "Error reading trusted certificate directory "
 		       "from configuration file");
 		return -1;

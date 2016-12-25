@@ -1,6 +1,7 @@
 /** \file
  * Implementation of handling server-specific security issues.
  */
+#include <string.h>
 #include <syslog.h>
 
 #include <openssl/err.h>

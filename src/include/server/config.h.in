@@ -63,6 +63,7 @@
 #define CONFIG_FILE_PRIV_KEY_PASS	"PRIVATE_KEY_PASSWORD"
 #define CONFIG_FILE_PRIV_KEY_PATH	"PRIVATE_KEY_PATH"
 #define CONFIG_FILE_CERTIFICATE_PATH	"CERT_PATH"
+#define CONFIG_FILE_SETS_DIR_PATH	"CONFIG_SETS_DIR"
 
 /**
  * @}
@@ -71,7 +72,8 @@
 typedef enum {
 	CERTIFICATE_PATH_OPTION_ID = __LAST_COMMON_OPTION_ID,
 	PRIVATE_KEY_PATH_OPTION_ID,
-	PRIVATE_KEY_PASS_OPTION_ID
+	PRIVATE_KEY_PASS_OPTION_ID,
+	CONFIG_SET_DIR_OPTION_ID
 } server_option_code;
 
 /**
@@ -93,6 +95,10 @@ typedef struct server_config_t {
 	 * Server's OpenSSL configuration.
 	 */
 	security_config_t security_config;
+	/**
+	 * Path to server's directory with clients' software configuration sets.
+	 */
+	char configuration_sets_dir[PATH_MAX_LEN];
 } server_config_t;
 
 /**
@@ -103,6 +109,7 @@ static const server_config_t INIT_CONFIG = {
 					HELP_PREFIX, DEFAULT_CONFIG_FILE_PATH,
 					UNIQ_DAEMON_INSTANCE_PID_PATH),
 	.security_config = INIT_SECURITY_CONFIG,
+	.configuration_sets_dir = { 0 }
 };
 
 #endif

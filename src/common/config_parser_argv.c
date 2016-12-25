@@ -242,10 +242,26 @@ int config_file_save_cb(const option_t *option, const char *value, void *config)
 	return 0;
 }
 
-void print_no_file_msg_argv(char short_option, const char *long_option, const char *file) {
+static void print_no_msg_argv(char short_option,
+			      const char *long_option,
+			      const char *file,
+			      const char *msg_prefix) {
 	fprintf(stderr, "Error parsing --%s [-%c] option value. "
-	       "File '%s' doesn't exist or has insufficient read rights.\n",
+	       "%s '%s' doesn't exist or has insufficient read rights.\n",
 	       long_option,
 	       short_option,
+	       msg_prefix,
 	       file);
+}
+
+void print_no_file_msg_argv(char short_option,
+			    const char *long_option,
+			    const char *file) {
+	print_no_msg_argv(short_option, long_option, file, "File");
+}
+
+void print_no_dir_msg_argv(char short_option,
+			   const char *long_option,
+			   const char *file) {
+	print_no_msg_argv(short_option, long_option, file, "Directory");
 }

@@ -44,20 +44,38 @@ static int server_read_config_from_file(const config_t *config, server_config_t 
 		return -1;
 	}
 
-	if (read_path_from_conf(config, base_config, PRIVATE_KEY_PATH_OPTION_ID,
-				CONFIG_FILE_PRIV_KEY_PATH,
-				security_config->private_key_path, 1) < 0) {
+	if (read_file_path_from_conf(config,
+				     base_config,
+				     PRIVATE_KEY_PATH_OPTION_ID,
+				     CONFIG_FILE_PRIV_KEY_PATH,
+				     security_config->private_key_path,
+				     1) < 0) {
 		syslog(LOG_ERR, "Failed to read private key path from "
 		       "configuration file");
 		return -1;
 	}
 
-	if (read_path_from_conf(config, base_config, CERTIFICATE_PATH_OPTION_ID,
-				CONFIG_FILE_CERTIFICATE_PATH,
-				security_config->certificate_path, 1) < 0) {
+	if (read_file_path_from_conf(config,
+				     base_config,
+				     CERTIFICATE_PATH_OPTION_ID,
+				     CONFIG_FILE_CERTIFICATE_PATH,
+				     security_config->certificate_path,
+				     1) < 0) {
 		syslog(LOG_INFO, "Provide path to server's private key by "
 		       "assigning path to `%s` variable in configuration file",
 		       CONFIG_FILE_PRIV_KEY_PATH);
+		return -1;
+	}
+
+	if (read_dir_path_from_conf(config,
+				    base_config,
+				    CONFIG_SET_DIR_OPTION_ID,
+				    CONFIG_FILE_SETS_DIR_PATH,
+				    server_config->configuration_sets_dir,
+				    1) < 0) {
+		syslog(LOG_INFO, "Provide path to server's configuration sets "
+		       "directory by assigning path to `%s` variable in "
+		       "configuration file", CONFIG_FILE_SETS_DIR_PATH);
 		return -1;
 	}
 

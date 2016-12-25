@@ -26,7 +26,8 @@ typedef enum {
 	TAR_BZ2_COMPRESSION,
 	TAR_XZ_COMPRESSION,
 	RAR_COMPRESSION,
-	ZIP_COMPRESSION
+	ZIP_COMPRESSION,
+	__LAST_COMPRESSION_TYPE_SENTINEL /* for packet validation purpose */
 } compression_type;
 
 /**
@@ -34,7 +35,8 @@ typedef enum {
  */
 typedef enum {
 	DPKG_PKG_MGR,
-	TAR_XZ_PKG_MGR
+	TAR_XZ_PKG_MGR,
+	__LAST_PKG_MGR_TYPE_SENTINEL
 } package_mgr;
 
 /**

@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "misc.h"
@@ -76,4 +77,32 @@ ssize_t bulk_write(int fd, char *buf, size_t nbyte) {
 		nbyte -= c;
 	} while (nbyte > 0);
 	return len;
+}
+
+static int check_if_exists(const char *path, int expect_file) {
+	struct stat s;
+
+	if (stat(path, &s) < 0) {
+		if (errno != ENOENT && errno != EACCES && errno != ENOTDIR)
+			syslog_errno("Failed to stat file");
+		return -1;
+	}
+
+	if (expect_file) {
+		if (!S_ISREG(s.st_mode))
+			return -1;
+	} else {
+		if (!S_ISDIR(s.st_mode))
+			return -1;
+	}
+
+	return 0;
+}
+
+int check_if_file_exists(const char *path) {
+	return check_if_exists(path, 1);
+}
+
+int check_if_dir_exists(const char *path) {
+	return check_if_exists(path, 0);
 }

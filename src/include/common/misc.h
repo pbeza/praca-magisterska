@@ -97,4 +97,8 @@ ssize_t bulk_pread(int fd, char *buf, size_t nbyte, off_t offset);
 
 ssize_t bulk_write(int fd, char *buf, size_t nbyte);
 
+int check_if_file_exists(const char *path);
+
+int check_if_dir_exists(const char *path);
+
 #endif

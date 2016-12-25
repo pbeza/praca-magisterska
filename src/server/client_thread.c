@@ -13,7 +13,9 @@
 
 #include "client_thread.h"
 
+#include "common/misc.h"
 #include "common/security.h"
+#include "common/protocol/proto_failure_packet.h"
 #include "protocol/proto_upgrade_response.h"
 #include "protocol/recv_upgrade_request.h"
 
@@ -78,40 +80,135 @@ static int send_response_to_client(int socket, SSL *ssl) {
 }
 
 /**
+ * \note \p config_set is treated as a filename of the client's configuration.
+ */
+static int check_if_config_set_valid(const server_config_t *srv_conf,
+				     uint16_t config_set) {
+	char dir_path[PATH_MAX_LEN];
+	char absolute_path[PATH_MAX_LEN];
+
+	snprintf(dir_path, ARRAY_LENGTH(dir_path), "%s/%u",
+		 srv_conf->configuration_sets_dir,
+		 config_set);
+
+	if (!realpath(dir_path, absolute_path)) {
+		syslog_errno("realpath() for config set path");
+		syslog_errno(dir_path);
+		return -1;
+	}
+
+	if (check_if_file_exists(absolute_path) < 0) {
+		syslog(LOG_ERR, "Requested configuration set '%s' doesn't exit",
+		       absolute_path);
+		return -1;
+	}
+
+	return 0;
+}
+
+static int check_if_compression_type_valid(compression_type compr_type) {
+	return 0 <= compr_type && compr_type < __LAST_COMPRESSION_TYPE_SENTINEL ? 0 : -1;
+}
+
+static int check_if_pkg_mgr_valid(package_mgr pkg_mgr) {
+	return 0 <= pkg_mgr && pkg_mgr < __LAST_PKG_MGR_TYPE_SENTINEL ? 0 : -1;
+}
+
+static int check_if_last_upgrade_time_valid(uint32_t last_upgrade_time) {
+	struct timespec spec;
+
+	if (clock_gettime(CLOCK_REALTIME, &spec) < 0) {
+		syslog_errno("clock_gettime()");
+		return -1;
+	}
+
+	return spec.tv_sec < last_upgrade_time ? -1 : 0;
+}
+
+static int check_if_upgrade_request_valid(const server_config_t *srv_conf,
+					  const upgrade_request_t *request,
+					  error_code *err_code) {
+
+	if (check_if_config_set_valid(srv_conf, request->config_set) < 0) {
+		syslog(LOG_ERR, "Received config set number = %" PRIu16
+		       " is not valid", request->config_set);
+		*err_code = UNKNOWN_CONFIG_SET;
+		return -1;
+	}
+
+	if (check_if_compression_type_valid(request->compr_type) < 0) {
+		syslog(LOG_ERR, "Received compression type = %d is not valid",
+		       request->compr_type);
+		*err_code = UNKNOWN_COMPR_TYPE;
+		return -1;
+	}
+
+	if (check_if_pkg_mgr_valid(request->pkg_mgr) < 0) {
+		syslog(LOG_ERR, "Received package manager = %d is not valid",
+		       request->pkg_mgr);
+		*err_code = UNKNOWN_PKG_MGR;
+		return -1;
+	}
+
+	if (check_if_last_upgrade_time_valid(request->last_upgrade_time) < 0) {
+		syslog(LOG_ERR, "Received last upgrade time = %" PRIu32
+		       " is not valid because it is in the future");
+		return -1;
+	}
+
+	return 0;
+}
+
+/**
  * SSL connection is already established successfully. From now on, we need to
  * follow protocol specification to talk with client.
  */
-static void start_protocol(int socket, SSL *ssl) {
+static int start_protocol(const server_config_t *srv_conf, int socket, SSL *ssl) {
 	upgrade_request_t upgrade_request;
+	error_code err_code;
 
 	syslog(LOG_DEBUG, "Waiting (polling) for client request %d milliseconds",
 	       MSG_POLL_TIMEOUT_MILLISECONDS);
 
 	if (wait_for_client_msg(socket) < 0) {
 		syslog(LOG_ERR, "Connection probably lost");
-		return;
+		return -1;
 	}
 
-	syslog(LOG_DEBUG, "Reading client's incoming message");
+	syslog(LOG_DEBUG, "Reading client's incoming message (UPGRADE_REQUEST"
+	       " packet is expected to be received)");
 
 	if (recv_upgrade_request(socket, ssl, &upgrade_request) < 0) {
 		syslog(LOG_ERR, "Failed to receive UPGRADE_REQUEST packet");
-		return;
+		return -1;
 	}
 
 	syslog(LOG_DEBUG, "Client's request details: config_set=%" PRIu16
-	       ", compr_type=%d, pkg_mgr=%d, last_upgrade_time=%" PRIu32,
+	       ", compr_type=%d, pkg_mgr=%d, last_upgrade_time=%" PRIu32
+	       ". Checking whether received request is valid...",
 	       upgrade_request.config_set, upgrade_request.compr_type,
 	       upgrade_request.pkg_mgr, upgrade_request.last_upgrade_time);
+
+	if (check_if_upgrade_request_valid(srv_conf, &upgrade_request, &err_code) < 0) {
+		syslog(LOG_ERR, "Received upgrade request is not valid");
+		syslog(LOG_DEBUG, "Sending protocol failure packet with "
+		       "error code number = %d", err_code);
+		if (send_proto_failure(socket, ssl, err_code) < 0)
+			syslog(LOG_ERR, "Failed to send protocol failure "
+			       "packet after receiving invalid upgrade request");
+		return -1;
+	}
 
 	syslog(LOG_DEBUG, "Sending response to the client");
 
 	if (send_response_to_client(socket, ssl) < 0) {
 		syslog(LOG_ERR, "Failed to send response to client");
-		return;
+		return -1;
 	}
 
 	syslog(LOG_DEBUG, "Response to the client successfully sent");
+
+	return 0;
 }
 
 void* thread_work(thread_arg_t *thread_arg) {
@@ -130,7 +227,8 @@ void* thread_work(thread_arg_t *thread_arg) {
 	} else {
 		syslog(LOG_INFO, "Accepting client's SSL handshake successful");
 		syslog_ssl_summary(thread_arg->ssl);
-		start_protocol(socket, thread_arg->ssl);
+		if (start_protocol(server_config, socket, thread_arg->ssl) < 0)
+			syslog(LOG_ERR, "Communication with client has failed");
 	}
 
 	if (bidirectional_shutdown_handshake(thread_arg->ssl) < 0)

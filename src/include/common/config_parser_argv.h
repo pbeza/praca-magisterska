@@ -113,4 +113,6 @@ int config_file_save_cb(const option_t *option, const char *value, void *config)
 
 void print_no_file_msg_argv(char short_option, const char *long_option, const char *file);
 
+void print_no_dir_msg_argv(char short_option, const char *long_option, const char *file);
+
 #endif
