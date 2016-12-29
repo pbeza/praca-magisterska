@@ -7,7 +7,7 @@ configure_file("${INC_DIR_SERVER}/config.h.in" "config.h")
 
 # Create executable.
 
-add_executable(${PROJECT_NAME} "main.c" "main_loop.c" "security.c" "config_parser.c" "config_parser_argv.c" "config_parser_file.c" "client_thread.c")
+add_executable(${PROJECT_NAME} "main.c" "main_loop.c" "security.c" "config_parser.c" "config_parser_argv.c" "config_parser_file.c" "client_thread.c" "packages_manager.c")
 
 # Include headers from ${PROJECT_BINARY_DIR} to allow inclusion dynamically
 # generated headers generated from server/*.in files.

@@ -7,6 +7,7 @@
 #define _COMMON_CONFIG_PARSER_FILE_H
 
 #include <libconfig.h>
+#include <sys/stat.h>
 
 #include "config.h"
 

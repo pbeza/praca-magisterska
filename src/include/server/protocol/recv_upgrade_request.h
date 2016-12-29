@@ -7,6 +7,7 @@
 #include <openssl/ssl.h>
 
 #include "common/protocol/packets.h"
+#include "common/misc.h"
 
 /**
  * Detailes fetched from `UPGRADE_REQUEST` sent by client.
@@ -16,6 +17,7 @@ typedef struct upgrade_request_t {
 	compression_type compr_type;
 	package_mgr pkg_mgr;
 	uint32_t last_upgrade_time;
+	char config_set_absolute_path[PATH_MAX_LEN];
 } upgrade_request_t;
 
 /**

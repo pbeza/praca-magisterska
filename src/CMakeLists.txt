@@ -123,6 +123,7 @@ include_directories(${PROJECT_BINARY_DIR})
 add_subdirectory(common)
 add_subdirectory(server)
 add_subdirectory(client)
+add_subdirectory(config)
 
 ###############################################################################
 # Documentation                                                               #

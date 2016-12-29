@@ -4,6 +4,7 @@
 
 #include "config_parser_file.h"
 
+#include "common/misc.h"
 #include "config.h"
 
 static int read_priv_key_pass(const config_t *config, server_config_t *server_config) {
@@ -76,6 +77,18 @@ static int server_read_config_from_file(const config_t *config, server_config_t 
 		syslog(LOG_INFO, "Provide path to server's configuration sets "
 		       "directory by assigning path to `%s` variable in "
 		       "configuration file", CONFIG_FILE_SETS_DIR_PATH);
+		return -1;
+	}
+
+	if (read_dir_path_from_conf(config,
+				    base_config,
+				    -1,
+				    CONFIG_FILE_PKG_CACHE_DIR_PREFIX,
+				    server_config->pkg_cache_dir,
+				    1) < 0) {
+		syslog(LOG_INFO, "Provide path to server's packages cache "
+		       "directory by assigning path to `%s` variable in "
+		       "configuration file", CONFIG_FILE_PKG_CACHE_DIR_PREFIX);
 		return -1;
 	}
 

@@ -51,13 +51,13 @@ int common_read_config_from_file(const config_t *config, base_config_t *base_con
 	return 0;
 }
 
-static int read_path_from_conf(const config_t *config,
-			       const char *config_var_path,
-			       char *config_save_path,
-			       int is_required,
-			       const char **path) {
+static int read_str_from_conf(const config_t *config,
+			      const char *config_var_path,
+			      char *config_save_path,
+			      int is_required,
+			      const char **str) {
 
-	if (config_lookup_string(config, config_var_path, path) == CONFIG_FALSE) {
+	if (config_lookup_string(config, config_var_path, str) == CONFIG_FALSE) {
 		if (is_required) {
 			fprintf(stderr, "Required option '%s' is not set in "
 			       "configuration file.\n", config_var_path);
@@ -68,12 +68,12 @@ static int read_path_from_conf(const config_t *config,
 		       "file. Default value '%s' will be used.\n",
 		       config_var_path, config_save_path);
 	} else {
-		strncpy(config_save_path, *path, PATH_MAX_LEN);
+		strncpy(config_save_path, *str, PATH_MAX_LEN);
 		syslog(LOG_INFO, "Setting %s = '%s' successfully loaded from "
 		       "configuration file", config_var_path, config_save_path);
 	}
 
-	*path = config_save_path;
+	*str = config_save_path;
 
 	return 0;
 }
@@ -87,10 +87,10 @@ int read_file_path_from_conf(const config_t *config,
 	const char *path;
 
 	/* Option already set via `argv[]`? `argv[]` takes precedence */
-	if (is_option_set(base_config, option_id))
+	if (option_id >= 0 && is_option_set(base_config, option_id))
 		return 0;
 
-	if (read_path_from_conf(config, config_var_path, config_save_path,
+	if (read_str_from_conf(config, config_var_path, config_save_path,
 				is_required, &path) < 0)
 		return -1;
 
@@ -114,10 +114,10 @@ int read_dir_path_from_conf(const config_t *config,
 	const char *path;
 
 	/* Option already set via `argv[]`? `argv[]` takes precedence */
-	if (is_option_set(base_config, option_id))
+	if (option_id >= 0 && is_option_set(base_config, option_id))
 		return 0;
 
-	if (read_path_from_conf(config, config_var_path, config_save_path,
+	if (read_str_from_conf(config, config_var_path, config_save_path,
 				is_required, &path) < 0)
 		return -1;
 

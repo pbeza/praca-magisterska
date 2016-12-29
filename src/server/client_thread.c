@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <poll.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <syslog.h>
 #include <unistd.h>
@@ -12,6 +13,7 @@
 #include <openssl/ssl.h>
 
 #include "client_thread.h"
+#include "packages_manager.h"
 
 #include "common/misc.h"
 #include "common/security.h"
@@ -83,9 +85,10 @@ static int send_response_to_client(int socket, SSL *ssl) {
  * \note \p config_set is treated as a filename of the client's configuration.
  */
 static int check_if_config_set_valid(const server_config_t *srv_conf,
-				     uint16_t config_set) {
+				     upgrade_request_t *req) {
 	char dir_path[PATH_MAX_LEN];
 	char absolute_path[PATH_MAX_LEN];
+	uint16_t config_set = req->config_set;
 
 	snprintf(dir_path, ARRAY_LENGTH(dir_path), "%s/%u",
 		 srv_conf->configuration_sets_dir,
@@ -102,6 +105,8 @@ static int check_if_config_set_valid(const server_config_t *srv_conf,
 		       absolute_path);
 		return -1;
 	}
+
+	strncpy(req->config_set_absolute_path, absolute_path, strlen(absolute_path));
 
 	return 0;
 }
@@ -126,33 +131,50 @@ static int check_if_last_upgrade_time_valid(uint32_t last_upgrade_time) {
 }
 
 static int check_if_upgrade_request_valid(const server_config_t *srv_conf,
-					  const upgrade_request_t *request,
+					  upgrade_request_t *req,
 					  error_code *err_code) {
 
-	if (check_if_config_set_valid(srv_conf, request->config_set) < 0) {
+	if (check_if_config_set_valid(srv_conf, req) < 0) {
 		syslog(LOG_ERR, "Received config set number = %" PRIu16
-		       " is not valid", request->config_set);
+		       " is not valid", req->config_set);
 		*err_code = UNKNOWN_CONFIG_SET;
 		return -1;
 	}
 
-	if (check_if_compression_type_valid(request->compr_type) < 0) {
+	if (check_if_compression_type_valid(req->compr_type) < 0) {
 		syslog(LOG_ERR, "Received compression type = %d is not valid",
-		       request->compr_type);
+		       req->compr_type);
 		*err_code = UNKNOWN_COMPR_TYPE;
 		return -1;
 	}
 
-	if (check_if_pkg_mgr_valid(request->pkg_mgr) < 0) {
+	if (check_if_pkg_mgr_valid(req->pkg_mgr) < 0) {
 		syslog(LOG_ERR, "Received package manager = %d is not valid",
-		       request->pkg_mgr);
+		       req->pkg_mgr);
 		*err_code = UNKNOWN_PKG_MGR;
 		return -1;
 	}
 
-	if (check_if_last_upgrade_time_valid(request->last_upgrade_time) < 0) {
+	if (check_if_last_upgrade_time_valid(req->last_upgrade_time) < 0) {
 		syslog(LOG_ERR, "Received last upgrade time = %" PRIu32
 		       " is not valid because it is in the future");
+		return -1;
+	}
+
+	return 0;
+}
+
+static int prepare_archive_for_client(const server_config_t *srv_conf,
+				      const upgrade_request_t *req) {
+
+	/* This operation may take some time... */
+	if (download_missing_packages(srv_conf, req) < 0) {
+		syslog(LOG_ERR, "Downloading missing packages has failed");
+		return -1;
+	}
+
+	if (compress_packages(req) < 0) {
+		syslog(LOG_ERR, "Compressing packages for client has failed");
 		return -1;
 	}
 
@@ -164,7 +186,7 @@ static int check_if_upgrade_request_valid(const server_config_t *srv_conf,
  * follow protocol specification to talk with client.
  */
 static int start_protocol(const server_config_t *srv_conf, int socket, SSL *ssl) {
-	upgrade_request_t upgrade_request;
+	upgrade_request_t req;
 	error_code err_code;
 
 	syslog(LOG_DEBUG, "Waiting (polling) for client request %d milliseconds",
@@ -178,7 +200,7 @@ static int start_protocol(const server_config_t *srv_conf, int socket, SSL *ssl)
 	syslog(LOG_DEBUG, "Reading client's incoming message (UPGRADE_REQUEST"
 	       " packet is expected to be received)");
 
-	if (recv_upgrade_request(socket, ssl, &upgrade_request) < 0) {
+	if (recv_upgrade_request(socket, ssl, &req) < 0) {
 		syslog(LOG_ERR, "Failed to receive UPGRADE_REQUEST packet");
 		return -1;
 	}
@@ -186,10 +208,9 @@ static int start_protocol(const server_config_t *srv_conf, int socket, SSL *ssl)
 	syslog(LOG_DEBUG, "Client's request details: config_set=%" PRIu16
 	       ", compr_type=%d, pkg_mgr=%d, last_upgrade_time=%" PRIu32
 	       ". Checking whether received request is valid...",
-	       upgrade_request.config_set, upgrade_request.compr_type,
-	       upgrade_request.pkg_mgr, upgrade_request.last_upgrade_time);
+	       req.config_set, req.compr_type, req.pkg_mgr, req.last_upgrade_time);
 
-	if (check_if_upgrade_request_valid(srv_conf, &upgrade_request, &err_code) < 0) {
+	if (check_if_upgrade_request_valid(srv_conf, &req, &err_code) < 0) {
 		syslog(LOG_ERR, "Received upgrade request is not valid");
 		syslog(LOG_DEBUG, "Sending protocol failure packet with "
 		       "error code number = %d", err_code);
@@ -199,7 +220,13 @@ static int start_protocol(const server_config_t *srv_conf, int socket, SSL *ssl)
 		return -1;
 	}
 
-	syslog(LOG_DEBUG, "Sending response to the client");
+	if (prepare_archive_for_client(srv_conf, &req) < 0) {
+		syslog(LOG_ERR, "Preparing archive for client has failed");
+		return -1;
+	}
+
+	syslog(LOG_DEBUG, "Sending response to the client (config_set = %"
+			PRIu16 ")", req.config_set);
 
 	if (send_response_to_client(socket, ssl) < 0) {
 		syslog(LOG_ERR, "Failed to send response to client");

@@ -1,0 +1,1 @@
+1. Usuwanie niektórych pakietów wymaga uruchomienia dodatkowych skryptów. Np. usunięcie/dodanie pakietu linux-image-4.0.0-2-amd64 wywołuje update GRUBa.
