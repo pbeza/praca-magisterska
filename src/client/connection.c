@@ -142,14 +142,15 @@ int connect_server(client_config_t *config) {
 			break;
 	}
 
-	freeaddrinfo(srv_info);
-
 	if (!iterator) {
 		syslog(LOG_ERR, "Failed to connect to server");
+		freeaddrinfo(srv_info);
 		goto cleanup_socket;
 	}
 
 	*addr = *srv_info->ai_addr;
+
+	freeaddrinfo(srv_info);
 
 	return fd;
 

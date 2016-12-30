@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <inttypes.h>
 #include <stdint.h>
+#include <string.h>
 #include <syslog.h>
 
 #include <openssl/ssl.h>
@@ -53,6 +54,7 @@ static void init_upgrade_request_struct(upgrade_request_t *u, const char *buf) {
 	u->compr_type = read_compr_type(buf);
 	u->pkg_mgr = read_pkg_mgr(buf);
 	u->last_upgrade_time = read_last_upgrade_time(buf);
+	memset(&u->config_set_absolute_path, 0, sizeof(u->config_set_absolute_path));
 }
 
 int recv_upgrade_request(int socket, SSL *ssl,
