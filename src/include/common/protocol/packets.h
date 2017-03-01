@@ -8,6 +8,8 @@
 #include <limits.h>
 #include <stdint.h>
 
+#include <openssl/ssl.h>
+
 /**
  * Total header length in bytes.
  */

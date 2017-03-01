@@ -7,7 +7,7 @@ configure_file("${INC_DIR_SERVER}/config.h.in" "config.h")
 
 # Create executable.
 
-add_executable(${PROJECT_NAME} "main.c" "main_loop.c" "security.c" "config_parser.c" "config_parser_argv.c" "config_parser_file.c" "client_thread.c" "packages_manager.c")
+add_executable(${PROJECT_NAME} "main.c" "main_loop.c" "security.c" "config_parser.c" "config_parser_argv.c" "config_parser_file.c" "client_thread.c" "packages_manager.c" "package_archiver.c")
 
 # Include headers from ${PROJECT_BINARY_DIR} to allow inclusion dynamically
 # generated headers generated from server/*.in files.
@@ -18,14 +18,23 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_BINARY_DIR})
 
 add_subdirectory(protocol)
 
-# Find and link against pthread library.
+###############################################################################
+# Third party libraries                                                       #
+###############################################################################
+
+# PTHREAD - Provides threads library.
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 find_package(Threads REQUIRED)
 
+# LIBARCHIVE - Provides implementation of compression algorithms.
+
+find_package(LibArchive REQUIRED)
+include_directories(${LibArchive_INCLUDE_DIRS})
+
 # Link the executable to the common libraries.
 
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC common server-protocol ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${LIBCONFIG_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC common server-protocol ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${LIBCONFIG_LIBRARIES} ${LibArchive_LIBRARIES})
 
 # Generate manual from --help output.
 

@@ -7,14 +7,14 @@
 
 % Podstawowe (meta)dane
 
-\title{Protokół zarządzania stacjami komputerowymi pod kontrolą systemu Linux}
+\title{Protokół zarządzania stacjami komputerowymi pod~kontrolą systemu Linux}
 \titleaux{Management Protocol for Linux Workstations}
-\author{\href{mailto:P.Beza@student.mini.pw.edu.pl}{inż. Patryk Bęza}}
+\author{\href{mailto:P.Beza@student.mini.pw.edu.pl}{Patryk Bęza}}
 \album{237533}
 \supervisoremail{M.Kozlowski@mini.pw.edu.pl}
 \supervisor{\href{mailto:M.Kozlowski@mini.pw.edu.pl}{dr inż. Marek Kozłowski}}
-\discipline{informatyka}
-\monthyear{luty 2017}
+\discipline{Informatyka}
+\monthyear{2017}
 \date{\today}
 
 % Właściwy początek dokumentu
@@ -26,8 +26,13 @@
 \pagenumbering{gobble}
 
 % Strona tytułowa + podpisy autora i Promotora na odwrocie
+% Strona tytułowa ma mniejsze marginesy żeby dostosować się do wzorca Rektora
+
+\newgeometry{inner=20mm,outer=20mm,top=25mm,bottom=25mm,bindingoffset=5mm}
 
 \maketitle
+
+\restoregeometry
 
 % Strona z informacjami o Wydziale i autorze
 
@@ -49,9 +54,14 @@
 
 \input{chapters/hypenation}
 
-% Streszczenie pracy TODO tłumaczenie na ang.
+% Lista słów kluczowych
 
-\subfile{chapters/abstract}
+\newcommand{\keywordslist}{\href{https://en.wikipedia.org/wiki/Linux}{Linux}, \href{https://en.wikipedia.org/wiki/Communications_protocol}{Communications Protocol}, \href{https://en.wikipedia.org/wiki/Software_configuration_management}{Software Configuration Management~(SCM)}, \href{https://en.wikipedia.org/wiki/Infrastructure_as_Code}{Infrastructure as Code~(IaC)}}
+
+% Streszczenie pracy po polsku i angielsku (abstract)
+
+\subfile{chapters/abstract-pl}
+\subfile{chapters/abstract-eng}
 
 % Wszystkie rozdziały pracy magisterskiej
 

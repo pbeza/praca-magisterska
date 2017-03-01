@@ -7,9 +7,10 @@
 #include "packages_manager.h"
 
 #include "common/misc.h"
+#include "package_archiver.h"
 
 #define CHANGE_CWD_TO_PKG_CACHE_DIR_CMD	"cd '%s'"
-#define APT_PKG_DOWNLOAD_CMD		"apt-get download"
+#define APT_PKG_DOWNLOAD_CMD		"apt-get download" /* TODO apt-get install --download-only (into the package cache) */
 #define APT_PKG_EXIST_CMD		"apt-cache show"
 #define PKG_DOWNLOAD_CMD_RESIZE_FACTOR	2
 #define MIN_PKG_DOWNLOAD_CMD_CHAR_LEN	4096
@@ -183,5 +184,13 @@ int download_missing_packages(const server_config_t *srv_conf,
 
 int compress_packages(const upgrade_request_t *req) {
 	UNUSED(req);
+	const char test[2][1024] = { "/tmp/a.txt", "/tmp/b.txt" };
+	const char *archive_path = "/tmp/test_archive";
+
+	if (compress(archive_path, TAR_GZ_COMPRESSION, test, 2) < 0) {
+		syslog(LOG_ERR, "Packages compression has failed");
+		return -1;
+	}
+
 	return 0;
 }

@@ -9,39 +9,83 @@
 \LoadClass[a4paper,11pt,twoside,openright]{report}
 \RequirePackage{graphicx}
 
-% Ustawienia językowe -- polskie kodowanie znaków
+% Ustawienia językowe (polskie kodowanie znaków)
 
-\RequirePackage[utf8]{inputenc}
+\RequirePackage[utf8]{inputenc} % inputenc package ignored with utf8 based engines
 \RequirePackage[OT4]{fontenc} % TODO OT4 vs T1
-\RequirePackage[polish]{babel}
+\RequirePackage[english,main=polish]{babel}
 \let\lll\undefined % fix przed załadowaniem amssymb (konflikt \lll)
 \RequirePackage[OT4]{polski} % TODO OT4 needed?
 
-% Dostosowanie marginesów strony
+% Zaimportowanie czcionek wymaganych przez wymagania Rektora
 
-\textwidth\paperwidth
-\advance\textwidth -55mm
-\oddsidemargin-1in
-\advance\oddsidemargin 30mm
-\evensidemargin-1in
-\advance\evensidemargin 25mm
-\topmargin -1in
-\advance\topmargin 2cm
-\setlength\textheight{48\baselineskip}
-\addtolength\textheight{\topskip}
-\marginparwidth15mm
+\RequirePackage{fontspec}
+\newfontfamily{\adagiolight}[
+	Path = fonts/,
+	UprightFont = adagio_slab-light-webfont,
+	ItalicFont = adagio_slab-light_italic-webfont
+]{Adagio_Slab}
+\newfontfamily{\adagioregular}[
+	Path=fonts/,
+	UprightFont=adagio_slab-regular-webfont,
+	ItalicFont=adagio_slab-regular_italic-webfont
+]{Adagio_Slab}
+\newfontfamily{\adagioregularmorespace}[
+	Path=fonts/,
+	UprightFont=adagio_slab-regular-webfont,
+	ItalicFont=adagio_slab-regular_italic-webfont,
+	WordSpace={3}
+]{Adagio_Slab}
+%\newfontfamily\arial{Arial} % pakiet ttf-mscorefonts-installer
+%\setmainfont[Mapping=tex-text]{Arial}
+%\setmainfont{Linux Libertine O}
+\setmainfont{Latin Modern Roman} % komenda bash: fc-list | grep ".otf"
+
+% Przedefiniowanie \emph żeby zawsze było pochylone
+
+\let\emph\relax % there's no \RedeclareTextFontCommand
+\DeclareTextFontCommand{\emph}{\itshape}
+
+% Fake'owe font Small Caps dla Adagio_Slab (wymagane na stronie tytułowej)
+% http://tex.stackexchange.com/questions/55664/fake-small-caps-with-xetex-fontspec
+%
+\newlength\fake@f
+\newlength\fake@c
+\def\fakesc#1{%
+	\begingroup%
+	\xdef\fake@name{\csname\curr@fontshape/\f@size\endcsname}%
+	\fontsize{\fontdimen8\fake@name}{\baselineskip}\selectfont%
+	\MakeUppercase{#1}%
+	\endgroup%
+}
+
+% Dostosowanie marginesów strony
+% Patrz: https://www.tug.org/TUGboat/tb09-1/tb20mcpherson.pdf
+%
+%\textwidth\paperwidth
+%\advance\textwidth -55mm
+%\oddsidemargin-1in
+%\advance\oddsidemargin 30mm
+%\evensidemargin-1in
+%\advance\evensidemargin 25mm
+%\topmargin -1in
+%\advance\topmargin 2cm
+%\setlength\textheight{48\baselineskip}
+%\addtolength\textheight{\topskip}
+%\marginparwidth15mm
 
 % Można też tak ustawić marginesy -- nie wiem czy któryś sposób jest preferowany
-%
-%\RequirePackage{geometry}
-%\geometry{
-%	inner=25mm,
-%	outer=25mm,
-%	bindingoffset=5mm,
-%	top=20mm,
-%	bottom=15mm,
-%	includeheadfoot
-%}
+
+\RequirePackage[
+	headheight=15pt, % http://tex.stackexchange.com/questions/85178/increase-height-of-fancyhdr-header
+	inner=25mm,
+	outer=25mm,
+	bindingoffset=5mm,
+	top=20mm,
+	bottom=15mm,
+	includeheadfoot
+%	showframe
+]{geometry}
 
 % Ustawienia wyłączenia podświetlania linków za pomocą kolorowych ramek
 
@@ -126,22 +170,22 @@
 \RequirePackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-%\fancyhead[RO,LE]{\slshape\rightmark}
-%\fancyhead[LO,RE]{\slshape\leftmark}
-%\fancyfoot[C]{\thepage}
-\fancyhead[RE]{\slshape\leftmark}
-\fancyhead[LO]{\slshape\rightmark}
-\fancyhead[LE,RO]{\thepage}
+\fancyfoot[LE,RO]{\thepage}
+\fancyhead[LO]{\sc\nouppercase{\rightmark}}
+\fancyhead[RE]{\sc\leftmark}
+%\renewcommand{\footrulewidth}{0.4pt}
 
 \renewcommand{\chaptermark}[1]{\markboth{\thechapter.\enspace#1}{}}
-\renewcommand{\sectionmark}[1]{\markright{\thesection.\enspace#1}}
-\def\cleardoublepage{\clearpage\if@twoside
-	\ifodd\c@page\else\hbox{}\thispagestyle{empty}\newpage
-	\if@twocolumn\hbox{}\newpage\fi\fi\fi}
-\renewcommand{\@seccntformat}[1]{\csname the#1\endcsname.\enspace}
-\renewcommand{\numberline}[1]{\hb@xt@\@tempdima{#1.\hfil}}
+%\renewcommand{\sectionmark}[1]{\markright{\thesection.\enspace#1}}
+%\def\cleardoublepage{\clearpage\if@twoside
+%	\ifodd\c@page\else\hbox{}\thispagestyle{empty}\newpage
+%	\if@twocolumn\hbox{}\newpage\fi\fi\fi}
+%\renewcommand{\@seccntformat}[1]{\csname the#1\endcsname.\enspace}
+%\renewcommand{\numberline}[1]{\hb@xt@\@tempdima{#1.\hfil}}
 \RequirePackage[parfill]{parskip}[2001/04/09]
 \RequirePackage{setspace}
+%\onehalfspacing
+\linespread{1.15} % zalecenie Rektora
 \frenchspacing
 \clubpenalty=10000
 \widowpenalty=10000
@@ -216,13 +260,16 @@
 	{\quotesinglbase}
 	{\fixligatures\textquoteright}
 \DeclareQuoteAlias[quotes]{polish}{polish}
-\DeclareQuoteOption{polish}
+%\DeclareQuoteOption{polish} % Package csquotes Warning: '\DeclareQuoteOption' invalid at this point
 
 \RequirePackage[
 	style=numeric,
+%	style=apa,
 	backend=biber,
-	sorting=none,
-	backref=true]{biblatex}
+	sorting=nyt,
+	backref=true
+]{biblatex}
+\DeclareLanguageMapping{polish}{english-apa}
 \addbibresource{bibliography.bib}
 
 % Paczki dla matematycznych formuł
@@ -273,20 +320,17 @@
 %\def\@date{\@latex@error{No date given}\@ehc}
 \def\album#1{\gdef\@album{#1}}
 \def\@album{\@latex@error{No album number given}\@ehc}
-\def\@university{Politechnika Warszawska}
-\def\@faculty{Wydzia{\l} Matematyki i Nauk Informacyjnych}
-\def\@authorcap{Autor}
-\def\@supervisorcap{Promotor}
-\def\@location{Warszawa}
-\def\@authorsig{podpis autora}
-\def\@supervisorsig{podpis promotora}
-\def\@titlepagecap{Strona tytu{\l}owa}
-\def\@academicyear{2016/2017}
-%\def\@statementcap{O{\'s}wiadczenie}
+\newcommand{\university}{Politechnika Warszawska}
+\newcommand{\faculty}{Wydział Matematyki \protect\\i~Nauk Informacyjnych}
+\newcommand{\location}{Warszawa}
+\newcommand{\authorsig}{podpis autora}
+\newcommand{\supervisorsig}{podpis promotora}
+\newcommand{\titlepagecap}{Strona tytułowa}
+%\def\@statementcap{Oświadczenie}
 %\def\@definition{Definicja}
 %\def\@corollary{Wniosek}
 %\def\@remark{Uwaga}
-%\def\@example{Przyk{\l}ad}
+%\def\@example{Przykład}
 
 % Załączniki
 
@@ -327,79 +371,97 @@
 
 % Strona tytułowa
 
+\newcommand\universitybox{\Huge\adagioregular\textbf{\university}}
+\newcommand\facultybox{\fontsize{19}{13}\selectfont\adagioregularmorespace\addfontfeature{LetterSpace=45.0}\fakesc{\faculty}}
+
 \renewcommand{\maketitle}{
-	\pdfbookmark[0]{\@titlepagecap}{titlepage}
+	\pdfbookmark[0]{\titlepagecap}{titlepage}
 	\begin{titlepage}
-	\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 		\center
-		\begin{minipage}{2.5cm}
-			\includegraphics[width=2.25cm]{img/pw}
+		% Logo MiNI
+		\begin{minipage}{2.6cm}
+			\includegraphics[width=2.6cm]{img/mini}
+%			\hfill % odkomentuj i wywal powyższe jeśli tak Rektor chce
 		\end{minipage}
 		\hfill
-		\begin{minipage}{100mm}
+		% Napis z nazwą Uczelni i Wydziału
+		\begin{minipage}{110mm}
 			\begin{center}
-				\textsc{\LARGE\@university\\\vspace{1mm}\large\@faculty}
+				\universitybox\\\vspace{3mm}\facultybox
 			\end{center}
 		\end{minipage}
 		\hfill
-		\begin{minipage}{2.5cm}
+		% Logo PW
+		\begin{minipage}{2.6cm}
 			\begin{flushright}
-					\includegraphics[width=2.25cm]{img/mini}
+				\includegraphics[width=2.6cm]{img/pw}
 			\end{flushright}
 		\end{minipage}\par
-		\vspace{3cm}
+		\vspace{3.5cm}
+
+		% Praca magisterska
+
 		{
-			\textsc{\Large Praca dyplomowa magisterska na kierunku \@discipline}\\[0.5cm]
-			\textsc{\large Rok akademicki \@academicyear}\\[1.8cm]
+			{\fontsize{45}{50}\selectfont\adagiolight Praca dyplomowa magisterska}\\[0.7cm]
+			{\fontsize{12}{15}\selectfont na kierunku \@discipline}
 		\par}
-		\HRule\\[1.5cm]
-		\begin{minipage}[t]{0.95\textwidth}
-		\begin{spacing}{2.0}
-			\center
-			\textbf{\LARGE\@title}
-		\end{spacing}
-		\end{minipage}\\[0.5cm]
-		\HRule\\[2cm]
-	\begin{minipage}[t]{0.4\textwidth}
-		\begin{flushleft}\large
-			\textsc{\@authorcap:}\\[3mm]
-			\@author
-		\end{flushleft}
-	\end{minipage}
-	\begin{minipage}[t]{0.4\textwidth}
-		\begin{flushright}\large
-			\textsc{\@supervisorcap:}\\[3mm]
-			\@supervisor\\[1cm]
-		\end{flushright}
-	\end{minipage}
-	\vfill
-	%\hspace{.7\textwidth}
-	%\begin{minipage}[t][70mm]{.4\textwidth}
-	%	\textsc{\large\@authorcap:}\\\@author\par
-	%	\vspace{7mm}
-	%	\textsc{\large\@supervisorcap:}\\\@supervisor
-	%\end{minipage}
-	\begin{center}
-		\textsc{\large\@location, \@monthyear}
-	\end{center}
-	\vspace{5mm}
-	\clearpage
-	\thispagestyle{empty}
-	\null\vfill
-	\begin{minipage}{50mm}
-		\begin{center}
-			..............................................\\
-			\vspace{1mm}
-			\@supervisorsig
-		\end{center}
-	\end{minipage}
-	\hfill
-	\begin{minipage}{50mm}
-		\begin{center}
-			..............................................\\
-			\vspace{1mm}
-			\@authorsig
-		\end{center}
-	\end{minipage}
+
+		\vspace{1.5cm}
+
+		% Tytuł pracy
+
+		\begin{minipage}{0.75\textwidth}
+			\begin{spacing}{1.7}
+				\center\textbf{\Large\@title}
+			\end{spacing}
+		\end{minipage}
+
+		\vspace{0.7cm}
+
+		% Autor
+
+		{\Huge\adagioregular\@author}\\[0.2cm]
+		{\fontsize{12}{15}\selectfont Numer albumu 237533}
+
+		\vspace{0.7cm}
+
+		% Promotor
+
+		{\fontsize{12}{15}\selectfont promotor}\\[0.2cm]
+		\@supervisor\\[2.5cm]
+
+		\vfill
+
+		% Miejscowość i rok
+
+		\textsc{\large\MakeUppercase{\location}~\@monthyear}
+
+		\vspace{5mm}
+
+		% Podpisy autora i promotora na odwrocie
+
+		\clearpage
+		\thispagestyle{empty}
+		\null\vfill
+		\newcommand{\sigdots}{.............................................}
+
+		% Miejsce na podpis promotora
+
+		\begin{minipage}{50mm}
+			\begin{center}
+				\sigdots\\
+				\vspace{1mm}
+				\supervisorsig
+			\end{center}
+		\end{minipage}
+		\hfill
+		% Miejsce na podpis autora
+		\begin{minipage}{50mm}
+			\begin{center}
+				\sigdots\\
+				\vspace{1mm}
+				\authorsig
+			\end{center}
+		\end{minipage}
 	\end{titlepage}}
 \endinput
