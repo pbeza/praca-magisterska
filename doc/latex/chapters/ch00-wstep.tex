@@ -24,6 +24,7 @@ Angielska wersja tytułu pracy:
 \begin{displayquote}
 \inserttitleaux.
 \end{displayquote}
+Wybór tematu pracy jest podyktowany zainteresowaniami autora pracy dotyczącymi sytemów \glslink{unix-like-system}{*nixowych}, protokołów sieciowych i~ich bezpieczeństwa oraz problemem w~pełni zautomatyzowanego, wygodnego dla~administratorów sieciowych, dystrybuowania oprogramowania, który dotyka wiele dużych firm, instytucji publicznych, szkół, uczelni i~wydziałów, w~tym również Wydział~MiNI~PW.
 
 %------------------------------------------------------------------------------
 
@@ -32,21 +33,21 @@ Angielska wersja tytułu pracy:
 
 \noindent Celem niniejszej pracy jest:
 \blockcquote{formularz-zgloszenia-pracy}{Zaprojektowanie i~zaimplementowanie protokołu umożliwiającego propagowanie zmian w~systemie plików, pakietów oraz elementów konfiguracji do~stacji roboczych pod kontrolą systemu operacyjnego \glslink{gnulinux}{Linux/GNU} lub~innego systemu \glslink{unix-like-system}{*nix}, a~także elastycznego standardu opisu zmian oraz narzędzi dla~ich rejestrowania i~dostosowywania. Proponowaną architekturą jest model klient--serwer. Konkretny obraz zmian może być przeznaczony dla~konkretnej dystrybucji, jednakże stworzone rozwiązania praktyczne powinny dawać się w~prosty sposób dostosowywać do~popularnych dystrybucji systemu \glslink{gnulinux}{Linux/GNU} oraz systemów \glslink{unix-like-system}{*nix}.}
-W~uproszczeniu, celem niniejszej pracy jest zaprojektowanie i~zaimplementowanie narzędzia dla~systemów \glslink{unix-like-system}{*niksowych} do~zarządzania synchronizacją oprogramowania i~jego konfiguracji na~grupie komputerów. Oprogramowanie takie często nazywa się~oprogramowaniem typu \emph{Software Configuration Management~(SCM})~\cite{wiki:scm}.
+W~uproszczeniu, celem niniejszej pracy jest zaprojektowanie i~zaimplementowanie narzędzia dla~systemów \glslink{unix-like-system}{*niksowych} do~zarządzania synchronizacją oprogramowania i~jego konfiguracji na~grupie komputerów podłączonych do~sieci opartej na~protokole~\gls{tcpip}. Oprogramowanie takie często jest nazywane oprogramowaniem typu \emph{\href{https://en.wikipedia.org/wiki/Software_configuration_management}{Software Configuration Management~(SCM)}}~\cite{wiki:scm}, a~sposób jego działania nazywany jest \emph{\href{https://en.wikipedia.org/wiki/Infrastructure_as_Code}{Infrastructure as Code~(IaC)}}.
 
 %------------------------------------------------------------------------------
 
 \section{Motywacja}
 
-Motywacją do~napisania pracy magisterskiej na~przedstawiony w~rozdziale~\ref{cel-i-zakres} temat, jest problem, z~którym zmagają się~administratorzy głównie średnich i dużych sieci komputerowych na~całym świecie, niezależnie od~używanego przez nich systemu operacyjnego --- problem automatycznego dystrybuowania ujednoliconego oprogramowania i~jego konfiguracji na~komputery połączone siecią komputerową~\cite{so-problem-intro}. W~ogólności nie~muszą to~być komputery takie jak serwery czy stacje robocze --- choć to~głównie z~nimi administratorzy komputerowi mają do~czynienia. Omawiany problem może dotyczyć również niektórych systemów wbudowanych nie będących systemami typu~\mbox{\emph{bare~metal}}, tzn.~pracujących pod kontrolą systemu operacyjnego.
+Motywacją do~napisania pracy magisterskiej na~przedstawiony w~rozdziale~\ref{cel-i-zakres} temat, jest problem, z~którym zmagają się~administratorzy głównie średnich i dużych sieci komputerowych na~całym świecie, niezależnie od~używanego przez nich systemu operacyjnego --- problem automatycznego dystrybuowania ujednoliconego oprogramowania i~jego konfiguracji na~komputery połączone siecią komputerową~\cite{so-problem-intro}. W~ogólności nie~muszą to~być komputery takie jak serwery czy stacje robocze --- choć to~głównie z~nimi administratorzy komputerowi mają do~czynienia. Omawiany problem może dotyczyć również niektórych systemów wbudowanych nie będących systemami typu~\mbox{\emph{bare~metal}}, tzn.~pracujących pod kontrolą systemu operacyjnego. Przykładem takich urządzeń są~niektóre biletomaty, bankomaty, maszyny \emph{vendingowe} i~wyświetlacze np.~na lotniskach, peronach i~przystankach komunikacji miejskiej.
 
-W praktyce problem dystrybuowania jednolitego oprogramowania jest szczególnie odczuwalny przez administratorów, którzy zarządzają dużym zbiorem komputerów --- serwerów lub~stacji roboczych --- z~których każdy musi mieć ten~sam lub podobny zestaw zainstalowanych programów i~konfiguracji dedykowanej dla~zainstalowanego oprogramowania. Popularne sposoby radzenia sobie z~tym problemem są~w~praktyce uciążliwe, a~istniejące rozwiązania w~pełni automatyzujące cały proces synchronizacji oprogramowania i~konfiguracji~(patrz rozdział~\ref{sec:istniejace-rozwiazania}), są stosunkowo młode i~słabo rozpowszechnione wśród większości administratorów komputerowych.
+W praktyce problem dystrybuowania jednolitego oprogramowania jest szczególnie odczuwalny przez administratorów, którzy zarządzają dużą ilością komputerów --- serwerów lub~stacji roboczych --- z~których każdy musi mieć ten~sam lub podobny zestaw zainstalowanych programów i~konfiguracji dedykowanej dla~zainstalowanego oprogramowania. Popularne sposoby radzenia sobie z~tym problemem są~w~praktyce uciążliwe, a~istniejące rozwiązania w~pełni automatyzujące cały proces synchronizacji oprogramowania i~konfiguracji~(patrz rozdział~\ref{sec:istniejace-rozwiazania}), są stosunkowo młode i~słabo rozpowszechnione wśród większości administratorów komputerowych.
 
 %------------------------------------------------------------------------------
 
 \section{Zastosowania}
 
-Zastosowania rozwiązania problemu dystrybuowania jednolitego oprogramowania można znaleźć wszędzie tam gdzie istnieje grupa ludzi, procesów lub~komputerów, z~których każdy wykorzystuje to~samo lub podobnie skonfigurowane oprogramowanie na~urządzeniu wyposażonym w~system operacyjny, podłączonym do~sieci komputerowej opartej o~\gls{tcpip}. W~szczególności mogą to~być grupy serwerów pracujących w~podobnym środowisku, np.~maszyny developerskie, testowe i~produkcyjne, \emph{load-balancery}, serwery działające w~ramach systemu rozproszonego, laboratoria komputerowe na~uczelniach, w szkołach i~bibliotekach, biura, komputery administracji publicznej (w~szczególności w~urzędach), bankomaty, biletomaty, automaty sprzedające~(tzn.~automaty \emph{vendingowe}), komputery kasjerów w~hipermarketach, komputery osobiste osób korzystających z~kilku(nastu) komputerów.
+Zastosowania rozwiązania problemu dystrybuowania jednolitego oprogramowania można znaleźć wszędzie tam gdzie istnieje grupa ludzi, procesów lub~komputerów, z~których każdy wykorzystuje to~samo lub podobnie skonfigurowane oprogramowanie na~urządzeniu wyposażonym w~system operacyjny, podłączonym do~sieci komputerowej. W~szczególności mogą to~być grupy serwerów pracujących w~podobnym środowisku, np.~maszyny developerskie, testowe i~produkcyjne, \emph{load-balancery}, serwery działające w~ramach systemu rozproszonego, laboratoria komputerowe na~uczelniach, w szkołach i~bibliotekach, biura, komputery administracji publicznej (w~szczególności w~urzędach), bankomaty, biletomaty, automaty sprzedające~(tzn.~automaty \emph{vendingowe}), komputery osobiste osób korzystających z~kilku(nastu) komputerów, komputery kasjerów w~hipermarketach, komputery obsługujące wyświetlacze informacyjne np.~na~przystankach komunikacji miejskiej, peronach, galeriach handlowych~itp.
 
 %------------------------------------------------------------------------------
 
@@ -67,21 +68,23 @@ Puppet został napisany w~języku programowania \texttt{Ruby}, a~jego rozwój je
 
 Konfiguracja Puppet polega na~napisaniu reguł tekstowych, niezależnych od~systemu operacyjnego (\emph{Domain Specific Language}), przechowywanych zwyczajowo w~plikach z~rozszerzeniem~\texttt{.pp}, zwanych manifestami. Reguły są~zapisane w~postaci deklaratywnej, a~nie imperatywnej, tzn.~opisują oczekiwany stan systemu, a~nie sposób przeprowadzenia zmian w~systemie. Struktura manifestu jest w~postaci tablicy asocjacyjnej (struktura danych \hreftt{https://docs.ruby-lang.org/en/trunk/Hash.html}{Hash}) z~języka programowania \texttt{Ruby}. Przykładowe manifesty przedstawiono na~listingach \ref{puppet-openssh-example}, \ref{puppet-motd-example} i~\ref{puppet-httpd-example}~\cite{puppet-examples}. Poprawność składni w~manifeście \path{example.pp} można zweryfikować komendą:
 \begin{center}
-\texttt{puppet parser validate example.pp}
+	\texttt{puppet parser validate example.pp}
 \end{center}
 
 Aby~wprowadzić zmiany opisane manifestem \texttt{example.pp}, wystarczy uruchomić komendę:
 \begin{center}
-\texttt{puppet apply example.pp}
+	\texttt{puppet apply example.pp}
 \end{center}
 
-Pomocna może być flaga \texttt{-{}-noop}, która uruchomia tryb \emph{dry run}, tzn.~tryb w~którym nie są dokonywane żadne zmiany w~systemie, a~na standardowym wyjściu są drukowane zmiany jakie by~zaszły, gdyby nie użyć tej flagi.
+Przed dokonaniem zmian w~systemie pomocna może być flaga \texttt{-{}-noop}, która uruchomia tryb \emph{dry run}, tzn.~tryb w~którym nie są dokonywane żadne zmiany w~systemie, a~na standardowym wyjściu są drukowane zmiany jakie by~zaszły, gdyby nie użyć tej flagi.
 
+\begin{minipage}{\linewidth} % żeby listing nie był podzielony na 2 stronach
 \begin{lstlisting}[numbers=none,caption={Manifest Puppet gwarantujący, że pakiet \texttt{openssh-client}, dostarczający klienta SSH, jest zainstalowany},label=puppet-openssh-example]
 package { 'openssh-client':
   ensure => present,
 }
 \end{lstlisting}
+\end{minipage}
 
 \begin{lstlisting}[numbers=none,caption={Manifest Puppet gwarantujący istnienie pliku \hreftt{https://en.wikipedia.org/wiki/Motd_(Unix)}{/etc/motd} z~komunikatem \texttt{Hello!}, który wyświetla się~użytkownikom systemu po~zalogowaniu},label=puppet-motd-example]
 file { 'motd':
@@ -99,29 +102,29 @@ service { 'httpd':
 
 W~nomenklaturze Puppeta istnieje co~najmniej kilka słów kluczowych, które odpowiadają abstrakcyjnym typom danych reprezentującym klientów i~ich oprogramowanie. Najważniejsze z~nich to:
 \begin{itemize}
-\item \texttt{class} --- Nazwany blok kodu Puppet przechowywany w~module. Służy do~konfiguracji dużej części funkcjonalności aplikacji. Konfiguracja węzła pozwala zadeklarować parametryzowane użycie wielu różnych klas. Deklaracja klasy może być co~najwyżej jedna.
-\item \texttt{module} --- Zbiór klas konfigurujący całą aplikację. Społeczność Puppet dostarcza na~stronie internetowej \hreftt{https://forge.puppet.com/}{forge.puppet.com} wielu użytecznych modułów do~różnych rodzajów złożonego oprogramowania. Najpopularniejsze z~nich są~weryfikowane przez programistów Puppet i~otrzymują status \emph{Puppet Supported} lub~\emph{Puppet Approved}, przez co~są postrzegane jako zaufane.
-\item \texttt{node} --- Reprezentacja jednego lub wielu klientów.
+\item \texttt{class} --- Nazwany blok kodu Puppet przechowywany w~\hyperlink{itm:puppetmodule}{module}. Służy do~konfiguracji dużej części funkcjonalności aplikacji. Konfiguracja \hyperlink{itm:puppetnode}{węzła} pozwala zadeklarować parametryzowane użycie wielu różnych klas. Deklaracja klasy może być co~najwyżej jedna.
+\item \hypertarget{itm:puppetmodule}{\texttt{module}} --- Zbiór klas konfigurujący całą aplikację. Społeczność Puppet dostarcza na~stronie internetowej \hreftt{https://forge.puppet.com/}{forge.puppet.com} wielu użytecznych modułów do~różnych rodzajów złożonego oprogramowania. Najpopularniejsze z~nich są~weryfikowane przez programistów Puppet i~otrzymują status \emph{Puppet Supported} lub~\emph{Puppet Approved}, przez co~są postrzegane jako zaufane.
+\item \hypertarget{itm:puppetnode}{\texttt{node}} --- Węzeł. Reprezentacja jednego lub wielu klientów.
 \item Wbudowane typy zasobów, takie jak: \texttt{cron}, \texttt{exec}, \texttt{file}, \texttt{group}, \texttt{host}, \texttt{maillist}, \texttt{mount}, \texttt{package}, \texttt{router}, \texttt{service}, \texttt{ssh\_authorized\_key}, \texttt{user}, \texttt{vlan}, \texttt{zone}, \texttt{zone\_pool} i~wiele innych. Listę tą można rozszerzać o~własne typy danych np.~przez załadowanie dodatkowych modułów~\cite{puppet-resources-types}.
 \end{itemize}
-W~praktyce pożądane jest automatyczne odpytywanie serwera przez klienta. Klient Puppeta domyślnie odpytuje serwer o~zmiany oprogramowania co~30~minut. Konfiguracja serwera odpowiadająca za~zdefiniowanie klas oprogramowania dla~poszczególnych klientów jest przechowywana w~pliku zwyczajowo nazywanym \path{site.pp}.
+W~praktyce często jest pożądane automatyczne odpytywanie serwera przez klienta. Klient Puppeta domyślnie odpytuje serwer o~zmiany oprogramowania co~30~minut. Konfiguracja serwera odpowiadająca za~zdefiniowanie klas oprogramowania dla~poszczególnych klientów jest przechowywana w~pliku zwyczajowo nazywanym \path{site.pp}.
 
 \urldef\etchosts\path{%SystemRoot%\system32\drivers\etc\hosts}
 
-W~przykładach~\ref{puppet-openssh-example}, \ref{puppet-motd-example}, \ref{puppet-httpd-example} zostały użyte trzy różne zasoby, odpowiednio: paczka oprogramowania~(\texttt{package}), plik~(\texttt{file}) oraz~serwis~(\texttt{service}). Puppet udostępnia również inne rodzaje zasobów takie jak: użytkownik~(\texttt{user}), grupa~(\texttt{group}), zdarzenie cykliczne~(\texttt{cron}), wykonanie komendy~(\texttt{exec}), wpis w~pliku \path{/etc/hosts}\footnote{Lub odpowiedniku pliku \path{/etc/hosts} w~systemach nie \glslink{unix-like-system}{*nixowych}, np.~\etchosts~w~nowych wersjach systemów Windows.}. Pełną listę wbudowanych typów zasobów można uzyskać wywołując komendę \texttt{puppet describe --list}. Aby~dowiedzieć się~więcej o~wybranym typie zasobu \texttt{X}, wystarczy wydać polecenie:
+W~przykładach~\ref{puppet-openssh-example}, \ref{puppet-motd-example}, \ref{puppet-httpd-example} zostały użyte trzy, różne zasoby, odpowiednio: paczka oprogramowania~(\texttt{package}), plik~(\texttt{file}) oraz~serwis~(\texttt{service}). Puppet udostępnia również inne rodzaje zasobów takie jak: użytkownik~(\texttt{user}), grupa~(\texttt{group}), zdarzenie cykliczne~(\texttt{cron}), wykonanie komendy~(\texttt{exec}), wpis w~pliku \path{/etc/hosts}\footnote{Lub odpowiedniku pliku \path{/etc/hosts} w~systemach nie \glslink{unix-like-system}{*nixowych}, np.~\etchosts~w~nowych wersjach systemów Windows.}. Pełną listę wbudowanych typów zasobów można uzyskać wywołując komendę \texttt{puppet describe --list}. Aby~dowiedzieć się~więcej o~wybranym typie zasobu \texttt{X}, wystarczy wydać komendę:
 \begin{center}
-\texttt{puppet describe~X}
+	\texttt{puppet describe~X}
 \end{center}
 
-Puppet składa się~z~wielu narzędzi towarzyszących. Jednym z~nich jest \texttt{facter}, który na~żądanie zbiera informacje o~systemie i~wyświetla je w~jednym z~możliwych formatów: JSON, YAML lub~\emph{plaintext}, który jest formatem domyślnym. Wywołanie komendy \texttt{facter} bez dodatkowych parametrów, wyświetla wszystkie dane o~systemie, jakie zebrało to~narzędzie.
+Puppet składa się~z~wielu narzędzi towarzyszących. Jednym z~nich jest \texttt{facter}, który na~żądanie zbiera informacje o~systemie i~wyświetla je w~jednym z~możliwych formatów: \hreftt{https://en.wikipedia.org/wiki/JSON}{JSON}, \hreftt{https://en.wikipedia.org/wiki/YAML}{YAML} lub~\hreftt{https://en.wikipedia.org/wiki/Plaintext}{plaintext}, który jest formatem domyślnym. Wywołanie komendy \texttt{facter} bez dodatkowych parametrów, wyświetla wszystkie dane o~systemie, jakie zebrało to~narzędzie.
 
-Dla~nowych użytkowników Puppeta została przygotowana przez opiekunów projektu maszyna wirtualna z~samouczkiem, tak, aby użytkownik nie~był skazany na~naukę Puppeta na~własnym systemie~\cite{puppet-vm-tutorial}. W~przypadku błędnej konfiguracji Puppeta, stan maszyny wirtualnej z~samouczkiem może być~łatwo przywrócony, co może nie~być takie proste w~przypadku nieudanych prób eksperymentów na~własnym systemie.
+Dla~nowych użytkowników Puppeta została przygotowana przez opiekunów projektu maszyna wirtualna z~samouczkiem tak, aby użytkownik nie~był skazany na~naukę Puppeta na~własnym systemie~\cite{puppet-vm-tutorial}. W~przypadku błędnej konfiguracji Puppeta, stan maszyny wirtualnej z~samouczkiem może być~łatwo przywrócony, co może nie~być takie proste w~przypadku nieudanych prób eksperymentów na~własnym systemie.
 
 %---------------------------------------
 
 \subsection{Chef}
 
-Chef jest oprogramowaniem napisanym w~językach programowania \texttt{Ruby} (tak jak Puppet) i~\texttt{Erlang} (zastosowanym tylko do~API w~części serwerowej). Projekt został zapoczątkowany przez \href{https://blog.chef.io/author/adam/}{Adama Jacoba} na~potrzeby firmy consultingowej, ale~po~zaprezentowaniu go~\href{https://en.wikipedia.org/wiki/Jesse_Robbins}{Jesse Robinsowi}, został został opublikowany na~zasadach licencji \glslink{apache2.0-license}{Apache~2.0} i~zaadaptowany do~użycia w~firmie \emph{Amazon}. Pierwsza wersja Chef została opublikowana w~2009~roku.
+Chef jest oprogramowaniem napisanym w~językach programowania \texttt{Ruby} (tak jak Puppet) i~\texttt{Erlang} (zastosowanym tylko do~API w~części serwerowej). Projekt został zapoczątkowany przez \href{https://blog.chef.io/author/adam/}{Adama Jacoba} na~potrzeby firmy consultingowej, ale~po~zaprezentowaniu go~pracownikowi firmy \emph{Amazon} --- \href{https://en.wikipedia.org/wiki/Jesse_Robbins}{Jesse Robinsowi} --- został został opublikowany na~zasadach licencji \glslink{apache2.0-license}{Apache~2.0} i~zaadaptowany do~użycia w~firmie \emph{Amazon}. Pierwsza wersja Chef została opublikowana w~2009~roku.
 
 Chef działa w~architekturze klient-serwer. Serwer może być uruchomiony na~systemach operacyjnych: \emph{CentOS}, \emph{Oracle Linux}, \emph{Red Hat Enterprise Linux} i~\emph{Ubuntu}. Serwer można również próbować uruchomić na~systemach \emph{Mac~OS~X} i~\emph{Microsoft Windows} --- dokumentacja Chef wyszczególnia te~systemy jako nieprzetestowane pod kątem współpracy z~Chef~\cite{chef-supported-platforms}.
 
@@ -165,7 +168,7 @@ end
 
 Ansible jest rozwiązaniem do~zarządzania oprogramowaniem różniącym się od~Puppet i~Chef tym, że~do~konfiguracji klientów \glslink{unix-like-system}{*nixowych} używa~SSH, a~do~klientów Windows WinRM i~PowerShell, dzięki czemu klienci nie~muszą uruchamiać żadnych dodatkowych procesów działających w~tle. Autorzy projektu Ansible podkreślają, że~w~przeciwieństwie do~konkurencji, Ansible nie jest skomplikowany, przez co~jego szybkie opanowanie jest łatwe.
 
-Ansible może zostać uruchomiony na~wielu różnych systemach~\glslink{unix-like-system}{*nixowych}, takich systemach jak~np.~\emph{Red~Hat}, \emph{Debian}, \emph{CentOS}, \emph{OS~X}, \emph{BSD}. System Windows może działać tylko w~roli klienta. Konfiguracja Ansible jest przechowywana w~plikach tekstowych~YAML.
+Ansible może zostać uruchomiony na~wielu różnych systemach~\glslink{unix-like-system}{*nixowych}, takich systemach jak~np.~\emph{Red~Hat}, \emph{Debian}, \emph{CentOS}, \emph{OS~X}, \emph{BSD}. System Windows może działać tylko w~roli klienta. Konfiguracja Ansible jest przechowywana w~plikach tekstowych~\texttt{YAML}.
 
 Ansible został opublikowany na~licencji~\glslink{gpl}{GPL} w~wersji~3, a~jego pierwsza wersja została wydana w~2012~roku. Projekt jest napisany w~języku \texttt{Python}~\cite{ansible,ansible-github}.
 
@@ -173,7 +176,57 @@ Ansible został opublikowany na~licencji~\glslink{gpl}{GPL} w~wersji~3, a~jego p
 
 \subsection{Salt}
 
-Salt, nazywany też SaltStack, to~otwartoźdłowe oprogramowanie napisane w~Pythonie i~opublikowane na~licencji \glslink{apache2.0-license}{Apache~2.0} mające podobną funkcjonalność do~opisanych dotychczas rozwiązań problemu synchronizacji oprogramowania. Pierwsza wersja Salt powstała w~2011~roku, a~więc jest to~najmłodsze rozwiązanie wśród przedstawionych~\cite{saltstack}.
+Salt, nazywany też \emph{SaltStack}, to~otwartoźdłowe oprogramowanie napisane w~Pythonie przez \href{https://www.linkedin.com/in/thhatch/}{Thomasa Hatcha} i~opublikowane na~licencji \glslink{apache2.0-license}{Apache~2.0}. Funkcjonalność Salt jest podobna do~dotychczas opisanych rozwiązań problemu synchronizacji oprogramowania. Pierwsza wersja Salt powstała w~2011~roku, a~więc jest to~najmłodsze rozwiązanie z~dotychczas przedstawionych~\cite{saltstack}.
+
+Salt pracuje w~modelu serwer-agent --- agenci są~nazywani \emph{Salt~Minions}, a~serwer \emph{Salt~Master}. Komunikacja między serwerem i~agentami odbywa się~asynchronicznie, zgodnie ze~wzorcem \emph{\href{https://en.wikipedia.org/wiki/Publish\%E2\%80\%93subscribe\_pattern}{publish/subscribe}}, co~implementują wykorzystane biblioteki \hreftt{http://zeromq.org/}{ZeroMQ} oraz \hreftt{http://www.tornadoweb.org/}{Tornado}. Podczas projektowania Salt kładziono duży nacisk na~modularność implementowaną jako \href{https://docs.python.org/3.7/tutorial/modules.html}{Pythonowe moduły}\footnote{W~nomenklaturze Salta moduł Pythonowy rozbudowujący funkcjonalność to~\emph{plug-in} (a~nie~\emph{module}).} tak, aby dodawanie obsługi nowych zasobów było możliwie łatwe. Salt, podobnie jak Puppet, przechowuje konfigurację w~plikach~\texttt{YAML}, \texttt{JSON}, \texttt{plaintext}, a~do zapewnienia bezpieczeństwa komunikacji używa szyfru blokowego~\gls{aes} w~ramach protokołu~\glslink{ssl/tls}{TLS}. Wspierane systemy operacyjne to~m.in. \emph{\glslink{gnulinux}{Linux}}, \emph{Windows}, \emph{MacOS}, \emph{FreeBSD}, \emph{Solaris} i~\emph{AIX}.
+
+Przykład~\ref{salt-topfile-example} przedstawia plik konfiguracyjny \emph{\href{https://docs.saltstack.com/en/getstarted/fundamentals/top.html\#introducing-the-top-file}{Top file}}, znajdujący się zwyczajowo w~pliku \path{/srv/salt/top.sls}. Plik ten~definuje stan różnych agentów --- w~przedstawionym przykładzie~\ref{salt-topfile-example} są~3~rodzajów agentów zdefiniowanych przez wyrażenia regularne dopasowywane do~nazwy agenta:
+\begin{enumerate}
+	\item grupa wszystkich agentów --- wyrażenie regularne~\texttt{'*'} pasuje do~każdej nazwy agenta,
+	\item grupa agentów, których nazwa pasuje do~wyrażenia regularnego~\texttt{'*web*'},
+	\item grupa agentów, których nazwa pasuje do~wyrażenia regularnego~\texttt{'*db*'}.
+\end{enumerate}
+Aby~zaaplikować zmiany opisane w~pliku konfiguracyjnym~\path{top.sls} wystarczy wydać komendę na~komputerze odgrywającym rolę~\emph{Salt Mastera}:
+\begin{center}
+	\texttt{salt '*' state.apply}
+\end{center}
+
+\begin{lstlisting}[numbers=none,caption={Plik konfiguracyjny \texttt{top.sls} w~formacie \texttt{YAML} definujący konfigurację dla~3~rodzajów agentów},label=salt-topfile-example]
+base:
+  '*':
+    - vim
+    - scripts
+    - users
+  '*web*':
+    - apache
+    - python
+    - django
+  '*db*':
+    - mysql
+\end{lstlisting}
+Nazwy znajdujące się w~pliku konfiguracyjnym pod~wyrażeniami regularnymi --- np.~w~przykładzie~\ref{salt-topfile-example}: \texttt{vim}, \texttt{scripts} i \texttt{users} pod~wyrażeniem regularnym \texttt{'*'} --- to~nazwy stanów opisanych innymi plikami konfiguracyjnymi nazywanymi plikami stanu~(\emph{State Files}). Przykład~\ref{salt-statefile} przedstawia przykładowy plik stanu \path{nettools.sls} (niewystępujący w~przykładowym pliku~\path{top.sls} w~przykładzie~\ref{salt-topfile-example}). Plik ten~wymusza: instalację pakietów \texttt{rsync}, \texttt{lftp} i~\texttt{curl} oraz obecność użytkownika \texttt{fred} z~przypisanym shellem \path{/bin/zsh}. Plik stanu można zaaplikować bezpośrednio na~wybrany rodzaj agentów przez komendę (a~niekoniecznie przez plik konfiguracyjny~\emph{Top file} agregujący pliki stanu). Np.~komenda:
+\begin{center}
+\texttt{salt 'minion[0-9]' state.apply nettools}
+\end{center}
+zastosuje plik stanu \path{nettools.sls} dla~agentów o~nazwach od~\texttt{minion0} do~\texttt{minion9}, a~komenda:
+\begin{center}
+\texttt{salt -C 'G@os:Ubuntu and minion* or S@192.168.50.*' nettools}
+\end{center}
+zastosuje plik stanu \path{nettools.sls} dla~agentów pracujących pod~kontrolą systemu operacyjnego \texttt{Ubuntu}, których nazwa pasuje do~wyrażenia regularnego \texttt{minion*} lub~których adres~IP pasuje do~wyrażenia regularnego~\texttt{192.168.50.*}.
+
+\begin{lstlisting}[numbers=none,caption={Plik stanu \texttt{nettools.sls} definujący 3~pakiety, które agent ma~zainstalować oraz użytkownika \texttt{fred}, który musi być w~systemie i~mieć przypisany shell~\texttt{/bin/zsh}},label=salt-statefile]
+install_network_packages:
+  pkg.installed:
+    - pkgs:
+      - rsync
+      - lftp
+      - curl
+  user.present:
+    - name: fred
+    - shell: /bin/zsh
+\end{lstlisting}
+
+Ciekawym trybem pracy Salt jest tryb \emph{Agentless}, który polega na~tym, że agenci nie muszą mieć zainstalowanego klienckiego oprogramowania~Salt. Do~działania, na maszynach klienckich, wystarczy zainstalowany Python i~SSH. Serwer Salt loguje się~do agentów przez~SSH i~rozpakowuje lekką wersję klienta Salt w~katalogu tymczasowym, który w~zależności od~konfiguracji jest kasowany lub~nie, po~dokonaniu zmian zleconych przez \emph{Salt Mastera} na~maszynie agenta.
 
 %---------------------------------------
 %
@@ -189,7 +242,7 @@ Salt, nazywany też SaltStack, to~otwartoźdłowe oprogramowanie napisane w~Pyth
 
 \section{Zawartość pracy}
 
-\noindent Niniejsza praca magisterska składa się z~dwóch głównych części:
+\noindent Niniejsza praca magisterska składa się z~dwóch zasadniczych części:
 \begin{enumerate}
 	\item Niniejszej dokumentacji napisanej w \LaTeX,
 	\item Aplikacji w~wersji binarnej i~źródłowej oraz~towarzyszącej jej dokumentacji wygenerowanej programem Doxygen z~komentarzy w~kodzie źródłowym.
