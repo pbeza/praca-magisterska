@@ -7,7 +7,7 @@
 
 Kod źródłowy projektu został napisany wyłącznie w~języku~\texttt{C}, co~wyróżnia projekt na~tle istniejących rozwiązań przedstawionych w~rozdziale~\ref{sec:istniejace-rozwiazania}. Wszystkie one~zostały bowiem napisane w~językach skryptowych, co~może uniemożliwić ich uruchomienie na~najoszczędniejszych systemach wbudowanych, które mogą nie~być zdolne do~uruchamiania interpreterów języków skryptowych. Programy wykonywane przez interpreter oraz~wykonywane na~maszynach wirtualnych (np.~Javy i~.NET) pochłaniają dużo więcej pamięci niż~ich odpowiedniki napisane w~języku~\texttt{C}, skompilowane do~kodu maszynowego. Wybór języka \texttt{C}~stanowi więc zaletę zaproponowanej implementacji, osiągniętej jednak kosztem złożoności kodu źródłowego.
 
-Podczas implementacji dokonano wszelkich starań, aby~kod źródłowy projektu był zgodny ze standardem~\gls{posix}. Wszelkie ewentualne odstępstwa od~standardu są~niezamierzone.
+Podczas implementacji dokonano wszelkich starań, aby~kod źródłowy projektu był zgodny ze~standardem~\gls{posix}. Wszelkie ewentualne odstępstwa od~standardu są~niezamierzone.
 
 W~niniejszym rozdziale przedstawiono szczegóły implementacyjne projektu, w~szczególności zastosowane biblioteki i~narzędzia pomocnicze.
 
@@ -29,17 +29,17 @@ Podczas testów aplikacji testowano jej~działanie wyłącznie z~linkowaną dyna
 
 \subsection{OpenSSL}
 
-Istnieje wiele bibliotek kryptograficznych, które, pod warunkiem poprawnego użycia, mogą istotnie poprawić bezpieczeństwo protokołu. Najpopularniejsze z~nich~to: \emph{\gls{openssl}}, \emph{GnuTLS}, \emph{LibreSSL} i~\emph{BoringSSL}. Biblioteką istniejącą najdłużej z~wymienionych jest \gls{openssl}. Biblioteka GnuTLS powstała w~odpowiedzi na~\gls{openssl} ze względu na to, że \gls{openssl} nie jest opublikowana na~licencji kompatybilnej z~licencją~\glslink{gpl}{GPL}, przez co liczne projekty korzystające licencji~\glslink{gpl}{GPL} (np.~\emph{Wireshark}), nie mogą korzystać z~\gls{openssl}. Biblioteki LibreSSL i~BoringSSL są~\emph{fork'ami} biblioteki \gls{openssl}. BoringSSL powstał w~\emph{Google} na~potrzeby użycia w~różnych produktach tej firmy, w~szczególności w~przeglądarce internetowej \emph{Chrome}. Długa historia \gls{openssl}, mnogość bibliotek pokrewnych, mających źródło w~kodzie źródłowym \gls{openssl} oraz względnie duża społeczność kryptologów zgromadzonych wokół tego projektu, spowodowały, że biblioteka \gls{openssl} została użyta do~zapewnienia bezpieczeństwa opracowanego protokołu sieciowego.
+Istnieje wiele bibliotek kryptograficznych, które, pod~warunkiem poprawnego użycia, mogą istotnie poprawić bezpieczeństwo protokołu. Najpopularniejsze z~nich~to: \emph{\gls{openssl}}, \emph{GnuTLS}, \emph{LibreSSL} i~\emph{BoringSSL}. Biblioteką istniejącą najdłużej z~wymienionych jest \gls{openssl}. Biblioteka GnuTLS powstała w~odpowiedzi na~\gls{openssl} ze~względu na~to, że~\gls{openssl} nie jest opublikowana na~licencji kompatybilnej z~licencją~\glslink{gpl}{GPL}, przez co~liczne projekty korzystające licencji~\glslink{gpl}{GPL} (np.~\emph{Wireshark}), nie mogą korzystać z~\gls{openssl}. Biblioteki LibreSSL i~BoringSSL są~\emph{fork'ami} biblioteki \gls{openssl}. BoringSSL powstał w~\emph{Google} na~potrzeby użycia w~różnych produktach tej firmy, w~szczególności w~przeglądarce internetowej \emph{Chrome}. Długa historia \gls{openssl}, mnogość bibliotek pokrewnych, mających źródło w~kodzie źródłowym \gls{openssl} oraz~względnie duża społeczność kryptologów zgromadzonych wokół tego projektu, spowodowały, że~biblioteka \gls{openssl} została użyta do~zapewnienia bezpieczeństwa opracowanego protokołu sieciowego.
 
-\gls{openssl} udostępnia wiele metod i~algorytmów kryptograficznych, które przetrwały wiele lat kryptoanaliz (np.~\gls{aes}, \gls{rsa}) i~są powszechnie uważane za bezpieczne, pod warunkiem poprawnego ich~wykorzystania i~zastosowania kluczy o~odpowiednio dużej długości. Wykorzystanie tej biblioteki w~kontekście komunikacji między klientem i~serwerem zostało opisane w~rozdziale~\ref{sec:security}, dotyczącym bezpieczeństwa opracowanego protokołu.
+\gls{openssl} udostępnia wiele metod i~algorytmów kryptograficznych, które przetrwały wiele lat kryptoanaliz (np.~\gls{aes}, \gls{rsa}) i~są powszechnie uważane za~bezpieczne, pod~warunkiem poprawnego ich~wykorzystania i~zastosowania kluczy o~odpowiednio dużej długości. Wykorzystanie tej biblioteki w~kontekście komunikacji między klientem i~serwerem zostało opisane w~rozdziale~\ref{sec:security}, dotyczącym bezpieczeństwa opracowanego protokołu.
 
 %---------------------------------------
 
 \subsection{libconfig}
 
-Zarówno aplikacja kliencka, jak i~serwerowa, mogą być konfigurowane przez parametry podane przy uruchamianiu programu, jak i~przez konfigurację czytaną z~pliku tekstowego. Konfiguracja programu, określona parametrami jego wywołania, nadpisuje konfigurację wczytaną z~pliku konfiguracyjnego, która z~kolei nadpisuje wartości domyślne, zapisane w~kodzie programu. Oznacza to~w~szczególności, że jeśli ten sam parametr jest wyspecyfikowany zarówno jako parametr wywołania programu, jak i~w konfiguracji wczytanej z~pliku konfiguracyjnego, to~przyjmowana jest tylko wartość parametru z~wywołania programu (tzn.~ze zmiennej~\texttt{**argv}).
+Zarówno aplikacja kliencka, jak i~serwerowa, mogą być konfigurowane przez parametry podane przy~uruchamianiu programu, jak i~przez konfigurację czytaną z~pliku tekstowego. Konfiguracja programu, określona parametrami jego wywołania, nadpisuje konfigurację wczytaną z~pliku konfiguracyjnego, która z~kolei nadpisuje wartości domyślne, zapisane w~kodzie programu. Oznacza to~w~szczególności, że~jeśli ten sam parametr jest wyspecyfikowany zarówno jako parametr wywołania programu, jak i~w konfiguracji wczytanej z~pliku konfiguracyjnego, to~przyjmowana jest tylko wartość parametru z~wywołania programu (tzn.~ze zmiennej~\texttt{**argv}).
 
-Do~czytania konfiguracji z~pliku została wykorzystana biblioteka \texttt{libconfig}. Biblioteka ta~również umożliwia zapisanie konfiguracji do~pliku, jednak ta funkcjonalność nie została wykorzystana. Format konfiguracji przypomina formatowanie~JSON, chociaż składnia nie jest identyczna.
+Do~czytania konfiguracji z~pliku została wykorzystana biblioteka \texttt{libconfig}. Biblioteka ta~również umożliwia zapisanie konfiguracji do~pliku, jednak ta~funkcjonalność nie została wykorzystana. Format konfiguracji przypomina formatowanie~JSON, chociaż składnia nie jest identyczna.
 
 %---------------------------------------
 
@@ -51,7 +51,7 @@ Paczki oprogramowania przesyłane przez serwer do~klienta są~skompresowane prze
 
 \section{Tworzenie demona systemowego}
 
-Poprawne utworzenie tradycyjnego \glslink{unix-like-system}{*niksowego} \glslink{demon}{demona} systemowego, nazywanego popularnie \emph{SysV daemon} (w~odróżnieniu od~\emph{systemd daemon}), czyli procesu nie mającego dostępu do~terminala i~pracującego w~tle, nie jest procesem trywialnym, tzn. nie sprowadza się~do~wywołania funkcji \texttt{daemon()}, która co~prawda istnieje w~niektórych systemach i~pochodzi z~systemu~BSD, ale implementuje tylko podzbiór operacji zalecanych przez manual~\texttt{daemon(7)}.
+Poprawne utworzenie tradycyjnego \glslink{unix-like-system}{*niksowego} \glslink{demon}{demona} systemowego, nazywanego popularnie \emph{SysV daemon} (w~odróżnieniu od~\emph{systemd daemon}), czyli procesu nie mającego dostępu do~terminala i~pracującego w~tle, nie jest procesem trywialnym, tzn.~nie sprowadza się~do~wywołania funkcji \texttt{daemon()}, która co~prawda istnieje w~niektórych systemach i~pochodzi z~systemu~BSD, ale implementuje tylko podzbiór operacji zalecanych przez manual~\texttt{daemon(7)}.
 
 Poniżej przedstawiono algorytm tworzenia tradycyjnego demona systemowego. Algorytm ten składa się z~15 kroków wymienionych w~manualu \texttt{daemon(7)}~\cite{creating-daemon}.%\cite{creating-daemon-stackoverflow}
 \begin{enumerate}
@@ -61,7 +61,7 @@ Poniżej przedstawiono algorytm tworzenia tradycyjnego demona systemowego. Algor
 	\item Usunąć własne zmienne środowiskowe, a~zmodyfikowane wcześniej zmienne środowiskowe przywrócić do~ich domyślnych wartości, aby~nie mogły one negatywnie wpłynąć na~działanie demona.
 	\item Stworzyć nowy proces~\texttt{A} przez wywołanie funkcji \texttt{fork()}.
 	\item W~procesie \texttt{A} wywołać funkcję \texttt{setsid()}, aby~odłączyć się od~terminala i~stworzyć nową, niezależną sesję.
-	\item W~procesie \texttt{A} wywołać funkcję \texttt{fork()}, która stworzy proces-dziecko~\texttt{B}, który zostanie demonem. Dzięki temu, że~\texttt{fork()} został wywołany drugi raz, upewniamy się, że demon nie będzie miał szansy odzyskania dostępu do~terminala, od którego został odłączony.
+	\item W~procesie \texttt{A} wywołać funkcję \texttt{fork()}, która stworzy proces-dziecko~\texttt{B}, który zostanie demonem. Dzięki temu, że~\texttt{fork()} został wywołany drugi raz, upewniamy się, że~demon nie będzie miał szansy odzyskania dostępu do~terminala, od którego został odłączony.
 	\item W~procesie \texttt{A} wywołać funkcję \texttt{exit()}, dzięki czemu proces~\texttt{B} zmieni rodzica na~proces \texttt{init}, którego \texttt{PID} jest równy~1.
 	\item W~procesie \texttt{B} przekierować standardowe wejście~(\texttt{stdin}), wyjście~(\texttt{stdout}) i~wyjście diagnostyczne~(\texttt{stderr}) do~\path{/dev/null}.
 	\item W~procesie \texttt{B} ustawić \texttt{umask} na~0, aby~późniejsze wywołania funkcji takich jak \texttt{open()}, \texttt{mkdir()} itp. miały bezpośrednią kontrolę dostępu tworzonych plików i~katalogów.
@@ -158,7 +158,7 @@ valgrind --leak-check=full -v ./server/appsync-srv
 
 \subsection{Doxygen}
 
-Dokumentacja kodu projektu została wygenerowana z~komentarzy kodu źródłowego za~pomocą programu~\texttt{Doxygen}~\cite{doxygen}. Komentarze w~kodzie źródłowym zostały dostosowane do~formatu używanego przez projekt \texttt{Doxygen}. Szczegóły dotyczące sposobu generowania dokumentacji zostały ustawione w~pliku konfiguracyjnym \path{doxygen_template.dox.in} czytanym przez \texttt{Doxygen}. Wygenerowana dokumentacja została zapisana w~formatach: \texttt{HTML}, \LaTeX oraz formacie dostosowanym do~czytania dokumentacji komendą~\texttt{man}. Dokumentacja w~formacie \texttt{HTML} wydaje się być najczytelniejsza, ale dla kompletności, do~niniejszej pracy zostały załączone dokumentacje we~wszystkich wymienionych formatach.
+Dokumentacja kodu projektu została wygenerowana z~komentarzy kodu źródłowego za~pomocą programu~\texttt{Doxygen}~\cite{doxygen}. Komentarze w~kodzie źródłowym zostały dostosowane do~formatu używanego przez projekt \texttt{Doxygen}. Szczegóły dotyczące sposobu generowania dokumentacji zostały ustawione w~pliku konfiguracyjnym \path{doxygen_template.dox.in} czytanym przez \texttt{Doxygen}. Wygenerowana dokumentacja została zapisana w~formatach: \texttt{HTML}, \LaTeX oraz~formacie dostosowanym do~czytania dokumentacji komendą~\texttt{man}. Dokumentacja w~formacie \texttt{HTML} wydaje się być najczytelniejsza, ale dla kompletności, do~niniejszej pracy zostały załączone dokumentacje we~wszystkich wymienionych formatach.
 
 %---------------------------------------
 %
@@ -170,7 +170,7 @@ Dokumentacja kodu projektu została wygenerowana z~komentarzy kodu źródłowego
 
 \subsection{help2man}
 
-Poza dokumentacją wygenerowaną przez \texttt{Doxygen}, stworzono dokumentację dającą się~wyświetlić systemową przeglądarką stron podręcznika ekranowego, tj.~komendą~\texttt{man}~\cite{tldp-create-manpage}. W~celu synchronizacji treści pomocy manuala wyświetlanego po~wydaniu komendy~\texttt{man} i~pomocy wyświetlanej po~dodaniu flagi \texttt{-{}-help} do~wywołania programu, wykorzystano skrypt \texttt{help2man}. Skrypt ten został napisany w~języku skryptowym \texttt{Perl} i~jest udostępniany jako paczka oprogramowania o~tej samej nazwie na~wielu popularnych dystrybucjach \gls{gnulinux}. \texttt{help2man} umożliwia automatyczne generowanie plików z~manualem na~podstawie wyniku wywołania programu z~flagą \texttt{-{}-help}. Skrypt ten jest wywoływany przy każdym uruchomieniu narzędzia \texttt{CMake}, dzięki czemu manual zawsze jest aktualny. Dodatkowa konfiguracja \texttt{help2man}, dodająca sekcje nieopisane w~pomocy wyświetlanej po~dodaniu flagi \texttt{-{}-help} do~wywołania programu~(np.~sekcja \texttt{Examples}), została zapisana w~pliku \path{manual.h2m}.
+Poza dokumentacją wygenerowaną przez \texttt{Doxygen}, stworzono dokumentację dającą się~wyświetlić systemową przeglądarką stron podręcznika ekranowego, tj.~komendą~\texttt{man}~\cite{tldp-create-manpage}. W~celu synchronizacji treści pomocy manuala wyświetlanego po~wydaniu komendy~\texttt{man} i~pomocy wyświetlanej po~dodaniu flagi \texttt{-{}-help} do~wywołania programu, wykorzystano skrypt \texttt{help2man}. Skrypt ten został napisany w~języku skryptowym \texttt{Perl} i~jest udostępniany jako paczka oprogramowania o~tej samej nazwie na~wielu popularnych dystrybucjach \gls{gnulinux}. \texttt{help2man} umożliwia automatyczne generowanie plików z~manualem na~podstawie wyniku wywołania programu z~flagą \texttt{-{}-help}. Skrypt ten jest wywoływany przy~każdym uruchomieniu narzędzia \texttt{CMake}, dzięki czemu manual zawsze jest aktualny. Dodatkowa konfiguracja \texttt{help2man}, dodająca sekcje nieopisane w~pomocy wyświetlanej po~dodaniu flagi \texttt{-{}-help} do~wywołania programu~(np.~sekcja \texttt{Examples}), została zapisana w~pliku \path{manual.h2m}.
 
 %---------------------------------------
 
@@ -182,7 +182,7 @@ Wireshark jest narzędziem do~analizowania pakietów i~dlatego był jednym z~naj
 
 \subsection{Edytor tekstu vim}
 
-Do~pisania kodu źródłowego projektu oraz niniejszej dokumentacji wykorzystano edytor tekstu~\texttt{vim} w~wersji~8.0, rozbudowany o wtyczki. Poniżej przedstawiono listę wtyczek \texttt{vim}, wykorzystanych w czasie implementacji:
+Do~pisania kodu źródłowego projektu oraz~niniejszej dokumentacji wykorzystano edytor tekstu~\texttt{vim} w~wersji~8.0, rozbudowany o~wtyczki. Poniżej przedstawiono listę wtyczek \texttt{vim}, wykorzystanych w~czasie implementacji:
 \begin{itemize}
 	\item\texttt{NerdTree} --- narzędzie do~wyświetlania drzewa systemu plików i~nawigowania po nim~\cite{nerdtree-vimorg,nerdtree-github},
 	\item\texttt{ctags} --- narzędzie do~generowania metainformacji do~wygodnego nawigowania po kodzie źródłowym~\cite{ctags},
@@ -203,11 +203,11 @@ W celu włączenia automatycznego ładowania pliku \texttt{tags} przez \texttt{v
 \begin{lstlisting}[language=tex,numbers=none,caption={Konfiguracja \texttt{ctags} w~pliku \texttt{.vimrc}}]
 set tags=build/tags,tags,./tags;$HOME
 \end{lstlisting}
-Konfiguracja ta powoduje, że \texttt{vim} automatycznie wczytuje plik \texttt{tags}, szukając go kolejno~w:
+Konfiguracja ta~powoduje, że~\texttt{vim} automatycznie wczytuje plik \texttt{tags}, szukając go kolejno~w:
 \begin{itemize}[font=\ttfamily]
 	\item katalogu \path{$PWD/build},
 	\item katalogu \path{$PWD},
-	\item katalogu, w którym znajduje się aktualnie otwarty plik w \texttt{vim},
+	\item katalogu, w~którym znajduje się aktualnie otwarty plik w~\texttt{vim},
 	\item katalogach poniżej katalogu \path{$PWD}, ale nie niżej niż \path{$HOME}.
 \end{itemize}
 gdzie zmienna systemowa \glstt{PWD}{\$PWD} oznacza aktualny katalog roboczy.
