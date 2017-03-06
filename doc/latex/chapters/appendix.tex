@@ -7,6 +7,17 @@
 
 \begin{appendices}
 
+% Ustawienie, żeby załączniki były wyświetlane w Spisie Treści z wcięciem
+% http://tex.stackexchange.com/questions/172496/adding-appendix-chapters-without-sections-in-table-of-contents
+
+\makeatletter
+\addtocontents{toc}{%
+	\begingroup
+	\let\protect\l@chapter\protect\l@section
+	\let\protect\l@section\protect\l@subsection
+}
+\makeatother
+
 \chapter{Płyta CD}
 \label{cd-appendix}
 
@@ -48,6 +59,8 @@ Poster został wykonany w~grafice wektorowej w~programie~\texttt{Inkscape} i~zos
 	\item wydruku na~arkuszu formatu~A3,
 	\item pliku \mbox{\texttt{poster.svg}}~(patrz załącznik~\ref{cd-appendix}), nagranym na~załączonej płycie~CD.
 \end{enumerate}
+
+\addtocontents{toc}{\endgroup}
 
 \end{appendices}
 

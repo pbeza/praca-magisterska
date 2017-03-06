@@ -131,6 +131,44 @@
 %	frame=bottom
 }
 
+% Ładne kolorowanie listingów YAML
+% http://tex.stackexchange.com/questions/152829/how-can-i-highlight-yaml-code-in-a-pretty-way-with-listings
+%
+%\newcommand\YAMLcolonstyle{\color{red}\mdseries}
+%\newcommand\YAMLkeystyle{\color{black}\bfseries}
+%\newcommand\YAMLvaluestyle{\color{blue}\mdseries}
+%
+%% here is a macro expanding to the name of the language
+%% (handy if you decide to change it further down the road)
+%\newcommand\language@yaml{yaml}
+%
+%\expandafter\expandafter\expandafter\lstdefinelanguage
+%\expandafter{\language@yaml}
+%{
+%	keywords={true,false,null,y,n},
+%	keywordstyle=\color{darkgray}\bfseries,
+%	basicstyle=\YAMLkeystyle,                                 % assuming a key comes first
+%	sensitive=false,
+%	comment=[l]{\#},
+%	morecomment=[s]{/*}{*/},
+%	commentstyle=\color{purple}\ttfamily,
+%	stringstyle=\YAMLvaluestyle\ttfamily,
+%	moredelim=[l][\color{orange}]{\&},
+%	moredelim=[l][\color{magenta}]{*},
+%	moredelim=**[il][\YAMLcolonstyle{:}\YAMLvaluestyle]{:},   % switch to value style at :
+%	morestring=[b]',
+%	morestring=[b]",
+%	literate =		{---}{{\ProcessThreeDashes}}3
+%					{>}{{\textcolor{red}\textgreater}}1
+%					{|}{{\textcolor{red}\textbar}}1
+%					{\ -\ }{{\mdseries\ -\ }}3,
+%}
+%
+%% switch to key style at EOL
+%\lst@AddToHook{EveryLine}{\ifx\lst@language\language@yaml\YAMLkeystyle\fi}
+%
+%\newcommand\ProcessThreeDashes{\llap{\color{cyan}\mdseries-{-}-}}
+
 % Umożliwienie korzystania z polskich liter w listingach kodu
 
 \lstset{
@@ -160,6 +198,7 @@
 % Centrowanie podpisów pod obrazkami, listingami kodu itp.
 
 \RequirePackage[justification=centering]{caption}
+\captionsetup[lstlisting]{font={small}}
 
 % Nierozjechane linki w tytułowiej stronie informacyjnej
 
@@ -205,6 +244,12 @@
 %\PassOptionsToPackage{hyphens}{url}
 %\RequirePackage[unicode,plainpages=false,hypertexnames=true]{hyperref}
 \RequirePackage[unicode]{hyperref}
+
+% Zwykły \href z emph font
+
+\newcommand\hrefemph[2]{%
+	\href{#1}{\emph{#2}}%
+}
 
 % Zwykły \href z verbatim font
 
@@ -260,7 +305,10 @@
 	{\quotesinglbase}
 	{\fixligatures\textquoteright}
 \DeclareQuoteAlias[quotes]{polish}{polish}
+\renewcommand{\mkbegdispquote}[2]{\itshape} % chcemy pochylone cytowania
 %\DeclareQuoteOption{polish} % Package csquotes Warning: '\DeclareQuoteOption' invalid at this point
+
+% Ustawienia dot. bibliografii
 
 \RequirePackage[
 	style=numeric,
