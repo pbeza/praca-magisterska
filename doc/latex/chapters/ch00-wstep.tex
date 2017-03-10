@@ -166,13 +166,13 @@ end
 
 \subsection{Ansible}
 
-Ansible jest rozwiązaniem do~zarządzania oprogramowaniem różniącym się od~Puppet i~Chef tym, że~do~konfiguracji klientów \glslink{unix-like-system}{*nixowych} używa~SSH, a~do~klientów Windows \hrefemph{http://superuser.com/questions/184926/winrm-what-it-is-and-how-to-use-it}{WinRM} i~\hrefemph{https://en.wikipedia.org/wiki/PowerShell}{PowerShell}, dzięki czemu klienci nie~muszą uruchamiać żadnych dodatkowych procesów działających w~tle --- Ansible działa w trybie \emph{agentless}, tzn.~klienci nie mają żadnego dedykowanego oprogramowania do~obsługi Ansible. Autorzy projektu Ansible podkreślają na~swojej stronie internetowej, że~w~przeciwieństwie do~konkurencji, Ansible nie jest skomplikowany, przez co~jego szybkie opanowanie jest łatwe~\cite{ansible}.
+Ansible jest rozwiązaniem do~zarządzania oprogramowaniem różniącym się od~Puppet i~Chef tym, że~do~konfiguracji klientów \glslink{unix-like-system}{*nixowych} używa~SSH, a~do~klientów Windows \hrefemph{http://superuser.com/questions/184926/winrm-what-it-is-and-how-to-use-it}{WinRM} i~\hrefemph{https://en.wikipedia.org/wiki/PowerShell}{PowerShell}, dzięki czemu klienci nie~muszą uruchamiać żadnych dodatkowych procesów działających w~tle --- Ansible działa w~trybie \emph{agentless}, tzn.~klienci nie mają żadnego dedykowanego oprogramowania do~obsługi Ansible. Autorzy projektu Ansible podkreślają na~swojej stronie internetowej, że~w~przeciwieństwie do~konkurencji, Ansible nie jest skomplikowany, przez co~jego szybkie opanowanie jest łatwe~\cite{ansible}.
 
-Listing~\ref{ansible-inventory-example} przedstawia przykładową konfigurację serwera dotyczącą klientów zarządzanych przez serwer Ansible~\cite{ansible-example}. Po~zapisanu takiej konfiguracji, Ansible można wykorzystać do uruchomienia komendy na~wybranej grupie klientów. Np.~komenda:
+Listing~\ref{ansible-inventory-example} przedstawia przykładową konfigurację serwera dotyczącą klientów zarządzanych przez serwer Ansible~\cite{ansible-example}. Po~zapisanu takiej konfiguracji, Ansible można wykorzystać do~uruchomienia komendy na~wybranej grupie klientów. Np.~komenda:
 \begin{center}
 \texttt{ansible all -s -m shell -a 'apt-get install nginx'}
 \end{center}
-zainstaluje serwer HTTP \hreftt{https://www.nginx.com/}{nginx} na wszystkich klientach. Flaga \texttt{-m} wybiera moduł (w~tym wypadku moduł \texttt{shell}), \texttt{-s} zapewnia, że komenda będzie uruchomiona z~użyciem \hreftt{https://en.wikipedia.org/wiki/Sudo}{sudo}, a~\texttt{-a} pozwala na~przekazanie parametru do~użytego modułu. Taka forma użycia Ansible jest najprostsza i~nie pozwala w~pełni wykorzystać możliwości Ansible. Trochę lepszym, deklaratywnym sposobem, wykorzystującym moduł~\texttt{apt} jest wywołanie:
+zainstaluje serwer HTTP \hreftt{https://www.nginx.com/}{nginx} na wszystkich klientach. Flaga \texttt{-m} wybiera moduł (w~tym wypadku moduł \texttt{shell}), \texttt{-s} zapewnia, że~komenda będzie uruchomiona z~użyciem \hreftt{https://en.wikipedia.org/wiki/Sudo}{sudo}, a~\texttt{-a} pozwala na~przekazanie parametru do~użytego modułu. Taka forma użycia Ansible jest najprostsza i~nie pozwala w~pełni wykorzystać możliwości Ansible. Trochę lepszym, deklaratywnym sposobem, wykorzystującym moduł~\texttt{apt} jest wywołanie:
 \begin{center}
 \texttt{ansible all -s -m apt -a 'pkg=nginx state=installed update\_cache=true'}
 \end{center}
@@ -182,7 +182,7 @@ które zwraca wynik na~standardowym wyjściu w~postaci~\texttt{JSON}:
     "changed": false
 }
 \end{lstlisting}
-Powyższe sposoby uruchamiania Ansible są wykorzystaniem Ansible~\emph{ad-hoc}. Możliwości Ansible w~pełni ujawniają się, gdy wykorzystamy \hrefemph{http://docs.ansible.com/playbooks_intro.html}{Playbook}, czyli odpowiednik manifestu Puppeta. Przykładowy \emph{Playbook} z~listingu~\ref{ansible-playbook-example} przedstawia sposób zainstalowania na~grupie komputerów o~nazwie \texttt{web}~(por.~\ref{ansible-inventory-example}) serwera \texttt{nginx}, stworzenia pliku serwowanego przez serwer, a~następnie uruchomienia \glslink{demon}{demona} serwera. Zmiany opisane przez \emph{Playbook} można dokonać za~pomocą komendy:
+Powyższe sposoby uruchamiania Ansible są wykorzystaniem Ansible~\emph{ad-hoc}. Możliwości Ansible w~pełni ujawniają się, gdy~wykorzystamy \hrefemph{http://docs.ansible.com/playbooks_intro.html}{Playbook}, czyli odpowiednik manifestu Puppeta. Przykładowy \emph{Playbook} z~listingu~\ref{ansible-playbook-example} przedstawia sposób zainstalowania na~grupie komputerów o~nazwie \texttt{web}~(por.~\ref{ansible-inventory-example}) serwera \texttt{nginx}, stworzenia pliku serwowanego przez serwer, a~następnie uruchomienia \glslink{demon}{demona} serwera. Zmiany opisane przez \emph{Playbook} można dokonać za~pomocą komendy:
 \begin{center}
 \texttt{ansible-playbook -s nginx.yml}
 \end{center}
@@ -197,7 +197,7 @@ gdzie \texttt{-s} to~flaga po~której następuje nazwa pliku~\emph{Playbook}. An
 192.168.22.11
 \end{lstlisting}
 
-\begin{lstlisting}[numbers=none,caption={Przykładowa konfiguracja klientów serwera Ansible, w~nomenklaturze Ansible nazywana \emph{Playbook}},label=ansible-playbook-example]
+\begin{lstlisting}[numbers=none,language=yaml,caption={Przykładowa konfiguracja klientów serwera Ansible, w~nomenklaturze Ansible nazywana \emph{Playbook}},label=ansible-playbook-example]
 ---
 - hosts: web
   vars:
@@ -251,7 +251,7 @@ Aby~zaaplikować zmiany opisane w~pliku konfiguracyjnym~\path{top.sls} wystarczy
 	\texttt{salt '*' state.apply}
 \end{center}
 
-\begin{lstlisting}[numbers=none,caption={Plik konfiguracyjny \texttt{top.sls} w~formacie \texttt{YAML} definujący konfigurację dla~3~rodzajów agentów},label=salt-topfile-example]
+\begin{lstlisting}[numbers=none,language=yaml,caption={Plik konfiguracyjny \texttt{top.sls} w~formacie \texttt{YAML} definujący konfigurację dla~3~rodzajów agentów},label=salt-topfile-example]
 base:
   '*':
     - vim
@@ -274,7 +274,7 @@ zastosuje plik stanu \path{nettools.sls} dla~agentów o~nazwach od~\texttt{minio
 \end{center}
 zastosuje plik stanu \path{nettools.sls} dla~agentów pracujących pod~kontrolą systemu operacyjnego \texttt{Ubuntu}, których nazwa pasuje do~wyrażenia regularnego \texttt{minion*} lub~których adres~IP pasuje do~wyrażenia regularnego~\texttt{192.168.50.*}.
 
-\begin{lstlisting}[numbers=none,caption={Plik stanu \texttt{nettools.sls} definujący 3~pakiety, które agent ma~zainstalować oraz~użytkownika \texttt{fred}, który musi być w~systemie i~mieć przypisany shell~\texttt{/bin/zsh}},label=salt-statefile]
+\begin{lstlisting}[numbers=none,language=yaml,caption={Plik stanu \texttt{nettools.sls} definujący 3~pakiety, które agent ma~zainstalować oraz~użytkownika \texttt{fred}, który musi być w~systemie i~mieć przypisany shell~\texttt{/bin/zsh}},label=salt-statefile]
 install_network_packages:
   pkg.installed:
     - pkgs:
@@ -300,7 +300,7 @@ Poza przedstawionymi czterema, prawdopodobnie najpopularniejszymi rozwiązaniami
 \end{itemize}
 W~pracy nie scharakteryzowano wszystkich istniejących rozwiązań do~zarządzania konfiguracją systemów operacyjnych~\cite{wiki:scm-comparison}. Nazwy innych otwartoźródłowych rozwiązań to~m.in.:~\hrefemph{https://en.wikipedia.org/wiki/Capistrano_(software)}{Capistrano}, \hrefemph{https://en.wikipedia.org/wiki/Cdist}{cdist}, \hrefemph{https://en.wikipedia.org/wiki/ISconf}{ISconf}, \hrefemph{https://en.wikipedia.org/wiki/LCFG}{LCFG}, \hrefemph{https://en.wikipedia.org/wiki/Juju_(software)}{Juju}, \hrefemph{https://en.wikipedia.org/wiki/OCS_Inventory}{OCS~Inventory}, \hrefemph{https://en.wikipedia.org/wiki/OpenLMI}{OpenLMI}, \hrefemph{https://en.wikipedia.org/wiki/Opsi}{Opsi}, \hrefemph{https://en.wikipedia.org/wiki/PIKT}{PIKT}, \hrefemph{https://en.wikipedia.org/wiki/Quattor}{Quattor}, \hrefemph{https://en.wikipedia.org/wiki/Radmind}{Radmind}, \hrefemph{https://en.wikipedia.org/wiki/Rex_(software)}{Rex}, \hrefemph{https://en.wikipedia.org/wiki/Rudder_(software)}{Rudder}, \hrefemph{https://en.wikipedia.org/wiki/SmartFrog}{SmartFrog}, \hrefemph{https://en.wikipedia.org/wiki/Spacewalk_(software)}{Spacewalk}, \hrefemph{https://en.wikipedia.org/wiki/Software_Testing_Automation_Framework}{STAF}, \hrefemph{https://en.wikipedia.org/wiki/Synctool}{Synctool}. Nie wszystkie z~nich mają tak rozbudowaną funkcjonalność jak rozwiązania opisane w~tym rozdziale --- np.~\emph{Radmind} zarządza tylko systemem plików, \emph{STAF} służy do~konfiguracji środowisk testowych, \emph{ISconf} nie ma wyróżnionego serwera, a~\emph{Rudder} bazuje na~\emph{CFEngine} i~system kontroli wersji~\emph{git}.
 
-Pomimo długiej listy istniejących rozwiązań, zdaje się, że żadne z~nich nie zdominowało rynku, tak jak np.~zrobił to~\hrefemph{https://en.wikipedia.org/wiki/Git}{git} w~\href{https://en.wikipedia.org/wiki/Version_control}{systemach kontroli wersji}~\cite{vcs-market-share}.
+Pomimo długiej listy istniejących rozwiązań, zdaje się, że~żadne z~nich nie zdominowało rynku, tak jak np.~zrobił to~\hrefemph{https://en.wikipedia.org/wiki/Git}{git} w~\href{https://en.wikipedia.org/wiki/Version_control}{systemach kontroli wersji}~\cite{vcs-market-share}.
 
 %------------------------------------------------------------------------------
 %
@@ -313,7 +313,7 @@ Pomimo długiej listy istniejących rozwiązań, zdaje się, że żadne z~nich n
 \noindent Niniejsza praca magisterska składa się z~dwóch zasadniczych części:
 \begin{enumerate}
 	\item Niniejszej dokumentacji napisanej w~\LaTeX, opisującej problem, istniejące rozwiązania i~projekt protokołu dla~przedstawionego problemu,
-	\item Aplikacji napisanej w~języku Python oraz oraz~towarzyszącej jej dokumentacji wygenerowanej z~komentarzy w~kodzie źródłowym.
+	\item Aplikacji napisanej w~języku Python oraz~towarzyszącej jej dokumentacji wygenerowanej z~komentarzy w~kodzie źródłowym.
 \end{enumerate}
 Aplikacja również składa~się z~dwóch części, co~jest naturalne dla~przyjętej architektury klient-serwer~(por.~rozdział~\ref{cel-i-zakres}):
 \begin{enumerate}
@@ -343,7 +343,7 @@ W~czasie prac nad~implementacją projektu, korzystano z~pomocnych dokumentacji, 
 		\item ,,UNIX'' --- przedmiot prowadzony przez mgra~inż.~Marcina~Borkowskiego~\cite{borkowski}.
 	\end{enumerate}
 \end{enumerate}
-Kompletny spis odwołań cytowanych w~niniejszej dokumentacji, znajduje się~na~jej \hyperref[bibliography-page]{końcu}.
+Kompletny spis odwołań cytowanych w~niniejszej dokumentacji, znajduje się~na~jej końcu. %\hyperref[bibliography-page]{końcu}.
 
 %------------------------------------------------------------------------------
 

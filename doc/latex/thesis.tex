@@ -21,7 +21,7 @@
 
 \begin{document}
 
-% Wyłączenie numeracji w spisie treści
+% Wyłączenie numeracji stron w spisie treści
 
 \pagenumbering{gobble}
 
@@ -29,9 +29,7 @@
 % Strona tytułowa ma mniejsze marginesy żeby dostosować się do wzorca Rektora
 
 \newgeometry{inner=20mm,outer=20mm,top=25mm,bottom=25mm,bindingoffset=5mm}
-
 \maketitle
-
 \restoregeometry
 
 % Strona z informacjami o Wydziale i autorze
@@ -45,10 +43,7 @@
 % Słownik pojęć
 
 \include{glossary}
-\pagenumbering{roman}
-%\printglossary[style=mcolindex,title=Słownik pojęć]
-\printglossary[style=labeling,title=Słownik pojęć]
-%\glsaddall % wypisuje również nieużywane pozycje słownika
+%\pagenumbering{roman}
 
 % Zakaz dzielenia wybranych słów (szczególnie angielskich)
 
@@ -75,10 +70,6 @@
 %\listoffigures
 
 \printbibliography
-\label{bibliography-page}
-
-% Oświadczenie o samodzielności wykonania pracy
-
-\includepdf[pages=1-,pagecommand={\thispagestyle{plain}}]{statement}
+%\label{bibliography-page}
 
 \end{document}

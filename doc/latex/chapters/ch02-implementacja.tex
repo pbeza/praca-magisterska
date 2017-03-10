@@ -5,9 +5,7 @@
 \chapter{Implementacja}
 \label{chapter:implementacja}
 
-Kod źródłowy projektu został napisany wyłącznie w~języku~\texttt{C}, co~wyróżnia projekt na~tle istniejących rozwiązań przedstawionych w~rozdziale~\ref{sec:istniejace-rozwiazania}. Wszystkie one~zostały bowiem napisane w~językach skryptowych, co~może uniemożliwić ich uruchomienie na~najoszczędniejszych systemach wbudowanych, które mogą nie~być zdolne do~uruchamiania interpreterów języków skryptowych. Programy wykonywane przez interpreter oraz~wykonywane na~maszynach wirtualnych (np.~Javy i~.NET) pochłaniają dużo więcej pamięci niż~ich odpowiedniki napisane w~języku~\texttt{C}, skompilowane do~kodu maszynowego. Wybór języka \texttt{C}~stanowi więc zaletę zaproponowanej implementacji, osiągniętej jednak kosztem złożoności kodu źródłowego.
-
-Podczas implementacji dokonano wszelkich starań, aby~kod źródłowy projektu był zgodny ze~standardem~\gls{posix}. Wszelkie ewentualne odstępstwa od~standardu są~niezamierzone.
+Kod źródłowy projektu został napisany wyłącznie w~języku~Python.
 
 W~niniejszym rozdziale przedstawiono szczegóły implementacyjne projektu, w~szczególności zastosowane biblioteki i~narzędzia pomocnicze.
 
@@ -17,103 +15,18 @@ W~niniejszym rozdziale przedstawiono szczegóły implementacyjne projektu, w~szc
 
 W~niniejszym rozdziale przedstawiono biblioteki, które wykorzystano w~implementacji projektu.
 
-%---------------------------------------
-
-\subsection{glibc}
-
-Podstawową biblioteką którą wykorzystano do~implementacji projektu jest biblioteka systemowa \texttt{glibc}, która jest najczęściej używaną biblioteką implementującą standard~ISO~C. Alternatywami mogłyby być~biblioteki takie jak np.~\texttt{musl} i~$\mu\texttt{Clibc}$, które ze~względu na~mniejsze wykorzystanie zasobów systemowych, są~często wykorzystywane w~systemach wbudowanych. Biblioteki te~implementują standard~ISO~C wraz z~rozszerzeniami w~sposób maksymalnie oszczędny, tzn.~w~taki sposób, aby~jak najoszczędniej dysponować zasobami takimi jak~pamięć i~czas procesora. Przykładowe zastosowania tak odchudzonych bibliotek można znaleźć zarówno w~profesjonalnych rozwiązaniach systemów wbudowanych, jak i~w~konfiguracji płytek przeznaczonych do~ich nauki, takich jak \emph{Raspberry~Pi}, \emph{Banana~Pi} czy~\emph{Orange~Pi}. Do~stworzenia własnej dystrybucji \gls{gnulinux} przeznaczonej na~takie systemy można skorzystać z~takich narzędzi jak np.~\emph{Buildroot}, \emph{OpenWRT} i~\emph{Yocto}.
-
-Podczas testów aplikacji testowano jej~działanie wyłącznie z~linkowaną dynamicznie biblioteką \texttt{glibc}. W~przypadku dalszego rozwoju niniejszego projektu, można by było dostosować implementację do~działania z~bibliotekami, które pozwoliłyby na~działanie programu na~najoszczędniejszych platformach wbudowanych, dla~których biblioteka~\texttt{glibc} byłaby zbyt wymagająca. Byłoby to~szczególnie pożądane w~przypadku obsługi starszych maszyn, które mogą nie mają wystarczającej ilości miejsca, aby~obsłużyć standardową bibliotekę~\texttt{glibc}, ale~są na~tyle rozbudowane, że~nie są systemami typu~\emph{bare-metal}, tzn.~mają system operacyjny.
-
-%---------------------------------------
-
-\subsection{OpenSSL}
-
-Istnieje wiele bibliotek kryptograficznych, które, pod~warunkiem poprawnego użycia, mogą istotnie poprawić bezpieczeństwo protokołu. Najpopularniejsze z~nich~to: \emph{\gls{openssl}}, \emph{GnuTLS}, \emph{LibreSSL} i~\emph{BoringSSL}. Biblioteką istniejącą najdłużej z~wymienionych jest \gls{openssl}. Biblioteka GnuTLS powstała w~odpowiedzi na~\gls{openssl} ze~względu na~to, że~\gls{openssl} nie jest opublikowana na~licencji kompatybilnej z~licencją~\glslink{gpl}{GPL}, przez co~liczne projekty korzystające licencji~\glslink{gpl}{GPL} (np.~\emph{Wireshark}), nie mogą korzystać z~\gls{openssl}. Biblioteki LibreSSL i~BoringSSL są~\emph{fork'ami} biblioteki \gls{openssl}. BoringSSL powstał w~\emph{Google} na~potrzeby użycia w~różnych produktach tej firmy, w~szczególności w~przeglądarce internetowej \emph{Chrome}. Długa historia \gls{openssl}, mnogość bibliotek pokrewnych, mających źródło w~kodzie źródłowym \gls{openssl} oraz~względnie duża społeczność kryptologów zgromadzonych wokół tego projektu, spowodowały, że~biblioteka \gls{openssl} została użyta do~zapewnienia bezpieczeństwa opracowanego protokołu sieciowego.
-
-\gls{openssl} udostępnia wiele metod i~algorytmów kryptograficznych, które przetrwały wiele lat kryptoanaliz (np.~\gls{aes}, \gls{rsa}) i~są powszechnie uważane za~bezpieczne, pod~warunkiem poprawnego ich~wykorzystania i~zastosowania kluczy o~odpowiednio dużej długości. Wykorzystanie tej biblioteki w~kontekście komunikacji między klientem i~serwerem zostało opisane w~rozdziale~\ref{sec:security}, dotyczącym bezpieczeństwa opracowanego protokołu.
-
-%---------------------------------------
-
-\subsection{libconfig}
-
-Zarówno aplikacja kliencka, jak i~serwerowa, mogą być konfigurowane przez parametry podane przy~uruchamianiu programu, jak i~przez konfigurację czytaną z~pliku tekstowego. Konfiguracja programu, określona parametrami jego wywołania, nadpisuje konfigurację wczytaną z~pliku konfiguracyjnego, która z~kolei nadpisuje wartości domyślne, zapisane w~kodzie programu. Oznacza to~w~szczególności, że~jeśli ten sam parametr jest wyspecyfikowany zarówno jako parametr wywołania programu, jak i~w konfiguracji wczytanej z~pliku konfiguracyjnego, to~przyjmowana jest tylko wartość parametru z~wywołania programu (tzn.~ze zmiennej~\texttt{**argv}).
-
-Do~czytania konfiguracji z~pliku została wykorzystana biblioteka \texttt{libconfig}. Biblioteka ta~również umożliwia zapisanie konfiguracji do~pliku, jednak ta~funkcjonalność nie została wykorzystana. Format konfiguracji przypomina formatowanie~JSON, chociaż składnia nie jest identyczna.
-
-%---------------------------------------
-
-\subsection{libarchive}
-
-Paczki oprogramowania przesyłane przez serwer do~klienta są~skompresowane przez bibliotekę \emph{libarchive}.
+\begin{itemize}
+	\item \hreftt{http://www.pyopenssl.org/}{pyOpenSSL} --- \hrefemph{https://en.wikipedia.org/wiki/Language_binding}{Binding} dla~biblioteki OpenSSL. Zapewnia poufność komunikacji między klientami i~serwerem oraz~uwierzytelnienia serwera przez klienta.
+%Istnieje wiele bibliotek kryptograficznych, które, pod~warunkiem poprawnego użycia, mogą istotnie poprawić bezpieczeństwo protokołu. Najpopularniejsze z~nich~to: \emph{\gls{openssl}}, \emph{GnuTLS}, \emph{LibreSSL} i~\emph{BoringSSL}. Biblioteką istniejącą najdłużej z~wymienionych jest \gls{openssl}. Biblioteka GnuTLS powstała w~odpowiedzi na~\gls{openssl} ze~względu na~to, że~\gls{openssl} nie jest opublikowana na~licencji kompatybilnej z~licencją~\glslink{gpl}{GPL}, przez co~liczne projekty korzystające licencji~\glslink{gpl}{GPL} (np.~\emph{Wireshark}), nie mogą korzystać z~\gls{openssl}. Biblioteki LibreSSL i~BoringSSL są~\emph{fork'ami} biblioteki \gls{openssl}. BoringSSL powstał w~\emph{Google} na~potrzeby użycia w~różnych produktach tej firmy, w~szczególności w~przeglądarce internetowej \emph{Chrome}. Długa historia \gls{openssl}, mnogość bibliotek pokrewnych, mających źródło w~kodzie źródłowym \gls{openssl} oraz~względnie duża społeczność kryptologów zgromadzonych wokół tego projektu, spowodowały, że~biblioteka \gls{openssl} została użyta do~zapewnienia bezpieczeństwa opracowanego protokołu sieciowego.
+%\gls{openssl} udostępnia wiele metod i~algorytmów kryptograficznych, które przetrwały wiele lat kryptoanaliz (np.~\gls{aes}, \gls{rsa}) i~są powszechnie uważane za~bezpieczne, pod~warunkiem poprawnego ich~wykorzystania i~zastosowania kluczy o~odpowiednio dużej długości. Wykorzystanie tej biblioteki w~kontekście komunikacji między klientem i~serwerem zostało opisane w~rozdziale~\ref{sec:security}, dotyczącym bezpieczeństwa opracowanego protokołu.
+	\item \hreftt{http://pyyaml.org/}{PyYAML} --- Służy do~parsowania plików konfiguracyjnych \texttt{YAML} serwera i~klienta.
+\end{itemize}
 
 %------------------------------------------------------------------------------
 
-\section{Tworzenie demona systemowego}
+\section{Wielowątkowość}
 
-Poprawne utworzenie tradycyjnego \glslink{unix-like-system}{*niksowego} \glslink{demon}{demona} systemowego, nazywanego popularnie \emph{SysV daemon} (w~odróżnieniu od~\emph{systemd daemon}), czyli procesu nie mającego dostępu do~terminala i~pracującego w~tle, nie jest procesem trywialnym, tzn.~nie sprowadza się~do~wywołania funkcji \texttt{daemon()}, która co~prawda istnieje w~niektórych systemach i~pochodzi z~systemu~BSD, ale implementuje tylko podzbiór operacji zalecanych przez manual~\texttt{daemon(7)}.
-
-Poniżej przedstawiono algorytm tworzenia tradycyjnego demona systemowego. Algorytm ten składa się z~15 kroków wymienionych w~manualu \texttt{daemon(7)}~\cite{creating-daemon}.%\cite{creating-daemon-stackoverflow}
-\begin{enumerate}
-	\item Zamknąć wszystkie deskryptory plików poza standardowym wejściem~(\texttt{stdin}), wyjściem~(\texttt{stdout}) i~wyjściem diagnostycznym~(\texttt{stderr}).
-	\item Ustawić domyślne \glslink{signal-handler}{signal handlery} (\texttt{SIG\_DFL}) dla~wszystkich sygnałów funkcją~\texttt{sigaction()}.
-	\item Zresetować maskę sygnałów używając funkcji~\texttt{sigprocmask()}.
-	\item Usunąć własne zmienne środowiskowe, a~zmodyfikowane wcześniej zmienne środowiskowe przywrócić do~ich domyślnych wartości, aby~nie mogły one negatywnie wpłynąć na~działanie demona.
-	\item Stworzyć nowy proces~\texttt{A} przez wywołanie funkcji \texttt{fork()}.
-	\item W~procesie \texttt{A} wywołać funkcję \texttt{setsid()}, aby~odłączyć się od~terminala i~stworzyć nową, niezależną sesję.
-	\item W~procesie \texttt{A} wywołać funkcję \texttt{fork()}, która stworzy proces-dziecko~\texttt{B}, który zostanie demonem. Dzięki temu, że~\texttt{fork()} został wywołany drugi raz, upewniamy się, że~demon nie będzie miał szansy odzyskania dostępu do~terminala, od którego został odłączony.
-	\item W~procesie \texttt{A} wywołać funkcję \texttt{exit()}, dzięki czemu proces~\texttt{B} zmieni rodzica na~proces \texttt{init}, którego \texttt{PID} jest równy~1.
-	\item W~procesie \texttt{B} przekierować standardowe wejście~(\texttt{stdin}), wyjście~(\texttt{stdout}) i~wyjście diagnostyczne~(\texttt{stderr}) do~\path{/dev/null}.
-	\item W~procesie \texttt{B} ustawić \texttt{umask} na~0, aby~późniejsze wywołania funkcji takich jak \texttt{open()}, \texttt{mkdir()} itp. miały bezpośrednią kontrolę dostępu tworzonych plików i~katalogów.
-	\item W~procesie \texttt{B} zmienić aktualny katalog (ang.~\emph{Current Working Directory~(CWD)}) na~katalog root~\path{/}, aby~uniknąć sytuacji w~której demon blokowałby punkty montowania od~bycia odmontowanym np.~komendą~\texttt{umount}.
-	\item W~procesie \texttt{B} zapisać \texttt{PID} procesu~\texttt{B} do~pliku tekstowego np.~\path{/run/mydaemon.pid}, aby~upewnić się, że~istnieje tylko jedna instancja działającego demona. Krok ten musi być zaimplementowany w~taki sposób, aby~uniknąć wyścigu~(ang.~\emph{race condition}), tzn.~tak, aby~sprawdzenie czy~\texttt{PID} procesu zapisanego w~pliku nie należy do~demona oraz~zapisanie nowego \texttt{PID} w~tym pliku, było atomowe. W~praktyce, zamiast czytać zawartość pliku, można użyć mechanizmu blokowania pliku funkcją~\texttt{lockf()}. Tak długo jak plik będzie blokowany przez instancję demona, żadna inna instancja demona nie zmieni zawartości pliku.
-	\item W~procesie \texttt{B} możliwie maksymalnie obniżyć uprawnienia demona np.~funkcjami \texttt{setuid()} i~\texttt{setgid()}. Dzięki temu demon w~przypadku np.~wadliwego działania lub~błędu bezpieczeństwa, nie będzie miał uprawnień do~czynienia tak dużych szkód jakie miałby, gdyby miał pełne prawa użytkownika~\texttt{root}.
-	\item W~procesie \texttt{B} powiadomić proces, który rozpoczął cały algorytm, tj.~proces-rodzic zakończonego już procesu~\texttt{B}, że~tworzenie demona się~powiodło. Można to~zaimplementować używając łącza nienazwanego~(ang.~\emph{unnamed pipe}), stworzonego przed pierwszym wywołaniem funkcji~\texttt{fork()}, dzięki czemu takie łącze byłoby dostępne w~rodzicu procesu~\texttt{A} i~procesie~\texttt{B}.
-	\item W~rodzicu, który zainicjował algorytm, czyli w~rodzicu procesu~\texttt{A}, wywołać funkcję~\texttt{exit()}.
-\end{enumerate}
-Po~wykonaniu powyższych kroków, proces~\texttt{B} jest poprawnie stworzonym, klasycznym demonem typu~SysV. W~praktyce kroki od~1~do~4 są~zbędne jeśli demon jest tworzony na~początku uruchomienia programu, przed dokonaniem istotnych zmian, których skutki cofnęłyby pierwsze 4~kroki opisanego wyżej algorytmu.
-
-Aplikacja klienta i~serwera tworzą demona systemowego w~powyższy sposób. Kod tworzący demona jest współdzielony między klientem i~serwerem, ale~linkowanie obiektu powstałego z~kodu tworzącego demona jest statyczne.
-
-%------------------------------------------------------------------------------
-
-\section{Procesy i~wątki}
-
-Aplikacja jest w~pełni zgodna ze~standardem \gls{posix}, dlatego do~obsługi wątków wykorzystano biblioteki \texttt{pthread}, wchodząca w~skład tego standardu~\cite{pthreads-posix-manual}. Wykorzystanie wątków jest szczególnie istotne po~stronie serwera. Każdy klient jest obsługiwany przez osobny wątek serwera. Do~celów synchronizacji dostępu do~zasobów dzielonych przez wątki wykorzystano muteksy~\texttt{pthread\_mutex\_t} i~rodzinę funkcji im~towarzyszących, takich jak np.~\texttt{pthread\_mutex\_lock()}, \texttt{pthread\_mutex\_lock()}.
-
-%------------------------------------------------------------------------------
-
-%\section{Obsługa sygnałów systemowych}
-%
-%%------------------------------------------------------------------------------
-%
-%\section{Zmienne globalne}
-%
-%Zmienne globalne zostały wykorzystane tylko tam gdzie to~konieczne, tzn.~w:
-%\begin{itemize}
-%	\item \glslink{signal-handler}{signal handlerach}\footnote{Zmienne te~muszą być typu \texttt{volatile sig\_atomic\_t}.},
-%\end{itemize}
-%
-%%------------------------------------------------------------------------------
-%
-%\section{Zmienne \texttt{volatile}}
-%
-%%------------------------------------------------------------------------------
-%
-%\section{Semafory, mutexy}
-%
-%%------------------------------------------------------------------------------
-%
-%\section{Shared memory segments and message queues}
-%
-%%------------------------------------------------------------------------------
-%
-%\section{Wybrane makra}
-%
-%\begin{lstlisting}[language=c,numbers=none,caption={Makro wykonujące wyrażenie dopóki kod błędu jest równy \texttt{EINTR}}]
-%TEMP_FAILURE_RETRY(expr)
-%\end{lstlisting}
-%
+TODO
 
 %------------------------------------------------------------------------------
 
@@ -122,137 +35,15 @@ Aplikacja jest w~pełni zgodna ze~standardem \gls{posix}, dlatego do~obsługi w�
 W~tym rozdziale opisano z~jakich narzędzi i~z~jakich elementów konfiguracji korzystano w~trakcie implementacji.
 
 %---------------------------------------
-
-\subsection{cmake}
-
-Do~prekonfiguracji kompilacji kodu źródłowego wykorzystano \texttt{CMake}, który jest elastycznym, rozszerzalnym oprogramowaniem do~zarządzania procesem kompilacji i~instalacji oprogramowania na~różnych platformach i~systemach operacyjnych, niezależnym od~używanego kompilatora~\cite{cmake}. Jego konfiguracja sprowadza się do~napisania plików konfiguracyjnych o~zwyczajowej nazwie \mbox{\texttt{CMakeLists.txt}}, umieszczonych w~podkatalogach z~kodem źródłowym projektu. Wyniki uruchomienia \texttt{cmake} zależy od~systemu operacyjnego. Na~\glslink{unix-like-system}{systemach *uniksowych} zostaje wygenerowany klasyczny plik \texttt{Makefile}~\cite{gnu-makefile-manual}, którego uruchomienie powoduje kompilację projektu.
-
-Listing~\ref{lst:cmake-debug} przedstawia sposób w~jaki \texttt{CMake} był uruchamiany w~czasie prac nad~projektem. Słowo kluczowe \texttt{Debug} powoduje, że~w~czasie kompilacji projektu są~dodatkowo generowane:
-\begin{itemize}
-\item Symbole debugowania, które umożliwiają czytelne debugowanie w~debuggerze~\texttt{gdb}.
-\item Symbole dla~narzędzi \texttt{ctags} i~\texttt{cscope}~\cite{ctags,cscope} ułatwiających nawigowanie po~kodzie źródłowym aplikacji. Alternatywnie symbole te~można wygenerować ręcznie, tak jak przedstawiono na~listingu~\ref{lst:cmake-developer-symbols}.
-\end{itemize}
-Kod dołączony do~niniejszej pracy na~płycie~CD (patrz rozdział~\ref{cd-appendix}) został skompilowany z~flagą~\texttt{Release}, dzięki której kod jest zoptymalizowany i~pozbawiony asercji~\cite{cmake-compilation-type-manual,cmake-compilation-type-stackoverflow}. Pełną listę opcji (ang.~\emph{targets}) dla~wygenerowanego pliku~\path{Makefile} zostaje wyświetlona komendą \texttt{make~help}.
-
-\begin{lstlisting}[label=lst:cmake-debug,language=bash,numbers=none,caption={Uruchomienie \texttt{cmake} w~trybie \texttt{Debug}}]
-cmake -D CMAKE_BUILD_TYPE=Debug ..
-make
-\end{lstlisting}
-
-\begin{lstlisting}[label=lst:cmake-developer-symbols,language=bash,numbers=none,caption={Generowanie symboli dla~narzędzi \texttt{cscope} i~\texttt{ctags}}]
-make cscope
-make ctags
-\end{lstlisting}
-
-%---------------------------------------
-
-\subsection{Valgrind}
-
-Stworzone oprogramowanie zostało przetestowane pod~kątem występowania przecieków pamięci oprogramowaniem \texttt{Valgrind}~\cite{valgrind}. Listing~\ref{lst:valgrind-run} prezentuje sposób przeprowadzonego testu na~aplikacji serwera. Podczas testów \texttt{Valgrind} nie wykrył żadnych wycieków pamięci.
-
-\begin{lstlisting}[label=lst:valgrind-run,language=bash,numbers=none,caption={Uruchomienie \texttt{Valgrind} w~trybie wykrywania wszystkich dostępnych testów wycieków pamięci na~aplikacji serwera }]
-valgrind --leak-check=full -v ./server/appsync-srv
-\end{lstlisting}
-
-%---------------------------------------
-
-\subsection{Doxygen}
-
-Dokumentacja kodu projektu została wygenerowana z~komentarzy kodu źródłowego za~pomocą programu~\texttt{Doxygen}~\cite{doxygen}. Komentarze w~kodzie źródłowym zostały dostosowane do~formatu używanego przez projekt \texttt{Doxygen}. Szczegóły dotyczące sposobu generowania dokumentacji zostały ustawione w~pliku konfiguracyjnym \path{doxygen_template.dox.in} czytanym przez \texttt{Doxygen}. Wygenerowana dokumentacja została zapisana w~formatach: \texttt{HTML}, \LaTeX oraz~formacie dostosowanym do~czytania dokumentacji komendą~\texttt{man}. Dokumentacja w~formacie \texttt{HTML} wydaje się być najczytelniejsza, ale dla kompletności, do~niniejszej pracy zostały załączone dokumentacje we~wszystkich wymienionych formatach.
-
-%---------------------------------------
 %
 %\subsection{Generowanie pakietu oprogramowania}
 %
 %W~celu łatwej instacji powstałego oprogramowania, została przygotowana paczka instalacyjna... TODO
 
 %---------------------------------------
-
-\subsection{help2man}
-
-Poza dokumentacją wygenerowaną przez \texttt{Doxygen}, stworzono dokumentację dającą się~wyświetlić systemową przeglądarką stron podręcznika ekranowego, tj.~komendą~\texttt{man}~\cite{tldp-create-manpage}. W~celu synchronizacji treści pomocy manuala wyświetlanego po~wydaniu komendy~\texttt{man} i~pomocy wyświetlanej po~dodaniu flagi \texttt{-{}-help} do~wywołania programu, wykorzystano skrypt \texttt{help2man}. Skrypt ten został napisany w~języku skryptowym \texttt{Perl} i~jest udostępniany jako paczka oprogramowania o~tej samej nazwie na~wielu popularnych dystrybucjach \gls{gnulinux}. \texttt{help2man} umożliwia automatyczne generowanie plików z~manualem na~podstawie wyniku wywołania programu z~flagą \texttt{-{}-help}. Skrypt ten jest wywoływany przy~każdym uruchomieniu narzędzia \texttt{CMake}, dzięki czemu manual zawsze jest aktualny. Dodatkowa konfiguracja \texttt{help2man}, dodająca sekcje nieopisane w~pomocy wyświetlanej po~dodaniu flagi \texttt{-{}-help} do~wywołania programu~(np.~sekcja \texttt{Examples}), została zapisana w~pliku \path{manual.h2m}.
-
-%---------------------------------------
-
-\subsection{Wireshark}
-
-Wireshark jest narzędziem do~analizowania pakietów i~dlatego był jednym z~najczęściej z~używanych narzędzi w~czasie implementacji projektu. Bez Wiresharka podgląd przesyłanych pakietów byłby trudny, szczególnie, że~przesyłane pakiety są~szyfrowane z~wykorzystaniem biblioteki OpenSSL~(patrz rozdział~\ref{sec:security}). Wireshark umożliwia łatwe dekodowanie pakietów po~podaniu klucza prywatnego użytego do~szyfrowania, co~czyni z~niego bardzo wygodne narzędzie do~analizy zaszyfrowanego ruchu sieciowego.
-
-%---------------------------------------
-
-\subsection{Edytor tekstu vim}
-
-Do~pisania kodu źródłowego projektu oraz~niniejszej dokumentacji wykorzystano edytor tekstu~\texttt{vim} w~wersji~8.0, rozbudowany o~wtyczki. Poniżej przedstawiono listę wtyczek \texttt{vim}, wykorzystanych w~czasie implementacji:
-\begin{itemize}
-	\item\texttt{NerdTree} --- narzędzie do~wyświetlania drzewa systemu plików i~nawigowania po nim~\cite{nerdtree-vimorg,nerdtree-github},
-	\item\texttt{ctags} --- narzędzie do~generowania metainformacji do~wygodnego nawigowania po kodzie źródłowym~\cite{ctags},
-	% http://stackoverflow.com/questions/934233/cscope-or-ctags-why-choose-one-over-the-other
-	% http://cscope.sourceforge.net/cscope_maps.vim
-	\item\texttt{cscope} --- narzędzie do~wygodnego przeglądania kodu źródłowego, bardziej rozbudowane od \texttt{ctags}~\cite{cscope}.
-\end{itemize}
-
-%Konfiguracja \path{~/.vimrc}:
-%TODO
-% TODO dodać inne ustawienia z .vimrc
-
-%-------------------
-
-\subsubsection{ctags}
-
-W celu włączenia automatycznego ładowania pliku \texttt{tags} przez \texttt{vim}, do~pliku \mbox{\path{~/.vimrc}} dodano następującą konfigurację~\cite{ctags,ctags-tricks}:
-\begin{lstlisting}[language=tex,numbers=none,caption={Konfiguracja \texttt{ctags} w~pliku \texttt{.vimrc}}]
-set tags=build/tags,tags,./tags;$HOME
-\end{lstlisting}
-Konfiguracja ta~powoduje, że~\texttt{vim} automatycznie wczytuje plik \texttt{tags}, szukając go kolejno~w:
-\begin{itemize}[font=\ttfamily]
-	\item katalogu \path{$PWD/build},
-	\item katalogu \path{$PWD},
-	\item katalogu, w~którym znajduje się aktualnie otwarty plik w~\texttt{vim},
-	\item katalogach poniżej katalogu \path{$PWD}, ale nie niżej niż \path{$HOME}.
-\end{itemize}
-gdzie zmienna systemowa \glstt{PWD}{\$PWD} oznacza aktualny katalog roboczy.
-
-%-------------------
-
-\subsubsection{Cscope}
-
-Analogiczną konfigurację ustawiono, aby~włączyć automatyczne szukanie plików pomocniczych dla~obsługi \texttt{Cscope} w~edytorze~\texttt{vim}~\cite{cscope,cscope-autoload}. Do~\path{~/.vimrc} dodano:
-\begin{lstlisting}[language=tex,numbers=none,caption={Konfiguracja \texttt{Cscope} w~pliku \texttt{.vimrc}}]
-function! LoadCscope()
-  let db = findfile("cscope.out", "build,.;$HOME")
-  if (!empty(db))
-    let path = strpart(db, 0, match(db, "/cscope.out$"))
-    set nocscopeverbose " suppress 'duplicate connection' error
-    exe "cs add " . db . " " . path
-    set cscopeverbose
-  endif
-endfunction
-au BufEnter /* call LoadCscope()
-\end{lstlisting}
-
-%---------------------------------------
-
-\subsection{latexmk}
-
-Niniejsza dokumentacja została napisana w~\LaTeX, a~do jej~skompilowania posłużył \texttt{latexmk}, który jest wygodnym skryptem napisanym w~języku \texttt{Perl}, udostępnianym w~wielu dystrybucjach \gls{gnulinux} jako paczka oprogramowania o~tej samej nazwie. Narzędzie to~automatyzuje proces kompilacji kodu i~umożliwia np.~uruchamianie kompilacji kodu dopóki w~wygenerowanym dokumencie przestaną zachodzić zmiany, co~jest szczególnie pożądane w~przypadku zmian cytowań i~referencji w~tekście pracy\footnote{Kompilacja kodu \LaTeX jest procesem wieloprzebiegowym.}. Inną przydatną funkcjonalnością tego narzędzia jest tryb kompilacji ciągłej, który umożliwia automatyczne uruchamianie ponownej kompilacji po~wykryciu zmian w~edytowanym pliku. Dzięki temu istnieje możliwość podglądania zmian w~wygenerowanym dokumencie \emph{on-line}. Listing~\ref{cmake-online-compilation} przedstawia sposób uruchomienia \texttt{latexmk} w~trybie ciągłej kompilacji.
-
-\begin{lstlisting}[label=cmake-online-compilation,language=bash,numbers=none,caption={Uruchomienie ciągłej kompilacji domyślnego pliku \LaTeX, znalezionego w~aktualnym katalogu roboczym, do~pliku wyjściowego w~formacie~PDF}]
-latexmk -pvc -pdf
-\end{lstlisting}
-
-%---------------------------------------
-
-\subsection{Pozostałe narzędzia}
-
-W~czasie projektu wykorzystano również inne narzędzia użytkowe:
-\begin{itemize}
-\item \texttt{Midnight~Commander} --- Menadżer plików używany do~sprawnego poruszania się po drzewie katalogów projektu.
-\end{itemize}
-
-%------------------------------------------------------------------------------
-
-\section{Formatowanie kodu}
-
-Dokonano wszelkich starań, aby~formatowanie kodu źródłowego było zgodne z~wytycznymi zaproponowanymi przez programistów \glslink{kernel}{jądra} systemu \gls{gnulinux}~\cite{kernel-coding-style}. Wszystkie ewentualne przypadki łamania konwencji formatowania kodu są~niecelowe.
+%
+%\subsection{Wireshark}
+%
+%Wireshark jest narzędziem do~analizowania pakietów i~dlatego był jednym z~najczęściej z~używanych narzędzi w~czasie implementacji projektu. Bez Wiresharka podgląd przesyłanych pakietów byłby trudny, szczególnie, że~przesyłane pakiety są~szyfrowane z~wykorzystaniem biblioteki OpenSSL~(patrz rozdział~\ref{sec:security}). Wireshark umożliwia łatwe dekodowanie pakietów po~podaniu klucza prywatnego użytego do~szyfrowania, co~czyni z~niego bardzo wygodne narzędzie do~analizy zaszyfrowanego ruchu sieciowego.
 
 \end{document}

@@ -18,6 +18,16 @@
 }
 \makeatother
 
+% Słownik pojęć
+
+\chapter{Słownik pojęć}
+
+%\printglossary[style=mcolindex,title=Słownik pojęć]
+\printglossary[style=labeling,title=Słownik pojęć]
+%\glsaddall % wypisuje również nieużywane pozycje słownika
+
+% Płyta CD z pracą magisterską
+
 \chapter{Płyta CD}
 \label{cd-appendix}
 
@@ -51,6 +61,8 @@ Do~pracy dołączono płytę z~zawartością części aplikacyjnej niniejszej pr
 \texttt{TODO}
 \end{center}
 
+% Plakat (poster)
+
 \chapter{Poster}
 Zgodnie z~wytycznymi Wydziału MiNI, dotyczącymi procedury związanej z~obroną pracy dyplomowej, do~niniejszej pracy dołączono poster z~podstawowymi informacjami dotyczącymi opracowanej pracy magisterskiej~\cite{informacje-dot-obron}.
 
@@ -61,6 +73,11 @@ Poster został wykonany w~grafice wektorowej w~programie~\texttt{Inkscape} i~zos
 \end{enumerate}
 
 \addtocontents{toc}{\endgroup}
+
+% Oświadczenie o samodzielności wykonania pracy
+
+%\includepdf[pages=1-,pagecommand={\thispagestyle{plain}},addtotoc={1,chapter,1,Oświadczenie,oswiadczenie-label}]{statement}
+\includepdf[pages=1-,pagecommand={\thispagestyle{plain}}]{statement}
 
 \end{appendices}
 
