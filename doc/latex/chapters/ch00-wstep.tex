@@ -10,7 +10,6 @@
 \begin{document}
 
 \chapter{Wstęp}
-\label{chapter:intro}
 
 %------------------------------------------------------------------------------
 
@@ -29,7 +28,7 @@ Wybór tematu pracy jest podyktowany zainteresowaniami autora pracy dotyczącymi
 %------------------------------------------------------------------------------
 
 \section{Cel i~zakres pracy}
-\label{cel-i-zakres}
+\label{sec:cel-i-zakres}
 
 \noindent Celem niniejszej pracy jest:
 \blockcquote{formularz-zgloszenia-pracy}{Zaprojektowanie i~zaimplementowanie protokołu umożliwiającego propagowanie zmian w~systemie plików, pakietów oraz~elementów konfiguracji do~stacji roboczych pod~kontrolą systemu operacyjnego \glslink{gnulinux}{Linux/GNU} lub~innego systemu \glslink{unix-like-system}{*nix}, a~także elastycznego standardu opisu zmian oraz~narzędzi dla~ich rejestrowania i~dostosowywania. Proponowaną architekturą jest model klient--serwer. Konkretny obraz zmian może być przeznaczony dla~konkretnej dystrybucji, jednakże stworzone rozwiązania praktyczne powinny dawać się w~prosty sposób dostosowywać do~popularnych dystrybucji systemu \glslink{gnulinux}{Linux/GNU} oraz~systemów \glslink{unix-like-system}{*nix}.}
@@ -39,7 +38,7 @@ W~uproszczeniu, celem niniejszej pracy jest zaprojektowanie i~zaimplementowanie 
 
 \section{Motywacja}
 
-Motywacją do~napisania pracy magisterskiej na~przedstawiony w~rozdziale~\ref{cel-i-zakres} temat, jest problem, z~którym zmagają się~administratorzy głównie średnich i~dużych sieci komputerowych na~całym świecie, niezależnie od~używanego przez nich systemu operacyjnego --- problem automatycznego dystrybuowania ujednoliconego oprogramowania i~jego konfiguracji na~komputery połączone siecią komputerową~\cite{so-problem-intro}. W~ogólności nie~muszą to~być komputery takie jak serwery czy stacje robocze --- choć to~głównie z~nimi administratorzy komputerowi mają do~czynienia. Omawiany problem może dotyczyć również niektórych systemów wbudowanych nie będących systemami typu~\mbox{\emph{bare~metal}}, tzn.~pracujących pod~kontrolą systemu operacyjnego. Przykładem takich urządzeń są~niektóre biletomaty, bankomaty, maszyny \emph{vendingowe} i~wyświetlacze np.~na lotniskach, peronach i~przystankach komunikacji miejskiej.
+Motywacją do~napisania pracy magisterskiej na~przedstawiony w~rozdziale~\ref{sec:cel-i-zakres} temat, jest problem, z~którym zmagają się~administratorzy głównie średnich i~dużych sieci komputerowych na~całym świecie, niezależnie od~używanego przez nich systemu operacyjnego --- problem automatycznego dystrybuowania ujednoliconego oprogramowania i~jego konfiguracji na~komputery połączone siecią komputerową~\cite{so-problem-intro}. W~ogólności nie~muszą to~być komputery takie jak serwery czy stacje robocze --- choć to~głównie z~nimi administratorzy komputerowi mają do~czynienia. Omawiany problem może dotyczyć również niektórych systemów wbudowanych nie będących systemami typu~\mbox{\emph{bare~metal}}, tzn.~pracujących pod~kontrolą systemu operacyjnego. Przykładem takich urządzeń są~niektóre biletomaty, bankomaty, maszyny \emph{vendingowe} i~wyświetlacze np.~na lotniskach, peronach i~przystankach komunikacji miejskiej.
 
 W praktyce problem dystrybuowania jednolitego oprogramowania jest szczególnie odczuwalny przez administratorów, którzy zarządzają dużą ilością komputerów --- serwerów lub~stacji roboczych --- z~których każdy musi mieć ten~sam lub~podobny zestaw zainstalowanych programów i~konfiguracji dedykowanej dla~zainstalowanego oprogramowania. Popularne sposoby radzenia sobie z~tym problemem są~w~praktyce uciążliwe, a~istniejące rozwiązania w~pełni automatyzujące cały proces synchronizacji oprogramowania i~konfiguracji~(patrz rozdział~\ref{sec:istniejace-rozwiazania}), są stosunkowo młode i~słabo rozpowszechnione wśród większości administratorów komputerowych.
 
@@ -61,12 +60,13 @@ Wymienione w~tym rozdziale aplikacje, poza możliwością synchronizacji zainsta
 %---------------------------------------
 
 \subsection{Puppet}
+\label{subsec:puppet}
 
 Jednym z~najpopularniejszych istniejących rozwiązań problemu dystrybuowania oprogramowania jest projekt Puppet, który jest dedykowany nie tylko dla systemów~\glslink{unix-like-system}{*niksowych}, ale~również dla~systemów \emph{Windows} i~\emph{Mac~OS}~\cite{puppet,puppet-github,puppet-clients}.
 
 Puppet został napisany w~języku programowania Ruby, a~jego rozwój jest wspierany i~wykorzystywany przez wiele czołowych firm i~organizacji w~branży~IT, takich jak: \emph{Google}, \emph{NASA}, \emph{Verizon}, \emph{Sony}, \emph{Disney}, \emph{Uber}, \emph{gettyimages}, \emph{CERN} i~wiele innych~\cite{puppet,puppet-google,puppet-cern,puppet-chef-disney}. Pierwsza wersja Puppet została opublikowana w~2005~roku na~licencji~\glslink{gpl}{GPL}. Od~wersji 2.0~Puppet jest licencjonowany na~warunkach licencji~\glslink{apache2.0-license}{Apache~2.0}. Istnieje również komercyjna wersja projektu, znana pod~nazwą \emph{Puppet Enterprise}.
 
-Konfiguracja Puppet polega na~napisaniu reguł tekstowych, niezależnych od~systemu operacyjnego (\emph{Domain Specific Language}), przechowywanych zwyczajowo w~plikach z~rozszerzeniem~\texttt{.pp}, zwanych manifestami. Reguły są~zapisane w~postaci deklaratywnej, a~nie imperatywnej, tzn.~opisują oczekiwany stan systemu, a~nie sposób przeprowadzenia zmian w~systemie. Struktura manifestu jest w~postaci tablicy asocjacyjnej (struktura danych \hreftt{https://docs.ruby-lang.org/en/trunk/Hash.html}{Hash}) z~języka programowania Ruby. Przykładowe manifesty przedstawiono na~listingach \ref{puppet-openssh-example}, \ref{puppet-motd-example} i~\ref{puppet-httpd-example}~\cite{puppet-examples}. Poprawność składni w~manifeście \path{example.pp} można zweryfikować komendą:
+Konfiguracja Puppet polega na~napisaniu reguł tekstowych, niezależnych od~systemu operacyjnego (\emph{Domain Specific Language}), przechowywanych zwyczajowo w~plikach z~rozszerzeniem~\texttt{.pp}, zwanych manifestami. Reguły są~zapisane w~postaci deklaratywnej, a~nie imperatywnej, tzn.~opisują oczekiwany stan systemu, a~nie sposób przeprowadzenia zmian w~systemie. Struktura manifestu jest w~postaci tablicy asocjacyjnej (struktura danych \hreftt{https://docs.ruby-lang.org/en/trunk/Hash.html}{Hash}) z~języka programowania Ruby. Przykładowe manifesty przedstawiono na~listingach \ref{lst:puppet-openssh-example}, \ref{lst:puppet-motd-example} i~\ref{lst:puppet-httpd-example}~\cite{puppet-examples}. Poprawność składni w~manifeście \path{example.pp} można zweryfikować komendą:
 \begin{center}
 	\texttt{puppet parser validate example.pp}
 \end{center}
@@ -79,21 +79,21 @@ Aby~wprowadzić zmiany opisane manifestem \texttt{example.pp}, wystarczy uruchom
 Przed dokonaniem zmian w~systemie pomocna może być flaga \texttt{-{}-noop}, która uruchomia tryb \emph{dry run}, tzn.~tryb w~którym nie są dokonywane żadne zmiany w~systemie, a~na standardowym wyjściu są drukowane zmiany jakie by~zaszły, gdyby nie użyć tej flagi.
 
 \begin{minipage}{\linewidth} % żeby listing nie był podzielony na 2 stronach
-\begin{lstlisting}[numbers=none,caption={Manifest Puppet gwarantujący, że~pakiet \texttt{openssh-client}, dostarczający klienta SSH, jest zainstalowany},label=puppet-openssh-example]
+\begin{lstlisting}[numbers=none,caption={Manifest Puppet gwarantujący, że~pakiet \texttt{openssh-client}, dostarczający klienta SSH, jest zainstalowany},label=lst:puppet-openssh-example]
 package { 'openssh-client':
   ensure => present,
 }
 \end{lstlisting}
 \end{minipage}
 
-\begin{lstlisting}[numbers=none,caption={Manifest Puppet gwarantujący istnienie pliku \hreftt{https://en.wikipedia.org/wiki/Motd_(Unix)}{/etc/motd} z~komunikatem \texttt{Hello!}, który wyświetla się~użytkownikom systemu po~zalogowaniu},label=puppet-motd-example]
+\begin{lstlisting}[numbers=none,caption={Manifest Puppet gwarantujący istnienie pliku \hreftt{https://en.wikipedia.org/wiki/Motd_(Unix)}{/etc/motd} z~komunikatem \texttt{Hello!}, który wyświetla się~użytkownikom systemu po~zalogowaniu},label=lst:puppet-motd-example]
 file { 'motd':
   path => '/etc/motd',
   content => 'Hello!',
 }
 \end{lstlisting}
 
-\begin{lstlisting}[numbers=none,caption={Manifest Puppet gwarantujący, że~\gls{demon} \hreftt{https://httpd.apache.org/}{httpd} jest włączony i~działa},label=puppet-httpd-example]
+\begin{lstlisting}[numbers=none,caption={Manifest Puppet gwarantujący, że~\gls{demon} \hreftt{https://httpd.apache.org/}{httpd} jest włączony i~działa},label=lst:puppet-httpd-example]
 service { 'httpd':
   ensure => running,
   enable => true,
@@ -111,7 +111,7 @@ W~praktyce często jest pożądane automatyczne odpytywanie serwera przez klient
 
 \urldef\etchosts\path{%SystemRoot%\system32\drivers\etc\hosts}
 
-W~przykładach~\ref{puppet-openssh-example}, \ref{puppet-motd-example}, \ref{puppet-httpd-example} zostały użyte trzy, różne zasoby, odpowiednio: paczka oprogramowania~(\texttt{package}), plik~(\texttt{file}) oraz~serwis~(\texttt{service}). Puppet udostępnia również inne rodzaje zasobów takie jak: użytkownik~(\texttt{user}), grupa~(\texttt{group}), zdarzenie cykliczne~(\texttt{cron}), wykonanie komendy~(\texttt{exec}), wpis w~pliku \path{/etc/hosts}\footnote{Lub odpowiedniku pliku \path{/etc/hosts} w~systemach nie \glslink{unix-like-system}{*nixowych}, np.~\etchosts~w~nowych wersjach systemów Windows.}. Pełną listę wbudowanych typów zasobów można uzyskać wywołując komendę \texttt{puppet describe --list}. Aby~dowiedzieć się~więcej o~wybranym typie zasobu \texttt{X}, wystarczy wydać komendę:
+W~przykładach~\ref{lst:puppet-openssh-example}, \ref{lst:puppet-motd-example}, \ref{lst:puppet-httpd-example} zostały użyte trzy, różne zasoby, odpowiednio: pakiet oprogramowania~(\texttt{package}), plik~(\texttt{file}) oraz~serwis~(\texttt{service}). Puppet udostępnia również inne rodzaje zasobów takie jak: użytkownik~(\texttt{user}), grupa~(\texttt{group}), zdarzenie cykliczne~(\texttt{cron}), wykonanie komendy~(\texttt{exec}), wpis w~pliku \path{/etc/hosts}\footnote{Lub odpowiedniku pliku \path{/etc/hosts} w~systemach nie \glslink{unix-like-system}{*nixowych}, np.~\etchosts~w~nowych wersjach systemów Windows.}. Pełną listę wbudowanych typów zasobów można uzyskać wywołując komendę \texttt{puppet describe --list}. Aby~dowiedzieć się~więcej o~wybranym typie zasobu \texttt{X}, wystarczy wydać komendę:
 \begin{center}
 	\texttt{puppet describe~X}
 \end{center}
@@ -123,6 +123,7 @@ Dla~nowych użytkowników Puppeta została przygotowana przez opiekunów projekt
 %---------------------------------------
 
 \subsection{Chef}
+\label{subsec:chef}
 
 Chef jest oprogramowaniem napisanym w~językach programowania Ruby (tak jak Puppet) i~\texttt{Erlang} (zastosowanym tylko do~API w~części serwerowej). Projekt został zapoczątkowany przez \href{https://blog.chef.io/author/adam/}{Adama Jacoba} na~potrzeby firmy consultingowej, ale~po~zaprezentowaniu go~pracownikowi firmy \emph{Amazon} --- \href{https://en.wikipedia.org/wiki/Jesse_Robbins}{Jesse Robinsowi} --- został został opublikowany na~zasadach licencji \glslink{apache2.0-license}{Apache~2.0} i~zaadaptowany do~użycia w~firmie \emph{Amazon}. Pierwsza wersja Chef została opublikowana w~2009~roku.
 
@@ -132,9 +133,9 @@ Klientami mogą być systemy działające pod~kontrolą m.in.: \emph{AIX}, \emph
 
 Użytkownikami Chefa, tak jak w~przypadku Puppeta, jest wiele dużych firm i~uniwersytetów, takich jak: \emph{Airbnb}, \emph{Disney}, \emph{Mozilla}, \emph{Facebook}, \emph{HP Public Cloud}, \emph{Prezi}, \emph{Uniwersytet Minnesoty}~\cite{chef-customers,puppet-chef-disney}.
 
-Odpowiednikiem plików konfiguracyjnych, które w~Puppet nazywane są~\emph{manifestami}, są~pliki nazywane w~nomenklaturze Chef \emph{przepisami}~(ang.~\emph{recipe}). Przykładowe przepisy przedstawiono w~przykładach~\ref{chef-apache-example}, \ref{chef-user-example} i~\ref{chef-service-example}. Więcej przykładów można znaleźć w,~bogatej w~przykładowe przepisy, dokumentacji Chef~\cite{chef-examples}.
+Odpowiednikiem plików konfiguracyjnych, które w~Puppet nazywane są~\emph{manifestami}, są~pliki nazywane w~nomenklaturze Chef \emph{przepisami}~(ang.~\emph{recipe}). Przykładowe przepisy przedstawiono w~przykładach~\ref{lst:chef-apache-example}, \ref{lst:chef-user-example} i~\ref{lst:chef-service-example}. Więcej przykładów można znaleźć w,~bogatej w~przykładowe przepisy, dokumentacji Chef~\cite{chef-examples}.
 
-\begin{lstlisting}[numbers=none,caption={Przepis Chef gwarantujący, że~serwer Apache zostanie zainstalowany niezależnie od~tego jak~się~nazywa paczka oprogramowania go~dostarczająca},label=chef-apache-example]
+\begin{lstlisting}[numbers=none,caption={Przepis Chef gwarantujący, że~serwer Apache zostanie zainstalowany niezależnie od~tego jak~się~nazywa pakiet oprogramowania go~dostarczający},label=lst:chef-apache-example]
 package 'Install Apache' do
   case node[:platform]
   when 'redhat', 'centos'
@@ -145,7 +146,7 @@ package 'Install Apache' do
 end
 \end{lstlisting}
 
-\begin{lstlisting}[numbers=none,caption={Przepis Chef gwarantujący, że~użytkownik \texttt{xyz} istnieje w~systemie i~ma zadane ustawienia konta},label=chef-user-example]
+\begin{lstlisting}[numbers=none,caption={Przepis Chef gwarantujący, że~użytkownik \texttt{xyz} istnieje w~systemie i~ma zadane ustawienia konta},label=lst:chef-user-example]
 user 'xyz' do
   comment 'A random user'
   uid '1234'
@@ -156,7 +157,7 @@ user 'xyz' do
 end
 \end{lstlisting}
 
-\begin{lstlisting}[numbers=none,caption={Przepis Chef gwarantujący, że~serwis \texttt{example\_service} jest uruchomiony},label=chef-service-example]
+\begin{lstlisting}[numbers=none,caption={Przepis Chef gwarantujący, że~serwis \texttt{example\_service} jest uruchomiony},label=lst:chef-service-example]
 service 'example_service' do
   action :start
 end
@@ -165,10 +166,11 @@ end
 %---------------------------------------
 
 \subsection{Ansible}
+\label{subsec:ansible}
 
 Ansible jest rozwiązaniem do~zarządzania oprogramowaniem różniącym się od~Puppet i~Chef tym, że~do~konfiguracji klientów \glslink{unix-like-system}{*nixowych} używa~SSH, a~do~klientów Windows \hrefemph{http://superuser.com/questions/184926/winrm-what-it-is-and-how-to-use-it}{WinRM} i~\hrefemph{https://en.wikipedia.org/wiki/PowerShell}{PowerShell}, dzięki czemu klienci nie~muszą uruchamiać żadnych dodatkowych procesów działających w~tle --- Ansible działa w~trybie \emph{agentless}, tzn.~klienci nie mają żadnego dedykowanego oprogramowania do~obsługi Ansible. Autorzy projektu Ansible podkreślają na~swojej stronie internetowej, że~w~przeciwieństwie do~konkurencji, Ansible nie jest skomplikowany, przez co~jego szybkie opanowanie jest łatwe~\cite{ansible}.
 
-Listing~\ref{ansible-inventory-example} przedstawia przykładową konfigurację serwera dotyczącą klientów zarządzanych przez serwer Ansible~\cite{ansible-example}. Po~zapisanu takiej konfiguracji, Ansible można wykorzystać do~uruchomienia komendy na~wybranej grupie klientów. Np.~komenda:
+Listing~\ref{lst:ansible-inventory-example} przedstawia przykładową konfigurację serwera dotyczącą klientów zarządzanych przez serwer Ansible~\cite{ansible-example}. Po~zapisanu takiej konfiguracji, Ansible można wykorzystać do~uruchomienia komendy na~wybranej grupie klientów. Np.~komenda:
 \begin{center}
 \texttt{ansible all -s -m shell -a 'apt-get install nginx'}
 \end{center}
@@ -182,13 +184,13 @@ które zwraca wynik na~standardowym wyjściu w~postaci~\texttt{JSON}:
     "changed": false
 }
 \end{lstlisting}
-Powyższe sposoby uruchamiania Ansible są wykorzystaniem Ansible~\emph{ad-hoc}. Możliwości Ansible w~pełni ujawniają się, gdy~wykorzystamy \hrefemph{http://docs.ansible.com/playbooks_intro.html}{Playbook}, czyli odpowiednik manifestu Puppeta. Przykładowy \emph{Playbook} z~listingu~\ref{ansible-playbook-example} przedstawia sposób zainstalowania na~grupie komputerów o~nazwie \texttt{web}~(por.~\ref{ansible-inventory-example}) serwera \texttt{nginx}, stworzenia pliku serwowanego przez serwer, a~następnie uruchomienia \glslink{demon}{demona} serwera. Zmiany opisane przez \emph{Playbook} można dokonać za~pomocą komendy:
+Powyższe sposoby uruchamiania Ansible są wykorzystaniem Ansible~\emph{ad-hoc}. Możliwości Ansible w~pełni ujawniają się, gdy~wykorzystamy \hrefemph{http://docs.ansible.com/playbooks_intro.html}{Playbook}, czyli odpowiednik manifestu Puppeta. Przykładowy \emph{Playbook} z~listingu~\ref{lst:ansible-playbook-example} przedstawia sposób zainstalowania na~grupie komputerów o~nazwie \texttt{web}~(por.~\ref{lst:ansible-inventory-example}) serwera \texttt{nginx}, stworzenia pliku serwowanego przez serwer, a~następnie uruchomienia \glslink{demon}{demona} serwera. Zmiany opisane przez \emph{Playbook} można dokonać za~pomocą komendy:
 \begin{center}
 \texttt{ansible-playbook -s nginx.yml}
 \end{center}
 gdzie \texttt{-s} to~flaga po~której następuje nazwa pliku~\emph{Playbook}. Ansible, tak jak konkurencyjne rozwiązania, potrafi zarządzać oprogramowaniem i~konfiguracją (i~nie tylko) w~sposób warunkowy, dlatego w~praktyce konfiguracje są~znacznie bardziej złożone od~przykładowych.
 
-\begin{lstlisting}[numbers=none,caption={Przykładowy plik konfiguracyjny klientów serwera Ansible (w~numenklaturze Ansible nazywany \hrefemph{http://docs.ansible.com/ansible/intro_inventory.html}{Inventory file}), zwyczajowo zapisywany w~\texttt{/etc/ansible/hosts}, definiujący adresy~IP zarządzanych klientów},label=ansible-inventory-example]
+\begin{lstlisting}[numbers=none,caption={Przykładowy plik konfiguracyjny klientów serwera Ansible (w~numenklaturze Ansible nazywany \hrefemph{http://docs.ansible.com/ansible/intro_inventory.html}{Inventory file}), zwyczajowo zapisywany w~\texttt{/etc/ansible/hosts}, definiujący adresy~IP zarządzanych klientów},label=lst:ansible-inventory-example]
 [local]
 127.0.0.1
 
@@ -197,7 +199,7 @@ gdzie \texttt{-s} to~flaga po~której następuje nazwa pliku~\emph{Playbook}. An
 192.168.22.11
 \end{lstlisting}
 
-\begin{lstlisting}[numbers=none,language=yaml,caption={Przykładowa konfiguracja klientów serwera Ansible, w~nomenklaturze Ansible nazywana \emph{Playbook}},label=ansible-playbook-example]
+\begin{lstlisting}[numbers=none,language=,caption={Przykładowa konfiguracja klientów serwera Ansible, w~nomenklaturze Ansible nazywana \emph{Playbook}},label=lst:ansible-playbook-example]
 ---
 - hosts: web
   vars:
@@ -235,12 +237,13 @@ Ansible został opublikowany na~licencji~\glslink{gpl}{GPL} w~wersji~3, a~jego p
 %---------------------------------------
 
 \subsection{Salt}
+\label{subsec:salt}
 
 Salt, nazywany też \emph{SaltStack}, to~otwartoźdłowe oprogramowanie napisane w~Pythonie przez \href{https://www.linkedin.com/in/thhatch/}{Thomasa Hatcha} i~opublikowane na~licencji \glslink{apache2.0-license}{Apache~2.0}. Funkcjonalność Salt jest podobna do~dotychczas opisanych rozwiązań problemu synchronizacji oprogramowania. Pierwsza wersja Salt powstała w~2011~roku, a~więc jest to~najmłodsze rozwiązanie z~dotychczas przedstawionych~\cite{saltstack}.
 
 Salt pracuje w~modelu serwer-agent --- agenci są~nazywani \emph{Salt~Minions}, a~serwer \emph{Salt~Master}. Komunikacja między serwerem i~agentami odbywa się~asynchronicznie, zgodnie ze~wzorcem \hrefemph{https://en.wikipedia.org/wiki/Publish\%E2\%80\%93subscribe\_pattern}{publish/subscribe}, co~implementują wykorzystane biblioteki \hreftt{http://zeromq.org/}{ZeroMQ} oraz~\hreftt{http://www.tornadoweb.org/}{Tornado}. Podczas projektowania Salt położono duży nacisk na~modularność implementowaną jako \href{https://docs.python.org/3.7/tutorial/modules.html}{Pythonowe moduły}\footnote{W~nomenklaturze Salta moduł Pythonowy rozbudowujący funkcjonalność to~\emph{plug-in} (a~nie~\emph{module}).} tak, aby dodawanie obsługi nowych zasobów było możliwie łatwe. Salt, podobnie jak Puppet, przechowuje konfigurację w~plikach~\texttt{YAML}, \texttt{JSON}, \texttt{plaintext}, a~do zapewnienia bezpieczeństwa komunikacji używa szyfru blokowego~\gls{aes} w~ramach protokołu~\glslink{ssl/tls}{TLS}. Wspierane systemy operacyjne to~m.in. \emph{\glslink{gnulinux}{Linux}}, \emph{Windows}, \emph{MacOS}, \emph{FreeBSD}, \emph{Solaris} i~\emph{AIX}.
 
-Przykład~\ref{salt-topfile-example} przedstawia plik konfiguracyjny \hrefemph{https://docs.saltstack.com/en/getstarted/fundamentals/top.html\#introducing-the-top-file}{Top file}, znajdujący się zwyczajowo w~pliku \path{/srv/salt/top.sls}. Plik ten~definuje stan różnych agentów --- w~przedstawionym przykładzie~\ref{salt-topfile-example} są~3~rodzajów agentów zdefiniowanych przez wyrażenia regularne dopasowywane do~nazwy agenta:
+Przykład~\ref{lst:salt-topfile-example} przedstawia plik konfiguracyjny \hrefemph{https://docs.saltstack.com/en/getstarted/fundamentals/top.html\#introducing-the-top-file}{Top file}, znajdujący się zwyczajowo w~pliku \path{/srv/salt/top.sls}. Plik ten~definuje stan różnych agentów --- w~przedstawionym przykładzie~\ref{lst:salt-topfile-example} są~3~rodzajów agentów zdefiniowanych przez wyrażenia regularne dopasowywane do~nazwy agenta:
 \begin{enumerate}
 	\item grupa wszystkich agentów --- wyrażenie regularne~\texttt{'*'} pasuje do~każdej nazwy agenta,
 	\item grupa agentów, których nazwa pasuje do~wyrażenia regularnego~\texttt{'*web*'},
@@ -251,7 +254,7 @@ Aby~zaaplikować zmiany opisane w~pliku konfiguracyjnym~\path{top.sls} wystarczy
 	\texttt{salt '*' state.apply}
 \end{center}
 
-\begin{lstlisting}[numbers=none,language=yaml,caption={Plik konfiguracyjny \texttt{top.sls} w~formacie \texttt{YAML} definujący konfigurację dla~3~rodzajów agentów},label=salt-topfile-example]
+\begin{lstlisting}[numbers=none,language=,caption={Plik konfiguracyjny \texttt{top.sls} w~formacie \texttt{YAML} definujący konfigurację dla~3~rodzajów agentów},label=lst:salt-topfile-example]
 base:
   '*':
     - vim
@@ -264,7 +267,7 @@ base:
   '*db*':
     - mysql
 \end{lstlisting}
-Nazwy znajdujące się w~pliku konfiguracyjnym pod~wyrażeniami regularnymi --- np.~w~przykładzie~\ref{salt-topfile-example}: \texttt{vim}, \texttt{scripts} i~\texttt{users} pod~wyrażeniem regularnym \texttt{'*'} --- to~nazwy stanów opisanych innymi plikami konfiguracyjnymi nazywanymi plikami stanu~(\emph{State Files}). Przykład~\ref{salt-statefile} przedstawia przykładowy plik stanu \path{nettools.sls} (niewystępujący w~przykładowym pliku~\path{top.sls} w~przykładzie~\ref{salt-topfile-example}). Plik ten~wymusza: instalację pakietów \texttt{rsync}, \texttt{lftp} i~\texttt{curl} oraz~obecność użytkownika \texttt{fred} z~przypisanym shellem \path{/bin/zsh}. Plik stanu można zaaplikować bezpośrednio na~wybrany rodzaj agentów przez komendę (a~niekoniecznie przez plik konfiguracyjny~\emph{Top file} agregujący pliki stanu). Np.~komenda:
+Nazwy znajdujące się w~pliku konfiguracyjnym pod~wyrażeniami regularnymi --- np.~w~przykładzie~\ref{lst:salt-topfile-example}: \texttt{vim}, \texttt{scripts} i~\texttt{users} pod~wyrażeniem regularnym \texttt{'*'} --- to~nazwy stanów opisanych innymi plikami konfiguracyjnymi nazywanymi plikami stanu~(\emph{State Files}). Przykład~\ref{lst:salt-statefile} przedstawia przykładowy plik stanu \path{nettools.sls} (niewystępujący w~przykładowym pliku~\path{top.sls} w~przykładzie~\ref{lst:salt-topfile-example}). Plik ten~wymusza: instalację pakietów \texttt{rsync}, \texttt{lftp} i~\texttt{curl} oraz~obecność użytkownika \texttt{fred} z~przypisanym shellem \path{/bin/zsh}. Plik stanu można zaaplikować bezpośrednio na~wybrany rodzaj agentów przez komendę (a~niekoniecznie przez plik konfiguracyjny~\emph{Top file} agregujący pliki stanu). Np.~komenda:
 \begin{center}
 \texttt{salt 'minion[0-9]' state.apply nettools}
 \end{center}
@@ -274,7 +277,7 @@ zastosuje plik stanu \path{nettools.sls} dla~agentów o~nazwach od~\texttt{minio
 \end{center}
 zastosuje plik stanu \path{nettools.sls} dla~agentów pracujących pod~kontrolą systemu operacyjnego \texttt{Ubuntu}, których nazwa pasuje do~wyrażenia regularnego \texttt{minion*} lub~których adres~IP pasuje do~wyrażenia regularnego~\texttt{192.168.50.*}.
 
-\begin{lstlisting}[numbers=none,language=yaml,caption={Plik stanu \texttt{nettools.sls} definujący 3~pakiety, które agent ma~zainstalować oraz~użytkownika \texttt{fred}, który musi być w~systemie i~mieć przypisany shell~\texttt{/bin/zsh}},label=salt-statefile]
+\begin{lstlisting}[numbers=none,language=,caption={Plik stanu \texttt{nettools.sls} definujący 3~pakiety, które agent ma~zainstalować oraz~użytkownika \texttt{fred}, który musi być w~systemie i~mieć przypisany shell~\texttt{/bin/zsh}},label=lst:salt-statefile]
 install_network_packages:
   pkg.installed:
     - pkgs:
@@ -295,12 +298,14 @@ Ciekawym trybem pracy Salt jest tryb \emph{Agentless}, który polega na~tym, że
 Poza przedstawionymi czterema, prawdopodobnie najpopularniejszymi rozwiązaniami, istnieją również inne:
 \begin{itemize}
 	\item \hrefemph{https://en.wikipedia.org/wiki/Otter_(software)}{Otter}\footnote{\emph{Otter} autorstwa firmy \emph{Inedo} nie~należy mylić \href{https://en.wikipedia.org/wiki/Prover9\#Predecessor}{aplikacją do~automatycznego dowodzenia twierdzeń} i~z~\href{https://pl.wikipedia.org/wiki/Otter\_Browser}{przeglądarką} o~tych samych nazwach.} --- komercyjne oprogramowanie do~automatyzacji głównie systemu Windows, sprzedawane przez firmę \emph{Inedo}~\cite{otter}. Konfiguracja dla systemu Windows odbywa się~przez graficzny interfejs przeglądarki internetowej, a~dla systemów \glslink{unix-like-system}{*nixowych} przez~SSH. Otter jest zintegrowany z~\hrefemph{https://en.wikipedia.org/wiki/PowerShell}{Windows PowerShell}.
-	\item \hrefemph{https://en.wikipedia.org/wiki/CFEngine}{CFEngine} (skrót od~ang.~\emph{The~\textbf{C}on\textbf{f}iguration \textbf{E}ngine}) --- otwartoźródłowy~(opublikowany na~licencji~\glslink{gpl}{GPL}) system zarządzania konfiguracją autorstwa \href{https://en.wikipedia.org/wiki/Mark_Burgess_(computer_scientist)}{prof.~Marka Burgessa} z~Uniwersystetu w~Oslo~\cite{cfengine}. Projekt jest najstarszy z~zestawienia --- narodził się bowiem w~1993~roku w~Departamencie Fizyki Teoretycznej, gdzie pracował autor projektu. W~roku~2009 została ogłoszona komercyjna wersja projektu. CFEngine działał pierwotnie tylko na~systemach~\glslink{unix-like-system}{*nixowych}, ale~obecnie wspiera również system Windows. CFEngine wyróżnia się na~tle konkurencji tym, że~został napisany w~języku~\texttt{C}. Rozpoznawalnym użytkownikiem CFEngine jest \hrefemph{https://www.linkedin.com/feed/}{LinkedIn} --- międzynarodowy serwis społecznościowy, specjalizujący się w~kontaktach zawodowo-biznesowych~\cite{cfengine-linkedin}.
-	\item \hrefemph{https://en.wikipedia.org/wiki/Bcfg2}{Bcfg2} --- projekt napisany w~Pythonie, zapoczątkowany przez \hrefemph{https://en.wikipedia.org/wiki/Argonne_National_Laboratory}{Argonne National Laboratory}. Na~tle konkurencyjnych rozwiązań wyróżnia się rozbudowaną funkcjonalnością raportowania statystyk przez klientów. Działa na \emph{AIX}, \emph{FreeBSD}, \emph{OpenBSD}, \emph{Mac OS X}, \emph{OpenSolaris}, \emph{Solaris} i~wielu dystrybucjach \gls{gnulinux}: \emph{Alpine Linux}, \emph{ArchLinux}, \emph{Blag}, \emph{CentOS}, \emph{Debian}, \emph{Fedora}, \emph{Gentoo}, \emph{gNewSense}, \emph{Mandriva}, \emph{openSUSE}, \emph{Red~Hat/RHEL}, \emph{SuSE/SLES}, \emph{Trisquel} i~\emph{Ubuntu}~\cite{bcfg2}.
+	\item\label{itm:cfengine} \hrefemph{https://en.wikipedia.org/wiki/CFEngine}{CFEngine} (skrót od~ang.~\emph{The~\textbf{C}on\textbf{f}iguration \textbf{E}ngine}) --- otwartoźródłowy~(opublikowany na~licencji~\glslink{gpl}{GPL}) system zarządzania konfiguracją autorstwa \href{https://en.wikipedia.org/wiki/Mark_Burgess_(computer_scientist)}{prof.~Marka Burgessa} z~Uniwersystetu w~Oslo~\cite{cfengine}. Projekt jest najstarszy z~zestawienia --- narodził się bowiem w~1993~roku w~Departamencie Fizyki Teoretycznej, gdzie pracował autor projektu. W~roku~2009 została ogłoszona komercyjna wersja projektu. CFEngine działał pierwotnie tylko na~systemach~\glslink{unix-like-system}{*nixowych}, ale~obecnie wspiera również system Windows. CFEngine wyróżnia się na~tle konkurencji tym, że~został napisany w~języku~\texttt{C}. Rozpoznawalnym użytkownikiem CFEngine jest \hrefemph{https://www.linkedin.com/feed/}{LinkedIn} --- międzynarodowy serwis społecznościowy, specjalizujący się w~kontaktach zawodowo-biznesowych~\cite{cfengine-linkedin}.
+	\item\label{itm:bcfg2} \hrefemph{https://en.wikipedia.org/wiki/Bcfg2}{Bcfg2} --- projekt napisany w~Pythonie, zapoczątkowany przez \hrefemph{https://en.wikipedia.org/wiki/Argonne_National_Laboratory}{Argonne National Laboratory}. Na~tle konkurencyjnych rozwiązań wyróżnia się rozbudowaną funkcjonalnością raportowania statystyk przez klientów. Działa na \emph{AIX}, \emph{FreeBSD}, \emph{OpenBSD}, \emph{Mac OS X}, \emph{OpenSolaris}, \emph{Solaris} i~wielu dystrybucjach \gls{gnulinux}: \emph{Alpine Linux}, \emph{ArchLinux}, \emph{Blag}, \emph{CentOS}, \emph{Debian}, \emph{Fedora}, \emph{Gentoo}, \emph{gNewSense}, \emph{Mandriva}, \emph{openSUSE}, \emph{Red~Hat/RHEL}, \emph{SuSE/SLES}, \emph{Trisquel} i~\emph{Ubuntu}~\cite{bcfg2}.
 \end{itemize}
 W~pracy nie scharakteryzowano wszystkich istniejących rozwiązań do~zarządzania konfiguracją systemów operacyjnych~\cite{wiki:scm-comparison}. Nazwy innych otwartoźródłowych rozwiązań to~m.in.:~\hrefemph{https://en.wikipedia.org/wiki/Capistrano_(software)}{Capistrano}, \hrefemph{https://en.wikipedia.org/wiki/Cdist}{cdist}, \hrefemph{https://en.wikipedia.org/wiki/ISconf}{ISconf}, \hrefemph{https://en.wikipedia.org/wiki/LCFG}{LCFG}, \hrefemph{https://en.wikipedia.org/wiki/Juju_(software)}{Juju}, \hrefemph{https://en.wikipedia.org/wiki/OCS_Inventory}{OCS~Inventory}, \hrefemph{https://en.wikipedia.org/wiki/OpenLMI}{OpenLMI}, \hrefemph{https://en.wikipedia.org/wiki/Opsi}{Opsi}, \hrefemph{https://en.wikipedia.org/wiki/PIKT}{PIKT}, \hrefemph{https://en.wikipedia.org/wiki/Quattor}{Quattor}, \hrefemph{https://en.wikipedia.org/wiki/Radmind}{Radmind}, \hrefemph{https://en.wikipedia.org/wiki/Rex_(software)}{Rex}, \hrefemph{https://en.wikipedia.org/wiki/Rudder_(software)}{Rudder}, \hrefemph{https://en.wikipedia.org/wiki/SmartFrog}{SmartFrog}, \hrefemph{https://en.wikipedia.org/wiki/Spacewalk_(software)}{Spacewalk}, \hrefemph{https://en.wikipedia.org/wiki/Software_Testing_Automation_Framework}{STAF}, \hrefemph{https://en.wikipedia.org/wiki/Synctool}{Synctool}. Nie wszystkie z~nich mają tak rozbudowaną funkcjonalność jak rozwiązania opisane w~tym rozdziale --- np.~\emph{Radmind} zarządza tylko systemem plików, \emph{STAF} służy do~konfiguracji środowisk testowych, \emph{ISconf} nie ma wyróżnionego serwera, a~\emph{Rudder} bazuje na~\emph{CFEngine} i~system kontroli wersji~\emph{git}.
 
 Pomimo długiej listy istniejących rozwiązań, zdaje się, że~żadne z~nich nie zdominowało rynku, tak jak np.~zrobił to~\hrefemph{https://en.wikipedia.org/wiki/Git}{git} w~\href{https://en.wikipedia.org/wiki/Version_control}{systemach kontroli wersji}~\cite{vcs-market-share}.
+
+Duża część przedstawionych rozwiązań, szczególnie tych najpopularniejszych, ma~za sobą co~najmniej kilka lat rozwoju i~duże zespoły programistów pracujących nad~ulepszaniem kodu źródłowego projektu. Przykładowo do~rozwoju projektu \emph{\hyperref[subsec:ansible]{Ansible}}, \emph{\hyperref[subsec:salt]{Salt}}, \emph{\hyperref[subsec:chef]{Chef}}, \emph{\hyperref[subsec:puppet]{Puppet}}, \emph{\hyperref[itm:cfengine]{CFEngine}} i~\emph{\hyperref[itm:bcfg2]{Bcfg2}} przyczyniło się odpowiednio co~najmniej: 2589, 1754, 505, 440, 82 i~55~osób dodając w~sumie odpowiednio: 29304, 79307, 18696, 24262, 13775 i~8525\hrefemph{https://en.wikipedia.org/wiki/Commit\_(version\_control)}{commitów}\footnote{Na~podstawie statystyk z~dnia 11~marca~2017r. udostępnionych na stronach repozytoriów projektów udostępnianych przez \hreftt{https://github.com/}{github.com}}. Dzięki temu zaangażowaniu rozwiązania te~są~w~stanie zarządzać niemal każdym aspektem konfiguracji systemu operacyjnego i~jego oprogramowania. Jest to~możliwe również dzięki modułowości oprogramowania i~licencji \glslink{copyleft}{copyleft}, na~warunkach których zostały w~znacznej większości udostępnione. Z~racji na~specyfikę pracy magisterskiej, projektowany protokół nie jest tak wszechstronny jak największe z~przedstawionych rozwiązań, mimo, że~podczas projektowania protokołu starano się~stworzyć możliwie wiele ułatwień dla~jego łatwej, modułowej rozbudowy.
 
 %------------------------------------------------------------------------------
 %
@@ -315,7 +320,7 @@ Pomimo długiej listy istniejących rozwiązań, zdaje się, że~żadne z~nich n
 	\item Niniejszej dokumentacji napisanej w~\LaTeX, opisującej problem, istniejące rozwiązania i~projekt protokołu dla~przedstawionego problemu,
 	\item Aplikacji napisanej w~języku Python oraz~towarzyszącej jej dokumentacji wygenerowanej z~komentarzy w~kodzie źródłowym.
 \end{enumerate}
-Aplikacja również składa~się z~dwóch części, co~jest naturalne dla~przyjętej architektury klient-serwer~(por.~rozdział~\ref{cel-i-zakres}):
+Aplikacja również składa~się z~dwóch części, co~jest naturalne dla~przyjętej architektury klient-serwer~(por.~rozdział~\ref{sec:cel-i-zakres}):
 \begin{enumerate}
 	\item Serwera --- wzorca oprogramowania i~konfiguracji dla~klientów,
 	\item Klienta --- okresowo synchronizującego oprogramowanie i~konfigurację z~serwerem.
@@ -330,7 +335,7 @@ W~czasie prac nad~implementacją projektu, korzystano z~pomocnych dokumentacji, 
 		\item dokumentacja POSIX~\cite{posix},
 		\item dokumentacja deweloperów dla wybranych dystrybucji/systemów~\cite{archlinux-wiki,gentoo-wiki},
 		\item dokumentacja Python i~narzędzi towarzyszących~\cite{python-doc},%~\cite{glibc-doc},
-		\item dokumenty IETF (\gls{rfc})~\cite{rfc-editor},
+		\item dokumenty \gls{ietf}~(\gls{rfc})~\cite{rfc-editor},
 		\item dokumentacja TLDP~\cite{tldp},
 		\item dokumenty W3C~\cite{w3c},
 		\item \hreftt{http://www.tcpipguide.com/}{tcpipguide.com}, czyli szczegółowy przegląd protokołu TCP/IP i~pokrewnych protokołów, opublikowany również w~formie obszernej\footnote{Książka ma~1616 stron. ISBN:~\href{https://www.nostarch.com/tcpip.htm}{9781593270476}. Wydawnictwo: \emph{No Starch Press}.} książki autorstwa \href{https://www.linkedin.com/in/charles-kozierok-708112/}{\mbox{Charlesa} \mbox{Kozieroka}} pt.~\emph{The~TCP/IP Guide}.
