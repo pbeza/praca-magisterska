@@ -207,6 +207,10 @@
 %\RequirePackage{tikz}
 %\usetikzlibrary{matrix}
 
+% Bez tego obrazki pojawiają się pod przypisem dolnym
+
+\RequirePackage[bottom]{footmisc}
+
 % Font URLi i zawijanie bardzo długich adresów URL (ładować po paczce setspace,
 % żeby działały dobrze skoki do footnote)
 

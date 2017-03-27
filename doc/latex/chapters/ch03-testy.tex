@@ -4,13 +4,9 @@
 
 \chapter{Testy}
 
-Przeprowadzone testy przeprowadzono na~kilku komputerach klasy~PC połączonych siecią lokalną \emph{ethernet}. Niniejszy rozdział opisuje przeprowadzone różnego rodzaju testy, zarówno z~wykorzystaniem infrastruktury sieciowej, jak i~bez niej. W~szczególności opisano testy funkcjonalne, wydajnościowe, wycieków zasobów (w~szczególności pamięci).
+Aplikacje wykorzystujące do~działania komunikację sieciową wymagają szczególnie dokładnych testów --- z~natury działania komunikacji sieciowej wynika bowiem wiele zazwyczaj niespodziewanych sytuacji, które aplikacja musi umieć obsłużyć, np.~nagłe zerwanie połączenia sieciowego~(np.~na~skutek odłączenia kabla ethernetowego lub~wyłączenia przełącznika sieciowego, do~którego podłączona jest maszyna kliencka) i~opóźnienia w~działaniu sieci --- to~tylko niektóre z~sytuacji, z~którymi każdy protokół i~aplikacja sieciowa muszą sobie umieć poradzić.
 
-%------------------------------------------------------------------------------
-
-\section{Testy wycieków pamięci}
-
-Do~testów kodu pod~kątem sprawdzenia wycieków pamięci wykorzystano program \texttt{valgrind} w~najnowszej dostępnej wersji~\texttt{3.12.0}~\cite{valgrind}.
+Niniejszy rozdział opisuje testy funkcjonalne części serwerowej i~klienckiej stworzonej aplikacji.
 
 %------------------------------------------------------------------------------
 %
@@ -27,6 +23,15 @@ Do~testów kodu pod~kątem sprawdzenia wycieków pamięci wykorzystano program \
 %------------------------------------------------------------------------------
 
 \section{Testy funkcjonalne}
+
+Przeprowadzone testy wykonano w~środowisku złożonym z~trzech fizycznych komputerów klasy~PC z~zainstalowanym systemem \emph{Linux Debian} oraz~dwóch maszyn wirtualnych \hrefemph{https://www.virtualbox.org/}{VirtualBox~5.1} z~zainstalowanym systemem \emph{Linux Arch}. Jeden z~komputerów z~zainstalowanym systemem \emph{Linux Debian} odgrywa rolę serwera i~klienta, a~pozostałe komputery są~klientami. Schemat testowej sieci został przedstawiony na rysunku~\ref{fig:testing-network}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\textwidth]{img/testing-network}
+	\caption{Schemat przedstawiający konfigurację sieciową środowiska testowego}
+	\label{fig:testing-network}
+\end{figure}
 
 TODO
 
