@@ -200,6 +200,10 @@
 \widowpenalty=10000
 \brokenpenalty=10000
 
+% Wyłączenie powyższego na pustych stronach
+
+\RequirePackage{emptypage}
+
 % Umożliwienie korzystania z przypisów
 
 \RequirePackage{footnote}

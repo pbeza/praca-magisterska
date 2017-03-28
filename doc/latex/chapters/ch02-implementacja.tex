@@ -4,7 +4,7 @@
 
 \chapter{Implementacja}
 
-Kod źródłowy projektu został napisany wyłącznie w~języku~Python.
+Kod źródłowy projektu został napisany wyłącznie w~języku \hreftt{https://en.wikipedia.org/wiki/Python_(programming_language)}{Python} w~najnowszej dostępnej wersji~\texttt{3.6.1}.
 
 W~niniejszym rozdziale przedstawiono szczegóły implementacyjne projektu, w~szczególności zastosowane biblioteki i~narzędzia pomocnicze.
 
@@ -17,22 +17,33 @@ W~niniejszym rozdziale przedstawiono wyróżnione biblioteki, które wykorzystan
 \begin{itemize}
 	\item \hreftt{http://www.pyopenssl.org/}{pyOpenSSL} --- \hrefemph{https://en.wikipedia.org/wiki/Language_binding}{Binding} dla~biblioteki OpenSSL. Biblioteka ta~implementuje wiele protokołów i~algorytmów kryptograficznych, ale~w~ramach projektu została wykorzystana tylko w~celu umożliwia uwierzytelnienie serwera przez klienta przez użycie certyfikatów cyfrowych.
 	\item \hreftt{http://zeromq.org/}{ØMQ} --- Znana jest również pod~nazwą \emph{ZeroMQ} --- biblioteka implementująca różne wzorce przekazywania komunikatów~(\emph{messaging library}), dedykowana przede wszystkim dla~wydajnych, rozproszonych środowisk sieciowych. Wzorcem wykorzystanym w~implementacji niniejszego projektu jest wzorzec \hrefemph{https://rfc.zeromq.org/spec:29/PUBSUB/}{Publish--Subscribe}, implementowany na~różne sposoby --- jednym ze~sposobów jest wykorzystanie protokołu~\hyperref[sec:pgm]{PGM}, pośrednio implementowanego przez~\href{https://en.wikipedia.org/wiki/ZeroMQ}{ØMQ} przez wykorzystanie implementacji \href{https://github.com/steve-o/openpgm}{OpenPGM}. Biblioteka została napisana w~języku~C++, ale~powstały również \emph{bindingi} dla~ponad 40~innych języków programowania --- m.in.~dla~Pythona, w~którym został zaimplementowany niniejszy projekt. ØMQ~została opublikowana na~warunkach licencji~\glslink{lgpl}{LGPL}.
+	\item \hreftt{https://en.wikipedia.org/wiki/Squid_(software)}{Squid} lub\footnote{TODO --- wybór tego, który lepiej się sprawdzi --- oba da się skonfigurować do~pracy na~\emph{Debianie} i~\emph{Archu}.} \hreftt{https://www.unix-ag.uni-kl.de/~bloch/acng/html/}{Apt-Cacher-NG} jako serwer buforujący pakiety oprogramowania dla~klienta (\href{https://lwn.net/Articles/318658/}{Package Repository Proxy}).
 %Istnieje wiele bibliotek kryptograficznych, które, pod~warunkiem poprawnego użycia, mogą istotnie poprawić bezpieczeństwo protokołu. Najpopularniejsze z~nich~to: \emph{\gls{openssl}}, \emph{GnuTLS}, \emph{LibreSSL} i~\emph{BoringSSL}. Biblioteką istniejącą najdłużej z~wymienionych jest \gls{openssl}. Biblioteka GnuTLS powstała w~odpowiedzi na~\gls{openssl} ze~względu na~to, że~\gls{openssl} nie jest opublikowana na~licencji kompatybilnej z~licencją~\glslink{gpl}{GPL}, przez co~liczne projekty korzystające licencji~\glslink{gpl}{GPL} (np.~\emph{Wireshark}), nie mogą korzystać z~\gls{openssl}. Biblioteki LibreSSL i~BoringSSL są~\emph{fork'ami} biblioteki \gls{openssl}. BoringSSL powstał w~\emph{Google} na~potrzeby użycia w~różnych produktach tej firmy, w~szczególności w~przeglądarce internetowej \emph{Chrome}. Długa historia \gls{openssl}, mnogość bibliotek pokrewnych, mających źródło w~kodzie źródłowym \gls{openssl} oraz~względnie duża społeczność kryptologów zgromadzonych wokół tego projektu, spowodowały, że~biblioteka \gls{openssl} została użyta do~zapewnienia bezpieczeństwa opracowanego protokołu sieciowego.
 %\gls{openssl} udostępnia wiele metod i~algorytmów kryptograficznych, które przetrwały wiele lat kryptoanaliz (np.~\gls{aes}, \gls{rsa}) i~są powszechnie uważane za~bezpieczne, pod~warunkiem poprawnego ich~wykorzystania i~zastosowania kluczy o~odpowiednio dużej długości. Wykorzystanie tej biblioteki w~kontekście komunikacji między klientem i~serwerem zostało opisane w~rozdziale~\ref{sec:security}, dotyczącym bezpieczeństwa opracowanego protokołu.
 	\item \hreftt{http://pyyaml.org/}{PyYAML} --- Służy do~parsowania plików konfiguracyjnych \texttt{YAML} serwera i~klienta.
 \end{itemize}
 
-%------------------------------------------------------------------------------
+%---------------------------------------
 
-\section{Wielowątkowość}
+\section{Moduły}
 
-TODO
+Aplikacja składa się z~części serwerowej i~klienckiej. Każda z~tych części składa się z~modułów realizujących rozłączone zadania. Wyjątkiem jest wspólny moduł parsera konfiguracji przesyłanej klientom przez serwer multicastem.
 
-%------------------------------------------------------------------------------
+Moduły serwera:\mynobreakpar
+\begin{itemize}
+	\item moduł wysyłający multicastem konfigurację klientom,
+	\item moduł pobierający, buforujący i~udostępniający klientom pakiety z~Internetu,
+	\item moduł logujący niepowodzenia instalacji klientów,
+	\item parser konfiguracji (wspólny dla~serwera i~klienta).
+\end{itemize}
 
-\section{Wykorzystane narzędzia}
-
-W~tym rozdziale opisano z~jakich narzędzi i~z~jakich elementów konfiguracji korzystano w~trakcie implementacji.
+Moduły klienta:\mynobreakpar
+\begin{itemize}
+	\item moduł odbierający i~interpretujący konfigurację odebraną multicastem od~serwera,
+	\item moduł odbierający oprogramowanie od~serwera pobierającego oprogramowanie z~Internetu,
+	\item moduł wysyłający logi do~serwera logów,
+	\item parser konfiguracji (wspólny dla~serwera i~klienta).
+\end{itemize}
 
 %---------------------------------------
 %
