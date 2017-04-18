@@ -1,0 +1,50 @@
+# Server logger configuration.
+#
+# To learn more about read:
+# https://docs.python.org/3.7/library/logging.config.html#dictionary-schema-details
+
+version: 1
+formatters:
+  brief:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  precise:
+    format: '%(relativeCreated)6d %(threadName)s %(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+handlers:
+  syslog:
+    class: logging.handlers.SysLogHandler
+    level: WARNING
+    formatter: precise
+    address: /dev/log
+  console:
+    class: logging.StreamHandler
+    level: NOTSET
+    formatter: precise
+    stream: ext://sys.stderr
+  file:
+    class: logging.handlers.RotatingFileHandler
+    formatter: brief
+    filename: /tmp/myscm/srv/log
+    maxBytes: 8192
+    backupCount: 3
+loggers:
+  server:
+    level: NOTSET
+    handlers: [file,console]
+    propagate: yes
+  server.multicastserver:
+    level: NOTSET
+    propagate: yes
+  server.pkgproxyserver:
+    level: NOTSET
+    propagate: yes
+  server.logserver:
+    level: NOTSET
+    propagate: yes
+  server.allinoneserver:
+    level: NOTSET
+    propagate: yes
+root:
+#  level: DEBUG
+  level: NOTSET
+  handlers: [syslog]
