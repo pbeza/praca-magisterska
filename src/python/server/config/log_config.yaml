@@ -10,6 +10,8 @@ formatters:
   precise:
     format: '%(relativeCreated)6d %(threadName)s %(asctime)s - %(name)s - %(levelname)s - %(message)s'
     datefmt: '%Y-%m-%d %H:%M:%S'
+  console:
+    format: '[ %(levelname)s ] %(message)s'
 handlers:
   syslog:
     class: logging.handlers.SysLogHandler
@@ -19,7 +21,7 @@ handlers:
   console:
     class: logging.StreamHandler
     level: NOTSET
-    formatter: precise
+    formatter: console
     stream: ext://sys.stderr
   file:
     class: logging.handlers.RotatingFileHandler

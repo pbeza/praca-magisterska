@@ -8,7 +8,7 @@ comfortably ran them together on one machine."""
 from server.allinoneconfig import AllInOneConfig
 from server.allinoneserver import AllInOneServer
 from server.base import baseparser
-import server.constants
+import server.base.constants
 
 logger = logging.getLogger(server.constants.ALL_IN_ONE_SERVER_LOGGER)
 

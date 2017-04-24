@@ -5,8 +5,8 @@ import time # TODO
 
 from server.base import baseserver
 from server.multicastserver import config
+import server.multicastserver.constants as srvconstants
 
-CONFIG_SECTION_NAME = 'multicastserver'
 SERVER_NAME = 'multicast server'
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,8 @@ class MulticastServer(baseserver.BaseServer):
 
     @classmethod
     def from_file(cls, config_path, args):
-        c = config.MulticastServerConfig(config_path, CONFIG_SECTION_NAME,
+        c = config.MulticastServerConfig(config_path,
+                                         srvconstants.CONFIG_SECTION_NAME,
 					 args)
         return cls(c)
 

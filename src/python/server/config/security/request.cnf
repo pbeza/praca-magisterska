@@ -1,0 +1,19 @@
+[req]
+default_bits       = 4096
+default_keyfile    = rsa_aes256_4096.key
+prompt             = no
+distinguished_name = dn
+req_extensions     = ext
+input_password     = minipw
+
+[dn]
+CN                 = Patryk
+OU                 = MiNI
+emailAddress       = patryk.beza@gmail.com
+O                  = PW
+L                  = Warsaw
+ST                 = Masovian
+C                  = PL
+
+[ext]
+subjectAltName     = DNS:www.mini.pw.edu.pl,DNS:*.mini.pw.edu.pl

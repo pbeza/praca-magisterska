@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*
-
-from common.myscmerror import MySCMError
-
-
-class MulticastServerError(MySCMError):
-    pass
+from server.base.error import ServerError
 
 
-class MulticastServerParserError(MulticastServerError):
+# TODO TODO TODO move to server.py
+class MulticastServerError(ServerError):
     pass

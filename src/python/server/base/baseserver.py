@@ -9,19 +9,20 @@ import yaml
 import common.constants
 from server.base import baseconfig
 
-logger = None
+logger = logging.getLogger(__name__)
 
 
+# TODO TODO TODO
 class BaseServer:
 
     def __init__(self, config, server_name):
         self.config = config
         self.server_name = server_name
 
-    @classmethod
+    """@classmethod
     def from_file(cls, config_path, config_section_name, server_name):
         config = baseconfig.BaseServerConfig(config_path, config_section_name)
-        return cls(config, server_name)
+        return cls(config, server_name)"""
 
     def start_daemon(self, atexit_func=None):
         pid_file = self.get_pid_file_path()
@@ -29,9 +30,9 @@ class BaseServer:
                 pidfile=lockfile.FileLock(pid_file),
                 detach_process=True,
                 signal_map={
-                        signal.SIGINT:  self._signal_handler,
-                        signal.SIGTERM: self._signal_handler
-                    }
+                    signal.SIGINT:  self._signal_handler,
+                    signal.SIGTERM: self._signal_handler
+                }
             )
         # self.context.signal_map = {
         #     signal.SIGHUP: 'terminate',
@@ -73,7 +74,7 @@ class BaseServer:
         try:
             logging.config.dictConfig(log_config)
         except ValueError as e:
-            m = "Can't load logging configuration file read from '{}'. "\
+            m = "Can't load logging configuration file read from '{}' "\
                 "Details: {}".format(log_config_path, str(e))
             raise Exception(m) from e  # TODO
         global logger

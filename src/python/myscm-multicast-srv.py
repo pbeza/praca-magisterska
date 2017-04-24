@@ -5,29 +5,26 @@ regularly sends configuration to clients using PGM multicast protocol."""
 
 import logging
 
+import common.constants
+import common.myscmerror as error
 import server.multicastserver.config as srvconfig
-import server.multicastserver.error as srverror
 
 logger = logging.getLogger(__name__)
 
 
 def _main():
+    # Temporary logger before loading logger config file
+    logging.basicConfig(
+        format=common.constants.BASIC_LOGGER_FORMAT,
+        level=common.constants.BASIC_CONFIG_LOG_LEVEL)
     srvconfig.init()
-    if srvconfig.config.version:
-        srvconfig.config_parser.print_version()
 
 
 if __name__ == '__main__':
-
-    # Setup temporary logger before loading final logger configuration
-    logging.basicConfig(format='%(message)s', level=logging.NOTSET)
-
     try:
         _main()
-    except srverror.MulticastServerError as e:
-        logger.warning(e)
-        if srvconfig.config and srvconfig.config.verbose > 0:
-            logger.warning(e.get_details())
+    except error.MySCMError as e:
+        logger.error(str(e))
     except (KeyboardInterrupt, EOFError):
         logger.info('Keyboard interrupt or EOF detected')
     except Exception as e:
