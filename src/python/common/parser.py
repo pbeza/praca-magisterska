@@ -90,10 +90,18 @@ _MAX_VERBOSITY_LEVEL = 5
 _LOG_CONFIG_FILE_VALIDATOR = None
 
 _LOG_CONFIG_FILE_OPTION = FileConfigOption(
-        'LogConfigPath', _DEFAULT_LOG_CONFIG_FILE, _LOG_CONFIG_FILE_VALIDATOR)
+        'LogConfigPath',
+        _DEFAULT_LOG_CONFIG_FILE,
+        _LOG_CONFIG_FILE_VALIDATOR)
+
 _VERBOSITY_OPTION = ArgFileConfigOption(
-        'Verbose', _DEFAULT_VERBOSITY_LEVEL, _assert_verbosity_valid, False,
-        '-v', '--verbose', action='count',
+        'Verbose',
+        _DEFAULT_VERBOSITY_LEVEL,
+        _assert_verbosity_valid,
+        False,
+        '-v',
+        '--verbose',
+        action='count',
         help='increase output and log verbosity')
 
 DEFAULT_CONFIG = [_LOG_CONFIG_FILE_OPTION, _VERBOSITY_OPTION]

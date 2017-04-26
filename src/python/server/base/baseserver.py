@@ -1,33 +1,40 @@
 # -*- coding: utf-8 -*-
-import daemon
+from lockfile.pidlockfile import PIDLockFile
 import lockfile
+import daemon
 import logging
 import logging.config
 import signal
-import yaml
 
-import common.constants
-from server.base import baseconfig
+from common.myscmerror import MySCMError
 
 logger = logging.getLogger(__name__)
 
 
-# TODO TODO TODO
 class BaseServer:
 
     def __init__(self, config, server_name):
         self.config = config
         self.server_name = server_name
 
-    """@classmethod
-    def from_file(cls, config_path, config_section_name, server_name):
-        config = baseconfig.BaseServerConfig(config_path, config_section_name)
-        return cls(config, server_name)"""
+    def _get_file_descriptors_to_preserve(self):
+        global logger
+        tmp_log = logger
+        preserve_list = []
+        while tmp_log.name != 'root':
+            for h in tmp_log.handlers:
+                if isinstance(h, logging.FileHandler):
+                    preserve_list.append(h.stream.fileno())
+            tmp_log = tmp_log.parent
+        return preserve_list
 
     def start_daemon(self, atexit_func=None):
-        pid_file = self.get_pid_file_path()
+        files_to_preserve = self._get_file_descriptors_to_preserve()
+        logger.debug('Log file descriptors to preserve after daemonization: '
+                     '{}'.format(files_to_preserve))
         self.context = daemon.DaemonContext(
-                pidfile=lockfile.FileLock(pid_file),
+                pidfile=PIDLockFile(self.config.PID_file_path),
+                files_preserve=files_to_preserve,
                 detach_process=True,
                 signal_map={
                     signal.SIGINT:  self._signal_handler,
@@ -47,46 +54,28 @@ class BaseServer:
         # self.context.files_preserve = [important_file, interesting_file]
         if atexit_func is not None:
             daemon.register_atexit_function(atexit_func)
-        self.context.open()
-        self._setup_logger_config()
-        logger.debug("Daemon successfully started ({})".format(
+        logger.debug('Before daemonization')
+        logger.debug('h: {}'.format(vars(logger.parent)))
+        try:
+            self.context.open()
+        except (FileExistsError, lockfile.AlreadyLocked) as e:
+            logger.error('dupa')
+            msg = 'Server is already running – PID file exists'
+            raise ServerError(msg, e) from e
+        logger.debug("Daemon '{}' successfully started".format(
                      self.server_name))
 
     def stop_daemon(self):
         self.context.close()
-        logger.debug("Daemon successfully stopped ({})".format(
+        logger.debug("Daemon '{}' successfully stopped".format(
                      self.server_name))
 
-    def get_from_config(self, var_name):
-        section_name = self.config.config_section_name
-        return self.config.parser[section_name].get(var_name)
-
-    def get_pid_file_path(self):
-        return self.get_from_config(common.constants.CONF_VAR_PID_FILE_PATH)
-
-    def get_logger_config_path(self):
-        return self.get_from_config(common.constants.CONF_VAR_LOG_CONFIG_PATH)
-
-    def _setup_logger_config(self):
-        log_config_path = self.get_logger_config_path()
-        with open(log_config_path) as f:
-            log_config = yaml.load(f)
-        try:
-            logging.config.dictConfig(log_config)
-        except ValueError as e:
-            m = "Can't load logging configuration file read from '{}' "\
-                "Details: {}".format(log_config_path, str(e))
-            raise Exception(m) from e  # TODO
-        global logger
-        logger = logging.getLogger(__name__)
-
     def _signal_handler(self, signum, _):
-        if signum == signal.SIGINT:
-            logger.warning('SIGINT signal (num = {}) handled by {}',
-                           signum, self.server_name)
-        elif signum == signal.SIGTERM:
-            logger.warning('SIGTERM signal (num = {}) handled by {}',
-                           signum, self.server_name)
-        else:
-            logger.warning('Signal (num = {}) handled by {}',
-                           signum, self.server_name)
+        sigdict = {signal.SIGINT: 'SIGINT', signal.SIGTERM: 'SIGTERM'}
+        signame = sigdict.get(signum, 'Unhandled')
+        logger.warning('{} signal (num = {}) handled by {}'.format(
+                       signame, signum, self.server_name))
+
+
+class ServerError(MySCMError):
+    pass

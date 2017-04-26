@@ -5,6 +5,7 @@ regularly sends configuration to clients using PGM multicast protocol."""
 
 import logging
 
+from server.multicastserver.multicastserver import MulticastServer
 import common.constants
 import common.myscmerror as error
 import server.multicastserver.config as srvconfig
@@ -18,6 +19,8 @@ def _main():
         format=common.constants.BASIC_LOGGER_FORMAT,
         level=common.constants.BASIC_CONFIG_LOG_LEVEL)
     srvconfig.init()
+    srv = MulticastServer(srvconfig.config)
+    srv.run()
 
 
 if __name__ == '__main__':

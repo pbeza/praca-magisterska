@@ -15,7 +15,8 @@ formatters:
 handlers:
   syslog:
     class: logging.handlers.SysLogHandler
-    level: WARNING
+#    level: WARNING
+    level: NOTSET
     formatter: precise
     address: /dev/log
   console:

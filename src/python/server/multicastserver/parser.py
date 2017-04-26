@@ -49,27 +49,41 @@ _DEFAULT_PROPAGATION_INTERVAL_SEC = 3600
 _DEFAULT_PID_FILE_PATH = '/var/run/lock/myscm-multicast-srv.pid'
 
 _PROPAGATION_INTERVAL_OPTION = common.parser.ArgFileConfigOption(
-        'PropagationIntervalSeconds', _DEFAULT_PROPAGATION_INTERVAL_SEC,
-        _assert_propagation_interval_valid, False, '-t', '--time-prop',
-        metavar='SEC', type=_assert_propagation_interval_valid,
+        'PropagationIntervalSeconds',
+        _DEFAULT_PROPAGATION_INTERVAL_SEC,
+        _assert_propagation_interval_valid,
+        False,
+        '-t',
+        '--time-prop',
+        metavar='SEC',
+        type=_assert_propagation_interval_valid,
         help='time interval in seconds between sending configuration to '
              'clients (minimum {}, maximum {} seconds)'.format(
                  _MIN_PROP_INTERVAL_SEC,
                  _MAX_PROP_INTERVAL_SEC))
+
 _PID_FILE_OPTION = common.parser.PIDFileConfigOption(_DEFAULT_PID_FILE_PATH)
+
 _SSL_CERT_FILE_OPTION = common.parser.ArgFileConfigOption(
-        'SSLCertPath', None, None, True, '--cert', metavar='PATH',
+        'SSLCertPath',
+        None,
+        None,
+        True,
+        '--cert',
+        metavar='PATH',
         type=_assert_ssl_cert_path_valid,
         help="file path to server's SSL certificate")
+
 _DEFAULT_CONFIG = [
         _PROPAGATION_INTERVAL_OPTION, _PID_FILE_OPTION, _SSL_CERT_FILE_OPTION]
+
 _DEFAULT_CONFIG.extend(server.base.parser.DEFAULT_CONFIG)
 
 
 class MulticastServerConfigParser(server.base.parser.ConfigParser):
 
     def __init__(self, config_path, config_section_name):
-        super(MulticastServerConfigParser, self).__init__(
+        super().__init__(
                 config_path, config_section_name, _DEFAULT_CONFIG, _HELP_DESC,
                 server.multicastserver.constants.APP_VERSION_LONG)
 
