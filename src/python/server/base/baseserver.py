@@ -4,6 +4,7 @@ import lockfile
 import daemon
 import logging
 import logging.config
+import os
 import signal
 
 from common.myscmerror import MySCMError
@@ -31,7 +32,7 @@ class BaseServer:
     def start_daemon(self, atexit_func=None):
         files_to_preserve = self._get_file_descriptors_to_preserve()
         logger.debug('Log file descriptors to preserve after daemonization: '
-                     '{}'.format(files_to_preserve))
+                     '{}.'.format(files_to_preserve))
         self.context = daemon.DaemonContext(
                 pidfile=PIDLockFile(self.config.PID_file_path),
                 files_preserve=files_to_preserve,
@@ -54,21 +55,41 @@ class BaseServer:
         # self.context.files_preserve = [important_file, interesting_file]
         if atexit_func is not None:
             daemon.register_atexit_function(atexit_func)
-        logger.debug('Before daemonization')
-        logger.debug('h: {}'.format(vars(logger.parent)))
+        logger.debug('Starting daemon. All subsequent log messages will be '
+                     'redirected to syslog and log file unless custom log '
+                     'configuration was set.')
         try:
             self.context.open()
-        except (FileExistsError, lockfile.AlreadyLocked) as e:
-            logger.error('dupa')
-            msg = 'Server is already running – PID file exists'
+        except lockfile.AlreadyLocked as e:
+            msg = 'Server is probably already running. PID lock file exists'
             raise ServerError(msg, e) from e
-        logger.debug("Daemon '{}' successfully started".format(
+        logger.debug("Daemon '{}' successfully started.".format(
                      self.server_name))
 
     def stop_daemon(self):
         self.context.close()
-        logger.debug("Daemon '{}' successfully stopped".format(
+        logger.debug("Daemon '{}' successfully stopped.".format(
                      self.server_name))
+
+    def terminate_daemon(self):
+        msg = "Terminating existing daemon based on PID lock file '{}'."\
+              .format(self.config.PID_file_path)
+        logger.info(msg)
+        pid = lockfile.pidlockfile.read_pid_from_pidfile(
+                self.config.PID_file_path)
+        if pid is None:
+            msg = "Can't stop daemon because PID lock file '{}' doesn't "\
+                  "exist.".format(self.config.PID_file_path)
+            raise ServerError(msg)
+
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError as e:
+            msg = 'Sending SIGTERM signal to daemon with PID = {} has failed.'\
+                  .format(pid)
+            raise ServerError(msg)
+
+        lockfile.pidlockfile.break_lock(self.config.PID_file_path)
 
     def _signal_handler(self, signum, _):
         sigdict = {signal.SIGINT: 'SIGINT', signal.SIGTERM: 'SIGTERM'}

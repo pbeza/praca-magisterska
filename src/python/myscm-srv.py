@@ -18,7 +18,7 @@ def _main(args):
     config = AllInOneConfig.from_file(
                              server.multicastserver.constants.CONFIG_FILE_PATH,
                              args)
-    logger.info('Starting all-in-one server')
+    logger.info('Starting all-in-one server.')
     server = AllInOneServer(config)
     server.run(config)
 

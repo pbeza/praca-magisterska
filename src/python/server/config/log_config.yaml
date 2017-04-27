@@ -5,28 +5,28 @@
 
 version: 1
 formatters:
-  brief:
-    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-  precise:
-    format: '%(relativeCreated)6d %(threadName)s %(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    datefmt: '%Y-%m-%d %H:%M:%S'
-  console:
-    format: '[ %(levelname)s ] %(message)s'
+  file-formatter:
+    format: '[%(process)d] [%(thread)d] [%(asctime)s] [ %(levelname)s ] %(message)s'
+  syslog-formatter:
+    format: '[%(thread)d] [ %(levelname)s ] %(message)s'
+    datefmt: '%Y.%m.%d %H:%M:%S'
+  console-formatter:
+    format: '[ %(levelname)s ] [%(process)d] [%(thread)d] %(message)s'
 handlers:
   syslog:
     class: logging.handlers.SysLogHandler
 #    level: WARNING
     level: NOTSET
-    formatter: precise
+    formatter: syslog-formatter
     address: /dev/log
   console:
     class: logging.StreamHandler
     level: NOTSET
-    formatter: console
+    formatter: console-formatter
     stream: ext://sys.stderr
   file:
     class: logging.handlers.RotatingFileHandler
-    formatter: brief
+    formatter: file-formatter
     filename: /tmp/myscm/srv/log
     maxBytes: 8192
     backupCount: 3

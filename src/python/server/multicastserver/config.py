@@ -22,8 +22,8 @@ def init():
                         srvconstants.CONFIG_SECTION_NAME)
     _load_logging_config()
     logger.info("Server configuration successfully loaded from file '{}' from "
-                "section [{}]".format(srvconstants.CONFIG_FILE_PATH,
-                                      srvconstants.CONFIG_SECTION_NAME))
+                "section [{}].".format(srvconstants.CONFIG_FILE_PATH,
+                                       srvconstants.CONFIG_SECTION_NAME))
 
 
 def _load_server_config(config_file_path, config_section_name):
@@ -34,7 +34,7 @@ def _load_server_config(config_file_path, config_section_name):
             config_section_name)
     config = config_parser.parse()
     if config.verbose > 1:
-        logger.debug('Successfully loaded multicast server configuration: {}'
+        logger.debug('Successfully loaded multicast server configuration: {}.'
                      .format(vars(config)))
 
 

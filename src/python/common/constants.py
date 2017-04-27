@@ -16,7 +16,7 @@ learn more about this implementation, refer project's white paper.'''
 # Basic logger configuration, including logger format and log level used before
 # loading logger configuration
 
-BASIC_LOGGER_FORMAT = '[ %(levelname)s ] %(message)s'
+BASIC_LOGGER_FORMAT = '[ %(levelname)s ][%(process)d] %(message)s'
 BASIC_CONFIG_LOG_LEVEL = logging.NOTSET
 APP_VERSION_FULL_TEMPLATE = '''{name} {version}
 {license}
