@@ -207,6 +207,7 @@
 % Umożliwienie korzystania z przypisów
 
 \RequirePackage{footnote}
+\RequirePackage{tablefootnote}
 %\RequirePackage[all]{hypcap}
 %\RequirePackage{tikz}
 %\usetikzlibrary{matrix}
@@ -305,6 +306,12 @@
 \RequirePackage{amssymb}
 %\RequirePackage{mathabx}
 
+% Krzyżyk (cross) i tick (check)
+
+\RequirePackage{pifont}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
 % Ustawienie wcięć na początku każdego akapitu
 
 %\RequirePackage{indentfirst}
@@ -316,6 +323,10 @@
 \def\@schapter#1{
 	\phantomsection\addcontentsline{toc}{chapter}{#1}
 	\markboth{#1}{#1}\@makeschapterhead{#1}\@afterheading}
+
+% Większe odstępy w tabelach
+
+\renewcommand{\arraystretch}{1.6}
 
 % Usunięcie ze spisu treści odwołania do spisu treści
 

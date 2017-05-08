@@ -23,7 +23,7 @@ Angielska wersja tytułu pracy:
 \begin{displayquote}
 \inserttitleaux.
 \end{displayquote}
-Wybór tematu pracy jest podyktowany zainteresowaniami autora pracy dotyczącymi m.in.~sytemów \glslink{unix-like-system}{*nixowych}, protokołów sieciowych, ich bezpieczeństwa oraz~problemem zautomatyzowanego dystrybuowania oprogramowania, który dotyka wiele firm, o~czym może świadzyć lista firm, uniwersytetów i~instytucji, które korzystają z~istniejących rozwiązań tego problemu przedstawionych w~rozdziale \ref{ch:istniejace-rozwiazania}. Problem ten dotyknął również Wydział~MiNI~PW, co~stało się bezpośrednią motywacją do~alternatywnego rozwiązania tego problemu.
+Wybór tematu pracy jest podyktowany zainteresowaniami autora pracy dotyczącymi m.in.~sytemów \glslink{unix-like-system}{*nixowych}, protokołów sieciowych, ich bezpieczeństwa oraz~problemem zautomatyzowanego dystrybuowania oprogramowania, który dotyka wiele firm, o~czym może świadzyć długa lista korporacji, uniwersytetów, ośrodków badawczych i~innych instytucji, które korzystają z~istniejących rozwiązań tego problemu, przedstawionych w~rozdziale \ref{ch:istniejace-rozwiazania}. Problem ten dotyknął również Wydział~MiNI~PW, co~stało się bezpośrednią motywacją do~alternatywnego rozwiązania tego problemu.
 
 %------------------------------------------------------------------------------
 
@@ -31,16 +31,18 @@ Wybór tematu pracy jest podyktowany zainteresowaniami autora pracy dotyczącymi
 \label{sec:cel-i-zakres}
 
 \noindent Celem niniejszej pracy jest:
-\blockcquote{formularz-zgloszenia-pracy}{Zaprojektowanie i~zaimplementowanie protokołu umożliwiającego propagowanie zmian w~systemie plików, pakietów oraz~elementów konfiguracji do~stacji roboczych pod~kontrolą systemu operacyjnego \glslink{gnulinux}{Linux/GNU} lub~innego systemu \glslink{unix-like-system}{*nix}, a~także elastycznego standardu opisu zmian oraz~narzędzi dla~ich rejestrowania i~dostosowywania. Proponowaną architekturą jest model klient--serwer. Konkretny obraz zmian może być przeznaczony dla~konkretnej dystrybucji, jednakże stworzone rozwiązania praktyczne powinny dawać się w~prosty sposób dostosowywać do~popularnych dystrybucji systemu \glslink{gnulinux}{Linux/GNU} oraz~systemów \glslink{unix-like-system}{*nix}.}
-W~uproszczeniu, celem niniejszej pracy jest zaprojektowanie i~zaimplementowanie narzędzia dla~systemów \glslink{unix-like-system}{*niksowych} do~zarządzania synchronizacją oprogramowania i~jego konfiguracji na~grupie komputerów podłączonych do~sieci opartej na~protokole~\gls{tcpip}. Oprogramowanie takie często jest nazywane oprogramowaniem typu \hrefemph{https://en.wikipedia.org/wiki/Software_configuration_management}{Software Configuration Management~(SCM)}~\cite{wiki:scm}, a~sposób jego działania nazywany jest \hrefemph{https://en.wikipedia.org/wiki/Infrastructure_as_Code}{Infrastructure as Code~(IaC)}.
+\blockcquote{formularz-zgloszenia-pracy}{Zaprojektowanie i~zaimplementowanie protokołu umożliwiającego propagowanie zmian w~systemie plików, pakietów oraz~elementów konfiguracji do~stacji roboczych pod~kontrolą systemu operacyjnego \glslink{gnulinux}{Linux/GNU} lub~innego systemu \glslink{unix-like-system}{*nix}, a~także elastycznego standardu opisu zmian oraz~narzędzi dla~ich rejestrowania i~dostosowywania. Proponowaną architekturą jest model klient-serwer. Konkretny obraz zmian może być przeznaczony dla~konkretnej dystrybucji, jednakże stworzone rozwiązania praktyczne powinny dawać się w~prosty sposób dostosowywać do~popularnych dystrybucji systemu \glslink{gnulinux}{Linux/GNU} oraz~systemów \glslink{unix-like-system}{*nix}.}
+W~uproszczeniu, celem niniejszej pracy jest zaprojektowanie i~zaimplementowanie zestawu narzędzi dla~systemów \glslink{unix-like-system}{*niksowych} pozwalających na~zarządzanie synchronizacją oprogramowania i~jego konfiguracji na~grupie komputerów podłączonych do~sieci opartej na~protokole~\gls{tcpip}. Takie oprogramowanie często jest nazywane oprogramowaniem typu \hrefemph{https://en.wikipedia.org/wiki/Software_configuration_management}{Software Configuration Management~(SCM)}~\cite{wiki:scm}.
 
 %------------------------------------------------------------------------------
 
 \section{Motywacja}
 
-Motywacją do~napisania pracy magisterskiej na~przedstawiony w~rozdziale~\ref{sec:cel-i-zakres} temat, jest problem, z~którym zmagają się~administratorzy głównie średnich i~dużych sieci komputerowych na~całym świecie, niezależnie od~używanego przez nich systemu operacyjnego --- problem automatycznego dystrybuowania ujednoliconego oprogramowania i~jego konfiguracji na~komputery połączone siecią komputerową~\cite{so-problem-intro}. W~ogólności nie~muszą to~być komputery takie jak serwery czy stacje robocze --- choć to~głównie z~nimi administratorzy komputerowi mają do~czynienia. Omawiany problem może dotyczyć również niektórych systemów wbudowanych nie będących systemami typu~\mbox{\hrefemph{https://en.wikipedia.org/wiki/Bare_machine}{bare~metal}}, tzn.~pracujących pod~kontrolą systemu operacyjnego. Przykładem takich urządzeń są~niektóre biletomaty, bankomaty, maszyny \emph{vendingowe} i~wyświetlacze np.~na lotniskach, peronach i~przystankach komunikacji miejskiej.
+Motywacją do~napisania pracy magisterskiej na~przedstawiony w~rozdziale~\ref{sec:cel-i-zakres} temat, jest problem, który wynika ze~specyfiki pracy administratora komputerowego, często odpowiedzialnego za~dziesiątki, setki lub~nawet tysiące komputerów, które wymagają podobnego lub~identycznego oprogramowania --- problem automatycznego dystrybuowania ujednoliconego oprogramowania i~jego konfiguracji na~komputery połączone siecią komputerową~\cite{so-problem-intro}. W~ogólności nie~muszą to~być komputery takie jak serwery czy stacje robocze --- choć to~zazwyczaj z~nimi administratorzy komputerowi mają do~czynienia. Omawiany problem może dotyczyć również niektórych systemów wbudowanych nie będących systemami typu~\mbox{\hrefemph{https://en.wikipedia.org/wiki/Bare_machine}{bare~metal}}, tzn.~pracujących pod~kontrolą systemu operacyjnego. Przykładem takich urządzeń są~niektóre biletomaty, bankomaty, maszyny \emph{vendingowe} i~wyświetlacze np.~na lotniskach, peronach i~przystankach komunikacji miejskiej.
 
-W praktyce problem dystrybuowania jednolitego oprogramowania jest szczególnie odczuwalny przez administratorów, którzy zarządzają dużą ilością komputerów --- serwerów lub~stacji roboczych --- z~których każdy musi mieć ten~sam lub~podobny zestaw zainstalowanych programów i~konfiguracji dedykowanej dla~zainstalowanego oprogramowania. Popularne sposoby radzenia sobie z~tym problemem są~w~praktyce uciążliwe, a~istniejące rozwiązania w~pełni automatyzujące cały proces synchronizacji oprogramowania i~konfiguracji~(patrz rozdział~\ref{ch:istniejace-rozwiazania}), są stosunkowo młode i~słabo rozpowszechnione wśród większości administratorów komputerowych.
+Popularne sposoby radzenia sobie z~tym problemem bywają w~praktyce uciążliwe, a~istniejące rozwiązania w~pełni automatyzujące cały proces synchronizacji oprogramowania i~konfiguracji~(patrz rozdział~\ref{ch:istniejace-rozwiazania}), są~stosunkowo młode, przez co~mogą być nieznane części administratorom komputerowym. Wszystkie cztery istniejące rozwiązania opisane w~rozdziale~\ref{ch:istniejace-rozwiazania} działają w~podobny sposób. W~dużym uproszczeniu typowy przypadek użycia każdego z~tych rozwiązań sprowadza się~do tego, że~administrator komputerowy tworzy w~języku danego rozwiązania pliki konfiguracyjne opisujące wymagany stan konfiguracji klientów. Następnie tak przygotowana konfiguracja jest tłumaczona przez aplikację serwera lub~klienta (w~zależności od~rozwiązania) na~język zrozumiały dla~systemu klienta i~zostaje przez niego zastosowana.
+
+Niniejsza praca prezentuje alternatywne rozwiązanie tego problemu. W~uproszczeniu, alternatywny model działania polega na~tym, że~administrator komputerowy skanuje system ,,wzorcowy'' przed dokonaniem jakichkolwiek zmian, które będą odzwierciedlone na~systemach klienckich, następnie dokonuje zmian w~przeskanowanym systemie i~ponownie skanuje ten sam system, do~którego chce upodobnić systemy klientów. Podczas drugiego skanowania powstaje obraz zmian dokonanych od~czasu przeprowadzenia pierwszego skanowania, który jest przesłany i~zastosowany przez aplikacje klientów.
 
 %------------------------------------------------------------------------------
 
@@ -52,31 +54,31 @@ Zastosowania rozwiązania problemu dystrybuowania jednolitego oprogramowania mo�
 
 \section{Zawartość pracy}
 
-\noindent Niniejsza praca magisterska składa się z~dwóch części:\mynobreakpar
+\noindent Niniejsza praca magisterska składa się z~dwóch zasadniczych części:\mynobreakpar
 \begin{enumerate}
-	\item Niniejszej dokumentacji napisanej w~\LaTeX, opisującej problem, istniejące rozwiązania i~projekt protokołu dla~przedstawionego problemu,
-	\item Aplikacji napisanej w~języku Python oraz~towarzyszącej jej dokumentacji wygenerowanej z~komentarzy w~kodzie źródłowym.
+	\item Niniejszej dokumentacji napisanej w~\href{https://en.wikipedia.org/wiki/LaTeX}{\LaTeX}, opisującej problem, istniejące rozwiązania i~projekt rozwiązania przedstawionego problemu,
+	\item Aplikacji napisanych w~języku Python oraz~towarzyszącej jej dokumentacji wygenerowanej z~komentarzy umieszczonych w~kodzie źródłowym.
 \end{enumerate}
-Aplikacja również składa~się z~dwóch części, co~jest naturalne dla~przyjętej architektury klient--serwer~(por.~rozdział~\ref{sec:cel-i-zakres}):\mynobreakpar
+Przygotowana aplikacja również składa~się z~dwóch części, co~jest naturalne dla~przyjętej architektury klient-serwer~(por.~rozdział~\ref{sec:cel-i-zakres}):\mynobreakpar
 \begin{enumerate}
 	\item Serwera --- wzorca oprogramowania i~konfiguracji dla~klientów,
 	\item Klienta --- okresowo synchronizującego oprogramowanie i~konfigurację z~serwerem.
 \end{enumerate}
 
-W~czasie prac nad~implementacją projektu, korzystano z~pomocnych dokumentacji, materiałów dydaktycznych i~innych źródeł wiedzy, takich jak np.~listy dyskusyjne i~programistyczne fora \hreftt{http://stackoverflow.com/}{stackoverflow.com} i~\hreftt{http://superuser.com/}{superuser.com}.
+W~czasie prac nad~implementacją projektu, korzystano z~wielu pomocnych dokumentacji, materiałów dydaktycznych i~innych źródeł wiedzy, takich jak np.~listy dyskusyjne i~programistyczne fora dyskusyjne \hreftt{http://stackoverflow.com/}{stackoverflow.com} i~\hreftt{http://superuser.com/}{superuser.com}.
 
 \noindent Na~szczególne wyróżnienie zasługują następujące źródła:\mynobreakpar
 \begin{enumerate}
 	\item dokumentacje:\mynobreakpar
 	\begin{enumerate}
-		\item dokumentacja POSIX~\cite{posix},
-		\item dokumentacja deweloperów dla wybranych dystrybucji/systemów~\cite{archlinux-wiki,gentoo-wiki},
 		\item dokumentacja Python i~narzędzi towarzyszących~\cite{python-doc},%~\cite{glibc-doc},
-		\item dokumenty \gls{ietf}~(\gls{rfc})~\cite{rfc-editor},
+		\item dokumentacja deweloperów dla wybranych dystrybucji/systemów~\cite{archlinux-wiki,gentoo-wiki},
 		\item dokumentacja TLDP~\cite{tldp},
+		\item dokumenty \gls{ietf}~(\gls{rfc})~\cite{rfc-editor},
 		\item dokumenty W3C~\cite{w3c},
-		\item \hreftt{http://www.tcpipguide.com/}{tcpipguide.com}, czyli szczegółowy przegląd protokołu TCP/IP i~pokrewnych protokołów, opublikowany również w~formie obszernej\footnote{Książka ma~1616 stron. ISBN:~\href{https://www.nostarch.com/tcpip.htm}{9781593270476}. Wydawnictwo: \emph{No Starch Press}.} książki autorstwa \href{https://www.linkedin.com/in/charles-kozierok-708112/}{\mbox{Charlesa} \mbox{Kozieroka}} pt.~\emph{The~TCP/IP Guide}.
 		\item dokumentacja biblioteki OpenSSL~\cite{openssl-doc},
+		\item \hreftt{http://www.tcpipguide.com/}{tcpipguide.com}, czyli szczegółowy przegląd protokołu TCP/IP i~pokrewnych protokołów, opublikowany również w~formie obszernej\footnote{Książka ma~1616 stron. ISBN:~\href{https://www.nostarch.com/tcpip.htm}{9781593270476}. Wydawnictwo: \emph{No Starch Press}.} książki autorstwa \href{https://www.linkedin.com/in/charles-kozierok-708112/}{\mbox{Charlesa} \mbox{Kozieroka}} pt.~\emph{The~TCP/IP Guide},
+		\item dokumentacja POSIX~\cite{posix}.
 %		\item dokumentacja biblioteki libconfig~\cite{libconfig-doc}.
 	\end{enumerate}
 	\item materiały dydaktyczne do~przedmiotów prowadzonych na~Wydziale~MiNI~PW:\mynobreakpar
@@ -85,7 +87,7 @@ W~czasie prac nad~implementacją projektu, korzystano z~pomocnych dokumentacji, 
 		\item ,,UNIX'' --- przedmiot prowadzony przez mgra~inż.~Marcina~Borkowskiego~\cite{borkowski}.
 	\end{enumerate}
 \end{enumerate}
-Kompletny spis odwołań cytowanych w~niniejszej dokumentacji, znajduje się~na~jej końcu. %\hyperref[bibliography-page]{końcu}.
+Kompletny spis odwołań cytowanych w~niniejszej pracy, znajduje się~na~jej końcu. %\hyperref[bibliography-page]{końcu}.
 
 %------------------------------------------------------------------------------
 
