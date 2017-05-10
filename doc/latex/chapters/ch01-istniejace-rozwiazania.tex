@@ -11,7 +11,7 @@ W~niniejszym rozdziale przedstawiono przegląd czterech, prawdopodobnie jednych 
 
 Wymienione w~tym rozdziale aplikacje, poza możliwością synchronizacji zainstalowanego oprogramowania i~konfiguracji, pozwalają również na~inne manipulacje systemem operacyjnym, np.~zapewnienie istnienia wybranego użytkownika w~systemie, zapewnienie działania zadanego \glslink{demon}{demona} czy~konfigurację interfejsów sieciowych. Takie oprogramowanie jest często nazywane w~skrócie~\emph{Software Configuration Management~(SCM)} implementującym ideę \emph{Infrastructure as~Code}, która polega na~traktowaniu infrastruktury komputerowej jak kodu, który może być zarządzany i~przetwarzany przez programy takie jak \href{https://en.wikipedia.org/wiki/Version_control}{systemy kontroli wersji}, \href{https://en.wikipedia.org/wiki/Test_automation}{automatyczne testy}, \href{https://en.wikipedia.org/wiki/Comparison_of_continuous_integration_software}{systemy ciągłej integracji}~itp.\cite{puppet-iac,wiki:iac,wiki:scm}.
 
-%---------------------------------------
+%------------------------------------------------------------------------------
 
 \section{Puppet}
 \label{sec:puppet}
@@ -74,7 +74,7 @@ Puppet składa się~z~wielu narzędzi towarzyszących. Jednym z~nich jest \hreft
 
 Dla~nowych użytkowników Puppeta została \href{https://puppet.com/download-learning-vm}{przygotowana} przez opiekunów projektu maszyna wirtualna z~samouczkiem tak, aby użytkownik nie~był skazany na~naukę Puppeta na~własnym systemie~\cite{puppet-vm-tutorial}. W~przypadku błędnej konfiguracji Puppeta, stan maszyny wirtualnej z~samouczkiem może być~łatwo przywrócony, co~może nie~być takie proste w~przypadku nieudanych eksperymentów na~własnym systemie.
 
-%---------------------------------------
+%------------------------------------------------------------------------------
 
 \section{Chef}
 \label{sec:chef}
@@ -117,7 +117,7 @@ service 'example_service' do
 end
 \end{lstlisting}
 
-%---------------------------------------
+%------------------------------------------------------------------------------
 
 \section{Ansible}
 \label{sec:ansible}
@@ -189,7 +189,7 @@ gdzie \texttt{-s} to~flaga po~której następuje nazwa pliku~\emph{playbook}. An
 
 Ansible może zostać uruchomiony na~wielu różnych systemach~\glslink{unix-like-system}{*nixowych}, takich systemach jak~np.~\emph{Red~Hat}, \emph{Debian}, \emph{CentOS}, \emph{OS~X}, \emph{BSD}. System Windows może działać tylko w~roli klienta. Konfiguracja Ansible jest przechowywana w~plikach tekstowych~\texttt{YAML}.
 
-%---------------------------------------
+%------------------------------------------------------------------------------
 
 \section{Salt}
 \label{sec:salt}
@@ -248,7 +248,7 @@ zastosuje plik stanu \path{nettools.sls} dla~agentów pracujących pod~kontrolą
 
 Ciekawym trybem pracy Salt jest tryb \emph{Agentless}, który polega na~tym, że~agenci nie muszą mieć zainstalowanego klienckiego oprogramowania~Salt. Do~działania, na maszynach klienckich, wystarczy zainstalowany Python i~SSH. Serwer Salt loguje się~do agentów przez~SSH i~rozpakowuje lekką wersję klienta Salt w~katalogu tymczasowym, który w~zależności od~konfiguracji, po~dokonaniu zmian zleconych przez \emph{Salt Mastera}, jest kasowany z~dysku agenta lub~nie.
 
-%---------------------------------------
+%------------------------------------------------------------------------------
 
 \section{Inne rozwiązania}
 
@@ -261,7 +261,7 @@ Poza opisanymi do~tej pory rozwiązaniami istnieją również inne:\mynobreakpar
 
 W~pracy nie scharakteryzowano wszystkich istniejących rozwiązań do~zarządzania konfiguracją systemów operacyjnych~\cite{wiki:scm-comparison}. Nazwy innych, wybranych otwartoźródłowych rozwiązań to~m.in.:~\hrefemph{https://en.wikipedia.org/wiki/Capistrano_(software)}{Capistrano}, \hrefemph{https://en.wikipedia.org/wiki/Cdist}{cdist}, \hrefemph{https://en.wikipedia.org/wiki/ISconf}{ISconf}, \hrefemph{https://en.wikipedia.org/wiki/LCFG}{LCFG}, \hrefemph{https://en.wikipedia.org/wiki/Juju_(software)}{Juju}, \hrefemph{https://en.wikipedia.org/wiki/OCS_Inventory}{OCS~Inventory}, \hrefemph{https://en.wikipedia.org/wiki/OpenLMI}{OpenLMI}, \hrefemph{https://en.wikipedia.org/wiki/Opsi}{Opsi}, \hrefemph{https://en.wikipedia.org/wiki/PIKT}{PIKT}, \hrefemph{https://en.wikipedia.org/wiki/Quattor}{Quattor}, \hrefemph{https://en.wikipedia.org/wiki/Radmind}{Radmind}, \hrefemph{https://en.wikipedia.org/wiki/Rex_(software)}{Rex}, \hrefemph{https://en.wikipedia.org/wiki/Rudder_(software)}{Rudder}, \hrefemph{https://en.wikipedia.org/wiki/SmartFrog}{SmartFrog}, \hrefemph{https://en.wikipedia.org/wiki/Spacewalk_(software)}{Spacewalk}, \hrefemph{https://en.wikipedia.org/wiki/Software_Testing_Automation_Framework}{STAF}, \hrefemph{https://en.wikipedia.org/wiki/Synctool}{Synctool}. Nie wszystkie z~nich mają tak rozbudowaną funkcjonalność jak rozwiązania opisane w~niniejszym rozdziale --- np.~\emph{Radmind} zarządza tylko systemem plików, \emph{STAF} służy do~konfiguracji środowisk testowych, \emph{ISconf} nie ma wyróżnionego serwera, a~\emph{Rudder} bazuje na~\emph{CFEngine} i~systemie kontroli wersji~\hrefemph{https://en.wikipedia.org/wiki/Git}{git}.
 
-%---------------------------------------
+%------------------------------------------------------------------------------
 
 \section{Podsumowanie}
 
@@ -345,7 +345,7 @@ Konfiguracja każdego z~czterech, najpopularniejszych rozwiązań sprowadza się
 	\item SaltStack Docs --- \hreftt{https://docs.saltstack.com/en/latest/ref/modules/all/index.html}{docs.saltstack.com/en/latest/ref/modules/all/}.
 \end{itemize}
 
-Wszystkie opisane rozwiązania oprócz Ansible i~poza specjalnym trybem działania Salt, działają w~modelu klient-serwer\footnote{Salt nazywa swój model komunikacji określeniem \emph{agent-server}, ale~w~istocie nie różni się on~od~modelu \emph{klient-serwer}.} i~co~pewien czas odpytują serwer o~aktualizację konfiguracji. Ansible i~Salt wyróżniają się pod tym względem --- dzięki użyciu~SSH nie wymagają one instalowania na~klientach aplikacji klienckiej, przez co~nadzorca klientów może w~dowolnym momencie wymusić instalację nowej konfiguracji na~kontrolowanych komputerach. Z~jednej strony jest to~zaleta, z~drugiej jednak, np.~Puppet, może być postrzegany jako rozwiązanie bardziej wyrafinowane i~złożone, czego świadectwem jest fakt, że~na~podstawie \hyperref[sec:puppet]{manifestu} tworzy on~skierowany graf zasobów i~dopiero na~jego podstawie ustala kolejność przeprowadzenia konfiguracji klienta. Ansible nie tworzy takiego grafu zależności --- konfiguracja klienta jest wykonywana w~takiej kolejności, w~jakiej administrator wyspecyfikował działania w~pliku konfiguracyjnym. Ewentualne błędy wynikłe z~błędów administratora lub~złej kolejności działań wyspecyfikowanych w~\emph{playbooku}, mogą więc być trudne do~wykrycia. Z~tego powodu, mimo podobnej podstawowej funkcjonalności obu rozwiązań, Puppet wydaje się być rozwiązaniem bardziej kompleksowym.
+Wszystkie opisane rozwiązania oprócz Ansible i~poza specjalnym \href{https://docs.saltstack.com/en/latest/topics/ssh/}{trybem} działania Salt, działają w~modelu klient-serwer\footnote{Salt nazywa swój model komunikacji określeniem \emph{agent-server}, ale~w~istocie nie różni się on~od~modelu \emph{klient-serwer}.} i~co~pewien czas odpytują serwer o~aktualizację konfiguracji. Ansible i~Salt wyróżniają się pod tym względem --- dzięki użyciu~SSH nie wymagają one instalowania na~klientach aplikacji klienckiej, przez co~nadzorca klientów może w~dowolnym momencie wymusić instalację nowej konfiguracji na~kontrolowanych komputerach. Z~jednej strony jest to~zaleta, z~drugiej jednak, np.~Puppet, może być postrzegany jako rozwiązanie bardziej wyrafinowane i~złożone, czego świadectwem jest fakt, że~na~podstawie \hyperref[sec:puppet]{manifestu} tworzy on~skierowany graf zasobów i~dopiero na~jego podstawie ustala kolejność przeprowadzenia konfiguracji klienta. Ansible nie tworzy takiego grafu zależności --- konfiguracja klienta jest wykonywana w~takiej kolejności, w~jakiej administrator wyspecyfikował działania w~pliku konfiguracyjnym. Ewentualne błędy wynikłe z~błędów administratora lub~złej kolejności działań wyspecyfikowanych w~\emph{playbooku}, mogą więc być trudne do~wykrycia. Z~tego powodu, mimo podobnej podstawowej funkcjonalności obu rozwiązań, Puppet wydaje się być rozwiązaniem bardziej kompleksowym.
 
 Warto pamiętać, że~przedstawione rozwiązania mają za~sobą co~najmniej kilka lat rozwoju~(por.~\ref{tab:existing-solutions-comparison}) i~są~rozwiązaniami tworzonymi społecznościowo, dzięki czemu istnieją tysiące modułów obsługujących bardzo wiele różnych aspektów konfiguracji systemu. Przykładowo do~rozwoju projektu \emph{\hyperref[sec:ansible]{Ansible}}, \emph{\hyperref[sec:salt]{Salt}}, \emph{\hyperref[sec:chef]{Chef}}, \emph{\hyperref[sec:puppet]{Puppet}}, \emph{\hyperref[itm:cfengine]{CFEngine}} i~\emph{\hyperref[itm:bcfg2]{Bcfg2}} przyczyniło się odpowiednio co~najmniej: \href{https://github.com/ansible/ansible}{2655}, \href{https://github.com/saltstack/salt}{1793}, \href{https://github.com/chef/chef}{509}, \href{https://github.com/puppetlabs/puppet}{442}, \href{https://github.com/cfengine/core}{83} i~\href{https://github.com/Bcfg2/bcfg2}{55}~osób dodając w~sumie odpowiednio: \href{https://github.com/ansible/ansible}{30033}, \href{https://github.com/saltstack/salt}{81656}, \href{https://github.com/chef/chef}{19236}, \href{https://github.com/puppetlabs/puppet}{24857}, \href{https://github.com/cfengine/core}{13819} i~\href{https://github.com/Bcfg2/bcfg2}{8525}\hrefemph{https://en.wikipedia.org/wiki/Commit\_(version\_control)}{commitów}\footnote{Na~podstawie statystyk z~dnia 7~maja~2017~roku, udostępnionych na stronach repozytoriów projektów udostępnianych przez \hreftt{https://github.com/}{github.com}}. Dzięki zbiorowemu zaangażowaniu programistów rozwiązania te~są~w~stanie zarządzać niemal każdym aspektem konfiguracji systemu operacyjnego i~jego oprogramowania. Jest to~możliwe również dzięki modułowości oprogramowania i~licencji \glslink{copyleft}{copyleft}, na~warunkach których zostały udostępnione.
 
