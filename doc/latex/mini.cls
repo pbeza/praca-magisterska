@@ -170,6 +170,10 @@
 \RequirePackage[justification=centering,font=footnotesize]{caption}
 \captionsetup[lstlisting]{font={footnotesize}}
 
+% Umożliwienie enumeracji inline w podpisach do obrazków
+
+\RequirePackage{paralist}
+
 % Nierozjechane linki w tytułowiej stronie informacyjnej
 
 \RequirePackage{listliketab}
@@ -209,7 +213,8 @@
 \RequirePackage{footnote}
 \RequirePackage{tablefootnote}
 %\RequirePackage[all]{hypcap}
-%\RequirePackage{tikz}
+\RequirePackage{tikz}
+\usetikzlibrary{arrows,automata}
 %\usetikzlibrary{matrix}
 
 % Bez tego obrazki pojawiają się pod przypisem dolnym
@@ -304,7 +309,7 @@
 \RequirePackage{mathtools} % do not use old amsmath package
 %\RequirePackage{amsthm}
 \RequirePackage{amssymb}
-%\RequirePackage{mathabx}
+\RequirePackage{mathabx}
 
 % Krzyżyk (cross) i tick (check)
 
