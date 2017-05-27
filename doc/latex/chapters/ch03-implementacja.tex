@@ -4,25 +4,26 @@
 
 \chapter{Implementacja}
 
-W~niniejszym rozdziale przedstawiono szczegóły implementacyjne projektu, w~szczególności zastosowane biblioteki i~narzędzia pomocnicze.
+W~niniejszym rozdziale przedstawiono szczegóły implementacyjne projektu, w~szczególności opisano sposób użycia aplikacji klienckiej i~aplikacji serwera, będącego systemem wzorcowym, zastosowane biblioteki i~narzędzia pomocnicze.
 
 %------------------------------------------------------------------------------
 
-\section{Moduły}
+\section{Moduły aplikacji}
 
-Aplikacja składa się z~części serwerowej i~klienckiej nazywanej w~kodzie źródłowym odpowiednio \texttt{myscm-srv} i~\texttt{myscm-cli}\footnote{\emph{myscm} to~skrót od~roboczej nazwy \emph{My~\href{https://en.wikipedia.org/wiki/Software_configuration_management}{Software Configuration Manager}}}. Każda z~tych części składa się z~modułów realizujących rozłączone zadania.
+Aplikacja składa się z~części serwerowej i~klienckiej, nazywanej w~kodzie źródłowym odpowiednio \texttt{myscm-srv} i~\texttt{myscm-cli}\footnote{\emph{myscm} to~skrót od~roboczej nazwy stworzonego oprogramowania --- \emph{My~\href{https://en.wikipedia.org/wiki/Software_configuration_management}{Software Configuration Manager}}}. Każda z~tych części składa się z~modułów realizujących rozłączone zadania.
 
-Główne moduły serwera:\mynobreakpar
+Wyróżnione moduły serwera:\mynobreakpar
 \begin{itemize}
-	\item moduł skanujący system wzorcowy i~tworzący plik stanu systemu,
-	\item moduł udostępniający klientom obraz zmian konfiguracji powstałej na~podstawie skanowania systemu wzorcowego,
-	\item moduł konfiguracji serwera z~ustawieniami takimi parametrami jak np.~numer portu nasłuchiwania na~połączenia klientów, czas między kolejnymi skanowaniami systemu~itp.
+	\item moduł skanujący system wzorcowy i~tworzący plik opisujący zmiany jakie zaszły w~konfiguracji systemu od~czasu pierszego skanowania systemu wzorcowego --- moduł ten~wykorzystuje do~swojego działania skaner~\hyperref[sec:aide]{AIDE} (patrz rozdział~\ref{sec:aide}),
+	\item moduł tworzący na~podstawie pierwszego i~ostatniego skanowania systemu wzorcowego, podpisany cyfrowo obraz zmian konfiguracji, będący archiwum plików dla~klienta, które zostaje rozpakowane i~zastosowane przez aplikację kliencką\footnote{W~przypadku konfliktów zmian, administrator może na~etapie użycia aplikacji klienckiej, interaktywnie porównać oba~pliki i~zdecydować która wersja konfliktowego pliku ma~być zachowana lub~alternatywnie może wymusić nadpisanie plików.},
+	\item moduł udostępniający klientom tak~stworzony obraz zmian konfiguracji systemu wzorcowego,
+	\item moduł konfiguracji aplikacji serwera --- konfiguracja ta~zawiera m.in.~ustawienia numeru portu nasłuchu na~połączenia klientów, ścieżkę do~pliku konfiguracyjnego~AIDE, określającego jakie katalogi powinny być~skanowane, ścieżkę do~klucza prywatnego certyfikatu cyfrowego serwera, używanego do~podpisywania obrazów zmian konfiguracji, ścieżkę do~katalogu, w~którym są~zapisywane generowane obrazy konfiguracji~itp.
 \end{itemize}
 
-Główne moduły klienta:\mynobreakpar
+Wyróżnione moduły klienta:\mynobreakpar
 \begin{itemize}
-	\item moduł odbierający, weryfikujący podpis cyfrowy i~rozpakowujący obraz zmian konfiguracji wzorcowej, udostępnionej przez serwer,
-	\item parser konfiguracji klienta z~ustawieniami takimi jak np.~numer portu nasłuchiwania serwera, czas między kolejnymi odpytaniami serwera o~aktualizację systemu~itp.
+	\item moduł odbierający, weryfikujący podpis cyfrowy, rozpakowujący i~stosujący obraz zmian konfiguracji wzorcowej udostępniony przez serwer,
+	\item moduł konfiguracji aplikacji klienta --- konfiguracja ta~zawiera m.in.~ustawienia numeru portu nasłuchiwania serwera, protokół wykorzystany do~połączenia z~serwerem, ścieżkę do~katalogu, w~którym są~zapisywane odebrane od~serwera obrazy konfiguracji~itp.
 \end{itemize}
 
 %------------------------------------------------------------------------------
@@ -32,26 +33,29 @@ Główne moduły klienta:\mynobreakpar
 \newcommand{\srvappname}{myscm-srv}
 \newcommand{\myscmsrvconfig}{\path{/etc/myscm-srv/myscm-srv.conf}}
 
-Aplikacja serwera to~aplikacja przeznaczona do~użycia na~maszynie będącej wzorcem oprogramowania dla~klientów. Służy ona do~dwóch celów --- do~stworzenia obrazu zmian konfiguracji przeprowadzonych przez administratora komputerowego od~czasu pierwszego skanowania~(por.~rozdział~\ref{sec:tworzenie-obrazu-konfiguracji}) i~do~udostępnienia takiego obrazu klientowi~(por.~rozdział~\ref{sec:przeslanie-obrazu-konfiguracji}). Główną funkcjonalnością aplikacji serwera jest stworzenie obrazu zmian konfiguracji, ponieważ utworzony obraz może być udostępniony klientowi w~dowolny inny sposób --- np.~za~pomocą protokołów \href{https://en.wikipedia.org/wiki/Trivial_File_Transfer_Protocol}{TFTP}~(\emph{Trivial File Transfer Protocol}), \href{https://en.wikipedia.org/wiki/SSH_File_Transfer_Protocol}{SFTP}~(\emph{SSH File Transfer Protocol}), \href{https://en.wikipedia.org/wiki/File_Transfer_Protocol}{FTP} lub~własnego protokołu --- wszystkie te~protokoły wspiera aplikacja kliencka, a~ponadto ma~możliwość załadowania obrazu zmian konfiguracji z~wybranego pliku.
+Aplikacja serwera to~aplikacja przeznaczona do~użycia z~uprawnieniami \hreftt{https://en.wikipedia.org/wiki/Superuser}{root}\footnote{Uprawnienia administratora są~konieczne do~uruchomienia skanowania~\hyperref[sec:aide]{AIDE}.} na~maszynie będącej wzorcem oprogramowania dla~klientów. Służy ona do~dwóch celów --- do~stworzenia obrazu zmian konfiguracji przeprowadzonych przez administratora komputerowego od~czasu pierwszego skanowania~(por.~rozdział~\ref{sec:tworzenie-obrazu-konfiguracji}) i~do~udostępnienia takiego obrazu klientowi~(por.~rozdział~\ref{sec:przeslanie-obrazu-konfiguracji}). Główną funkcjonalnością aplikacji serwera jest stworzenie obrazu zmian konfiguracji, ponieważ utworzony obraz może być udostępniony klientowi w~dowolny inny sposób --- np.~za~pomocą protokołów \href{https://en.wikipedia.org/wiki/Trivial_File_Transfer_Protocol}{TFTP}~(\emph{Trivial File Transfer Protocol}), \href{https://en.wikipedia.org/wiki/SSH_File_Transfer_Protocol}{SFTP}~(\emph{SSH File Transfer Protocol}), \href{https://en.wikipedia.org/wiki/File_Transfer_Protocol}{FTP} --- wszystkie te~protokoły wspiera aplikacja kliencka, a~ponadto ma~możliwość załadowania obrazu zmian konfiguracji z~wybranego pliku obrazu konfiguracji.
 
-\begin{lstlisting}[label=lst:myscm-srv-usage,numbers=none,caption={Szablon użycia aplikacji serwera}]
+Szczegółowa instrukcja obsługi użycia aplikacji serwera została dostarczona z~przygotowanym pakietem oprogramowania \texttt{\srvappname}~(patrz~załącznik~\ref{ch:cd-appendix}). Instrukcję można otworzyć po~zainstalowaniu pakietu \texttt{\srvappname} za~pomocą komendy \texttt{man~\srvappname}. Konfiguracja aplikacji znajduje się w~katalogu \myscmsrvconfig.
+
+\begin{lstlisting}[label=lst:myscm-srv-usage,numbers=none,caption={Szablon użycia aplikacji serwera o~nazwie \texttt{myscm-srv}}]
 myscm-srv [OPCJE]
 \end{lstlisting}
 
-Szczegółowa instrukcja obsługi użycia aplikacji serwera została dostarczona z~pakietem oprogramowania \texttt{\srvappname}~(patrz:~załącznik~\ref{ch:cd-appendix}). Instrukcję można otworzyć po~zainstalowaniu pakietu \texttt{\srvappname} za~pomocą komendy \texttt{man~\srvappname}. Konfiguracja aplikacji znajduje się w~katalogu \myscmsrvconfig. Listing~\ref{lst:myscm-srv-usage} przedstawia skrócony opis użycia aplikacji serwera, gdzie \texttt{OPCJE} oznaczają następujące dozwolone argumenty:\mynobreakpar
+Listing~\ref{lst:myscm-srv-usage} przedstawia skrócony szablon użycia aplikacji serwera, gdzie argumenty opcji ujęte w~nawiasy kwadratowe \texttt{[~]} oznaczają opcjonalność tych argumentów\footnote{Argumenty opcjonalne, które mają swoje odpowiedniki w~pliku konfiguracyjnym, powodują zignorowanie odpowiedników z~pliku konfiguracyjnego --- dotyczy to~zarówno aplikacji serwera, jak i~aplikacji klienckiej.}, a~\texttt{OPCJE} oznaczają następujące dozwolone opcje:\mynobreakpar
+
 \setlist[description]{style=nextline,font=\ttfamily}
 \begin{description}
-	\item[-i, --init {[aide\_config\_file]}]\hypertarget{itm:srv-init} Inicjuje bazę \hyperref[sec:aide]{AIDE} korzystając z~pliku konfiguracyjnego~AIDE wskazywanego przez plik konfiguracyjny aplikacji serwera lub~przez opcjonalny parametr \path{aide_config_file}. Tak~stworzona baza jest referencyjną konfiguracją systemu wzorcowego, która będzie porównywana z~kolejnymi wynikami skanowań (patrz: \hyperlink{itm:srv-update}{\texttt{--update}}). Wynik skanowania zostaje zapisany do~katalogu ustawionego w~konfiguracji aplikacji --- domyślnie jest to~katalog \path{/var/lib/aide}.
-	\item[--update]\hypertarget{itm:srv-update} Skanuje system w~poszukiwaniu zmian od~pierwszego skanowania \hyperref[sec:aide]{AIDE} wykonanego za~pomocą opcji \hyperlink{itm:srv-init}{\texttt{--init}}. Wynikiem skanowania jest aktualizacja ostatniej, porównawczej bazy danych~AIDE, na~podstawie której może powstać obraz zmian konfiguracji systemu wzorcowego (patrz: \hyperlink{itm:srv-gen-img}{\texttt{--gen-img}}).
-	\item[--upgrade] Wywołuje najpierw opcję \hyperlink{itm:srv-update}{\texttt{--update}}, a~następnie \hyperlink{itm:srv-gen-img}{\texttt{--gen-img}}.
-	\item[-g, --gen-img]\hypertarget{itm:srv-gen-img} Tworzy obraz zmian na~podstawie pierwszego i~ostatniego skanowania~AIDE wykonanego odpowiednio za~pomocą opcji \hyperlink{itm:srv-init}{\texttt{--init}} i~\hyperlink{itm:srv-update}{\texttt{--update}}.
-	\item[-c, --config config\_file] Domyślnie konfiguracja aplikacji serwera jest czytana z~pliku tekstowego \myscmsrvconfig. Ta~opcja zmienia to~zachowanie wczytując zadaną konfigurację z~pliku tekstowego \texttt{config\_file}.
-	\item[-d, --daemonize] Uruchamia aplikację w~tle. Wszystkie komunikaty programu zostają przekierowane do~\hreftt{https://en.wikipedia.org/wiki/Syslog}{sysloga}.
-	\item[-s, --share {[myscm\_img\_file]}]\hypertarget{itm:srv-share} Włącza udostępnianie obrazu utworzonego za~pomocą opcji \hyperlink{itm:srv-gen-img}{\texttt{--gen-img}} na~porcie określonym przez konfigurację serwera lub~na~porcie \texttt{port\_number} określonym przez opcję \hyperlink{itm:srv-port}{\texttt{--port}}. Jeśli \texttt{myscm\_img\_file} jest podany, to~zamiast domyślnego obrazu, jest udostępniany obraz określony ścieżką \texttt{myscm\_img\_file}.
-	\item[-p, --port {[port\_number]}]\hypertarget{itm:port} Ustawia port nasłuchu na~klientów na~\texttt{port\_number}. Ta~opcja ma~sens tylko w~połączeniu z~opcją \hyperlink{itm:srv-share}{\texttt{--share}}.
+	\item[-i, --init {[AIDE\_CONFIG\_FILE]}]\hypertarget{itm:srv-init} Inicjuje bazę \hyperref[sec:aide]{AIDE} korzystając z~pliku konfiguracyjnego~AIDE wskazywanego przez plik konfiguracyjny aplikacji serwera lub~przez opcjonalny parametr \path{AIDE_CONFIG_FILE}. Wynik skanowania zostaje zapisany w~pliku ustawionym w~konfiguracji aplikacji --- domyślnie jest to~plik tekstowy \path{/var/lib/myscm-srv/aide.db}. Tak~stworzona baza jest referencyjną konfiguracją systemu wzorcowego, która będzie porównywana z~kolejnymi wynikami skanowań (patrz opcja \hyperlink{itm:srv-update}{\texttt{--update}}).
+	\item[--update {[SCAN\_OUT\_FILE]}]\hypertarget{itm:srv-update} Skanuje system w~poszukiwaniu zmian od~czasu pierwszego skanowania \hyperref[sec:aide]{AIDE}, wykonanego za~pomocą wywołania programu z~opcją \hyperlink{itm:srv-init}{\texttt{--init}}. Wynikiem skanowania jest plik tekstowy \path{/var/lib/myscm-srv/aide.db.new}\footnote{Jeśli już taki plik istnieje, to~starsza wersja \path{aide.db.new} zostaje przeniesiona do~\path{aide.db.old}, nadpisując plik o~tej samej nazwie jeśli taki istnieje. Dzięki zachowaniu \path{aide.db.old} możliwe jest przywrócenie poprzedniej konfiguracji.}, na~podstawie którego może powstać obraz zmian konfiguracji systemu wzorcowego od~czasu pierwszego skanowania systemu~(patrz opcja \hyperlink{itm:srv-gen-img}{\texttt{--gen-img}}). Jeśli opcjonalny parametr \path{SCAN_OUT_FILE} jest podany, to~wynik skanowania zostaje zapisany w~pliku \path{SCAN_OUT_FILE}, nadpisując ewentualny istniejący plik o~tej samej nazwie.
+	\item[-g, --gen-img {[MYSCM\_IMG\_FILE]}]\hypertarget{itm:srv-gen-img} Tworzy obraz zmian na~podstawie pierwszego i~ostatniego skanowania~AIDE wykonanego odpowiednio za~pomocą opcji \hyperlink{itm:srv-init}{\texttt{--init}} i~\hyperlink{itm:srv-update}{\texttt{--update}} --- ścieżki do~plików będącymi wynikami działania programu uruchomionego z~tymi opcjami są~ustawiane w~konfiguracji aplikacji. Obraz zmian konfiguracji to~archiwum\footnote{Rodzaj użytej kompresji jest konfigurowalny. Domyślnie plik obrazu konfiguracji jest skompresowany za~pomocą \hreftt{https://en.wikipedia.org/wiki/Tar_(computing)}{tar} i~\hreftt{https://en.wikipedia.org/wiki/Gzip}{gzip} do~pliku archiwum z~rozszerzeniem \texttt{tar.gz}.}, które domyślnie zostaje zapisane w~pliku \path{/var/lib/myscm-srv/myscm-img.tar.gz} lub~w~\path{MYSCM_IMG_FILE}, jeśli ten~argument zostanie podany. Jeśli obraz konfiguracji o~tej samej nazwie już istnieje, to~zostaje nadpisany.
+	\item[--upgrade] Wywołuje program tak, jakby był wywołany najpierw z~opcją \hyperlink{itm:srv-update}{\texttt{--update}}, a~następnie z~opcją \hyperlink{itm:srv-gen-img}{\texttt{--gen-img}} --- oba~wywołania bez~dodatkowych argumentów.
+	\item[-c, --config CONFIG\_FILE] Domyślnie konfiguracja aplikacji serwera jest czytana z~pliku tekstowego \myscmsrvconfig. Ta~opcja zmienia to~zachowanie wczytując konfigurację aplikacji serwera z~pliku tekstowego \texttt{CONFIG\_FILE}.
+	\item[-s, --share {[MYSCM\_IMG\_FILE]}]\hypertarget{itm:srv-share} Włącza udostępnianie obrazu utworzonego za~pomocą opcji \hyperlink{itm:srv-gen-img}{\texttt{--gen-img}} na~porcie określonym przez konfigurację serwera lub~na~porcie \texttt{PORT\_NUMBER} określonym przez opcję \hyperlink{itm:srv-port}{\texttt{--port}}. Jeśli \texttt{MYSCM\_IMG\_FILE} jest podany, to~zamiast domyślnego obrazu, jest udostępniany obraz określony ścieżką \texttt{MYSCM\_IMG\_FILE}.
+	\item[-p, --port PORT\_NUMBER]\hypertarget{itm:port} Ustawia port nasłuchu na~klientów na~\texttt{PORT\_NUMBER}. Ta~opcja ma~sens tylko w~połączeniu z~opcją \hyperlink{itm:srv-share}{\texttt{--share}} i~zostaje ona zignorowana w~przypadku braku tej~opcji.
 	%\item[--force]
-	\item[--version] Wypisuje informację o~wersji i~licencji programu.
-	\item[-h, --help] Wypiuje pomoc z~informacjami o~dozwolonych opcjach programu i~ich znaczeniu.
+	\item[-d, --daemonize {[TIME\_INTERVAL]}] Uruchamia aplikację w~tle i~włącza cykliczne skanowanie systemu co~pewien czas ustawiony w~konfiguracji serwera lub~co~czas wyrażony w~minutach za~pomocą opcjonalnego parametru \texttt{TIME\_INTERVAL}. Jeśli obecna jest również opcja \hyperlink{itm:srv-share}{\texttt{--share}}, to~poza cyklicznym skanowaniem, w~tle działa udostępnianie najnowszego obrazu konfiguracji. Wszystkie komunikaty programu zostają przekierowane do~\hreftt{https://en.wikipedia.org/wiki/Syslog}{sysloga} lub~do~pliku z~logami, zdefiniowanym w~konfiguracji aplikacji serwera.
+	\item[--version] Wypisuje informację o~wersji i~licencji aplikacji serwera.
+	\item[-h, --help] Wypiuje pomoc w~języku angielskim z~informacjami o~dozwolonych opcjach aplikacji serwera i~ich znaczeniu.
 	\item[-v, --verbose] Włącza tryb ,,gadatliwy", tzn.~włącza wypisywanie dodatkowych komunikatów mogących okazać się pomocnymi przy diagnozowaniu ewentualnych problemów z~działaniem programu.
 \end{description}
 
@@ -62,24 +66,26 @@ Szczegółowa instrukcja obsługi użycia aplikacji serwera została dostarczona
 \newcommand{\cliappname}{myscm-cli}
 \newcommand{\myscmcliconfig}{\path{/etc/myscm-cli/myscm-cli.conf}}
 
-Aplikacja kliencka to~aplikacja przeznaczona do~użycia na~maszynie, której konfigurację administrator chce dostosować do~konfiguracji systemu wzorcowego. Aplikacja kliencka umożliwia pobranie obrazu zmian konfiguracji z~serwera za~pomocą \href{https://en.wikipedia.org/wiki/Trivial_File_Transfer_Protocol}{TFTP}~(\emph{Trivial File Transfer Protocol}), \href{https://en.wikipedia.org/wiki/SSH_File_Transfer_Protocol}{SFTP}~(\emph{SSH File Transfer Protocol}), \href{https://en.wikipedia.org/wiki/File_Transfer_Protocol}{FTP} lub~własnego protokołu.
+Aplikacja kliencka to~aplikacja przeznaczona do~użycia z~uprawnieniami \hreftt{https://en.wikipedia.org/wiki/Superuser}{root}\footnote{Uprawnienia administratora są~konieczne do~tworzenia, zmiany i~usuwania plików z~dowolnej częsci systemu plików, co~jest konieczne podczas zastosowania obrazu zmian konfiguracji systemu wzorcowego.} na~maszynie, której konfigurację administrator chce dostosować do~konfiguracji systemu wzorcowego. Aplikacja kliencka umożliwia pobranie obrazu zmian konfiguracji z~serwera za~pomocą \href{https://en.wikipedia.org/wiki/Trivial_File_Transfer_Protocol}{TFTP}~(\emph{Trivial File Transfer Protocol}), \href{https://en.wikipedia.org/wiki/SSH_File_Transfer_Protocol}{SFTP}~(\emph{SSH File Transfer Protocol}), \href{https://en.wikipedia.org/wiki/File_Transfer_Protocol}{FTP} lub~własnego protokołu, a~następnie umożliwia zastosowanie~go na~systemie klienckim.
+
+Szczegółowa instrukcja obsługi użycia aplikacji klienckiej, analogicznie jak w~przypadku aplikacji serwera, została dostarczona z~przygotowanym pakietem oprogramowania \texttt{\cliappname}~(patrz~załącznik~\ref{ch:cd-appendix}). Instrukcję można otworzyć po~zainstalowaniu pakietu \texttt{\cliappname} za~pomocą komendy \texttt{man~\cliappname}. Konfiguracja aplikacji znajduje się w~katalogu \myscmcliconfig.
 
 \begin{lstlisting}[numbers=none,language=,caption={Szablon użycia aplikacji klienckiej dostosowującej konfigurację systemu klienta do~konfiguracji pobranej z~serwera o~IP \texttt{server\_IP} lub~z~pliku obrazu konfiguracji określonego ścieżką \texttt{myscm\_img\_file}},label=lst:myscm-cli-usage]
 myscm-cli [OPCJE] [server_IP | myscm_img_file]
 \end{lstlisting}
 
-Szczegółowa instrukcja obsługi użycia aplikacji kliencka, analogicznie jak w~przypadku aplikacji serwera, została dostarczona z~pakietem oprogramowania \texttt{\cliappname}~(patrz:~załącznik~\ref{ch:cd-appendix}). Instrukcję można otworzyć po~zainstalowaniu pakietu \texttt{\cliappname} za~pomocą komendy \texttt{man~\cliappname}. Listing~\ref{lst:myscm-cli-usage} przedstawia skrócony opis użycia aplikacji klienckiej, gdzie \texttt{OPCJE} oznaczają następujące dozwolone argumenty:\mynobreakpar
+Listing~\ref{lst:myscm-cli-usage} przedstawia skrócony szablon użycia aplikacji klienckiej, gdzie argumenty opcji ujęte w~nawiasy kwadratowe \texttt{[~]} oznaczają opcjonalność tych argumentów, a~\texttt{OPCJE} oznaczają następujące dozwolone opcje:\mynobreakpar
+
 \begin{description}
-	\item[--upgrade] Pobiera obraz zmian konfiguracji z~serwera i~stosuje~ją.
-	\item[--update] Pobiera obraz zmian konfiguracji z~serwera i~nie stosuje jej. Jeśli w~wyołaniu komendy \texttt{\cliappname} nie został podany numer IP~serwera (\texttt{server\_IP}), to~zostaje on~pobrany z~pliku konfiguracyjnego klienta \myscmcliconfig. Miejsce przechowywania pobranego obrazu zmian jest również zdefiniowane w~konfiguracji klienta.
-	\item[--SFTP]
-	\item[--FTP]
-	\item[--cert X509\_cert\_file]
-	\item[--daemonize]
-	\item[--force]
-	\item[-p, --port number]
-	\item[--version] Wypisuje informację o~wersji i~licencji programu.
-	\item[-h, --help] Wypiuje pomoc z~informacjami o~dozwolonych opcjach programu i~ich znaczeniu.
+	\item[--upgrade]\hypertarget{itm:cli-upgrade} Pobiera obraz zmian konfiguracji z~serwera zdefiniowanego w~konfiguracji systemu aplikacji klienckiej do~pliku określonego przez tę~konfigurację (domyślnie do~pliku \path{/var/myscm-cli/myscm-img.tar.gz}), sprawdza poprawność certyfikatu cyfrowego, którym jest podpisany i~jeśli jest on~poprawny, stosuje~go na~systemie klienta. Jeśli w~konfiruacji obecnej i~stosowanej są~konflikty, administrator może interaktywnie je~rozwiązać. W~przypadku obecności w~wywołaniu programu opcjonalnego adresu IP~serwera \texttt{server\_IP} lub~ścieżki do~pliku obrazu \texttt{myscm\_img\_file}, obraz zmian konfiguracji zostaje pobrany odpowiednio z~serwera o~zadanym adresie~IP, za~pomocą protokołu zdefiniowanego w~konfiguracji aplikacji klienckiej bądź z~pliku o~zadanej ścieżce.
+	\item[--update {[MYSCM\_IMG\_FILE]}] Działa jak \texttt{--upgrade}, tylko nie stosuje obrazu na~systemie klienckim, tzn.~pobiera obraz zmian konfiguracji systemu z~serwera zdefiniowanego w~konfiguracji aplikacji klienckiej do~pliku określonego przez tę~konfigurację (domyślnie to~plik \path{/var/myscm-cli/myscm-img.tar.gz}) lub~do~pliku \path{MYSCM_IMG_FILE} jeśli jest podany, sprawdza poprawność certyfikatu cyfrowego, którym jest podpisany i~nie stosuje jej~na~systemie klienta. W~przypadku obecności w~wywołaniu programu opcjonalnego adresu IP~serwera \texttt{server\_IP}, obraz zmian konfiguracji zostaje pobrany z~zadanego adresu~IP za~pomocą protokołu zdefiniowanego w~konfiguracji aplikacji klienckiej. W~przypadku gdy w~wywołaniu programu podana jest ścieżka do~pliku obrazu \texttt{myscm\_img\_file}, zostaje ona~zignorowana i~program kończy działanie nie pobierając żadnego obrazu zmian konfiguracji.
+	\item[--SFTP, --FTP]\hypertarget{itm:cli-sftp} Wymusza zastosowanie protokołu (S)FTP do~połączenia z~serwerem. Dane połączenia takie jak np.~nazwa użytkownika, hasło i~port są~pobierane z~konfiguracji aplikacji.
+	\item[--cert X509\_cert\_file] Sprawdza poprawność obrazu konfiguracji za~pomocą certyfikatu cyfrowego zapisanego w~pliku określonego ścieżką \path{X509_cert_file}. Jeśli ta~opcja nie jest podana, to~domyślnie używany certyfikat cyfrowy jest ustawiony w~konfiguracji aplikacji.
+	\item[--force] Wymusza nadpisanie plików na~systemie klienta w~przypadku zaistnienia konfliktów podczas zastosowania obrazu systemu. Ta~opcja ma~sens tylko w~połączeniu z~opcją \texttt{--upgrade}.
+	\item[-p, --port PORT\_NUMBER] Wymusza połączenie do~serwera na~porcie \texttt{PORT\_NUMBER} za~pomocą protokołu określonego w~konfiguracji aplikacji klienckiej lub~za~pomocą protokołu określonego flagą \hyperlink{itm:cli-sftp}{\texttt{--SFTP}} lub~\hyperlink{itm:cli-sftp}{\texttt{--FTP}}.
+	\item[-d, --daemonize {[TIME\_INTERVAL]}] Uruchamia aplikację w~tle i~włącza cykliczny \hyperlink{itm:cli-upgrade}{\texttt{--upgrade}} systemu. Czas odstępu między kolejnymi aktualizacjami jest ustawiony w~konfiguracji aplikacji klienckiej lub~w~opcjonalnym parametrze \texttt{TIME\_INTERVAL} wyrażonym w~minutach. Wszystkie komunikaty programu zostają przekierowane do~\hreftt{https://en.wikipedia.org/wiki/Syslog}{sysloga} lub~do~pliku z~logami, zdefiniowanym w~konfiguracji aplikacji serwera.
+	\item[--version] Wypisuje informację o~wersji i~licencji aplikacji klienckiej.
+	\item[-h, --help] Wypiuje pomoc w~języku angielskim z~informacjami o~dozwolonych opcjach aplikacji klienckiej i~ich znaczeniu.
 	\item[-v, --verbose] Włącza tryb ,,gadatliwy", tzn.~włącza wypisywanie dodatkowych komunikatów mogących okazać się pomocnymi przy diagnozowaniu ewentualnych problemów z~działaniem programu.
 \end{description}
 
@@ -87,7 +93,7 @@ Szczegółowa instrukcja obsługi użycia aplikacji kliencka, analogicznie jak w
 
 \section{Kod źródłowy}
 
-Kod źródłowy projektu został w~całości napisany w~języku \href{https://en.wikipedia.org/wiki/Python_(programming_language)}{Python} w~najnowszej dostępnej wersji~3.6.1. Źródła projektu znajdują się na~płycie~CD dołączonej do~tej pracy (patrz załącznik~\ref{ch:cd-appendix}) w~katalogu~\path{/src}, a~dokumentacja wygenerowana z~komentarzy kodu źródłowego w~\path{/doc/python}.
+Kod źródłowy projektu został w~całości napisany w~języku \href{https://en.wikipedia.org/wiki/Python_(programming_language)}{Python} w~najnowszej dostępnej w~trakcie pisania tej pracy wersji~3.6.1. Źródła projektu znajdują się na~płycie~CD dołączonej do~tej pracy (patrz załącznik~\ref{ch:cd-appendix}) w~katalogu~\path{/src}, a~dokumentacja wygenerowana z~komentarzy kodu źródłowego w~\path{/doc/python}.
 
 Kod źródłowy został sformatowany zgodnie z~wymogami \href{https://www.python.org/dev/peps/pep-0008/}{PEP~8} (\emph{Python Enhancement Proposals}) pt.~\emph{Style Guide for Python Code} i~\href{https://www.python.org/dev/peps/pep-0257/}{PEP~257} pt.~\emph{Docstring Conventions}. Do~sprawdzenia zgodności napisanego kodu ze~standardem~PEP~8 wykorzystano narzędzie \hreftt{https://pypi.python.org/pypi/flake8}{flake8}, który obudowuje (\emph{wrapper}) narzędzia \hreftt{https://pypi.python.org/pypi/pep8}{pep8}, \hreftt{https://pypi.python.org/pypi/pyflakes}{pyflakes}, \hreftt{https://pypi.python.org/pypi/pycodestyle}{pycodestyle} i~\hreftt{https://pypi.python.org/pypi/mccabe}{mccabe}. Edytorem kodu wykorzystanym do~implementacji był \texttt{vim} rozbudowany o~\href{http://vimawesome.com/}{wtyczki}~(\emph{plugins}).
 

@@ -356,6 +356,8 @@
 \def\@supervisoremail{\@latex@error{No supervisor e-mail given}\@ehc}
 \def\discipline#1{\gdef\@discipline{#1}}
 \def\@discipline{\@latex@error{No discipline given}\@ehc}
+\def\specialization#1{\gdef\@specialization{#1}}
+\def\@specialization{\@latex@error{No specialization given}\@ehc}
 \def\monthyear#1{\gdef\@monthyear{#1}}
 \def\@monthyear{\@latex@error{No month and year given}\@ehc}
 %\def\date#1{\gdef\@date{#1}}
@@ -445,7 +447,8 @@
 
 		{
 			{\fontsize{45}{50}\selectfont\adagiolight Praca dyplomowa magisterska}\\[0.7cm]
-			{\fontsize{12}{15}\selectfont na kierunku \@discipline}
+			{\fontsize{12}{15}\selectfont na~kierunku \@discipline}\\[0.2cm]
+			{\fontsize{12}{15}\selectfont w~specjalności \@specialization}
 		\par}
 
 		\vspace{1.5cm}

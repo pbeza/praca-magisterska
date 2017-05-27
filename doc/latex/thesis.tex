@@ -14,6 +14,7 @@
 \supervisoremail{M.Kozlowski@mini.pw.edu.pl}
 \supervisor{\href{mailto:M.Kozlowski@mini.pw.edu.pl}{dr inż. Marek Kozłowski}}
 \discipline{Informatyka}
+\specialization{Metody Sztucznej Inteligencji}
 \monthyear{2017}
 \date{\today}
 
@@ -68,9 +69,24 @@
 \subfile{chapters/ch04-testy}
 \subfile{chapters/ch05-podsumowanie}
 \subfile{chapters/appendix}
-%\listoffigures
+
+% Lista rysunków i tablic na jednej stronie A4
+% https://tex.stackexchange.com/questions/14510/how-to-show-listoffigures-and-listoftables-on-one-page-and-in-the-toc
+
+\renewcommand{\listtablename}{Spis tabel}
+\listoffigures
+\begingroup
+\let\clearpage\relax
+\listoftables
+\endgroup
 
 \printbibliography
 %\label{bibliography-page}
+
+% Oświadczenie o samodzielności wykonania pracy
+
+%\includepdf[pages=1-,pagecommand={\thispagestyle{plain}},addtotoc={1,chapter,1,Oświadczenie,oswiadczenie-label}]{statement}
+\includepdf[pages=1-,pagecommand={\thispagestyle{plain}}]{statement}
+
 
 \end{document}
