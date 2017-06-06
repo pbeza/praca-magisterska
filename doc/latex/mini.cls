@@ -118,6 +118,8 @@
 \definecolor{orange}{rgb}{0.4,0,0}
 %\definecolor{purple}{rgb}{0.4,0.6,0}
 \lstdefinestyle{customc}{
+	aboveskip=15pt,
+	belowskip=0pt,
 	numbers=left,
 	stepnumber=1,
 	numbersep=10pt,
@@ -212,7 +214,6 @@
 
 \RequirePackage{footnote}
 \RequirePackage{tablefootnote}
-%\RequirePackage[all]{hypcap}
 \RequirePackage{tikz}
 \usetikzlibrary{arrows,automata}
 %\usetikzlibrary{matrix}
@@ -228,6 +229,7 @@
 %\PassOptionsToPackage{hyphens}{url}
 %\RequirePackage[unicode,plainpages=false,hypertexnames=true]{hyperref}
 \RequirePackage[unicode]{hyperref}
+%\RequirePackage[all]{hypcap} % żeby dało się użyć hyperref w caption
 
 % Zwykły \href z emph font
 
