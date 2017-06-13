@@ -33,21 +33,21 @@ Aby~wprowadzić zmiany opisane manifestem \texttt{example.pp}, wystarczy uruchom
 Przed dokonaniem zmian w~systemie pomocna może być flaga \texttt{-{}-noop}, która uruchomia tryb \emph{dry run}, tzn.~tryb w~którym nie są dokonywane żadne zmiany w~systemie, a~na standardowym wyjściu są drukowane zmiany jakie by~zaszły, gdyby nie użyć tej flagi.
 
 \begin{minipage}{\linewidth} % żeby listing nie był podzielony na 2 stronach
-\begin{lstlisting}[numbers=none,caption={Manifest Puppet gwarantujący, że~pakiet \texttt{openssh-client}, dostarczający klienta SSH, jest zainstalowany},label=lst:puppet-openssh-example]
+\begin{lstlisting}[language=,numbers=none,caption={Manifest Puppet gwarantujący, że~pakiet \texttt{openssh-client}, dostarczający klienta SSH, jest zainstalowany},label=lst:puppet-openssh-example]
 package { 'openssh-client':
   ensure => present,
 }
 \end{lstlisting}
 \end{minipage}
 
-\begin{lstlisting}[numbers=none,caption={Manifest Puppet gwarantujący istnienie pliku \hreftt{https://en.wikipedia.org/wiki/Motd_(Unix)}{/etc/motd} z~komunikatem \texttt{Hello!}, który wyświetla się~użytkownikom systemu po~zalogowaniu},label=lst:puppet-motd-example]
+\begin{lstlisting}[language=,numbers=none,caption={Manifest Puppet gwarantujący istnienie pliku \hreftt{https://en.wikipedia.org/wiki/Motd_(Unix)}{/etc/motd} z~komunikatem \texttt{Hello!}, który wyświetla się~użytkownikom systemu po~zalogowaniu},label=lst:puppet-motd-example]
 file { 'motd':
   path => '/etc/motd',
   content => 'Hello!',
 }
 \end{lstlisting}
 
-\begin{lstlisting}[numbers=none,caption={Manifest Puppet gwarantujący, że~\gls{demon} \hreftt{https://httpd.apache.org/}{httpd} jest włączony i~działa},label=lst:puppet-httpd-example]
+\begin{lstlisting}[language=,numbers=none,caption={Manifest Puppet gwarantujący, że~\gls{demon} \hreftt{https://httpd.apache.org/}{httpd} jest włączony i~działa},label=lst:puppet-httpd-example]
 service { 'httpd':
   ensure => running,
   enable => true,
@@ -89,7 +89,7 @@ Użytkownikami Chefa, tak jak w~przypadku Puppeta, jest wiele dużych firm i~uni
 
 Odpowiednikiem plików konfiguracyjnych, które w~Puppet nazywane są~\emph{manifestami}, są~pliki nazywane w~nomenklaturze Chef \emph{przepisami}~(ang.~\emph{recipe}). Przykładowe przepisy przedstawiono w~przykładach~\ref{lst:chef-apache-example}, \ref{lst:chef-user-example} i~\ref{lst:chef-service-example}. Więcej przykładów można znaleźć w,~bogatej w~przykładowe przepisy, dokumentacji Chef~\cite{chef-examples}.
 
-\begin{lstlisting}[numbers=none,caption={Przepis Chef gwarantujący, że~serwer Apache zostanie zainstalowany niezależnie od~tego jak~się~nazywa pakiet oprogramowania go~dostarczający},label=lst:chef-apache-example]
+\begin{lstlisting}[language=,numbers=none,caption={Przepis Chef gwarantujący, że~serwer Apache zostanie zainstalowany niezależnie od~tego jak~się~nazywa pakiet oprogramowania go~dostarczający},label=lst:chef-apache-example]
 package 'Install Apache' do
   case node[:platform]
   when 'redhat', 'centos'
@@ -100,7 +100,7 @@ package 'Install Apache' do
 end
 \end{lstlisting}
 
-\begin{lstlisting}[numbers=none,caption={Przepis Chef gwarantujący, że~użytkownik \texttt{xyz} istnieje w~systemie i~ma zadane ustawienia konta},label=lst:chef-user-example]
+\begin{lstlisting}[language=,numbers=none,caption={Przepis Chef gwarantujący, że~użytkownik \texttt{xyz} istnieje w~systemie i~ma zadane ustawienia konta},label=lst:chef-user-example]
 user 'xyz' do
   comment 'A random user'
   uid '1234'
@@ -111,7 +111,7 @@ user 'xyz' do
 end
 \end{lstlisting}
 
-\begin{lstlisting}[numbers=none,caption={Przepis Chef gwarantujący, że~serwis \texttt{example\_service} jest uruchomiony},label=lst:chef-service-example]
+\begin{lstlisting}[language=,numbers=none,caption={Przepis Chef gwarantujący, że~serwis \texttt{example\_service} jest uruchomiony},label=lst:chef-service-example]
 service 'example_service' do
   action :start
 end
@@ -127,7 +127,7 @@ Ansible jest rozwiązaniem do~zarządzania oprogramowaniem różniącym się od~
 Ansible został opublikowany na~licencji~\glslink{gpl}{GPL} w~wersji~3, a~jego pierwsza wersja została wydana w~2012~roku. Projekt został zaimplementowany w~języku Python przez \href{http://michaeldehaan.net/}{\mbox{Michaela} \mbox{Dehaana}}~\cite{ansible-github}.
 
 
-\begin{lstlisting}[numbers=none,caption={Przykładowy plik konfiguracyjny klientów serwera Ansible (w~numenklaturze Ansible nazywany \hrefemph{http://docs.ansible.com/ansible/intro_inventory.html}{Inventory file}), zwyczajowo zapisywany w~\texttt{/etc/ansible/hosts}, definiujący adresy~IP zarządzanych klientów},label=lst:ansible-inventory-example]
+\begin{lstlisting}[language=,numbers=none,caption={Przykładowy plik konfiguracyjny klientów serwera Ansible (w~numenklaturze Ansible nazywany \hrefemph{http://docs.ansible.com/ansible/intro_inventory.html}{Inventory file}), zwyczajowo zapisywany w~\texttt{/etc/ansible/hosts}, definiujący adresy~IP zarządzanych klientów},label=lst:ansible-inventory-example]
 [local]
 127.0.0.1
 
@@ -145,12 +145,12 @@ zainstaluje serwer HTTP \hreftt{https://www.nginx.com/}{nginx} na wszystkich kli
 \texttt{ansible all -s -m apt -a 'pkg=nginx state=installed update\_cache=true'}
 \end{center}
 które zwraca wynik na~standardowym wyjściu w~postaci~\texttt{JSON}:
-\begin{lstlisting}[numbers=none,frame=none]
+\begin{lstlisting}[language=,numbers=none,frame=none]
 127.0.0.1 | success >> {
     "changed": false
 }
 \end{lstlisting}
-Powyższe sposoby uruchamiania Ansible są wykorzystaniem Ansible~\emph{ad-hoc}. Możliwości Ansible w~pełni ujawniają się, gdy~wykorzystamy \hrefemph{http://docs.ansible.com/playbooks_intro.html}{playbook}, czyli odpowiednik manifestu Puppeta i~przepisu Chefa. Przykładowy \emph{playbook} z~listingu~\ref{lst:ansible-playbook-example} przedstawia sposób zainstalowania na~grupie komputerów o~nazwie \texttt{web}~(por.~\ref{lst:ansible-inventory-example}) serwera \texttt{nginx}, stworzenia pliku serwowanego przez serwer, a~następnie uruchomienia \glslink{demon}{demona} serwera. Zmiany opisane przez \emph{playbook} można dokonać za~pomocą komendy:\mynobreakpar
+Powyższe sposoby uruchamiania Ansible są wykorzystaniem Ansible~\emph{ad-hoc}. Możliwości Ansible w~pełni ujawniają się, gdy~wykorzystamy \hrefemph{http://docs.ansible.com/playbooks_intro.html}{playbook}, czyli odpowiednik manifestu Puppeta i~przepisu Chefa. Przykładowy \emph{playbook} z~listingu~\ref{lst:ansible-playbook-example} przedstawia sposób zainstalowania na~grupie komputerów o~nazwie \texttt{web}~(por. listing~\ref{lst:ansible-inventory-example}) serwera \texttt{nginx}, stworzenia pliku serwowanego przez serwer, a~następnie uruchomienia \glslink{demon}{demona} serwera. Zmiany opisane przez \emph{playbook} można dokonać za~pomocą komendy:\mynobreakpar
 \begin{center}
 \texttt{ansible-playbook -s nginx.yml}
 \end{center}
@@ -276,6 +276,11 @@ W~rozdziałach~\ref{sec:puppet}, \ref{sec:chef}, \ref{sec:ansible} i~\ref{sec:sa
 \newcommand{\ansiblelogo}{\centerheader{img/Ansible_logo}}
 \newcommand{\saltlogo}{\multicolumn{1}{c}{\includegraphics[height=\tablelogoheight]{img/SaltStack_logo}}}
 
+\newcommand{\puppetauthor}{\href{https://puppet.com/company/leadership/luke-kanies}{Luke Kanies}}
+\newcommand{\chefauthor}{\href{https://blog.chef.io/author/adam/}{Adam Jacob}}
+\newcommand{\ansibleauthor}{\href{http://michaeldehaan.net/}{Michael Dehaan}}
+\newcommand{\saltauthor}{\href{https://www.linkedin.com/in/thhatch/}{Thomas Hatch}}
+
 \newcommand{\puppetref}{\hyperref[sec:puppet]{Puppet}}
 \newcommand{\chefref}{\hyperref[sec:chef]{Chef}}
 \newcommand{\ansibleref}{\hyperref[sec:ansible]{Ansible}}
@@ -293,6 +298,11 @@ W~rozdziałach~\ref{sec:puppet}, \ref{sec:chef}, \ref{sec:ansible} i~\ref{sec:sa
 \newcommand{\chefpage}{\hreftt{https://www.chef.io/}{chef.io}}
 \newcommand{\ansiblepage}{\hreftt{https://www.ansible.com/}{ansible.com}}
 \newcommand{\saltpage}{\hreftt{https://saltstack.com/}{saltstack.com}}
+
+\newcommand{\puppetgithub}{{\tiny\hreftt{https://github.com/puppetlabs/puppet}{github.com/puppetlabs/puppet}}}
+\newcommand{\chefgithub}{{\tiny\hreftt{https://github.com/chef/chef}{github.com/chef/chef}}}
+\newcommand{\ansiblegithub}{{\tiny\hreftt{https://github.com/ansible/ansible}{github.com/ansible/ansible}}}
+\newcommand{\saltgithub}{{\tiny\hreftt{https://github.com/saltstack/salt}{github.com/saltstack/salt}}}
 
 \newcommand{\puppetenterprise}{\href{https://puppet.com/product}{Puppet Enterprise}}
 \newcommand{\chefenterprise}{\href{https://www.chef.io/automate/}{Chef Automate}}
@@ -316,24 +326,43 @@ W~rozdziałach~\ref{sec:puppet}, \ref{sec:chef}, \ref{sec:ansible} i~\ref{sec:sa
 \newcommand{\saltpricing}{\href{https://saltstack.com/saltstack-enterprise/}{Nie podano}\tablefootnote{Cena zostaje podana po~kontakcie przez e-mail \hreftt{mailto:sales@saltstack.com}{sales@saltstack.com}.}}
 
 \newcommand{\ansiblewinpartialsupport}{\href{http://docs.ansible.com/ansible/intro_installation.html\#control-machine-requirements}{Częściowe}}
-\begin{table}[!ht]
+
+\newcommand{\usaorwiki}{\href{https://en.wikipedia.org/wiki/Oregon}{OR}}
+\newcommand{\usawawiki}{\href{https://en.wikipedia.org/wiki/Washington_(state)}{WA}}
+\newcommand{\usancwiki}{\href{https://en.wikipedia.org/wiki/North_Carolina}{NC}}
+\newcommand{\usautwiki}{\href{https://en.wikipedia.org/wiki/Utah}{UT}}
+
+\newcommand{\puppetdebrank}{\href{https://qa.debian.org/popcon.php?package=puppet}{5725}}
+\newcommand{\chefdebrank}{\href{https://qa.debian.org/popcon.php?package=chef}{12089}}
+\newcommand{\ansibledebrank}{\href{https://qa.debian.org/popcon.php?package=ansible}{8844}}
+\newcommand{\saltdebrank}{\href{https://qa.debian.org/popcon.php?package=salt}{9014}}
+
+\newcommand{\debcontest}{\specialcell{\setstretch{0.5}Miejsce w~rankingu\\[-0.7em]liczby pobrań \emph{Debian}\\[-0.7em]\hrefemph{https://tex.stackexchange.com/a/19678/44382}{Pupularity Contest}\\[-0.7em](stan na~06.06.2917)}}
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
+
+\begin{table}[t]
 	\scriptsize
 	\makebox[\textwidth][c]{ % center too wide table
 	\begin{tabular}{l|l|l|l|l}
-		                    & \puppetlogo       & \cheflogo               & \ansiblelogo                  & \saltlogo       \\\hline\hline
-		Rok powstania       & 2005              & 2009                    & 2012                          & 2011            \\\hline
-		Język programowania & \rubylink         & \rubylink, \erlanglink  & \pythonlink, \powershelllink  & \pythonlink     \\\hline
-		Architektura        & Klient-serwer     & Klient-serwer           & Tylko serwer                  & Klient-serwer   \\\hline
-		Nazwa konfiguracji  & \emph{manifest}   & \emph{recipe} / \emph{cookbook} & \emph{playbook}       & ---             \\\hline
-		Wsparcie GNU/Linux  & \cmark            & \cmark                  & \cmark                        & \cmark          \\\hline
-		Wsparcie Mac~OS     & \cmark            & \cmark                  & \cmark                        & \cmark          \\\hline
-		Wsparcie Windows    & \cmark            & \cmark                  & \ansiblewinpartialsupport     & \cmark          \\\hline
-		Licencja            & \apachegls        & \apachegls              & \gplgls                       & \apachegls      \\\hline
-		Wersja komercyjna   & \puppetenterprise & \chefenterprise         & \ansibleenterprise            & \saltenterprise \\\hline
-		\pricingtitle       & \puppetpricing    & \chefpricing            & \ansiblepricing               & \saltpricing    \\\hline
-		Firma               & \puppetcompany    & \chefcompany            & \redhatcompany                & \saltcompany    \\\hline
-		Strona internetowa  & \puppetpage       & \chefpage               & \ansiblepage                  & \saltpage       \\\hline
-		Dokumentacja        & \puppetdocs       & \chefdocs               & \ansibledocs                  & \saltdocs
+		                    & \puppetlogo                     & \cheflogo                       & \ansiblelogo                     & \saltlogo                    \\\hline\hline
+		Rok powstania       & 2005                            & 2009                            & 2012                             & 2011                         \\\hline
+		Autor               & \puppetauthor~(USA,~\usaorwiki) & \chefauthor~(USA,~\usawawiki)   & \ansibleauthor~(USA,~\usancwiki) & \saltauthor~(USA,~\usautwiki)\\\hline
+		Język programowania & \rubylink                       & \rubylink, \erlanglink          & \pythonlink, \powershelllink     & \pythonlink                  \\\hline
+		Architektura        & Klient-serwer                   & Klient-serwer                   & Tylko serwer                     & Klient-serwer                \\\hline
+		Model komunikacji   & \emph{pull}                     & \emph{pull}                     & \emph{push}                      & \emph{push} i~\emph{pull}    \\\hline
+		Nazwa konfiguracji  & \emph{manifest}                 & \emph{recipe} / \emph{cookbook} & \emph{playbook}                  & ---                          \\\hline
+		Wsparcie GNU/Linux  & \cmark                          & \cmark                          & \cmark                           & \cmark                       \\\hline
+		Wsparcie Mac~OS     & \cmark                          & \cmark                          & \cmark                           & \cmark                       \\\hline
+		Wsparcie Windows    & \cmark                          & \cmark                          & \ansiblewinpartialsupport        & \cmark                       \\\hline
+		Licencja            & \apachegls                      & \apachegls                      & \gplgls                          & \apachegls                   \\\hline
+		Wersja komercyjna   & \puppetenterprise               & \chefenterprise                 & \ansibleenterprise               & \saltenterprise              \\\hline
+		\pricingtitle       & \puppetpricing                  & \chefpricing                    & \ansiblepricing                  & \saltpricing                 \\\hline
+		Firma               & \puppetcompany                  & \chefcompany                    & \redhatcompany                   & \saltcompany                 \\\hline
+		Strona internetowa  & \puppetpage                     & \chefpage                       & \ansiblepage                     & \saltpage                    \\\hline
+		Dokumentacja        & \puppetdocs                     & \chefdocs                       & \ansibledocs                     & \saltdocs                    \\\hline
+		Kod źródłowy        & \puppetgithub                   & \chefgithub                     & \ansiblegithub                   & \saltgithub                  \\\hline
+		\debcontest         & \puppetdebrank                  & \chefdebrank                    & \ansibledebrank                  & \saltdebrank % https://tex.stackexchange.com/a/19678/44382
 	\end{tabular}}
 	\caption{Porównanie wybranych cech \emph{\puppetref}, \emph{\chefref}, \emph{\ansibleref}, \emph{\saltref}}
 	\label{tab:existing-solutions-comparison}
@@ -347,9 +376,9 @@ Konfiguracja każdego z~czterech, najpopularniejszych rozwiązań sprowadza się
 	\item SaltStack Docs --- \hreftt{https://docs.saltstack.com/en/latest/ref/modules/all/index.html}{docs.saltstack.com/en/latest/ref/modules/all/}.
 \end{itemize}
 
-Wszystkie opisane rozwiązania oprócz Ansible i~poza specjalnym \href{https://docs.saltstack.com/en/latest/topics/ssh/}{trybem} działania Salt, działają w~modelu klient-serwer\footnote{Salt nazywa swój model komunikacji określeniem \emph{agent-server}, ale~w~istocie nie różni się on~od~modelu \emph{klient-serwer}.} i~co~pewien czas odpytują serwer o~aktualizację konfiguracji. Ansible i~Salt wyróżniają się pod~tym względem --- dzięki użyciu~SSH nie wymagają one instalowania na~klientach aplikacji klienckiej, przez co~nadzorca klientów może w~dowolnym momencie wymusić instalację nowej konfiguracji na~kontrolowanych komputerach. Z~jednej strony jest to~zaleta, z~drugiej jednak, np.~Puppet, może być postrzegany jako rozwiązanie bardziej wyrafinowane i~złożone, czego świadectwem jest fakt, że~na~podstawie \hyperref[sec:puppet]{manifestu} tworzy on~skierowany graf zasobów i~dopiero na~jego podstawie ustala kolejność przeprowadzenia konfiguracji klienta. Ansible nie tworzy takiego grafu zależności --- konfiguracja klienta jest wykonywana w~takiej kolejności, w~jakiej administrator wyspecyfikował działania w~pliku konfiguracyjnym. Ewentualne błędy wynikłe z~błędów administratora lub~złej kolejności działań wyspecyfikowanych w~\emph{playbooku}, mogą więc być trudne do~wykrycia. Z~tego powodu, mimo podobnej podstawowej funkcjonalności obu rozwiązań, Puppet wydaje się być rozwiązaniem bardziej kompleksowym.
+Wszystkie opisane rozwiązania oprócz Ansible i~poza specjalnym \href{https://docs.saltstack.com/en/latest/topics/ssh/}{trybem} działania Salt, działają w~modelu klient-serwer\footnote{Salt nazywa swój model komunikacji określeniem \emph{agent-server}, ale~w~istocie nie różni się on~od~modelu \emph{klient-serwer}.} i~co~pewien czas odpytują serwer o~aktualizację konfiguracji (model \emph{pull}). Ansible i~Salt wyróżniają się pod~tym względem --- dzięki użyciu~SSH nie wymagają one instalowania na~klientach aplikacji klienckiej, przez co~nadzorca klientów może w~dowolnym momencie wymusić instalację nowej konfiguracji na~kontrolowanych komputerach (model \emph{push}). Z~jednej strony jest to~zaleta, z~drugiej jednak, np.~Puppet, może być postrzegany jako rozwiązanie bardziej wyrafinowane i~złożone, czego świadectwem jest fakt, że~na~podstawie \hyperref[sec:puppet]{manifestu} tworzy on~skierowany graf zasobów i~dopiero na~jego podstawie ustala kolejność przeprowadzenia konfiguracji klienta. Ansible nie tworzy takiego grafu zależności --- konfiguracja klienta jest wykonywana w~takiej kolejności, w~jakiej administrator wyspecyfikował działania w~pliku konfiguracyjnym. Ewentualne błędy wynikłe z~błędów administratora lub~złej kolejności działań wyspecyfikowanych w~\emph{playbooku}, mogą więc być trudne do~wykrycia. Z~tego powodu, mimo podobnej podstawowej funkcjonalności obu rozwiązań, Puppet wydaje się być rozwiązaniem bardziej kompleksowym.
 
-Warto pamiętać, że~przedstawione rozwiązania mają za~sobą co~najmniej kilka lat rozwoju~(por.~\ref{tab:existing-solutions-comparison}) i~są~rozwiązaniami tworzonymi społecznościowo, dzięki czemu istnieją tysiące modułów obsługujących bardzo wiele różnych aspektów konfiguracji systemu. Przykładowo do~rozwoju projektu \emph{\hyperref[sec:ansible]{Ansible}}, \emph{\hyperref[sec:salt]{Salt}}, \emph{\hyperref[sec:chef]{Chef}}, \emph{\hyperref[sec:puppet]{Puppet}}, \emph{\hyperref[itm:cfengine]{CFEngine}} i~\emph{\hyperref[itm:bcfg2]{Bcfg2}} przyczyniło się odpowiednio co~najmniej: \href{https://github.com/ansible/ansible}{2655}, \href{https://github.com/saltstack/salt}{1793}, \href{https://github.com/chef/chef}{509}, \href{https://github.com/puppetlabs/puppet}{442}, \href{https://github.com/cfengine/core}{83} i~\href{https://github.com/Bcfg2/bcfg2}{55}~osób dodając w~sumie odpowiednio: \href{https://github.com/ansible/ansible}{30033}, \href{https://github.com/saltstack/salt}{81656}, \href{https://github.com/chef/chef}{19236}, \href{https://github.com/puppetlabs/puppet}{24857}, \href{https://github.com/cfengine/core}{13819} i~\href{https://github.com/Bcfg2/bcfg2}{8525}\hrefemph{https://en.wikipedia.org/wiki/Commit\_(version\_control)}{commitów}\footnote{Na~podstawie statystyk z~dnia 7~maja~2017~roku, udostępnionych na stronach repozytoriów projektów udostępnianych przez \hreftt{https://github.com/}{github.com}}. Dzięki zbiorowemu zaangażowaniu programistów rozwiązania te~są~w~stanie zarządzać niemal każdym aspektem konfiguracji systemu operacyjnego i~jego oprogramowania. Jest to~możliwe również dzięki modułowości oprogramowania i~licencji \glslink{copyleft}{copyleft}, na~warunkach których zostały udostępnione.
+Warto pamiętać, że~przedstawione rozwiązania mają za~sobą co~najmniej kilka lat rozwoju~(por. tebelę~\ref{tab:existing-solutions-comparison}) i~są~rozwiązaniami tworzonymi społecznościowo, dzięki czemu istnieją tysiące modułów obsługujących bardzo wiele różnych aspektów konfiguracji systemu. Przykładowo do~rozwoju projektu \emph{\hyperref[sec:ansible]{Ansible}}, \emph{\hyperref[sec:salt]{Salt}}, \emph{\hyperref[sec:chef]{Chef}}, \emph{\hyperref[sec:puppet]{Puppet}}, \emph{\hyperref[itm:cfengine]{CFEngine}} i~\emph{\hyperref[itm:bcfg2]{Bcfg2}} przyczyniło się odpowiednio co~najmniej: \href{https://github.com/ansible/ansible}{2717}, \href{https://github.com/saltstack/salt}{1815}, \href{https://github.com/chef/chef}{510}, \href{https://github.com/puppetlabs/puppet}{447}, \href{https://github.com/cfengine/core}{84} i~\href{https://github.com/Bcfg2/bcfg2}{55}~osób dodając w~sumie odpowiednio: \href{https://github.com/ansible/ansible}{30552}, \href{https://github.com/saltstack/salt}{82608}, \href{https://github.com/chef/chef}{19368}, \href{https://github.com/puppetlabs/puppet}{25215}, \href{https://github.com/cfengine/core}{13884} i~\href{https://github.com/Bcfg2/bcfg2}{8532}\hrefemph{https://en.wikipedia.org/wiki/Commit\_(version\_control)}{commitów}\footnote{Na~podstawie statystyk z~dnia 6~czerwca~2017~roku, udostępnionych na stronach repozytoriów projektów udostępnianych przez \hreftt{https://github.com/}{github.com}}. Dzięki zbiorowemu zaangażowaniu programistów rozwiązania te~są~w~stanie zarządzać niemal każdym aspektem konfiguracji systemu operacyjnego i~jego oprogramowania. Jest to~możliwe również dzięki modułowości oprogramowania i~licencji \glslink{copyleft}{copyleft}, na~warunkach których zostały udostępnione.
 
 Z~racji na~specyfikę pracy magisterskiej, projektowany protokół nie jest tak rozbudowany jak największe z~przedstawionych rozwiązań. W~zamian, podczas projektowania protokołu starano się~stworzyć możliwie wiele ułatwień dla~jego modułowej, dalszej rozbudowy. Niniejsza praca implementuje zarządzanie elementami konfiguracji systemu --- w~szczególności zaimplementowane rozwiązanie nie ma~wbudowanego mechanizmu do~zapewnienia istnienia np.~plików specjalnych i~mechanizmu zapewniającego, że~dany \gls{demon} jest uruchomiony\footnote{Chyba, że~administrator sam napisze taki skrypt i~go~umieści w~odpowiednim katalogu tworzonego obrazu konfiguracji --- np.~w~katalogu \hreftt{https://en.wikipedia.org/wiki/Cron}{crona}.}. Stworzone oprogramowanie jest za~to~w~stanie śledzić zmiany i~aktualizować m.in.~konfigurację zapisaną w~plikach tekstowych i~oprogramowanie zapisane w~postaci plików binarnych.
 

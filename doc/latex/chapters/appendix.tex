@@ -7,6 +7,11 @@
 
 \begin{appendices}
 
+% Zamienia domyślnych tytułów 'Dodatek X' na 'Załącznik X'
+
+\newcommand\zalacznik{Załącznik}
+\renewcommand{\appendixname}{\zalacznik}
+
 % Ustawienie, żeby załączniki były wyświetlane w Spisie Treści z wcięciem
 % http://tex.stackexchange.com/questions/172496/adding-appendix-chapters-without-sections-in-table-of-contents
 
@@ -30,44 +35,426 @@
 
 %------------------------------------------------------------------------------
 
+\chapter{Przykład działania AIDE}
+\label{ch:aide-example}
+
+Niniejszy załącznik przedstawia prosty przykład wykorzystania AIDE do~śledzenia zmian przykładowego drzewa katalogów \path{/tmp/demo}, utworzonego w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example} i~zobrazowanego na~rysunku~\ref{fig:drzewo-katalogow-przyklad-przed-aide}. Listing~\ref{lst:aide-config-example} jest przykładową konfiguracją AIDE wykorzystaną na~potrzeby prezentacji działania AIDE, listing~\ref{lst:aide-example-first-scan} zawiera komendy, które inicjują za~pomocą użycia flagi \hreftt{https://linux.die.net/man/1/aide}{--init} plik stanu AIDE \path{/tmp/aide.db.new}, odpowiadający skanowanemu drzewu katalogów, a~następnie przenoszą go~do~pliku \path{/tmp/aide.db}, ustalając w~ten sposób referencyjny plik stanu, do~którego są~porównywane wyniki skanowania z~flagą \hreftt{https://linux.die.net/man/1/aide}{--scan} (por.~pierwszy wiersz konfiguracji \path{/tmp/aide-demo.conf} z~listingu~\ref{lst:aide-config-example}). Listing~\ref{lst:tree-change-aide-example} symuluje dokonanie zmian zawartości plików i~katalogów w~drzewie \path{/tmp/demo}, odzwierciedlonych w~drzewie na~rysunku~\ref{fig:drzewo-katalogow-przyklad-po-aide}. Ponowne wywołanie skanowania AIDE z~flagą \hreftt{https://linux.die.net/man/1/aide}{--check} powoduje wypisanie na~standardowe wyjście raportu dokonanych zmian w~skanowanym drzewie, co~przedstawia listing~\ref{lst:aide-example-second-scan}. Jeśli zaszłaby potrzeba zamiany starego pliku referencyjnego \path{/tmp/aide.db} na~nowy plik stanu \path{/tmp/aide.db.new}, to~należałoby wywołać AIDE z~opcją \hreftt{https://linux.die.net/man/1/aide}{--update}, co~przedstawia listing~\ref{lst:aide-example-second-scan-output}. Zawartość nowego pliku \path{/tmp/aide.db.new} została przedstawiona na~listingu~\ref{lst:aide-example-second-scan-output}.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=,numbers=none,caption={Konfiguracja AIDE \protect\path{/tmp/aide-demo.conf} zastosowana do~prezentacji działania AIDE na~przykładowym drzewie katalogów~\protect\path{/tmp/demo} utworzonym w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example} i~zobrazowany na~rys.~\ref{fig:drzewo-katalogow-przyklad-przed-aide}},label=lst:aide-config-example]
+database = file:/tmp/aide.db
+database_out = file:/tmp/aide.db.new
+database_new = file:/tmp/aide.db.new
+gzip_dbout = no
+summarize_changes = yes
+grouped = yes
+verbose = 6
+report_base16 = no
+MyRule = p+ftype+i+n+l+u+g+s+b+m+c+md5+sha256+sha512+rmd160+gost+crc32+tiger
+/tmp/demo/.* MyRule
+!/tmp/demo/dir1/subdir2/.*
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=,numbers=none,caption={Utworzenie przykładowego drzewa katalogów \protect\path{/tmp/demo}, w~tym --- 9~katalogów, 11~\href{https://en.wikipedia.org/wiki/Unix_file_types\#Regular_file}{plików zwykłych}~(\emph{regular files}), 2~\href{https://en.wikipedia.org/wiki/Symbolic_link}{dowiązań symbolicznych}~(\emph{symbolic links}), 2~\href{https://en.wikipedia.org/wiki/Hard_link}{dowiązań twardych}~(\emph{hard links}) i~2~\href{https://en.wikipedia.org/wiki/Named_pipe}{łączy nazwanych}~(\emph{named pipes}/\emph{FIFOs}) na~potrzeby przykładu działania AIDE (por.~rys.~\ref{fig:drzewo-katalogow-przyklad-przed-aide})},label=lst:tree-create-aide-example]
+user@host:/tmp$ mkdir demo && cd demo
+user@host:/tmp/demo$ echo '0th file' > file0
+user@host:/tmp/demo$ echo '1st file' > file1
+user@host:/tmp/demo$ mkdir dir{0..3} dir1/subdir{0..3}
+user@host:/tmp/demo$ ln -s file1 file1_symlink
+user@host:/tmp/demo$ ln -s dir3 dir3_symlink
+user@host:/tmp/demo$ touch dir1/file
+user@host:/tmp/demo$ echo '2nd file' > dir1/file2
+user@host:/tmp/demo$ echo '3rd file' > dir1/file3
+user@host:/tmp/demo$ echo '4th file' > dir1/subdir1/file4
+user@host:/tmp/demo$ echo '5th file' > dir1/subdir1/file5
+user@host:/tmp/demo$ echo '6th file' > dir1/subdir2/file6
+user@host:/tmp/demo$ echo '7th file' > dir1/subdir2/file7
+user@host:/tmp/demo$ mkfifo dir2/fifo{0,1}
+user@host:/tmp/demo$ echo '8th file' > dir3/file8
+user@host:/tmp/demo$ echo '9th file' > dir3/file9
+user@host:/tmp/demo$ ln dir3/file8 file8_hardlink
+user@host:/tmp/demo$ chmod 777 dir1/file2
+user@host:/tmp/demo$ ln dir1/subdir1/file4 file4_hardlink
+user@host:/tmp/demo$ chgrp wireshark dir1/file3
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=,numbers=none,caption={Uruchomienie pierwszego skanowania AIDE z~konfiguracją \protect\path{/tmp/aide-demo.conf} i~z~flagą \hreftt{https://linux.die.net/man/1/aide}{--init}, oznaczającą inicjalizację referencyjnej bazy wynikowej \protect\path{/tmp/aide.db.new}, opisującej stan systemu},label=lst:aide-example-first-scan]
+user@host:/tmp/demo$ aide --init -c /tmp/aide-demo.conf
+Start timestamp: 2017-06-12 23:50:52 +0200 (AIDE 0.16)
+AIDE initialized database at /tmp/aide.db.new
+Verbose level: 6
+
+Number of entries:	22
+
+---------------------------------------------------
+The attributes of the (uncompressed) database(s):
+---------------------------------------------------
+
+/tmp/aide.db.new
+  MD5      : s0dlxhIPglO538vgaDr3ZQ==
+  SHA1     : RDle9veNHRdgf8fZA2xWVrKrRMM=
+  RMD160   : a/rNYSmrCmq4Vwk0BpocigPqCRQ=
+  TIGER    : JvTaz+LrZPC7xUYXRO3wXxXVgpxhL2me
+  SHA256   : oSutM/qSGsAecbTyGJrQDKFd1LwEV2IG
+             t6hmcKECjWI=
+  SHA512   : IugVANSKAfh0gJ+EgBuR8SNQ5m8Sxckz
+             NANR2MjSZvgSB1QO9gN2Uiqnn2WW/z2I
+             03/qiu4xQPx055zgYJluKA==
+  CRC32    : iDo0aw==
+  HAVAL    : fVpHqgYtV8qgt368sIwDE1ZNjSP5bEwP
+             HUoK5RSiPkQ=
+  GOST     : ybuJquCJz3rTKT/HRN+VrEAlUUtIxai0
+             L8PH4FfbUDM=
+  WHIRLPOOL: 9qqFSseiin1TG8P+4PVoYp7Vs3XMwZD+
+             kjaisnYJ6FNj6MyOgLBfkdOCwtBM+M6s
+             W7d7gKm9kmXI7FkPAi9oCw==
+
+
+End timestamp: 2017-06-12 23:50:52 +0200 (run time: 0m 0s)
+user@host:/tmp/demo$ mv ../aide.db.new ../aide.db
+\end{lstlisting}
+\end{minipage}
+
+\begin{lstlisting}[language=,numbers=none,caption={Dokonanie demonstracyjnych zmian w~śledzonym przez AIDE drzewie katalogów \protect\path{/tmp/demo}, utworzonym w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example}~(por.~rys.~\ref{fig:drzewo-katalogow-przyklad-przed-aide} i~\ref{fig:drzewo-katalogow-przyklad-po-aide}) przed uruchomieniem drugiego skanowania AIDE z~flagą \hreftt{https://linux.die.net/man/1/aide}{--check}~(patrz listing~\ref{lst:aide-example-second-scan}},label=lst:tree-change-aide-example]
+user@host:/tmp/demo$ mv dir2/fifo0 dir0
+user@host:/tmp/demo$ echo 'x' >> file1
+user@host:/tmp/demo$ rm file8_hardlink
+user@host:/tmp/demo$ rm dir1/subdir1/file4
+user@host:/tmp/demo$ mv dir3/file9 .
+user@host:/tmp/demo$ chmod o-rwx dir1/file2
+user@host:/tmp/demo$ chgrp user dir1/file3
+user@host:/tmp/demo$ mv file0 file0_renamed
+user@host:/tmp/demo$ ln -s dir1/subdir2/file6 file6_symlink
+user@host:/tmp/demo$ ln dir1/subdir2/file7 file7_hardlink
+user@host:/tmp/demo$ touch dir1/subdir1/file5
+\end{lstlisting}
+
+\newpage
+\begin{lstlisting}[language=,numbers=none,caption={Drugie skanowanie drzewa katalogów \protect\path{/tmp/demo} --- po~zmianach przedstawionych na~listingu~\ref{lst:tree-change-aide-example} i~zwizualizowanych na~rys.~\ref{fig:drzewo-katalogow-przyklad-aide}},label=lst:aide-example-second-scan]
+user@host:/tmp/demo$ aide --check -c /tmp/aide-demo.conf 
+Start timestamp: 2017-06-13 00:05:07 +0200 (AIDE 0.16)
+AIDE found differences between database and filesystem!!
+Verbose level: 6
+
+Summary:
+  Total number of entries:	22
+  Added entries:		5
+  Removed entries:		5
+  Changed entries:		10
+
+---------------------------------------------------
+Added entries:
+---------------------------------------------------
+
+p++++++++++++++++: /tmp/demo/dir0/fifo0
+f++++++++++++++++: /tmp/demo/file0_renamed
+l++++++++++++++++: /tmp/demo/file6_symlink
+f++++++++++++++++: /tmp/demo/file7_hardlink
+f++++++++++++++++: /tmp/demo/file9
+
+---------------------------------------------------
+Removed entries:
+---------------------------------------------------
+
+f----------------: /tmp/demo/dir1/subdir1/file4
+p----------------: /tmp/demo/dir2/fifo0
+f----------------: /tmp/demo/dir3/file9
+f----------------: /tmp/demo/file0
+f----------------: /tmp/demo/file8_hardlink
+
+---------------------------------------------------
+Changed entries:
+---------------------------------------------------
+
+d =.... mc..     : /tmp/demo/dir0
+f =.p.. .c...    : /tmp/demo/dir1/file2
+f =...g .c...    : /tmp/demo/dir1/file3
+d =.... mc..     : /tmp/demo/dir1/subdir1
+f =.... mc...    : /tmp/demo/dir1/subdir1/file5
+d =.... mc..     : /tmp/demo/dir2
+d =.... mc..     : /tmp/demo/dir3
+f =.... .c.n.    : /tmp/demo/dir3/file8
+f >.... mc..C    : /tmp/demo/file1
+f =.... .c.n.    : /tmp/demo/file4_hardlink
+
+---------------------------------------------------
+Detailed information about changes:
+---------------------------------------------------
+
+Directory: /tmp/demo/dir0
+  Mtime    : 2017-06-12 23:43:48 +0200        | 2017-06-12 23:54:03 +0200
+  Ctime    : 2017-06-12 23:43:48 +0200        | 2017-06-12 23:54:03 +0200
+
+File: /tmp/demo/dir1/file2
+  Perm     : -rwxrwxrwx                       | -rwxrwx---
+  Ctime    : 2017-06-12 23:47:21 +0200        | 2017-06-12 23:59:37 +0200
+
+File: /tmp/demo/dir1/file3
+  Gid      : 127                              | 1000
+  Ctime    : 2017-06-12 23:47:48 +0200        | 2017-06-13 00:00:00 +0200
+
+Directory: /tmp/demo/dir1/subdir1
+  Mtime    : 2017-06-12 23:45:42 +0200        | 2017-06-12 23:57:08 +0200
+  Ctime    : 2017-06-12 23:45:42 +0200        | 2017-06-12 23:57:08 +0200
+
+File: /tmp/demo/dir1/subdir1/file5
+  Mtime    : 2017-06-12 23:45:42 +0200        | 2017-06-13 00:04:30 +0200
+  Ctime    : 2017-06-12 23:45:42 +0200        | 2017-06-13 00:04:30 +0200
+
+Directory: /tmp/demo/dir2
+  Mtime    : 2017-06-12 23:46:22 +0200        | 2017-06-12 23:54:03 +0200
+  Ctime    : 2017-06-12 23:46:22 +0200        | 2017-06-12 23:54:03 +0200
+
+Directory: /tmp/demo/dir3
+  Mtime    : 2017-06-12 23:46:54 +0200        | 2017-06-12 23:58:06 +0200
+  Ctime    : 2017-06-12 23:46:54 +0200        | 2017-06-12 23:58:06 +0200
+
+File: /tmp/demo/dir3/file8
+  Ctime    : 2017-06-12 23:47:10 +0200        | 2017-06-12 23:56:31 +0200
+  Linkcount: 2                                | 1
+
+File: /tmp/demo/file1
+  Size     : 9                                | 11
+  Mtime    : 2017-06-12 23:43:11 +0200        | 2017-06-12 23:56:07 +0200
+  Ctime    : 2017-06-12 23:43:11 +0200        | 2017-06-12 23:56:07 +0200
+  MD5      : PhzxiZvr9xGEi3W4/w4tjw==         | 3YTsP47ztvqew1yDoSNJpw==
+  CRC32    : DHu60A==                         | ELsdEQ==
+
+File: /tmp/demo/file4_hardlink
+  Ctime    : 2017-06-12 23:47:37 +0200        | 2017-06-12 23:57:08 +0200
+  Linkcount: 2                                | 1
+
+
+---------------------------------------------------
+The attributes of the (uncompressed) database(s):
+---------------------------------------------------
+
+/tmp/aide.db
+  MD5      : s0dlxhIPglO538vgaDr3ZQ==
+  SHA1     : RDle9veNHRdgf8fZA2xWVrKrRMM=
+  RMD160   : a/rNYSmrCmq4Vwk0BpocigPqCRQ=
+  TIGER    : JvTaz+LrZPC7xUYXRO3wXxXVgpxhL2me
+  SHA256   : oSutM/qSGsAecbTyGJrQDKFd1LwEV2IG
+             t6hmcKECjWI=
+  SHA512   : IugVANSKAfh0gJ+EgBuR8SNQ5m8Sxckz
+             NANR2MjSZvgSB1QO9gN2Uiqnn2WW/z2I
+             03/qiu4xQPx055zgYJluKA==
+  CRC32    : iDo0aw==
+  HAVAL    : fVpHqgYtV8qgt368sIwDE1ZNjSP5bEwP
+             HUoK5RSiPkQ=
+  GOST     : ybuJquCJz3rTKT/HRN+VrEAlUUtIxai0
+             L8PH4FfbUDM=
+  WHIRLPOOL: 9qqFSseiin1TG8P+4PVoYp7Vs3XMwZD+
+             kjaisnYJ6FNj6MyOgLBfkdOCwtBM+M6s
+             W7d7gKm9kmXI7FkPAi9oCw==
+
+
+End timestamp: 2017-06-13 00:05:07 +0200 (run time: 0m 0s)
+\end{lstlisting}
+
+\begin{lstlisting}[language=,numbers=none,caption={Zaktualizowanie pliku stanu systemu \protect\path{/tmp/aide.db.new} po~skanowaniu drzewa katalogów \protect\path{/tmp/demo} po~dokonaniu w~nim zmian przedstawionych na~listingu~\ref{lst:tree-change-aide-example} i~zwizualizowanych na~rys.~\ref{fig:drzewo-katalogow-przyklad-aide}},label=lst:aide-example-update-output]
+user@host:/tmp/demo$ aide --update -c /tmp/aide-demo.conf 
+Start timestamp: 2017-06-13 00:11:49 +0200 (AIDE 0.16)
+AIDE found differences between database and filesystem!!
+New AIDE database written to /tmp/aide.db.new
+
+(...) Skipped fragment identical to above command's output (...)
+
+/tmp/aide.db.new
+  MD5      : eORTPtiPLrkyWoezwMCLug==
+  SHA1     : Zqn8oDZlMMVmnbBplX045dlEcf8=
+  RMD160   : 9ddczy9kGt8BfEuDbJb1XrkmpGA=
+  TIGER    : FdC9kqp9fiMhLxifEtzqI27gScXEbhni
+  SHA256   : EbD/BuWkqf+IFpuDKm10KDSJ66VSL2K+
+             rwcTtiO9siw=
+  SHA512   : cQTUtyiOf9tVhDg+nxnGts4/nXeP62tg
+             OTgAYVwxqapOco8oXIlXWiAPmBi6iUbA
+             Gb5rqKkL2jjn5gN+E4iJKA==
+  CRC32    : 65CBGg==
+  HAVAL    : J33vR7P/PWSC30sA16E1yE2L/gNfWI/p
+             JLHhajaQNY4=
+  GOST     : cQ/9GpeTXXI7fMbyFpFGa/P4i2pG+6h9
+             nz62FI6U4kY=
+  WHIRLPOOL: zae+ZMAF13z08+d264FaeZXY7vxWjLWY
+             A7Hzao29+EksBihJ2n4qJb85sSRR7hwB
+             dHssv+Z0QFO/k1InWBpeCQ==
+
+
+End timestamp: 2017-06-13 00:11:49 +0200 (run time: 0m 0s)
+\end{lstlisting}
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=,numbers=none,caption={Zaktualizowany plik stanu systemu \protect\path{/tmp/aide.db.new} po~skanowaniu drzewa katalogów \protect\path{/tmp/demo} po~dokonaniu w~nim zmian przedstawionych na~listingu~\ref{lst:tree-change-aide-example} i~zwizualizowanych na~rys.~\ref{fig:drzewo-katalogow-przyklad-aide}},label=lst:aide-example-second-scan-output]
+user@host:/tmp/demo$ cat ../aide.db.new
+@@begin_db
+# This file was generated by Aide, version 0.16
+# Time of generation was 2017-06-13 00:11:49
+@@db_spec name lname attr perm inode bcount uid gid size mtime ctime lcount md5 crc32 
+/tmp/demo/dir0 0 34359742397 40755 22 8 1000 1000 4096 MTQ5NzMwNDQ0Mw== MTQ5NzMwNDQ0Mw== 2 0 0
+/tmp/demo/dir0/fifo0 0 34359742397 10644 40 0 1000 1000 0 MTQ5NzMwMzk4Mg== MTQ5NzMwNDQ0Mw== 1 0 0
+/tmp/demo/dir1 0 34359742397 40755 23 8 1000 1000 4096 MTQ5NzMwMzkxMA== MTQ5NzMwMzkxMA== 6 0 0
+/tmp/demo/dir1/file 0 34359812029 100644 33 0 1000 1000 0 MTQ5NzMwMzg3Ng== MTQ5NzMwMzg3Ng== 1 1B2M2Y8AsgTpgAmY7PhCfg== AAAAAA==
+/tmp/demo/dir1/file2 0 34359812029 100770 34 8 1000 1000 9 MTQ5NzMwMzg5NA== MTQ5NzMwNDc3Nw== 1 fPzlv5u5G40YOOqm53vNkQ== fae7bA==
+/tmp/demo/dir1/file3 0 34359812029 100644 35 8 1000 1000 9 MTQ5NzMwMzkxMA== MTQ5NzMwNDgwMA== 1 w6pbLq3ndYjJReSudThjtQ== cRmpjQ==
+/tmp/demo/dir1/subdir0 0 34359742397 40755 27 8 1000 1000 4096 MTQ5NzMwMzgyOA== MTQ5NzMwMzgyOA== 2 0 0
+/tmp/demo/dir1/subdir1 0 34359742397 40755 28 8 1000 1000 4096 MTQ5NzMwNDYyOA== MTQ5NzMwNDYyOA== 2 0 0
+/tmp/demo/dir1/subdir1/file5 0 34359812029 100644 37 8 1000 1000 9 MTQ5NzMwNTA3MA== MTQ5NzMwNTA3MA== 1 DDmr9IRrE2rSn6A3nfDZMg== Vc6IPw==
+/tmp/demo/dir1/subdir3 0 34359742397 40755 30 8 1000 1000 4096 MTQ5NzMwMzgyOA== MTQ5NzMwMzgyOA== 2 0 0
+/tmp/demo/dir2 0 34359742397 40755 25 8 1000 1000 4096 MTQ5NzMwNDQ0Mw== MTQ5NzMwNDQ0Mw== 2 0 0
+/tmp/demo/dir2/fifo1 0 34359742397 10644 41 0 1000 1000 0 MTQ5NzMwMzk4Mg== MTQ5NzMwMzk4Mg== 1 0 0
+/tmp/demo/dir3 0 34359742397 40755 26 8 1000 1000 4096 MTQ5NzMwNDY4Ng== MTQ5NzMwNDY4Ng== 2 0 0
+/tmp/demo/dir3/file8 0 34359812029 100644 42 8 1000 1000 9 MTQ5NzMwNDAwMw== MTQ5NzMwNDU5MQ== 1 jXL6coUzcqJ4eO2B9wVhKA== R+iLhg==
+/tmp/demo/dir3_symlink dir3 34359742399 120777 32 0 1000 1000 4 MTQ5NzMwMzg3MA== MTQ5NzMwMzg3MA== 1 0 0
+/tmp/demo/file0_renamed 0 34359812029 100644 15 8 1000 1000 9 MTQ5NzMwMzc4Mw== MTQ5NzMwNDg3Nw== 1 Xk/ZsDDB3q6NEc1SJSVpCQ== cuvJCA==
+/tmp/demo/file1 0 34359812029 100644 20 8 1000 1000 11 MTQ5NzMwNDU2Nw== MTQ5NzMwNDU2Nw== 1 3YTsP47ztvqew1yDoSNJpw== ELsdEQ==
+/tmp/demo/file1_symlink file1 34359742399 120777 31 0 1000 1000 5 MTQ5NzMwMzg1OQ== MTQ5NzMwMzg1OQ== 1 0 0
+/tmp/demo/file4_hardlink 0 34359812029 100644 36 8 1000 1000 9 MTQ5NzMwMzkzMg== MTQ5NzMwNDYyOA== 1 qX9IDI1OOYA5OfoKfNHY9Q== M2SIzQ==
+/tmp/demo/file6_symlink dir1/subdir2/file6 34359742399 120777 45 0 1000 1000 18 MTQ5NzMwNDk0MA== MTQ5NzMwNDk0MA== 1 0 0
+/tmp/demo/file7_hardlink 0 34359812029 100644 39 8 1000 1000 9 MTQ5NzMwMzk1Ng== MTQ5NzMwNDk2Mg== 2 cgHdmt/roeP+P+HwBdK83g== LodI3w==
+/tmp/demo/file9 0 34359812029 100644 43 8 1000 1000 9 MTQ5NzMwNDAxNA== MTQ5NzMwNDY4Ng== 1 1zYCmaRbg4+M57I7ICdgWw== IUKLdA==
+@@end_db
+\end{lstlisting}
+\end{minipage}
+%user@host:/tmp/demo$ aide --compare -c /tmp/aide-demo.conf 
+%Start timestamp: 2017-06-13 00:16:26 +0200 (AIDE 0.16)
+%AIDE found differences between the two databases!!
+%
+%(...) Wynik na stdout taki jak dla opcji --update (...)
+%
+
+%\begin{minipage}{\linewidth} % https://tex.stackexchange.com/questions/73231/avoid-page-breaks-in-lstlistings
+\begin{figure}
+	\centering
+	\begin{subfigure}[t]{0.49\textwidth}
+			\mybox{dirs}{%
+				\dirtree{%
+				.1 /.
+				.2 \vdots.
+				.2 tmp.
+				.3 \vdots.
+				.3 demo.
+				.4 dir0.
+				.4 dir1.
+				.5 file.
+				.5 file2.
+				.5 file3.
+				.5 subdir0.
+				.5 subdir1.
+				.6 file4.
+				.6 file5.
+				.5 subdir2.
+				.6 file6.
+				.6 file7.
+				.5 subdir3.
+				.4 dir2.
+				.5 fifo0.
+				.5 fifo1.
+				.4 dir3.
+				.5 file8.
+				.5 file9.
+				.4 dir3\_symlink -> dir3.
+				.4 file0.
+				.4 file1.
+				.4 file1\_symlink -> file1.
+				.4 file4\_hardlink.
+				.4 file8\_hardlink.
+				}
+				\tcblower
+				\caption{Drzewo katalogów \path{/tmp/demo} utworzone w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example} przed~dokonaniem w~nim zmian z~listingu~\ref{lst:tree-change-aide-example}}
+				\label{fig:drzewo-katalogow-przyklad-przed-aide}
+			}
+	\end{subfigure}
+	\begin{subfigure}[t]{0.49\textwidth}
+			\mybox{dirs}{%
+				\dirtree{%
+				.1 /.
+				.2 \vdots.
+				.2 tmp.
+				.3 \vdots.
+				.3 demo.
+				.4 dir0.
+				.5 fifo0.
+				.4 dir1.
+				.5 file.
+				.5 file2.
+				.5 file3.
+				.5 subdir0.
+				.5 subdir1.
+				.6 file5.
+				.5 subdir2.
+				.6 file6.
+				.6 file7.
+				.5 subdir3.
+				.4 dir2.
+				.5 fifo1.
+				.4 dir3.
+				.5 file8.
+				.4 dir3\_symlink -> dir3.
+				.4 file0\_renamed.
+				.4 file1.
+				.4 file1\_symlink -> file1.
+				.4 file4\_hardlink.
+				.4 file6\_symlink -> dir1/subdir2/file6.
+				.4 file7\_hardlink.
+				.4 file9.
+				}
+				\tcblower
+				\caption{Drzewo katalogów \path{/tmp/demo} utworzone w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example} po~dokonaniu w~nim zmian z~listingu~\ref{lst:tree-change-aide-example}}
+				\label{fig:drzewo-katalogow-przyklad-po-aide}
+			}
+	\end{subfigure}
+	\caption{Drzewo katalogów \protect\path{/tmp/demo} utworzone w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example} przed i~po~dokonaniu zmian przedstawionych na~listingu~\ref{lst:tree-change-aide-example}}
+	\label{fig:drzewo-katalogow-przyklad-aide}
+\end{figure}
+%\end{minipage}
+
+
+%------------------------------------------------------------------------------
+
 % Płyta CD z pracą magisterską
 
 \chapter{Płyta CD}
 \label{ch:cd-appendix}
 
-Do~pracy dołączono płytę z~zawartością części aplikacyjnej niniejszej pracy magisterskiej. Drzewo najważniejszych\footnote{Zaprezentowane drzewo nie prezentuje całej zawartości płyty~CD, a~jedynie najważniejsze katalogi i~pliki do~głębokości drzewa równej~4. Drzewo powstało przez wybranie najważniejszych plików z~wyjścia wywołania komendy \mbox{\texttt{tree~-L~4}}~\cite{tree-manual}.} katalogów i~plików zapisanych na~płycie~CD: % TODO
+Do~pracy dołączono płytę z~zawartością części aplikacyjnej niniejszej pracy magisterskiej. Drzewo najważniejszych\footnote{Zaprezentowane drzewo katalogów nie prezentuje całej zawartości płyty~CD, a~jedynie wybrane, najistotniejsze katalogi i~pliki do~głębokości drzewa równej~4. Drzewo powstało przez wybranie najważniejszych plików z~wyjścia wywołania komendy \mbox{\texttt{tree~-L~4}}~\cite{tree-manual}.} katalogów i~plików zapisanych na~płycie~CD: % TODO
 
+{\footnotesize
 \dirtree{%
-.0 .
-.1 bin.
-.2 packages.
-.3 debian.
-.4 myscm-srv.deb.
-.4 myscm-cli.deb.
-.3 arch.
-.4 myscm-srv.tar.xz.
-.4 myscm-cli.tar.xz.
-.1 config.
-.2 server.
-.3 certificate.pem.
-.3 request.cnf.
-.3 request.csr.
-.3 rsa\_aes256\_4096.key.
-.3 rsa\_aes256\_4096.key.pkcs12.
-.1 data.
-.1 doc.
-.2 python.
-.2 latex.
-.3 chapters.
-.3 img.
-.2 poster.
-.1 lib.
-.1 src.
-.2 build.
-.2 client.
-.2 server.
-.2 common.
-.2 include.
+.1 /.
+.2 bin.
+.3 packages.
+.4 debian.
+.5 myscm-srv.deb.
+.5 myscm-cli.deb.
+.4 arch.
+.5 myscm-srv.tar.xz.
+.5 myscm-cli.tar.xz.
+.2 config.
+.3 server.
+.4 certificate.pem.
+.4 request.cnf.
+.4 request.csr.
+.4 rsa\_aes256\_4096.key.
+.4 rsa\_aes256\_4096.key.pkcs12.
+.2 data.
+.2 doc.
+.3 python.
+.3 latex.
+.4 chapters.
+.4 img.
+.3 poster.
+.2 lib.
+.2 src.
+.3 build.
+.3 client.
+.3 server.
+.3 common.
+.3 include.
+}
 }
 
 \noindent Skrót \texttt{MD5}~zawartości płyty:

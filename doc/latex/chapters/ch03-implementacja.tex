@@ -52,7 +52,7 @@ Główną funkcjonalnością aplikacji serwera jest stworzenie obrazu zmian konf
 
 Szczegółowa instrukcja obsługi użycia aplikacji serwera została dostarczona z~przygotowanym pakietem oprogramowania \texttt{\srvappname}~(patrz załącznik~\ref{ch:cd-appendix}). Instrukcję można otworzyć po~zainstalowaniu pakietu \texttt{\srvappname} za~pomocą komendy \texttt{man~\srvappname}. Konfiguracja aplikacji serwera znajduje się w~pliku \myscmsrvconfig.
 
-\begin{lstlisting}[label=lst:myscm-srv-usage,numbers=none,caption={Szablon uruchomienia aplikacji serwera \texttt{myscm-srv} przeznaczonej do~użycia na~systemie odgrywającym rolę stacji z~konfiguracją wzorcową dla~klientów}]
+\begin{lstlisting}[language=,label=lst:myscm-srv-usage,numbers=none,caption={Szablon uruchomienia aplikacji serwera \texttt{myscm-srv} przeznaczonej do~użycia na~systemie odgrywającym rolę stacji z~konfiguracją wzorcową dla~klientów}]
 myscm-srv [OPCJE]
 \end{lstlisting}
 
@@ -113,7 +113,7 @@ Aplikacja serwera i~aplikacja kliencka nie są~zależne od~żadnej konkretnej dy
 \section{Wykorzystane biblioteki}
 \label{sec:wykorzystane-oprogramowanie}
 
-Do~implementacji projektu wykorzystano kilkadziesiąt \href{https://docs.python.org/dev/tutorial/modules.html}{modułów} Pythona, kilka pomocniczych aplikacji i~bibliotek. Wyróżnione z~nich~to:
+Do~implementacji projektu wykorzystano kilkadziesiąt \href{https://docs.python.org/dev/tutorial/modules.html}{modułów} Pythona, kilka pomocniczych aplikacji i~bibliotek. Wyróżnione z~nich~to:\mynobreakpar
 \begin{itemize}
 	\item \href{http://aide.sourceforge.net/}{AIDE} (\emph{Advanced Intrusion Detection Environment}) --- skaner integralności plików zaprojektowany w~celu wykrywania złośliwego oprogramowania, np.~\hrefemph{https://en.wikipedia.org/wiki/Rootkit}{rootkitów}. W~niniejszym projekcie został wykorzystany do~wykrywania zmian w~konfiguracji systemu wzorcowego (patrz rozdział~\ref{sec:aide}).
 	\item \href{http://www.pyopenssl.org/}{pyOpenSSL} --- \hrefemph{https://en.wikipedia.org/wiki/Language_binding}{Binding} dla~biblioteki OpenSSL. Biblioteka ta~implementuje wiele protokołów i~algorytmów kryptograficznych, ale~w~ramach projektu została wykorzystana tylko w~celu umożliwia uwierzytelnienie serwera przez klienta przez użycie certyfikatów cyfrowych.
@@ -126,42 +126,182 @@ Do~implementacji projektu wykorzystano kilkadziesiąt \href{https://docs.python.
 \section{AIDE}
 \label{sec:aide}
 
-Kluczowym narzędziem wykorzystanym w~implementacji projektu jest~\href{http://aide.sourceforge.net/}{AIDE}~(\emph{Advanced Intrusion Detection Environment}). \href{https://wiki.archlinux.org/index.php/AIDE}{AIDE}~jest oprogramowaniem zaprojektowanym z~myślą wykrywania zmian w~systemie plików w~celu wykrycia złoźliwego oprogramowania\footnote{Taki rodzaj oprogramowania jest nazywany oprogramowaniem~\href{https://en.wikipedia.org/wiki/Host-based_intrusion_detection_system_comparison}{HIDS}~(\hrefemph{https://wiki.archlinux.org/index.php/List_of_applications/Security\#Threat_and_vulnerability_detection}{Host-based Intrusion Detection System}).}, jednak sposób jego działania nie ogranicza wykorzystania go~tylko do~tego celu. AIDE~został zapoczątkowany przez \href{http://www.ipi.fi/~rammer/cv.html}{Ramiego Lehtiego}\footnote{\href{http://www.ipi.fi/~rammer/cv.html}{Będącego} w~latach 1996--1999 administratorem komputerowym w~\href{http://www.tut.fi/en}{Tampere University of~Technology~(TUT)} w~Finlandii.} oraz~\href{https://www.linkedin.com/in/pablo-virolainen-73501731/}{Pablo Virolainena} w~1999~roku. AIDE~jest w~całości napisany w~języku~\href{https://en.wikipedia.org/wiki/C_(programming_language)}{C} i~jest objęty \glslink{gpl}{licencją~GPL}.
+Kluczowym narzędziem wykorzystanym do~implementacji projektu jest~\href{http://aide.sourceforge.net/}{AIDE}~(\emph{Advanced Intrusion Detection Environment}). \href{https://wiki.archlinux.org/index.php/AIDE}{AIDE}~jest oprogramowaniem zaprojektowanym z~myślą wykrywania zmian w~systemie plików w~celu wykrycia złoźliwego oprogramowania\footnote{Taki rodzaj oprogramowania jest nazywany oprogramowaniem~\href{https://en.wikipedia.org/wiki/Host-based_intrusion_detection_system_comparison}{HIDS}~(\hrefemph{https://wiki.archlinux.org/index.php/List_of_applications/Security\#Threat_and_vulnerability_detection}{Host-based Intrusion Detection System}).}, jednak sposób jego działania nie ogranicza wykorzystania go~tylko do~tego celu. AIDE~został zapoczątkowany w~1999~roku przez dwóch Finów --- \href{http://www.ipi.fi/~rammer/cv.html}{Ramiego Lehtiego}\footnote{\href{http://www.ipi.fi/~rammer/cv.html}{Będącego} w~latach 1996--1999 administratorem komputerowym w~\href{http://www.tut.fi/en}{Tampere University of~Technology~(TUT)} w~Finlandii.} oraz~\href{https://www.linkedin.com/in/pablo-virolainen-73501731/}{Pablo Virolainena} --- jest w~całości napisany w~języku~\href{https://en.wikipedia.org/wiki/C_(programming_language)}{C} i~jest objęty \glslink{gpl}{licencją~GPL}.
 
-Działanie AIDE polega na~wykonywaniu migawek systemu~(\emph{snapshot}) zawierającego m.in.~skróty plików~(\emph{files' \href{https://en.wikipedia.org/wiki/Hash_function}{hashes}}), czas ich~modyfikacji, uprawnienia i~inne parametry plików zdefiniowane przez administratora w~konfiguracji \path{/etc/aide/aide.conf}. Konfiguracja ta~jest zapisana w~formacie podobnym do~tego, który został użyty w~komercyjnym oprogramowaniu \hrefemph{https://en.wikipedia.org/wiki/Open_Source_Tripwire}{Tripwire}, będącym pierwowzorem dla~AIDE. Pierwsza migawka systemu wykonana komendą \texttt{aide --init} typowo powinna zostać wykonana na~dopiero~co zainstalowanym systemie operacyjnym przed podłączeniem go~do~sieci i~zostać zapisana na~systemie plików tylko do~odczytu~(\emph{read-only}) lub~na~nośniku niepodłączonym do~działającego systemu (\hrefemph{https://www.techopedia.com/definition/30275/cold-storage}{cold storage}), ponieważ jest ona~referencyjnym stanem systemu, będącym punktem odniesienia dla~kolejnych migawek\footnote{Instrukcja użytkownika AIDE \href{http://aide.sourceforge.net/stable/manual.html\#usage}{zaleca} przeniesienie na~bezpieczne nośniki również binaria, konfigurację i~instukcję ~AIDE.}. Zapisanie pierwszej migawki na~partycji \href{https://linux.die.net/man/8/mount}{zamontowanej} w~trybie tylko do~odczytu i/lub~umieszczenie jej~na~bezpiecznym nośniku minimalizuje ryzyko jej modyfikacji z~jakiegokolwiek powodu --- np.~z~powodu złośliwego oprogramowania, awarii, przypadkowego nadpisania~itd. Migawki wykonane podczas kolejnych skanowań, wykonane komendą \texttt{aide~-C}, są~porównywane z~pierwszą migawką i~na~tej podstawie AIDE~tworzy tekstowy raport zmian.
+Działanie AIDE polega na~wykonywaniu migawek systemu~(\emph{system snapshot}) zawierających, w~zależności od~konfiguracji, np.~czas modyfikacji śledzonych plików, ilość zajmowanego przez nie miejsca, uprawnienia do~nich i~inne atrybuty plików, zdefiniowane przez administratora w~konfiguracji \href{https://linux.die.net/man/5/aide.conf}{\path{/etc/aide/aide.conf}}. Konfiguracja ta~jest zapisana w~formacie podobnym do~formatu użytego w~komercyjnym oprogramowaniu \href{https://en.wikipedia.org/wiki/Open_Source_Tripwire}{Tripwire}, stworzonym w~1992~roku przez \href{https://en.wikipedia.org/wiki/Gene_Spafford}{prof.~Gene Spafforda} z~\href{https://en.wikipedia.org/wiki/Purdue_University}{Purdue University}~(USA, \href{https://en.wikipedia.org/wiki/Indiana}{Indiana}) i~jego studenta \href{https://en.wikipedia.org/wiki/Gene_Kim}{Gene Kima}. Duże podobieństwo między konfiguracją AIDE i~Tripwire, o~którym wspomina instrukcja obsługi (\emph{\gls{manual}}) pliku konfiguracyjnego \hreftt{https://linux.die.net/man/5/aide.conf}{aide.conf}, jest przesłanką do~przypuszczenia, że~komercyjny Tripwire mógł być~pierwowzorem dla~\glslink{wolne-oprogramowanie}{otwartoźródłowego} AIDE. Nowe, znacznie rozbudowane wersje oprogramowania Tripwire są~sprzedawane do~dziś w~ramach działalności \href{https://en.wikipedia.org/wiki/Tripwire_(company)}{firmy} o~tej samej nazwie.
+
+W~klasycznym zastosowaniu AIDE związanym z~zapewnieniem bezpieczeństwa systemowi operacyjnemu przez zagwarantowanie jego integralności, pierwsza, referencyjna migawka utworzona komendą \hreftt{https://linux.die.net/man/1/aide}{aide --init}, powinna zostać wykonana na~dopiero~co zainstalowanym systemie operacyjnym przed podłączeniem go~do~sieci i~zapisana na~systemie plików tylko do~odczytu~(\emph{read-only}) lub~na~nośniku niepodłączonym do~działającego systemu (\hrefemph{https://www.techopedia.com/definition/30275/cold-storage}{cold storage})\footnote{Instrukcja użytkownika (\emph{\gls{manual}}) AIDE \href{http://aide.sourceforge.net/stable/manual.html\#usage}{zaleca} przeniesienie na~bezpieczne nośniki również binaria, konfigurację i~instrukcję ~AIDE~\cite{aide-manual}.}~\cite{aide-manual}. Pierwsza migawka jest referencyjnym stanem systemu, do~którego będą porównywane kolejne migawki, a~zapisanie jej~na~partycji \href{https://linux.die.net/man/8/mount}{zamontowanej} w~trybie tylko do~odczytu i~umieszczenie jej~na~bezpiecznym nośniku danych minimalizuje ryzyko jej modyfikacji z~jakiegokolwiek powodu --- np.~z~powodu złośliwego oprogramowania, awarii, przypadkowego nadpisania~itd. Migawki wykonane podczas kolejnych skanowań, wykonane komendą \hreftt{https://linux.die.net/man/1/aide}{aide~--check}, są~porównywane z~referencyjną migawką i~na~tej podstawie AIDE~tworzy tekstowy raport zmian, który zostaje odczytany i~interpretowany przez oprogramowanie stworzone w~ramach niniejszej pracy, aby~na tej~podstawie wygenerować \hyperref[sec:obraz-zmian-konfiguracji]{obraz zmian konfiguracji systemu wzorcowego}. Pierwszą migawkę referencyjną można zastąpić nową uruchamiając AIDE z~flagą \hreftt{https://linux.die.net/man/1/aide}{--update} i~nadpisując istniejący plik (domyślnie) \path{/var/lib/aide/aide.db} nowym plikiem \path{/var/lib/aide/aide.db.new} --- taka aktualizacja bazy AIDE jest szczególnie użyteczna przy iteracyjnym dostosowywaniu konfiguracji AIDE \path{/etc/aide/aide.conf} do~własnych potrzeb.
+
+W~drzewie katalogów systemów \glslink{unix-like-system}{*niksowych}\footnote{Struktura drzewa katalogów systemów \glslink{unix-like-system}{*niksowych} jest zdefiniowana przez \hrefemph{https://wiki.linuxfoundation.org/lsb/fhs}{Filesystem Hierarchy Standard}~(\href{http://www.tldp.org/LDP/sag/html/fs-background.html}{FHS}).} istnieją katalogi systemowe, tzn.~katalogi niebędące katalogiem domowym użytkownika ani jego podkatalogiem, których zawartość zmienia się np.~co~każde uruchomienie systemu i~takie zachowanie nie powinno zazwyczaj niepokoić administratora komputerowego, dlatego powinny być one (i~część z~nich jest domyślnie) wyłączone ze~skanowania~AIDE. Do~takich katalogów należą~m.in.~katalogi:\mynobreakpar
+
+\begin{itemize}
+	\item \hreftt{http://www.tldp.org/LDP/sag/html/var-fs.html}{/var} --- katalog, w~którym znajdują się \href{http://www.linuxpl.org/SAG/x547.html}{m.in.}~logi w~\path{/var/log}, blokady plików w~\path{/var/lock}, \emph{cache} w~\path{/var/cache}, \href{http://www.tldp.org/HOWTO/Printing-Usage-HOWTO-2.html}{kolejki wydruku} i~kolejki pocztowe w~\path{/var/spool}~itp.,
+	\item \hreftt{http://www.tldp.org/LDP/Linux-Filesystem-Hierarchy/html/tmp.html}{/tmp} --- katalog z~danymi tymczasowymi programów.
+\end{itemize}
+
+ Do~katalogów, które również powinny być wyłączone ze~skanowania AIDE należą katalogi specjalne, w~tym m.in.~katalogi wirtualne, których istnienie zapewnia w~locie (\emph{on the fly}) \glslink{kernel}{jądro} systemu operacyjnego:\mynobreakpar
+
+\begin{itemize}
+	\item \hreftt{https://www.kernel.org/doc/Documentation/filesystems/sysfs.txt}{/sys} --- katalog zawierający m.in.~informacje o~podłączonych urządzeniach,
+	\item \hreftt{http://www.tldp.org/LDP/sag/html/proc-fs.html}{/proc} --- katalog \hreftt{https://en.wikipedia.org/wiki/Procfs}{procfs}, zawierający informacje o~działających procesach,
+	\item \hreftt{http://www.tldp.org/LDP/sag/html/dev-fs.html}{/dev} --- katalog zawierający \href{https://en.wikipedia.org/wiki/Device_file}{pliki urządzeń}, będące interfejsami sterowników urządzeń,
+	\item \hreftt{https://unix.stackexchange.com/questions/13972/what-is-this-new-run-filesystem/13973}{/run} --- katalog zawierający dane dotyczące np.~aktualnie zalogowanych użytkowników i~działających \glslink{demon}{demonów} --- często montowany w~systemie plików \hreftt{https://wiki.archlinux.org/index.php/Tmpfs}{tmpfs}.
+	\item \hreftt{http://www.tldp.org/LDP/Linux-Filesystem-Hierarchy/html/media.html}{/media} --- miejsce montowania tymczasowo podłączonych nośników danych (\emph{removable media}),
+	\item \hreftt{http://www.tldp.org/LDP/Linux-Filesystem-Hierarchy/html/mnt.html}{/mnt} --- miejsce tymczasowego montowania systemów plików.
+\end{itemize}
 
 \begin{lstlisting}[language=,caption={Zawartość pliku \protect\path{/etc/aide/aide.conf} z~przykładową konfiguracją~AIDE\\ (przykład z~oficjalnej strony internetowej projektu \hreftt{http://aide.sourceforge.net/stable/manual.html}{aide.sourceforge.net/stable/manual.html})},label=lst:aide-config,escapechar=|]
 MyRule = p+i+n+u+g+s+b+m+c+md5+sha1|\label{line:custom-rule}|
-/etc p+i+u+g     # check only permissions, inode, user and group for etc
-/bin MyRule      # apply the custom rule to the files in bin
-/sbin MyRule     # apply the same custom rule to the files in sbin
-/var MyRule
+/etc p+i+u+g     # check only permissions, inode, user and group for etc|\label{line:etc-conf}|
+/bin MyRule      # apply the custom rule to the files in bin|\label{line:bin-conf}|
+/sbin MyRule     # apply the same custom rule to the files in sbin|\label{line:sbin-conf}|
+/var MyRule|\label{line:var-conf}|
 !/var/log/.*     # ignore the log dir it changes too often|\label{line:var-log}|
 !/var/spool/.*   # ignore spool dirs as they change too often|\label{line:spool}|
 !/var/adm/utmp$  # ignore the file /var/adm/utmp|\label{line:var-adm-utmp}|
 \end{lstlisting}
 
-W~drzewie katalogów systemów \glslink{unix-like-system}{*niksowych}\footnote{Struktura drzewa katalogów systemów \glslink{unix-like-system}{*niksowych} jest zdefiniowana przez \hrefemph{https://wiki.linuxfoundation.org/lsb/fhs}{Filesystem Hierarchy Standard}~(\href{http://www.tldp.org/LDP/sag/html/fs-background.html}{FHS}).} istnieją katalogi systemowe, tzn.~katalogi niebędące katalogiem domowym użytkownika ani jego podkatalogiem, których zawartość zmienia się np.~co~każde uruchomienie systemu i~takie zachowanie nie powinno zazwyczaj niepokoić administratora, dlatego powinny być one (i~część z~nich jest domyślnie) wyłączone ze~skanowania~AIDE. Do~takich katalogów należą~m.in.~katalogi:
+Listing~\ref{lst:aide-config} przedstawia przykładową konfigurację~AIDE. W~\hyperref[line:custom-rule]{pierwszej linii listingu} została zdefiniowana reguła, która określa jakie atrybuty śledzonego pliku lub~katalogu definiują jego stan (poza zawartością). W~tym przykładzie są~to: \href{https://www.linux.com/learn/understanding-linux-file-permissions}{uprawnienia do~pliku}~(\texttt{p}), \href{https://en.wikipedia.org/wiki/Inode}{i-węzeł}~(\texttt{i}), liczba \href{https://en.wikipedia.org/wiki/Hard_link}{dowiązań twardych}~(\texttt{n}), nazwa użytkownika~(\texttt{u}), nazwa grupy~(\texttt{g}), wielkość pliku~(\texttt{s}), liczba zajmowanych \href{https://en.wikipedia.org/wiki/Block_\%28data_storage\%29}{bloków pamięci}\footnote{Rozmiar bloku pamięci np.~partycji \texttt{sda1} można wyświetlić wyrażony w~bajtach za~pomocą komendy \texttt{blockdev --getbsz /dev/sda1}. Domyślna, typowa wartość rozmiaru bloku pamięci waha się w~zależności m.in.~od~zastosowanego systemu plików --- najczęściej wynoszą one~4096, 2048 lub~1024~bajty.}~(\texttt{b}), czas modyfikacji \hreftt{http://leksykot.top.hell.pl/lx3/N/atime_mtime_ctime}{mtime}~(\texttt{m}), czas zmiany \hreftt{http://leksykot.top.hell.pl/lx3/N/atime_mtime_ctime}{ctime}~(\texttt{c})\footnote{\texttt{mtime} to~czas ostatniej zmiany zawartości pliku. \texttt{ctime} to~czas ostatniej zmiany informacji o~pliku (np.~zawartości, uprawnień~itd.). \texttt{atime} to~czas ostatniego dostępu do~pliku. $\texttt{mtime} \leq \texttt{ctime} \leq \texttt{atime}$.}. Dwa ostatnie atrybuty --- \texttt{md5} i~\texttt{sha1} --- definiują funkcje skrótu jakie zostaną użyte do~obliczenia skrótów~(\emph{hashy}) śledzonych plików, aby~po~wywołaniu AIDE z~flagą \hreftt{https://linux.die.net/man/1/aide}{--check} lub~\hreftt{https://linux.die.net/man/1/aide}{--compare}, AIDE porównując wybrane atrybuty i~skrót pliku, mógł szybko ocenić które pliki i~katalogi zostały zmodyfikowane. Kompletna lista dostępnych atrybutów przedstawia tabela~\ref{tab:aide-file-attrs}. Reguły rozpoczynające się znakiem ukośnika (\texttt{/}) --- tj.~linie~\ref{line:etc-conf}, \ref{line:bin-conf}, \ref{line:sbin-conf} i~\ref{line:var-conf} --- odpowiadają za~dodanie do~skanowania katalogów \path{/etc}, \path{/bin}, \path{/sbin} i~\path{/var} wraz z~zawartością. Reguły~\ref{line:var-log}, \ref{line:spool} i~\ref{line:var-adm-utmp} zaczynają się~wykrzyknikiem~(\texttt{!}), co~oznacza, że~te~katalogi mają nie być skanowane przez~AIDE. Poza regułami występującymi w~przykładzie~\ref{lst:aide-config}, tj.~regułami rozpoczynającymi się znakiem ukośnika~(\texttt{/}) lub~wykrzyknika~(\texttt{!}), istnieje trzeci rodzaj reguły --- rozpoczynający się znakiem równości~(\texttt{=}) --- oznaczający, że~pliki i~katalogi pasujące do~wyrażenia następującego po~znaku równości zostaną dodane do~tworzonej bazy wynikowej --- tak samo jak ma~to~miejsce w~regule rozpoczynającej się od~ukośnika --- ale w~odróżnieniu od~niej, dzieci podkatalogów katalogów pasujących do~reguły nie zostaną dodane, a~dzieci katalogów pasujących do~danej reguły zostaną dodane tylko wtedy, gdy~reguła kończy się~znakiem ukośnika~(\texttt{/}).
 
+W~ogólności reguły AIDE mogą mieć jedną z~trzech postaci:\mynobreakpar
 \begin{itemize}
-	\item \hreftt{http://www.tldp.org/LDP/sag/html/var-fs.html}{/var} --- katalog, w~którym znajdują się \href{http://www.linuxpl.org/SAG/x547.html}{m.in.}~logi w~\path{/var/log}, blokady plików w~\path{/var/lock}, \emph{cache} w~\path{/var/cache}, \href{http://www.tldp.org/HOWTO/Printing-Usage-HOWTO-2.html}{kolejki wydruku} i~kolejki pocztowe w~\path{/var/spool}~itp.,
-	\item \hreftt{http://www.tldp.org/LDP/Linux-Filesystem-Hierarchy/html/tmp.html}{/tmp} --- katalog z~danymi tymczasowymi.
+	\item \texttt{<regex> <file types> <group>}
+	\item \texttt{!<regex> <file types>}
+	\item \texttt{=<regex> <file types> <group>}
+\end{itemize}
+gdzie:
+\begin{itemize}
+	\item \texttt{<regex>} --- wyrażenie regularne rozpoczynające się~ukośnikiem~(\texttt{/}), zgodne wyrażeniami regularnymi występującymi w~języku programowania \href{https://en.wikipedia.org/wiki/Perl}{Perl}~(\hrefemph{https://en.wikipedia.org/wiki/Perl_Compatible_Regular_Expressions}{Perl Compatible Regular Expressions}),
+	\item \texttt{<file types>} --- lista będąca filtrem typów plików rozdzielonych przecinkami (może być pusta, wtedy filtrowanie jest wyłączone), do~których zostanie zastosowana dana reguła --- akceptowane typy plików przedstawiono w~tabeli~\ref{tab:aide-file-types},
+	\item \texttt{<group>} --- lista atrybutów plików, które definują stan pliku zapisany zgodnie z~następującą, prostą gramatyką:
+\begin{lstlisting}[language=,numbers=none,frame=none,xleftmargin=5em,aboveskip=7pt,belowskip=0pt]
+<group>| <group> + <predefined group>
+       | <group> - <predefined group>
+       | <predefined group>
+\end{lstlisting}
+	gdzie:
+	\begin{itemize}
+		\item \texttt{<predefined group>} to~jeden z~atrybutów z~tabeli~\ref{tab:aide-file-attrs},
+		\item sumowanie atrybutów~(\texttt{<group> + <predefined group>}) i~odejmowanie atrybutów (\texttt{<group> - <predefined~group>}) oznacza odpowiednio --- teoriomnogościową sumę i~różnicę atrybutów \texttt{<group>} i~\texttt{<predefined group>}.
+	\end{itemize}
 \end{itemize}
 
- Do~katalogów, które również powinny być wyłączone ze~skanowania AIDE należą katalogi specjalne, np.~katalogi wirtualne, których istnienie zapewnia w~locie (\emph{on the fly}) \glslink{kernel}{jądro} systemu operacyjnego:
+Konsekwencją zastosowania wyrażeń regularnych w~regułach AIDE jest w~szczególności to, że~zapisanie reguły np.~\path{!/var/adm/utmp} oznacza zignorowanie wszystkich plików, które znajdują się w~katalogu \path{/var/adm} i~których nazwa rozpoczyna się od~napisu \path{utmp} --- np.~plik \path{/var/adm/utmp_root_kit} zostałby zignorowany i~wyłączony z~raportu skanowania~AIDE. Prawidłowa reguła ignorująca tylko plik \path{/var/adm/utmp} to~\path{!/var/adm/utmp$}. Na~początku wyrażenia regularnego dodawany jest \emph{implicite} znak ,,daszka''~(\texttt{\textasciicircum}) oznaczający w~języku wyrażeń regularnych dopasowanie do~początku linii.
 
-\begin{itemize}
-	\item \hreftt{https://www.kernel.org/doc/Documentation/filesystems/sysfs.txt}{/sys} --- katalog zawierający m.in.~informacje o~urządzeniach podłączonych do~komputera,
-	\item \hreftt{http://www.tldp.org/LDP/sag/html/proc-fs.html}{/proc} --- katalog \hreftt{https://en.wikipedia.org/wiki/Procfs}{procfs}, zawierający informacje o~działających procesach,
-	\item \hreftt{http://www.tldp.org/LDP/sag/html/dev-fs.html}{/dev} --- katalog zawierający \href{https://en.wikipedia.org/wiki/Device_file}{pliki urządzeń},
-	\item \hreftt{https://unix.stackexchange.com/questions/13972/what-is-this-new-run-filesystem/13973}{/run} --- katalog zawierający dane dotyczące np.~aktualnie zalogowanych użytkowników i~działających \glslink{demon}{demonów}; często montowany w~systemie plików \hreftt{https://wiki.archlinux.org/index.php/Tmpfs}{tmpfs}.
-	\item \hreftt{http://www.tldp.org/LDP/Linux-Filesystem-Hierarchy/html/media.html}{/media} --- miejsce montowania np.~tymczasowo podłączonych nośników danych (\emph{removable media}),
-	\item \hreftt{http://www.tldp.org/LDP/Linux-Filesystem-Hierarchy/html/mnt.html}{/mnt} --- miejsce tymczasowego montowania systemów plików.
-\end{itemize}
+\newcommand{\regularfilewiki}{\href{https://en.wikipedia.org/wiki/Unix_file_types\#Regular_file}{zwykłe pliki}}
+\newcommand{\directorywiki}{\href{https://en.wikipedia.org/wiki/Unix_file_types\#Directory}{katalogi}}
+\newcommand{\symlinkwiki}{\href{https://en.wikipedia.org/wiki/Symbolic_link}{dowiązania symboliczne}}
+\newcommand{\chardevwiki}{\href{https://en.wikipedia.org/wiki/Device_file\#Character_devices}{urządzenie znakowe}}
+\newcommand{\blockdevwiki}{\href{https://en.wikipedia.org/wiki/Device_file\#Block_devices}{urządzenie blokowe}}
+\newcommand{\fifofilewiki}{\href{https://en.wikipedia.org/wiki/Named_pipe}{łącza nazwane}}
+\newcommand{\unixsocketwiki}{\href{https://en.wikipedia.org/wiki/Unix_domain_socket}{gniazda UNIX}}
+\newcommand{\solariswiki}{\href{https://en.wikipedia.org/wiki/Solaris_(operating_system)}{Solaris}}
+\newcommand{\solarisdoorwiki}{\href{https://en.wikipedia.org/wiki/Doors_(computing)}{drzwi}}
+\newcommand{\solariseventport}{\href{https://solarisrants.wordpress.com/2013/07/24/solaris-file-event-notification/}{port zdarzenia}}
 
-W~ramach niniejszej pracy AIDE został wykorzystany do~badania zmian w~konfiguracji systemu wzorcowego. Listing~\ref{lst:aide-config} przedstawia przykładową konfigurację~AIDE. W~\hyperref[line:custom-rule]{pierwszej linii} została zdefiniowana reguła, która określa jakie parametry pliku definiują jego stan. W~tym przykładzie są~to: \href{https://www.linux.com/learn/understanding-linux-file-permissions}{uprawnienia do~pliku}~(\texttt{p}), \href{https://en.wikipedia.org/wiki/Inode}{i-węzeł}~(\texttt{i}), liczba \href{https://en.wikipedia.org/wiki/Hard_link}{dowiązań twardych}~(\texttt{n}), nazwa użytkownika~(\texttt{u}), nazwa grupy~(\texttt{g}), wielkość pliku~(\texttt{s}), liczba zajmowanych bloków pamięci~(\texttt{b}), czas modyfikacji \hreftt{http://leksykot.top.hell.pl/lx3/N/atime_mtime_ctime}{mtime}~(\texttt{m}), czas zmiany \hreftt{http://leksykot.top.hell.pl/lx3/N/atime_mtime_ctime}{ctime}~(\texttt{c})\footnote{\texttt{mtime} to~czas ostatniej zmiany zawartości pliku. \texttt{ctime} to~czas ostatniej zmiany informacji o~pliku (np.~zawartości, uprawnień~itd.). \texttt{atime} to~czas ostatniego dostępu do~pliku. $\texttt{mtime} \leq \texttt{ctime} \leq \texttt{atime}$.}. Dwa ostatnie parametry --- \texttt{md5} i~\texttt{sha1} --- definiują funkcje skrótu jakie zostaną użyte do~obliczenia \emph{hashy} wymienionych atrybutów plików znajdujących się w~katalogach z~zastosowaną tą~regułą (w~przykładzie są~to~katalogi \path{/etc}, \path{/bin}, \path{/sbin} i~\path{/var}). Linie~\ref{line:var-log}, \ref{line:spool} i~\ref{line:var-adm-utmp} zaczynają się znakiem wykrzyknika, co~oznacza, że~te~katalogi mają nie być skanowane przez~AIDE.
+\begin{table}
+	\centering
+	\footnotesize
+	\begin{tabular}{>{\ttfamily}l|>{\itshape}l|l}
+		\textnormal{Typ pliku} & \textnormal{Rozwinięcie skrótu} & Znaczenie atrybutu                     \\\hline\hline
+		f                      & regular files                   & \regularfilewiki                       \\\hline
+		d                      & directories                     & \directorywiki                         \\\hline
+		l                      & symbolic links                  & \symlinkwiki                           \\\hline
+		c                      & character devices               & \chardevwiki                           \\\hline
+		b                      & block devices                   & \blockdevwiki                          \\\hline
+		p                      & FIFO files                      & \fifofilewiki~(pliki FIFO)             \\\hline
+		s                      & UNIX sockets                    & \unixsocketwiki                        \\\hline
+		D                      & Solaris doors                   & \solarisdoorwiki~systemu \solariswiki  \\\hline
+		P                      & Solaris event ports             & \solariseventport~systemu \solariswiki
+	\end{tabular}
+	\caption{Wszystkie atrybuty plików obsługiwane przez konfigurację AIDE, precyzujące do~jakiego typu pliku mają zastosowanie reguły z~tabeli~\ref{tab:aide-file-attrs} (lista z~\emph{\glslink{manual}{manuala}} konfiguracji AIDE --- \hreftt{https://linux.die.net/man/5/aide.conf}{man aide.conf})~\cite{aide-manual}}
+	\label{tab:aide-file-types}
+\end{table}
 
-AIDE jest dostępny w~wielu repozytoriach oprogramowania różnych dystrybucji \glslink{unix-like-system}{*niksowych}. Pakiet oprogramowania dostępny w~repozytorium Debiana tworzy dodatkowe pliki konfiguracyjne i~skrypt opakowujący \hreftt{https://www.apt-browse.org/browse/debian/jessie/main/all/aide-common/0.16~a2.git20130520-3/file/usr/bin/aide.wrapper}{aide.wrapper}, który uniemożliwia uruchomienie więcej niż~jednej instancji AIDE tworząc plik (\hrefemph{https://unix.stackexchange.com/questions/12815/what-are-pid-and-lock-files-for}{lock file}) \path{/var/run/aide.lock}, za~pomocą skryptu \hreftt{https://www.apt-browse.org/browse/debian/jessie/main/all/aide-common/0.16~a2.git20130520-3/file/usr/sbin/update-aide.conf}{update-aide.conf} scala do~pliku \path{/var/lib/aide/aide.conf.autogenerated} konfigurację AIDE rozproszoną po~plikach \emph{rule files}, umieszczonych w~katalogu \path{/etc/aide.conf.d} oraz~uruchamia właściwy program \hreftt{https://linux.die.net/man/1/aide}{aide}. Instalacja AIDE na~Debianie domyślnie uruchamia AIDE codziennie za~pomocą \hreftt{https://en.wikipedia.org/wiki/Cron}{crona}. Konfiguracja dotycząca działań \texttt{crona} i~AIDE znajduje się w~plikach \path{/etc/default/aide} i~w~\texttt{/etc/cron.daily/aide} (który wywołuje \texttt{aide.wrapper}). Domyślnie baza stworzona ze~skanowania systemu jest tworzona w~pliku \path{/var/lib/aide/aide.db.new}. Logi z~działania AIDE są~domyślnie dostępne w~pliku \path{/var/log/aide/aide.log}. Szczegóły instalacyjne specyficzne dla~Debiana można znaleźć w~pliku \path{/usr/share/doc/aide-common/README.Debian.gz} --- w~szczególności można znaleźć tam wskazówki dotyczące inicjalizacji bazy AIDE za~pomocą skryptu \path{/usr/sbin/aideinit} (\emph{wrapper}) zamiast \texttt{aide~--init}.
+Działanie AIDE polega na~tym, że~w~trakcie czytania przez niego swojej \hyperref[lst:aide-config]{konfiguracji}, konstruuje drzewo, którego krawędzie odpowiadają relacji zawierania się skanowanych katalogów i~plików, a~wierzchołki w~przybliżeniu katalogom systemu plików, który będzie przeszukiwany kiedy AIDE zostanie wywołany z~opcją \hreftt{https://linux.die.net/man/1/aide}{--init} lub~\hreftt{https://linux.die.net/man/1/aide}{--scan}~\cite{aide-manual}. W~każdym wierzchołku takiego drzewa znajdują się~trzy listy odpowiadające wszystkim trzem możliwym regułom zaczynającym się od~znaku ukośnika~(\texttt{/}), wykrzyknika~(\texttt{!}) i~znaku równości~(\texttt{=}). Jeśli wierzchołek nie ma~przypisanej którejś reguły, to~lista odpowiadająca danej regule pozostaje pusta. AIDE~umieszcza reguły tak nisko w~drzewie, tzn.~jak najbliżej liści, jak to~tylko możliwe, tak, aby~umieszczane reguły były w~drzewie wyżej niż wszystkie katalogi i~pliki, których dotyczą. Przykładowo reguła \path{!/proc} zostaje umieszczona w~korzeniu drzewa (tzn.~w~wierzchołku~\path{/}), \path{!/proc/.*} w~wierzchołku \path{/proc}, \path{!/var/log/syslog*} w~wierzchołku \path{/var/log}, a~\path{!/home/[a-z0-9]+/.bashrc$} w~wierzchołku \path{/home}. W~momencie gdy~AIDE potrzebuje ustalić czy dany plik o~ścieżce \path{filename} jest włączony do~skanowania, najpierw wyszukuje najgłębiej położony w~drzewie wierzchołek~\path{x}, którego reguły pasują do~pliku \path{filename}, a~następnie wywołuje funkcję rekurencyjną \texttt{check-node\_for\_match(x, filename, true)}\footnote{Funkcję \texttt{check-node\_for\_match(x, filename, true)} można znaleźć w~kodzie źródłowym AIDE w~wersji~\href{https://sourceforge.net/projects/aide/files/aide/0.16/aide-0.16.tar.gz/download}{0.16} --- która jest najnowszą stabilną wersją AIDE w~czasie pisania tej pracy --- w~linii~\href{https://fossies.org/linux/aide/src/gen_list.c\#l_617}{617} w~pliku \href{https://fossies.org/linux/aide/src/gen_list.c}{\path{/src/gen_list.c}}}, której pseudokod przedstawiono w~\href{http://aide.sourceforge.net/stable/manual.html\#config}{instrukcji obsługi}~(\emph{\glslink{manual}{manualu}}) AIDE i~na~listingu~\ref{lst:aide-matching-algorithm}~\cite{aide-manual}. Instrukcja warunkowa \texttt{if} znajdująca się w~\hyperref[line:aide-if-first-time]{drugiej linii listingu} warunkuje wywołanie funkcji \texttt{check} z~linii~\ref{line:aide-check-equals-list}, sprawdzającej czy~plik \texttt{filename} pasuje do~któregokolwiek z~wyrażeń regularnych znajdujących się na~liście odpowiadającej regule rozpoczynającej się od~znaku równości~(\texttt{=}), aby~niepotrzebnie nie sprawdzać spełnienia tej~reguły na~głębszych poziomach rekurencji --- reguła ta~może być tylko spełniona tylko podczas pierwszego wywołania omawianej funkcji, co~wprost wynika z~zasady jej~działania. Linia~\ref{line:aide-check-regular-list} odpowiada za~sprawdzenie czy~plik \texttt{filename} pasuje do~któregoś wyrażenia regularnego z~listy (znajdującej się w~bieżącym wierzchołku drzewa), odpowiadającej regułom rozpoczynającym się od~znaku ukośnika~(\texttt{/}). Linia~\ref{line:aide-recursive-call} to~wywołanie rekurencyjne dla~wierzchołka-rodzica, które zostaje wykonane na~każdym poziomie rekurencji poza ostatnim, kiedy rozpatrywany jest korzeń drzewa (tj.~wierzchołek~\path{/}). W~linii~\ref{line:aide-if-about-to-be-added} następuje sprawdzenie czy~po~wywołaniach rekurencyjnych dla~wierzchołków znajdujących się wyżej w~drzewie, plik \texttt{filename} ma~zostać dodany do~skanowania czy nie --- jeśli tak, to~w~linii~\ref{line:aide-negative-match} zostaje sprawdzona dla~pliku \texttt{filename} reguła rozpoczynająca się od~znaku wykrzyknika~(\texttt{!}). W~linii~\ref{line:aide-return-statement} zostaje zwrócona wartość logiczna \texttt{true} lub~\texttt{false}, która oznacza odpowiednio, że~plik zostanie dodany lub~nie zostanie dodany do~skanowania AIDE.
+
+\begin{lstlisting}[language=,caption={Pseudokod algorytmu wykorzystywanego przez AIDE do~ustalenia czy~plik lub~katalog \protect\path{filename} powinien być dodany do~skanowania AIDE (pseudokod z~instrukcji AIDE)~\cite{aide-manual}},label=lst:aide-matching-algorithm,escapechar=|]
+check_node_for_match(node,filename,first_time)
+    if (first_time)|\label{line:aide-if-first-time}|
+        check(equals list for this node)|\label{line:aide-check-equals-list}|
+    check(regular list for this node)|\label{line:aide-check-regular-list}|
+    if (node is not the root node)|\label{line:aide-if-node-not-root}|
+        check_node_for_match(nodes parent,filename,false)|\label{line:aide-recursive-call}|
+    if (this file is about to be added)|\label{line:aide-if-about-to-be-added}|
+        check(negative list for this node)|\label{line:aide-negative-match}|
+    return (info about whether this file should be added or not and how)|\label{line:aide-return-statement}|
+\end{lstlisting}
+
+Oprogramowanie AIDE jest dostępne w~wielu repozytoriach oprogramowania różnych dystrybucji \glslink{unix-like-system}{*niksowych}. Pakiet oprogramowania dostępny w~repozytorium dystrybucji Debian tworzy dodatkowe pliki konfiguracyjne i~skrypt opakowujący \hreftt{https://www.apt-browse.org/browse/debian/jessie/main/all/aide-common/0.16~a2.git20130520-3/file/usr/bin/aide.wrapper}{aide.wrapper}, który uniemożliwia uruchomienie więcej niż~jednej instancji procesu AIDE tworząc plik (\hrefemph{https://unix.stackexchange.com/questions/12815/what-are-pid-and-lock-files-for}{lock file}) \path{/var/run/aide.lock}, a~za~pomocą skryptu \hreftt{https://www.apt-browse.org/browse/debian/jessie/main/all/aide-common/0.16~a2.git20130520-3/file/usr/sbin/update-aide.conf}{update-aide.conf} scala do~pliku \path{/var/lib/aide/aide.conf.autogenerated} konfigurację AIDE rozproszoną po~plikach \emph{rule files}, umieszczonych w~katalogu \path{/etc/aide.conf.d} oraz~uruchamia właściwy program \hreftt{https://linux.die.net/man/1/aide}{aide}. Instalacja AIDE na~Debianie domyślnie uruchamia AIDE codziennie za~pomocą \hreftt{https://en.wikipedia.org/wiki/Cron}{crona}. Konfiguracja dotycząca działań \texttt{crona} w~zakresie regularnego uruchomiania AIDE znajduje się w~plikach \path{/etc/default/aide} i~w~\texttt{/etc/cron.daily/aide}~(który z~kolei wywołuje skrypt \texttt{aide.wrapper}). Domyślnie baza stworzona w~wyniku skanowania systemu programem AIDE jest zapisywana w~pliku \path{/var/lib/aide/aide.db.new}. Logi z~działania AIDE są~domyślnie dostępne w~pliku \path{/var/log/aide/aide.log}. Szczegóły instalacyjne specyficzne dla~Debiana można znaleźć w~pliku \path{/usr/share/doc/aide-common/README.Debian.gz} --- w~szczególności można znaleźć tam wskazówki dotyczące inicjalizacji bazy AIDE za~pomocą skryptu \path{/usr/sbin/aideinit} (\emph{wrapper}) zamiast \hreftt{https://linux.die.net/man/1/aide}{aide~--init}.
+
+W~ramach niniejszej pracy AIDE został wykorzystany do~badania zmian w~konfiguracji systemu wzorcowego. TODO
+
+\newcommand{\inodewiki}{\href{https://en.wikipedia.org/wiki/Inode}{i-węzeł}}
+\newcommand{\mdwiki}{\href{https://en.wikipedia.org/wiki/MD5}{MD5}}
+\newcommand{\shawiki}{\href{https://en.wikipedia.org/wiki/SHA-1}{SHA-1}}
+\newcommand{\shatwowiki}{\href{https://en.wikipedia.org/wiki/SHA-2}{SHA-256}}
+\newcommand{\shafivewiki}{\href{https://en.wikipedia.org/wiki/SHA-2}{SHA-512}}
+\newcommand{\ripemdwiki}{\href{https://en.wikipedia.org/wiki/RIPEMD}{RIPEMD-160}}
+\newcommand{\tigerwiki}{\href{https://en.wikipedia.org/wiki/Tiger_(cryptography)}{Tiger}}
+\newcommand{\havalwiki}{\href{https://en.wikipedia.org/wiki/HAVAL}{HAVAL}}
+\newcommand{\crcwiki}{\href{https://en.wikipedia.org/wiki/Cyclic_redundancy_check}{CRC-32}}
+\newcommand{\gostwiki}{\href{https://en.wikipedia.org/wiki/GOST_(hash_function)}{GOST}}
+\newcommand{\whirlpoolwiki}{\href{https://en.wikipedia.org/wiki/Whirlpool_(cryptography)}{Whirlpool}}
+\newcommand{\aclwiki}{\href{https://en.wikipedia.org/wiki/Access_control_list}{ACL}}
+\newcommand{\selinuxwiki}{\href{https://en.wikipedia.org/wiki/Security-Enhanced_Linux}{SELinux}}
+\newcommand{\xattrsman}{\href{http://man7.org/linux/man-pages/man7/xattr.7.html}{rozszerzone atrybuty pliku}}
+\newcommand{\xattrswiki}{\href{https://en.wikipedia.org/wiki/Extended_file_attributes\#Linux}{xattrs}}
+\newcommand{\extwiki}{\href{https://en.wikipedia.org/wiki/Ext2}{\texttt{ext2}}}
+\newcommand{\mtime}{\href{http://leksykot.top.hell.pl/lx3/N/atime_mtime_ctime}{\texttt{mtime}}}
+\newcommand{\atime}{\href{http://leksykot.top.hell.pl/lx3/N/atime_mtime_ctime}{\texttt{atime}}}
+\newcommand{\ctime}{\href{http://leksykot.top.hell.pl/lx3/N/atime_mtime_ctime}{\texttt{ctime}}}
+
+\begin{table}
+	\centering
+	\footnotesize
+	\begin{tabular}{>{\ttfamily}l|>{\itshape}l|l}
+		\textnormal{Atrybut pliku} & \textnormal{Rozwinięcie skrótu}        & Znaczenie atrybutu                      \\\hline\hline
+		p                          & permissions                            & uprawnienia do~pliku                    \\\hline
+		ftype                      & file type                              & typ pliku                               \\\hline
+		i                          & inode                                  & \inodewiki                              \\\hline
+		l                          & link name                              & nazwa pliku                             \\\hline
+		n                          & number of links                        & liczba dowiązań twardych                \\\hline
+		u                          & user                                   & właściciel pliku                        \\\hline
+		g                          & group                                  & grupa pliku                             \\\hline
+		s                          & size                                   & rozmiar                                 \\\hline
+		b                          & block count                            & liczba zajmowanych bloków pamięci       \\\hline
+		m                          & mtime                                  & czas modyfikacji                        \\\hline
+		a                          & atime                                  & czas dostępu                            \\\hline
+		c                          & ctime                                  & czas zmiany                             \\\hline
+		S                          & check for growing size                 & sprawdzenie czy~plik się~powiększył     \\\hline
+		I                          & ignore changed filename                & ignorowanie zmian nazwy pliku           \\\hline
+		ANF                        & allow new files                        & ignorowanie w~raporcie nowych plików    \\\hline
+		ARF                        & allow removed files                    & ignorowanie w~raporcie usuniętych plików\\\hline
+		md5                        & md5 checksum                           & suma kontrolna \mdwiki                  \\\hline
+		sha1                       & sha1 checksum                          & suma kontrolna \shawiki                 \\\hline
+		sha256                     & sha256 checksum                        & suma kontrolna \shatwowiki              \\\hline
+		sha512                     & sha512 checksum                        & suma kontrolna \shafivewiki             \\\hline
+		rmd160                     & rmd160 checksum                        & suma kontrolna \ripemdwiki              \\\hline
+		tiger                      & tiger checksum                         & suma kontrolna \tigerwiki               \\\hline
+		haval                      & haval checksum                         & suma kontrolna \havalwiki               \\\hline
+		crc32                      & crc32 checksum                         & suma kontrolna \crcwiki                 \\\hline
+		R                          & \texttt{p+ftype+i+l+n+u+g+s+m+c+md5+X} & skrót                                   \\\hline
+		L                          & \texttt{p+ftype+i+l+n+u+g+X}           & skrót                                   \\\hline
+		E                          & Empty group                            & pusta grupa                             \\\hline
+		X                          & \texttt{acl+selinux+xattrs+e2fsattrs}  & skrót dla rozszerzonych atrybutów pliku \\\hline
+		>                          & \texttt{p+ftype+l+u+g+i+n+S+X}         & skrót dla~powiększającego się pliku     \\\hline
+		% And also the following if you have mhash support enabled                                                    \\\hline
+		gost                       & gost checksum                          & suma kontrolna \gostwiki                \\\hline
+		whirlpool                  & whirlpool checksum                     & suma kontrolna \whirlpoolwiki           \\\hline
+		%The following are available only when explicitly enabled using configure                                     \\\hline
+		acl                        & access control list                    & atrybuty pliku \aclwiki                 \\\hline
+		selinux                    & selinux attributes                     & atrybuty pliku \selinuxwiki             \\\hline
+		xattrs                     & extended attributes                    & \xattrsman (\xattrswiki)                \\\hline
+		e2fsattrs                  & file attributes on a second extended file system & atrybuty pliku na~systemie plików \extwiki
+	\end{tabular}
+	\caption{Wszystkie atrybuty plików dla~reguł obsługiwanych przez konfigurację~AIDE\\(lista z~\emph{\glslink{manual}{manuala}} konfiguracji AIDE --- \hreftt{https://linux.die.net/man/5/aide.conf}{man aide.conf})~\cite{aide-manual}}
+	\label{tab:aide-file-attrs}
+\end{table}
 
 %------------------------------------------------------------------------------
 %

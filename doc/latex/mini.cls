@@ -118,7 +118,7 @@
 \definecolor{orange}{rgb}{0.4,0,0}
 %\definecolor{purple}{rgb}{0.4,0.6,0}
 \lstdefinestyle{customc}{
-	aboveskip=15pt,
+	aboveskip=11pt,
 	belowskip=0pt,
 	numbers=left,
 	stepnumber=1,
@@ -171,6 +171,14 @@
 
 \RequirePackage[justification=centering,font=footnotesize]{caption}
 \captionsetup[lstlisting]{font={footnotesize}}
+
+% Listing drzew side by side o równych wysokościach
+% https://tex.stackexchange.com/questions/373951/align-vertically-subfigures-containing-dirtrees
+
+\usepackage[xparse]{tcolorbox}
+\NewTotalTColorBox{\mybox}{m +m}{equal height group=#1, size=fbox,
+sharp corners, colback=white, width=\textwidth, space to upper,
+lower separated=false, fontupper=\footnotesize, nobeforeafter}{#2}
 
 % Umożliwienie enumeracji inline w podpisach do obrazków
 
@@ -382,7 +390,7 @@
 
 \RequirePackage[toc,page]{appendix}
 
-\def\zalaczniki{Załączniki}
+\newcommand\zalaczniki{Załączniki}
 \renewcommand{\appendixtocname}{\zalaczniki}
 \renewcommand{\appendixpagename}{\zalaczniki}
 

@@ -33,7 +33,7 @@ Obraz zmian konfiguracji wzorcowej to~archiwum z~\href{https://unix.stackexchang
 	\item plik stanu opisujący oczekiwany stan konfiguracji systemu, z~którego klient zadeklarował się aktualizować --- plik ten~jest pomocny dla~aplikacji klienckiej do~wykrycia samowolnych (niezalecanych, ponieważ mogących prowadzić do~konfliktów) zmian konfiguracji klienckiej od~czasu ostatniej aktualizacji klienta.
 \end{itemize}
 
-W~przypadku zaistnienia sytuacji konfliktowych, administrator może za~pomocą \hyperref[sec:cli-app]{aplikacji klienckiej} interaktywnie porównać atrybuty oraz~zawartość konfliktowych plików, aby~na~tej~podstawie podjąć decyzję którą wersję pliku zachować lub~alternatywnie może wymusić automatyczne \hyperlink{itm:cli-force}{domyślne zachowanie} aplikacji klienckiej zastosowującej obraz zmian na~systemie klienta. Przykładami sytuacji konfliktowych są~sytuacje w~których od~czasu ostatniej aktualizacji klienta:
+W~przypadku zaistnienia sytuacji konfliktowych, administrator może za~pomocą \hyperref[sec:cli-app]{aplikacji klienckiej} interaktywnie porównać atrybuty oraz~zawartość konfliktowych plików, aby~na~tej~podstawie podjąć decyzję którą wersję pliku zachować lub~alternatywnie może wymusić automatyczne \hyperlink{itm:cli-force}{domyślne zachowanie} aplikacji klienckiej zastosowującej obraz zmian na~systemie klienta. Przykładami sytuacji konfliktowych są~sytuacje w~których od~czasu ostatniej aktualizacji klienta:\mynobreakpar
 \begin{itemize}
 	\item na~systemie wzorcowym powstał śledzony plik lub~katalog, który już istnieje na~systemie klienckim i~ich atrybuty lub~zawartości są~różne,
 	\item na~systemie wzorcowym i~klienckim powstał śledzony plik lub~katalog o~tej samej ścieżce o~różnych atrybutach lub~zawartości,
@@ -64,7 +64,7 @@ Jeśli na~przykład na~systemie wzorcowym dokonano już~3~skanowań systemu, w~w
 		\path[->] (q3) edge[font=\scriptsize,dashed] node[align=center] {zmiany\\konfiguracji} (q4);
 		\path[->] (q4) edge[font=\scriptsize]        node[align=center] {skanowanie\\systemu}  (q5);
 	\end{tikzpicture}
-	\caption{Przykładowy ciąg 3~skanowań i~2~zmian konfiguracji systemu wzorcowego --- linią przerywaną zobrazowano zmiany konfiguracji systemu wzorcowego, linią ciągłą skanowania systemu wzorcowego, a~wierzchołkami stan konfiguracji systemu wzorcowego}
+	\caption[Przykładowy ciąg 3~skanowań i~2~zmian konfiguracji systemu wzorcowego]{Przykładowy ciąg 3~skanowań i~2~zmian konfiguracji systemu wzorcowego --- linią przerywaną zobrazowano zmiany konfiguracji systemu wzorcowego, linią ciągłą skanowania systemu wzorcowego, a~wierzchołkami stan konfiguracji systemu wzorcowego}
 	\label{fig:ciag-skanowan}
 \end{figure}
 
@@ -101,13 +101,12 @@ Powyższe kroki zobrazowano na~poglądowym rysunku~\ref{fig:cykl-skanowan} przed
 		\path[->] (q3) edge[font=\scriptsize,dashed]     node[align=center] {zmiany\\konfiguracji} (q4);
 		\path[->] (q4) edge[font=\scriptsize,bend left]  node[align=center] {skanowanie\\systemu}  (q3);
 		\path[->] (q3) edge[font=\scriptsize,loop below] node[align=center] {tworzenie\\obrazu zmian\\konfiguracji} (q3);
-		\path[->] (q4) edge[font=\scriptsize,loop below] node[align=center] {tworzenie\\obrazu zmian\\konfiguracji} (q4);
 	\end{tikzpicture}
-	\caption[Cykl skanowań systemu wzorcowego]{Kompletny cykl skanowań systemu wzorcowego, gdzie $Q_0=\{\neg k_1, \neg k_2, k_3\}$, $Q_1=\{k_1, \neg k_2, k_3\}$, $Q_2=\{k_1, \neg k_2, \neg k_3\}$, $Q_3=\{k_1, k_2, k_3\}$, $Q_4=\{k_1, k_2, \neg k_3\}$ a~$k_1$, $k_2$ i~$k_3$ oznaczają odpowiednio, że~\begin{inparaenum}[(1)] \protect\item istnieje pliku stanu systemu wzorcowego, utworzony podczas pierwszego skanowania~go \protect\item istnieje porównawczy plik stanu systemu wzorcowego, tworzony podczas kolejnych skanowań \protect\item najnowszy plik stanu jest aktualny \end{inparaenum}}
+	\caption[Cykl skanowań systemu wzorcowego]{Kompletny cykl skanowań systemu wzorcowego, gdzie $Q_0=\{\neg k_1, \neg k_2, k_3\}$, $Q_1=\{k_1, \neg k_2, k_3\}$, $Q_2=\{k_1, \neg k_2, \neg k_3\}$, $Q_3=\{k_1, k_2, k_3\}$, $Q_4=\{k_1, k_2, \neg k_3\}$ a~$k_1$, $k_2$ i~$k_3$ oznaczają odpowiednio, że~\begin{inparaenum}[(1)]\let\refstepcounter\stepcounter \protect\item istnieje pliku stanu systemu wzorcowego, utworzony podczas pierwszego skanowania~go \protect\item istnieje porównawczy plik stanu systemu wzorcowego, tworzony podczas kolejnych skanowań \protect\item najnowszy plik stanu jest aktualny \end{inparaenum}}
 	\label{fig:cykl-skanowan}
 \end{figure}
 
-Krok~\hyperlink{itm:pierwsze-skanowanie}{1} odpowiada przejściu między stanami $Q_0\rightarrow Q_1$, $Q_2\rightarrow Q_3$ lub~$Q_4\rightarrow Q_3$, krok~\hyperlink{itm:dokonanie-zmian}{2} przejściu między stanami $Q_1\rightarrow Q_2$ lub~$Q_3\rightarrow Q_4$, a~krok~\hyperlink{itm:dokonanie-zmian}{3} przejściu to~pętla~$Q_4\rightarrow Q_4$. Pozostałe stany pominięte na~rysunku~\ref{fig:cykl-skanowan} --- tj.~stany~$\{\neg k_1,k_2,k_3\}$, $\{\neg k_1,k_2,\neg k_3\}$ i~$\{\neg k_1,\neg k_2,\neg k_3\}$ --- są~traktowane przez \hyperref[sec:srv-app]{aplikację serwera} tworzącą obraz zmian konfiguracji jako stany błędne, w~których administrator musi podjąć własne działania, aby~przejść do~jednego z~poprawnych stanów, tj.~$Q_0$, $Q_1$, $Q_2$, $Q_3$ lub~$Q_4$. Warto zauważyć, że~wygenerowanie \hyperref[sec:obraz-zmian-konfiguracji]{obrazu konfiguracji wzorcowej} jest możliwe tylko jeśli najnowszy plik stan jest aktualny, tzn.~że~po~dokonaniu wszystkich zmian w~konfiguracji systemu wzorcowego zostało uruchomione jego skanowanie. \hyperref[sec:srv-app]{Aplikacja serwera} przed wygenerowaniem zmian obrazu konfiguracji wymusza sprawdzenie czy~plik stanu jest aktualny. Jeśli nie jest, to~domyślnie zostaje uruchomione skanowanie systemu wzorcowego.
+Krok~\hyperlink{itm:pierwsze-skanowanie}{1} odpowiada przejściu między stanami $Q_0\rightarrow Q_1$, $Q_2\rightarrow Q_3$ lub~$Q_4\rightarrow Q_3$, krok~\hyperlink{itm:dokonanie-zmian}{2} przejściu między stanami $Q_1\rightarrow Q_2$ lub~$Q_3\rightarrow Q_4$, a~krok~\hyperlink{itm:dokonanie-zmian}{3} przejściu to~pętla~$Q_4\rightarrow Q_4$. Pozostałe stany pominięte na~rysunku~\ref{fig:cykl-skanowan} --- tj.~stany~$\{\neg k_1,k_2,k_3\}$, $\{\neg k_1,k_2,\neg k_3\}$ i~$\{\neg k_1,\neg k_2,\neg k_3\}$ --- są~traktowane przez \hyperref[sec:srv-app]{aplikację serwera} tworzącą obraz zmian konfiguracji jako stany błędne, w~których administrator musi podjąć własne działania, aby~przejść do~jednego z~poprawnych stanów, tj.~$Q_0$, $Q_1$, $Q_2$, $Q_3$ lub~$Q_4$. Warto zauważyć, że~wygenerowanie \hyperref[sec:obraz-zmian-konfiguracji]{obrazu konfiguracji wzorcowej} jest możliwe tylko w~stanie~$Q_3$, gdy najnowszy plik stan jest aktualny, tzn.~że~po~dokonaniu wszystkich zmian w~konfiguracji systemu wzorcowego zostało uruchomione jego skanowanie. \hyperref[sec:srv-app]{Aplikacja serwera} przed wygenerowaniem zmian obrazu konfiguracji wymusza sprawdzenie czy~plik stanu jest aktualny. Jeśli nie jest, to~domyślnie zostaje uruchomione skanowanie systemu wzorcowego.
 
 %------------------------------------------------------------------------------
 
@@ -149,14 +148,16 @@ Wygenerowanie takiego certyfikatu cyfrowego wymaga podpisania go~przez centrum c
 
 Wygenerowanie i~podpisanie certyfikatu zostało wykonane z~użyciem \gls{openssl}. Listing~\ref{lst:openssl-gencert} przedstawia jak wygenerować klucze publiczny i~prywatny \gls{rsa} o~długości 4096~bitów, a~następnie, jak wykorzystać klucz prywatny do~wygenerowania żądania podpisania certyfikatu (\hrefemph{https://en.wikipedia.org/wiki/Certificate_signing_request}{Certificate Signing Request}) i~na jego podstawie podpisać certyfikat~X.509~\cite{openssl-cookbook,wiki:csr}.
 
-\begin{lstlisting}[numbers=none,caption={Wygenerowanie i~podpisanie certyfikatu X.509},label=lst:openssl-gencert]
+\begin{minipage}{\linewidth} % https://tex.stackexchange.com/questions/73231/avoid-page-breaks-in-lstlistings
+\begin{lstlisting}[language=,numbers=none,caption={Wygenerowanie i~podpisanie certyfikatu X.509},label=lst:openssl-gencert]
 $ openssl genrsa -aes256 -out rsa_aes256_4096.key 4096
 $ openssl req -new -key rsa_aes256_4096.key -out request.csr
 $ openssl req -new -config request.cnf -key fd.key -out request.csr
 $ openssl x509 -req -days 365 -in request.csr -signkey rsa_aes256_4096.key -out certificate.pem
 \end{lstlisting}
+\end{minipage}
 
-\begin{lstlisting}[numbers=none,caption={Plik z~konfiguracją certyfikatu X.509},label=lst:openssl-request-config]
+\begin{lstlisting}[language=,numbers=none,caption={Plik z~konfiguracją certyfikatu X.509},label=lst:openssl-request-config]
 [req]
 default_bits       = 4096
 default_keyfile    = rsa_aes256_4096.key
@@ -179,13 +180,13 @@ subjectAltName     = DNS:www.mini.pw.edu.pl,DNS:*.mini.pw.edu.pl
 \end{lstlisting}
 
 Listing~\ref{lst:openssl-request-config} przedstawia przykładową zawartość pliku \path{request.cnf}, który służy do~konfiguracji żądania podpisania certyfikatu. Certyfikat jest zaufany jeśli istnieje ważny\footnote{Tzn.~żaden certyfikat w~ciągu nie stracił ważności.} ciąg podpisów cyfrowych, który zaczyna się~od~\gls{ca}, a~kończy na~naszym certyfikacie. Aby sprawdzić czy~certyfikat jest zaufany przez nasz system, wystarczy wydać komendę:
-\begin{lstlisting}[numbers=none,frame=none]
+\begin{lstlisting}[language=,numbers=none,frame=none]
 $ openssl verify -verbose certificate.pem
 \end{lstlisting}
 
 Aby~\href{http://stackoverflow.com/questions/10782826/digital-signature-for-a-file-using-openssl}{podpisać} skrót~\href{https://en.wikipedia.org/wiki/SHA-2}{SHA256} pliku \path{config.img} za~pomocą certyfikatu \path{certificate.pem} i~zapisać wynik takiej operacji do~pliku~\path{signature} wystarczy wydać komendę\footnote{W~zaimplementowanej aplikacji operacja podpisania obrazu konfiguracji wzorcowej jest wykonywana z~poziomu biblioteki OpenSSL, a~nie z~poziomu linii komend.}:
 
-\begin{lstlisting}[numbers=none,frame=none]
+\begin{lstlisting}[language=,numbers=none,frame=none]
 $ openssl dgst -sha256 -sign certificate.pem -out signature config.img
 \end{lstlisting}
 

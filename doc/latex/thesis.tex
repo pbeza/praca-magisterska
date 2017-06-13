@@ -18,6 +18,20 @@
 \monthyear{2017}
 \date{\today}
 
+% Wspólna numeracja dla obrazków, tabel
+% https://tex.stackexchange.com/questions/145546/how-to-make-figure-and-listing-share-their-counter
+
+\makeatletter
+\AtBeginDocument{%
+	\let\c@figure\c@lstlisting
+	\let\thefigure\thelstlisting
+	\let\c@table\c@lstlisting
+	\let\thetable\thelstlisting
+	\let\ftype@lstlisting\ftype@figure % give the floats the same precedence
+	\let\ftype@table\ftype@figure % give the floats the same precedence
+}
+\makeatother
+
 % Właściwy początek dokumentu
 
 \begin{document}
@@ -75,10 +89,10 @@
 
 \renewcommand{\listtablename}{Spis tabel}
 \listoffigures
-\begingroup
-\let\clearpage\relax
+%\begingroup % odkomentuj jeśli wszystko ma być na 1 stronie
+%\let\clearpage\relax
 \listoftables
-\endgroup
+%\endgroup
 
 \printbibliography
 %\label{bibliography-page}
