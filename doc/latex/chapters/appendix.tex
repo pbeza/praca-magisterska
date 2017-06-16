@@ -119,7 +119,7 @@ user@host:/tmp/demo$ mv ../aide.db.new ../aide.db
 \end{lstlisting}
 \end{minipage}
 
-\begin{lstlisting}[language=,numbers=none,caption={Dokonanie demonstracyjnych zmian w~śledzonym przez AIDE drzewie katalogów \protect\path{/tmp/demo}, utworzonym w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example}~(por.~rys.~\ref{fig:drzewo-katalogow-przyklad-przed-aide} i~\ref{fig:drzewo-katalogow-przyklad-po-aide}) przed uruchomieniem drugiego skanowania AIDE z~flagą \hreftt{https://linux.die.net/man/1/aide}{--check}~(patrz listing~\ref{lst:aide-example-second-scan}},label=lst:tree-change-aide-example]
+\begin{lstlisting}[language=,numbers=none,caption={Dokonanie demonstracyjnych zmian w~śledzonym przez AIDE drzewie katalogów \protect\path{/tmp/demo}, utworzonym w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example}~(por.~rys.~\ref{fig:drzewo-katalogow-przyklad-przed-aide} i~\ref{fig:drzewo-katalogow-przyklad-po-aide}) przed uruchomieniem drugiego skanowania AIDE z~flagą \hreftt{https://linux.die.net/man/1/aide}{--check}~(patrz listing~\ref{lst:aide-example-second-scan})},label=lst:tree-change-aide-example]
 user@host:/tmp/demo$ mv dir2/fifo0 dir0
 user@host:/tmp/demo$ echo 'x' >> file1
 user@host:/tmp/demo$ rm file8_hardlink
@@ -134,7 +134,7 @@ user@host:/tmp/demo$ touch dir1/subdir1/file5
 \end{lstlisting}
 
 \newpage
-\begin{lstlisting}[language=,numbers=none,caption={Drugie skanowanie drzewa katalogów \protect\path{/tmp/demo} --- po~zmianach przedstawionych na~listingu~\ref{lst:tree-change-aide-example} i~zwizualizowanych na~rys.~\ref{fig:drzewo-katalogow-przyklad-aide}},label=lst:aide-example-second-scan]
+\begin{lstlisting}[language=,numbers=none,caption={Drugie skanowanie drzewa katalogów \protect\path{/tmp/demo} --- skanowanie po~zmianach przedstawionych na~listingu~\ref{lst:tree-change-aide-example} i~zwizualizowanych na~rys.~\ref{fig:drzewo-katalogow-przyklad-aide}},label=lst:aide-example-second-scan]
 user@host:/tmp/demo$ aide --check -c /tmp/aide-demo.conf 
 Start timestamp: 2017-06-13 00:05:07 +0200 (AIDE 0.16)
 AIDE found differences between database and filesystem!!
@@ -407,7 +407,7 @@ user@host:/tmp/demo$ cat ../aide.db.new
 				\label{fig:drzewo-katalogow-przyklad-po-aide}
 			}
 	\end{subfigure}
-	\caption{Drzewo katalogów \protect\path{/tmp/demo} utworzone w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example} przed i~po~dokonaniu zmian przedstawionych na~listingu~\ref{lst:tree-change-aide-example}}
+	\caption[Drzewo katalogów \protect\path{/tmp/demo} utworzone na~potrzeby demonstracji działania skanera~AIDE]{Drzewo katalogów \protect\path{/tmp/demo} utworzone na~potrzeby demonstracji działania skanera AIDE w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example} --- widok przed i~po~dokonaniu zmian przedstawionych na~listingu~\ref{lst:tree-change-aide-example}}
 	\label{fig:drzewo-katalogow-przyklad-aide}
 \end{figure}
 %\end{minipage}
