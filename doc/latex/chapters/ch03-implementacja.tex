@@ -17,15 +17,19 @@ Wyróżnione moduły aplikacji \hyperref[sec:srv-app]{serwera}:\mynobreakpar
 \begin{itemize}
 	\item moduł skanujący system wzorcowy i~tworzący plik stanu, który skrótowo opisuje stan konfiguracji systemu wzorcowego --- moduł ten~wykorzystuje do~swojego działania skaner~\hyperref[sec:aide]{AIDE} (patrz rozdział~\ref{sec:aide}),
 	\item moduł tworzący na~podstawie dwóch wyników skanowań systemu wzorcowego, podpisany cyfrowo \hyperref[sec:obraz-zmian-konfiguracji]{obraz zmian konfiguracji systemu wzorcowego}, będący archiwum plików dla~klienta, które później zostaje rozpakowane i~zastosowane przez aplikację kliencką\footnote{W~przypadku konfliktów zmian, administrator może na~etapie użycia aplikacji klienckiej, interaktywnie porównać oba~pliki i~zdecydować która wersja konfliktowego pliku ma~być zachowana lub~alternatywnie może wymusić nadpisanie plików.},
-	\item moduł udostępniający klientom stworzony obraz zmian konfiguracji systemu wzorcowego,
+	\item moduł umożliwiający przegląd i~dostosowanie stworzonego wcześniej \hyperref[sec:obraz-zmian-konfiguracji]{obrazu zmian konfiguracji systemu wzorcowego} do~własnych potrzeb,
+	%\item moduł udostępniający klientom stworzony obraz zmian konfiguracji systemu wzorcowego,
 	\item moduł konfiguracji aplikacji serwera --- konfiguracja ta~zawiera m.in.~ustawienia numeru portu nasłuchu na~połączenia klientów, ścieżkę do~pliku konfiguracyjnego~AIDE, określającego jakie katalogi powinny być~skanowane, ścieżkę do~klucza prywatnego certyfikatu cyfrowego serwera, używanego do~podpisywania obrazów zmian konfiguracji, ścieżkę do~katalogu, w~którym są~zapisywane generowane obrazy konfiguracji~itp.
 \end{itemize}
 
 Wyróżnione moduły \hyperref[sec:cli-app]{aplikacji klienckiej}:\mynobreakpar
 \begin{itemize}
-	\item moduł odbierający, weryfikujący podpis cyfrowy, rozpakowujący i~stosujący obraz zmian konfiguracji wzorcowej udostępniony przez serwer,
+	\item moduł udostępniający innym klientom stworzony przez serwer \hyperref[sec:obraz-zmian-konfiguracji]{obraz zmian konfiguracji systemu wzorcowego},
+	\item moduł odbierający, weryfikujący podpis cyfrowy, rozpakowujący i~stosujący obraz zmian konfiguracji wzorcowej udostępniony przez serwer lub~przez innego klienta,
 	\item moduł konfiguracji aplikacji klienta --- konfiguracja ta~zawiera m.in.~ustawienia numeru portu nasłuchiwania serwera, protokół wykorzystany do~połączenia z~serwerem, ścieżkę do~katalogu, w~którym są~zapisywane odebrane od~serwera obrazy konfiguracji~itp.
 \end{itemize}
+
+Określenia \emph{klient} i~\emph{serwer} użyte w~kontekście opisu modułów aplikacji stworzonej w~ramach niniejszej pracy nie oznaczają klasycznego modelu komunikacji klient-serwer, w~którym serwer mógłby udostępniać klientom \hyperref[sec:obraz-zmian-konfiguracji]{obraz zmian swojej konfiguracji}. Serwer należy raczej utożsamiać z~systemem, którego oprogramowanie pozwala na~tworzenie, przegląd i~dostosowanie \hyperref[sec:obraz-zmian-konfiguracji]{obrazu zmian swojej konfiguracji}, a~nie z~systemem, do~którego klienci łączą się w~celu pobrania takiego obrazu. Zadanie dystrybuowania obrazu w~przyjętym rozwiązaniu zostało przydzielone klientom, którzy poza tym, że~stosują się do~\hyperref[sec:obraz-zmian-konfiguracji]{obrazu zmian konfiguracji systemu wzorcowego} stworzonego przez serwer, to~mogą udostępniać go~innym klientom w~ramach połączenia \hrefemph{https://en.wikipedia.org/wiki/Peer-to-peer}{peer-to-peer}. Taki model komunikacji wydaje się być skalowalny, ponieważ serwer nie jest tak obciążony jak byłby, gdyby tylko on~udostępniał obraz swojej konfiguracji.
 
 W~kolejnych dwóch rozdziałach~\ref{sec:srv-app} i~\ref{sec:cli-app} przedstawiono instrukcję obsługi aplikacji serwera i~aplikacji klienckiej. Pominięto w~nich \href{https://www.gnu.org/prep/standards/html_node/Command_002dLine-Interfaces.html}{następujące typowe} opcje, wspólne dla~obu programów:
 
