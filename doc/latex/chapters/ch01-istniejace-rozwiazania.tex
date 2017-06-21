@@ -33,21 +33,21 @@ Aby~wprowadzić zmiany opisane manifestem \texttt{example.pp}, wystarczy uruchom
 Przed dokonaniem zmian w~systemie pomocna może być flaga \texttt{-{}-noop}, która uruchomia tryb \emph{dry run}, tzn.~tryb w~którym nie są dokonywane żadne zmiany w~systemie, a~na standardowym wyjściu są drukowane zmiany jakie by~zaszły, gdyby nie użyć tej flagi.
 
 \begin{minipage}{\linewidth} % żeby listing nie był podzielony na 2 stronach
-\begin{lstlisting}[language=,numbers=none,caption={Manifest Puppet gwarantujący, że~pakiet \texttt{openssh-client}, dostarczający klienta SSH, jest zainstalowany},label=lst:puppet-openssh-example]
+\begin{lstlisting}[language=,caption={Manifest Puppet gwarantujący, że~pakiet \texttt{openssh-client}, dostarczający klienta SSH, jest zainstalowany},label=lst:puppet-openssh-example]
 package { 'openssh-client':
   ensure => present,
 }
 \end{lstlisting}
 \end{minipage}
 
-\begin{lstlisting}[language=,numbers=none,caption={Manifest Puppet gwarantujący istnienie pliku \hreftt{https://en.wikipedia.org/wiki/Motd_(Unix)}{/etc/motd} z~komunikatem \texttt{Hello!}, który wyświetla się~użytkownikom systemu po~zalogowaniu},label=lst:puppet-motd-example]
+\begin{lstlisting}[language=,caption={Manifest Puppet gwarantujący istnienie pliku \hreftt{https://en.wikipedia.org/wiki/Motd_(Unix)}{/etc/motd} z~komunikatem \texttt{Hello!}, który wyświetla się~użytkownikom systemu po~zalogowaniu},label=lst:puppet-motd-example]
 file { 'motd':
   path => '/etc/motd',
   content => 'Hello!',
 }
 \end{lstlisting}
 
-\begin{lstlisting}[language=,numbers=none,caption={Manifest Puppet gwarantujący, że~\gls{demon} \hreftt{https://httpd.apache.org/}{httpd} jest włączony i~działa},label=lst:puppet-httpd-example]
+\begin{lstlisting}[language=,caption={Manifest Puppet gwarantujący, że~\gls{demon} \hreftt{https://httpd.apache.org/}{httpd} jest włączony i~działa},label=lst:puppet-httpd-example]
 service { 'httpd':
   ensure => running,
   enable => true,
@@ -89,7 +89,7 @@ Użytkownikami Chefa, tak jak w~przypadku Puppeta, jest wiele dużych firm i~uni
 
 Odpowiednikiem plików konfiguracyjnych, które w~Puppet nazywane są~\emph{manifestami}, są~pliki nazywane w~nomenklaturze Chef \emph{przepisami}~(ang.~\emph{recipe}). Przykładowe przepisy przedstawiono w~przykładach~\ref{lst:chef-apache-example}, \ref{lst:chef-user-example} i~\ref{lst:chef-service-example}. Więcej przykładów można znaleźć w,~bogatej w~przykładowe przepisy, dokumentacji Chef~\cite{chef-examples}.
 
-\begin{lstlisting}[language=,numbers=none,caption={Przepis Chef gwarantujący, że~serwer Apache zostanie zainstalowany niezależnie od~tego jak~się~nazywa pakiet oprogramowania go~dostarczający},label=lst:chef-apache-example]
+\begin{lstlisting}[language=,caption={Przepis Chef gwarantujący, że~serwer Apache zostanie zainstalowany niezależnie od~tego jak~się~nazywa pakiet oprogramowania go~dostarczający},label=lst:chef-apache-example]
 package 'Install Apache' do
   case node[:platform]
   when 'redhat', 'centos'
@@ -100,7 +100,7 @@ package 'Install Apache' do
 end
 \end{lstlisting}
 
-\begin{lstlisting}[language=,numbers=none,caption={Przepis Chef gwarantujący, że~użytkownik \texttt{xyz} istnieje w~systemie i~ma zadane ustawienia konta},label=lst:chef-user-example]
+\begin{lstlisting}[language=,caption={Przepis Chef gwarantujący, że~użytkownik \texttt{xyz} istnieje w~systemie i~ma zadane ustawienia konta},label=lst:chef-user-example]
 user 'xyz' do
   comment 'A random user'
   uid '1234'
@@ -111,7 +111,7 @@ user 'xyz' do
 end
 \end{lstlisting}
 
-\begin{lstlisting}[language=,numbers=none,caption={Przepis Chef gwarantujący, że~serwis \texttt{example\_service} jest uruchomiony},label=lst:chef-service-example]
+\begin{lstlisting}[language=,caption={Przepis Chef gwarantujący, że~serwis \texttt{example\_service} jest uruchomiony},label=lst:chef-service-example]
 service 'example_service' do
   action :start
 end
@@ -127,7 +127,7 @@ Ansible jest rozwiązaniem do~zarządzania oprogramowaniem różniącym się od~
 Ansible został opublikowany na~licencji~\glslink{gpl}{GPL} w~wersji~3, a~jego pierwsza wersja została wydana w~2012~roku. Projekt został zaimplementowany w~języku Python przez \href{http://michaeldehaan.net/}{\mbox{Michaela} \mbox{Dehaana}}~\cite{ansible-github}.
 
 
-\begin{lstlisting}[language=,numbers=none,caption={Przykładowy plik konfiguracyjny klientów serwera Ansible \protect\path{/etc/ansible/hosts} (w~numenklaturze Ansible nazywany \hrefemph{http://docs.ansible.com/ansible/intro_inventory.html}{Inventory file}) definiujący adresy~IP zarządzanych klientów},label=lst:ansible-inventory-example]
+\begin{lstlisting}[language=,caption={Przykładowy plik konfiguracyjny klientów serwera Ansible \protect\path{/etc/ansible/hosts} (w~numenklaturze Ansible nazywany \hrefemph{http://docs.ansible.com/ansible/intro_inventory.html}{Inventory file}) definiujący adresy~IP zarządzanych klientów},label=lst:ansible-inventory-example]
 [local]
 127.0.0.1
 
@@ -145,7 +145,7 @@ zainstaluje serwer HTTP \hreftt{https://www.nginx.com/}{nginx} na wszystkich kli
 \texttt{ansible all -s -m apt -a 'pkg=nginx state=installed update\_cache=true'}
 \end{center}
 które zwraca wynik na~standardowym wyjściu w~postaci~\texttt{JSON}:
-\begin{lstlisting}[language=,numbers=none,frame=none]
+\begin{lstlisting}[language=,frame=none,numbers=none]
 127.0.0.1 | success >> {
     "changed": false
 }
@@ -156,7 +156,7 @@ Powyższe sposoby uruchamiania Ansible są wykorzystaniem Ansible~\emph{ad-hoc}.
 \end{center}
 gdzie \texttt{-s} to~flaga po~której następuje nazwa pliku~\emph{playbook}. Ansible, tak jak konkurencyjne rozwiązania, potrafi zarządzać oprogramowaniem i~konfiguracją w~sposób warunkowy, dlatego w~praktyce użyteczne konfiguracje są~znacznie bardziej złożone od~przykładowych.
 
-\begin{lstlisting}[numbers=none,language=,caption={Przykładowa konfiguracja klientów serwera Ansible, w~nomenklaturze Ansible nazywana \emph{playbook}},label=lst:ansible-playbook-example]
+\begin{lstlisting}[language=,caption={Przykładowa konfiguracja klientów serwera Ansible, w~nomenklaturze Ansible nazywana \emph{playbook}},label=lst:ansible-playbook-example]
 ---
 - hosts: web
   vars:
@@ -209,7 +209,7 @@ Aby~zastosować zmiany opisane w~pliku konfiguracyjnym~\path{top.sls} wystarczy 
 	\texttt{salt '*' state.apply}
 \end{center}
 
-\begin{lstlisting}[numbers=none,language=,caption={Plik konfiguracyjny \texttt{top.sls} w~formacie \texttt{YAML} definiujący konfigurację dla~3~rodzajów agentów},label=lst:salt-topfile-example]
+\begin{lstlisting}[language=,caption={Plik konfiguracyjny \texttt{top.sls} w~formacie \texttt{YAML} definiujący konfigurację dla~3~rodzajów agentów},label=lst:salt-topfile-example]
 base:
   '*':
     - vim
@@ -224,7 +224,7 @@ base:
 \end{lstlisting}
 Nazwy znajdujące się w~pliku konfiguracyjnym pod~wyrażeniami regularnymi --- np.~w~przykładzie~\ref{lst:salt-topfile-example}: \texttt{vim}, \texttt{scripts} i~\texttt{users} pod~wyrażeniem regularnym \texttt{'*'} --- to~nazwy stanów opisanych innymi plikami konfiguracyjnymi nazywanymi plikami stanu~(\emph{State Files}). Przykład~\ref{lst:salt-statefile} przedstawia przykładowy plik stanu \path{nettools.sls} (niewystępujący w~przykładowym pliku~\path{top.sls} w~przykładzie~\ref{lst:salt-topfile-example}). Plik ten~wymusza: instalację pakietów \hreftt{https://wiki.archlinux.org/index.php/rsync}{rsync}, \hreftt{https://lftp.yar.ru/}{lftp} i~\hreftt{https://curl.haxx.se/}{curl} oraz~obecność użytkownika \texttt{fred} z~przypisanym \href{https://superuser.com/questions/144666/what-is-the-difference-between-shell-console-and-terminal}{shellem} \href{https://en.wikipedia.org/wiki/Z_shell}{\path{/bin/zsh}}.
 
-\begin{lstlisting}[numbers=none,language=,caption={Plik stanu \texttt{nettools.sls} definujący 3~pakiety, które agent ma~zainstalować oraz~użytkownika \texttt{fred}, który musi być w~systemie i~mieć przypisany shell~\texttt{/bin/zsh}},label=lst:salt-statefile]
+\begin{lstlisting}[language=,caption={Plik stanu \texttt{nettools.sls} definujący 3~pakiety, które agent ma~zainstalować oraz~użytkownika \texttt{fred}, który musi być w~systemie i~mieć przypisany shell~\texttt{/bin/zsh}},label=lst:salt-statefile]
 install_network_packages:
   pkg.installed:
     - pkgs:
@@ -384,6 +384,6 @@ Warto pamiętać, że~przedstawione rozwiązania mają za~sobą co~najmniej kilk
 
 Z~racji na~specyfikę pracy magisterskiej, projektowany protokół nie jest tak rozbudowany i~kompleksowy jak największe z~przedstawionych rozwiązań. W~zamian, przygotowane w~ramach tej~pracy oprogramowanie działa według zupełnie innego pomysłu niż~rozwiązania opisane w~niniejszym rozdziale --- w~przeciwieństwie do~nich, administrator nie musi używać języka specyficznego dla~danego rozwiązania do~opisania oczekiwanej konfiguracji systemu. Wystarczy, że~stacja wzorcowa zostanie przeskanowana przed dokonaniem jakichkolwiek zmian, które administrator chce odzwierciedlić na~stacjach klienckich, następnie administrator skonfiguruje stację wzorcową w~taki sposób, w~jaki chciałby skonfigurować grupę stacji klienckich, a~na~koniec przeskanuje system wzorcowy ponownie, w~wyniku czego powstaje \hyperref[sec:obraz-zmian-konfiguracji]{obraz zmian systemu wzorcowego}, który może być przesłany do~stacji klienckich i~przez nich zastosowany. Wszystkie wymienione kroki implementuje zestaw narzędzi przygotowany w~ramach niniejszej pracy.
 
-Podczas projektowania przygotowanego rozwiązania starano się~stworzyć możliwie wiele ułatwień dla~jego modułowej, dalszej rozbudowy. Praca implementuje zarządzanie \emph{elementami} konfiguracji systemu --- w~szczególności zaimplementowane rozwiązanie nie ma~wbudowanego mechanizmu zapewniającego, że~dany \gls{demon} jest uruchomiony. Zapewnienie uruchomienia \glslink{demon}{demona} można zapewnić przez synchronizowanie katalogu z~ustawieniami \hreftt{https://en.wikipedia.org/wiki/Cron}{cron}, który odpowiada za~harmonogramowanie zadań w~systemie. Stworzone oprogramowanie jest za~to~w~stanie śledzić zmiany i~aktualizować m.in.~konfigurację zapisaną w~plikach tekstowych i~oprogramowanie zapisane w~postaci bibliotek i~innych plików binarnych.
+Podczas projektowania przygotowanego rozwiązania starano się~stworzyć możliwie wiele ułatwień dla~jego modułowej, dalszej rozbudowy. Praca implementuje zarządzanie \emph{elementami} konfiguracji systemu, a~nie jego każdą częścią --- w~szczególności zaimplementowane rozwiązanie nie ma~wbudowanego mechanizmu zapewniającego, że~dany \gls{demon} jest uruchomiony. Zapewnienie uruchomienia \glslink{demon}{demona} można zapewnić przez synchronizowanie katalogu z~ustawieniami \hreftt{https://en.wikipedia.org/wiki/Cron}{cron}, który odpowiada za~harmonogramowanie zadań w~systemie. Stworzone oprogramowanie jest za~to~w~stanie śledzić zmiany i~aktualizować m.in.~konfigurację zapisaną w~plikach tekstowych i~oprogramowanie zapisane w~postaci bibliotek i~innych plików binarnych.
 
 \end{document}

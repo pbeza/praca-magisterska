@@ -11,7 +11,7 @@ W~niniejszym rozdziale przedstawiono szczegóły implementacyjne projektu, w~szc
 
 \section{Moduły aplikacji}
 
-Stworzona aplikacja składa się z~dwóch części --- \hyperref[sec:srv-app]{serwerowej} i~\hyperref[sec:cli-app]{klienckiej} --- nazywanej w~kodzie źródłowym odpowiednio \texttt{myscm-srv} i~\texttt{myscm-cli}\footnote{\emph{myscm} to~skrót od~roboczej nazwy stworzonego oprogramowania --- \emph{My~\href{https://en.wikipedia.org/wiki/Software_configuration_management}{Software Configuration Manager}}.}. Część serwerowa jest przeznaczona do~uruchomienia na~systemie odgrywającym rolę systemu wzorcowego, a~część kliencka na~systemach, których konfiguracja ma~zostać upodobniona do~konfiguracji systemu wzorcowego. Każda z~tych części składa się z~modułów realizujących rozłączone zadania.
+Stworzona aplikacja jest \href{https://en.wikipedia.org/wiki/Command-line_interface}{aplikacją konsolową} składającą się z~dwóch zasadniczych części --- \hyperref[sec:srv-app]{serwerowej} i~\hyperref[sec:cli-app]{klienckiej} --- nazywanej w~kodzie źródłowym odpowiednio \texttt{myscm-srv} i~\texttt{myscm-cli}\footnote{\emph{myscm} to~skrót od~roboczej nazwy stworzonego oprogramowania --- \emph{My~\href{https://en.wikipedia.org/wiki/Software_configuration_management}{Software Configuration Manager}}.}. Część serwerowa jest przeznaczona do~uruchomienia na~systemie odgrywającym rolę systemu wzorcowego, a~część kliencka na~systemach, których konfiguracja ma~zostać upodobniona do~konfiguracji systemu wzorcowego. Każda z~tych części składa się z~modułów realizujących rozłączone zadania.
 
 Wyróżnione moduły aplikacji \hyperref[sec:srv-app]{serwera}:\mynobreakpar
 \begin{itemize}
@@ -50,9 +50,9 @@ Zarówno aplikacji serwera jak i~aplikacji klienckiej towarzyszą skrypty i~konf
 \newcommand{\srvappname}{myscm-srv}
 \newcommand{\myscmsrvconfig}{\path{/etc/myscm-srv/myscm-srv.conf}}
 
-Aplikacja serwera to~aplikacja przeznaczona do~użycia z~uprawnieniami \hreftt{https://en.wikipedia.org/wiki/Superuser}{root}\footnote{Uprawnienia administratora są~konieczne do~uruchomienia skanowania~\hyperref[sec:aide]{AIDE}.} na~maszynie będącej wzorcem oprogramowania dla~klientów. Służy ona do~dwóch celów --- do~stworzenia obrazu zmian konfiguracji przeprowadzonych przez administratora komputerowego od~czasu wybranego skanowania~(por.~krok~\hyperlink{itm:stworzenie-obrazu-konfiguracji}{3} w~rozdziale~\ref{sec:tworzenie-obrazu-konfiguracji}) i~do~udostępnienia takiego obrazu klientowi~(por.~rozdział~\ref{sec:przeslanie-obrazu-konfiguracji}).
+Aplikacja serwera to~aplikacja przeznaczona do~użycia z~uprawnieniami \hreftt{https://en.wikipedia.org/wiki/Superuser}{root}\footnote{Uprawnienia administratora są~konieczne do~uruchomienia skanowania~\hyperref[sec:aide]{AIDE}.} na~maszynie będącej wzorcem oprogramowania dla~klientów. Służy ona wyłącznie do~stworzenia, przeglądu i~dostosowania obrazu zmian konfiguracji przeprowadzonych przez administratora komputerowego od~czasu wybranego skanowania~(por.~krok~\hyperlink{itm:stworzenie-obrazu-konfiguracji}{3} w~rozdziale~\ref{sec:tworzenie-obrazu-konfiguracji}).
 
-Główną funkcjonalnością aplikacji serwera jest stworzenie obrazu zmian konfiguracji, a~nie jego udostępnienie, ponieważ utworzony obraz może być równie dobrze przesłany klientowi w~dowolny inny sposób --- niekoniecznie za~pomocą aplikacji serwera --- np.~z~wykorzystaniem protokołu \href{https://en.wikipedia.org/wiki/Trivial_File_Transfer_Protocol}{TFTP}~(\emph{Trivial File Transfer Protocol}), \href{https://en.wikipedia.org/wiki/SSH_File_Transfer_Protocol}{SFTP}~(\emph{SSH File Transfer Protocol}) lub~\href{https://en.wikipedia.org/wiki/File_Transfer_Protocol}{FTP}~(\emph{File Transfer Protocol}) --- wszystkie te~protokoły wspiera \hyperref[sec:cli-app]{aplikacja kliencka}, a~ponadto ma~ona możliwość załadowania obrazu zmian konfiguracji z~wybranego pliku obrazu konfiguracji.
+Główną funkcjonalnością aplikacji serwera jest stworzenie obrazu zmian konfiguracji, a~nie jego udostępnienie, ponieważ utworzony przez serwer obraz zmian jest udostępniany klientom przez innych klientów lub~równie dobrze może być przesłany klientowi w~dowolny inny sposób --- np.~z~wykorzystaniem protokołu \href{https://en.wikipedia.org/wiki/SSH_File_Transfer_Protocol}{SFTP}~(\emph{SSH File Transfer Protocol}) lub~\href{https://en.wikipedia.org/wiki/File_Transfer_Protocol}{FTP}~(\emph{File Transfer Protocol}), które wspiera \hyperref[sec:cli-app]{aplikacja kliencka}, a~ponadto ma~ona możliwość załadowania obrazu zmian konfiguracji z~wybranego pliku obrazu konfiguracji.
 
 Szczegółowa instrukcja obsługi użycia aplikacji serwera została dostarczona z~przygotowanym pakietem oprogramowania \texttt{\srvappname}~(patrz załącznik~\ref{ch:cd-appendix}). Instrukcję można otworzyć po~zainstalowaniu pakietu \texttt{\srvappname} za~pomocą komendy \texttt{man~\srvappname}. Konfiguracja aplikacji serwera znajduje się w~pliku \myscmsrvconfig.
 
@@ -81,7 +81,7 @@ Listing~\ref{lst:myscm-srv-usage} przedstawia skrócony szablon użycia aplikacj
 \newcommand{\cliappname}{myscm-cli}
 \newcommand{\myscmcliconfig}{\path{/etc/myscm-cli/myscm-cli.conf}}
 
-Aplikacja kliencka to~aplikacja przeznaczona do~użycia z~uprawnieniami \hreftt{https://en.wikipedia.org/wiki/Superuser}{root}\footnote{Uprawnienia administratora są~konieczne do~tworzenia, zmiany i~usuwania plików z~dowolnej części systemu plików, co~jest konieczne podczas zastosowania obrazu zmian konfiguracji systemu wzorcowego.} na~maszynie, której konfigurację administrator chce dostosować do~konfiguracji systemu wzorcowego. Aplikacja kliencka umożliwia pobranie obrazu zmian konfiguracji z~serwera za~pomocą \href{https://en.wikipedia.org/wiki/Trivial_File_Transfer_Protocol}{TFTP}~(\emph{Trivial File Transfer Protocol}), \href{https://en.wikipedia.org/wiki/SSH_File_Transfer_Protocol}{SFTP}~(\emph{SSH File Transfer Protocol}), \href{https://en.wikipedia.org/wiki/File_Transfer_Protocol}{FTP} lub~własnego protokołu, a~następnie umożliwia zastosowanie~go na~systemie klienckim.
+Aplikacja kliencka to~aplikacja przeznaczona do~użycia z~uprawnieniami \hreftt{https://en.wikipedia.org/wiki/Superuser}{root}\footnote{Uprawnienia administratora są~konieczne do~tworzenia, zmiany i~usuwania plików z~dowolnej części systemu plików, co~jest konieczne podczas zastosowania obrazu zmian konfiguracji systemu wzorcowego.} na~maszynie, której konfigurację administrator chce dostosować do~konfiguracji systemu wzorcowego. Aplikacja kliencka umożliwia pobranie obrazu zmian konfiguracji od~innego klienta za~pomocą \href{https://en.wikipedia.org/wiki/SSH_File_Transfer_Protocol}{SFTP}~(\emph{SSH File Transfer Protocol}), \href{https://en.wikipedia.org/wiki/File_Transfer_Protocol}{FTP} lub~własnego protokołu, a~następnie umożliwia zastosowanie~go na~systemie klienckim.
 
 Szczegółowa instrukcja obsługi użycia aplikacji klienckiej, analogicznie jak w~przypadku aplikacji serwera, została dostarczona z~przygotowanym pakietem oprogramowania \texttt{\cliappname}~(patrz załącznik~\ref{ch:cd-appendix}). Instrukcję można otworzyć po~zainstalowaniu pakietu \texttt{\cliappname} za~pomocą komendy \texttt{man~\cliappname}. Konfiguracja aplikacji klienckiej znajduje się w~pliku \myscmcliconfig.
 
@@ -183,7 +183,7 @@ gdzie:
        | <group> - <predefined group>
        | <predefined group>
 \end{lstlisting}
-	gdzie:
+	gdzie:\mynobreakpar
 	\begin{itemize}
 		\item \texttt{<predefined group>} to~jeden z~atrybutów z~tabeli~\ref{tab:aide-file-attrs},
 		\item sumowanie atrybutów~(\texttt{<group> + <predefined group>}) i~odejmowanie atrybutów (\texttt{<group> - <predefined~group>}) oznacza odpowiednio --- teoriomnogościową sumę i~różnicę atrybutów \texttt{<group>} i~\texttt{<predefined group>}.

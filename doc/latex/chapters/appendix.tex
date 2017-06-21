@@ -38,26 +38,26 @@
 \chapter{Przykład działania AIDE}
 \label{ch:aide-example}
 
-Niniejszy załącznik przedstawia prosty przykład wykorzystania AIDE do~śledzenia zmian dokonanych na~demonstracyjnym drzewie katalogów \path{/tmp/demo}, utworzonym w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example} i~zobrazowanym na~rysunku~\ref{fig:drzewo-katalogow-przyklad-przed-aide}. Listing~\ref{lst:aide-config-example} jest przykładową konfiguracją AIDE wykorzystaną na~potrzeby prezentacji działania AIDE, listing~\ref{lst:aide-example-first-scan} zawiera komendy, które inicjują za~pomocą użycia flagi \hreftt{https://linux.die.net/man/1/aide}{--init} plik stanu AIDE \path{/tmp/aide.db.new}, odpowiadający skanowanemu drzewu katalogów, a~następnie przenoszą go~do~pliku \path{/tmp/aide.db}, ustalając w~ten sposób referencyjny plik stanu, do~którego są~porównywane wyniki skanowania z~flagą \hreftt{https://linux.die.net/man/1/aide}{--scan} (por.~pierwszy wiersz konfiguracji \path{/tmp/aide-demo.conf} z~listingu~\ref{lst:aide-config-example}). Listing~\ref{lst:tree-change-aide-example} symuluje dokonanie zmian zawartości plików i~katalogów w~drzewie \path{/tmp/demo}, odzwierciedlonych w~drzewie na~rysunku~\ref{fig:drzewo-katalogow-przyklad-po-aide}. Ponowne wywołanie skanowania AIDE z~flagą \hreftt{https://linux.die.net/man/1/aide}{--check} powoduje wypisanie na~standardowe wyjście raportu dokonanych zmian w~skanowanym drzewie, co~przedstawia listing~\ref{lst:aide-example-second-scan}. Jeśli zaszłaby potrzeba zamiany starego pliku referencyjnego \path{/tmp/aide.db} na~nowy plik stanu \path{/tmp/aide.db.new}, to~należałoby wywołać AIDE z~opcją \hreftt{https://linux.die.net/man/1/aide}{--update}, co~przedstawia listing~\ref{lst:aide-example-second-scan-output}. Zawartość nowego pliku \path{/tmp/aide.db.new} została przedstawiona na~listingu~\ref{lst:aide-example-second-scan-output}.
+Niniejszy załącznik ma~na~celu przybliżenie sposobu działania AIDE. Do~tego celu posłużył prosty przykład wykorzystania go~do~śledzenia zmian dokonanych na~demonstracyjnym drzewie katalogów \path{/tmp/demo}, utworzonym w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example} i~zobrazowanym na~rysunku~\ref{fig:drzewo-katalogow-przyklad-przed-aide}. Listing~\ref{lst:aide-config-example} jest przykładową konfiguracją AIDE wykorzystaną na~potrzeby prezentacji działania AIDE, listing~\ref{lst:aide-example-first-scan} zawiera komendy, które inicjują za~pomocą użycia flagi \hreftt{https://linux.die.net/man/1/aide}{--init} plik stanu AIDE \path{/tmp/aide.db.new}, odpowiadający skanowanemu drzewu katalogów, a~następnie przenoszą go~do~pliku \path{/tmp/aide.db}, ustalając w~ten sposób referencyjny plik stanu, do~którego są~później porównywane wyniki skanowania z~flagą \hreftt{https://linux.die.net/man/1/aide}{--scan} lub~\hreftt{https://linux.die.net/man/1/aide}{--compare}~(por.~\hyperref[line:aide-first-config-line]{pierwszy} wiersz konfiguracji \path{/tmp/aide-demo.conf} z~listingu~\ref{lst:aide-config-example}). Listing~\ref{lst:tree-change-aide-example} symuluje dokonanie zmian zawartości plików i~katalogów w~drzewie \path{/tmp/demo}, odzwierciedlonych w~drzewie na~rysunku~\ref{fig:drzewo-katalogow-przyklad-po-aide}. Wywołanie skanowania AIDE z~flagą \hreftt{https://linux.die.net/man/1/aide}{--check} powoduje wypisanie na~standardowe wyjście raportu dokonanych zmian w~skanowanym drzewie, co~przedstawia listing~\ref{lst:aide-example-second-scan} na~stronach~\pageref{lst:aide-example-second-scan}--\pageref{aide-example-second-scan-last-page}. Jeśli zaszłaby potrzeba zamiany starego pliku referencyjnego \path{/tmp/aide.db} na~nowy plik stanu \path{/tmp/aide.db.new}, to~należałoby wywołać AIDE z~opcją \hreftt{https://linux.die.net/man/1/aide}{--update}, co~przedstawia listing~\ref{lst:aide-example-update-output}. Zawartość nowego pliku \path{/tmp/aide.db.new} została przedstawiona na~listingu~\ref{lst:aide-example-second-scan-output}.
 
 \begin{minipage}{\linewidth}
-\begin{lstlisting}[language=,numbers=none,caption={Konfiguracja AIDE \protect\path{/tmp/aide-demo.conf} zastosowana do~prezentacji działania AIDE na~przykładowym drzewie katalogów~\protect\path{/tmp/demo}, utworzonym w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example} i~zobrazowany na~rys.~\ref{fig:drzewo-katalogow-przyklad-przed-aide}},label=lst:aide-config-example]
-database = file:/tmp/aide.db
+\begin{lstlisting}[language=,caption={Konfiguracja AIDE \protect\path{/tmp/aide-demo.conf} zastosowana do~prezentacji działania AIDE na~przykładowym drzewie katalogów~\protect\path{/tmp/demo}, utworzonym w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example} i~zobrazowanym na~rys.~\ref{fig:drzewo-katalogow-przyklad-przed-aide}},label=lst:aide-config-example,escapechar=|]
+database = file:/tmp/aide.db|\label{line:aide-first-config-line}|
 database_out = file:/tmp/aide.db.new
 database_new = file:/tmp/aide.db.new
 gzip_dbout = no
 summarize_changes = yes
 grouped = yes
-verbose = 6
+verbose = 6|\label{line:aide-verbosity-line}|
 report_base16 = no
-MyRule = p+ftype+i+n+l+u+g+s+b+m+c+md5+sha256+sha512+rmd160+gost+crc32+tiger
+MyRule = p+ftype+i+n+l+u+g+s+b+m+c+md5+crc32
 /tmp/demo/.* MyRule
 !/tmp/demo/dir1/subdir2/.*
 \end{lstlisting}
 \end{minipage}
 
 \begin{minipage}{\linewidth}
-\begin{lstlisting}[language=,numbers=none,caption={Utworzenie przykładowego drzewa katalogów \protect\path{/tmp/demo}, w~tym --- 9~katalogów, 11~\href{https://en.wikipedia.org/wiki/Unix_file_types\#Regular_file}{plików zwykłych}~(\emph{regular files}), 2~\href{https://en.wikipedia.org/wiki/Symbolic_link}{dowiązań symbolicznych}~(\emph{symbolic links}), 2~\href{https://en.wikipedia.org/wiki/Hard_link}{dowiązań twardych}~(\emph{hard links}) i~2~\href{https://en.wikipedia.org/wiki/Named_pipe}{łączy nazwanych}~(\emph{named pipes}/\emph{FIFOs}) na~potrzeby przykładu działania AIDE (por.~rys.~\ref{fig:drzewo-katalogow-przyklad-przed-aide})},label=lst:tree-create-aide-example]
+\begin{lstlisting}[language=,caption={Utworzenie przykładowego drzewa katalogów \protect\path{/tmp/demo}, w~tym --- 9~katalogów, 11~\href{https://en.wikipedia.org/wiki/Unix_file_types\#Regular_file}{plików zwykłych}~(\emph{regular files}), 2~\href{https://en.wikipedia.org/wiki/Symbolic_link}{dowiązań symbolicznych}~(\emph{symbolic links}), 2~\href{https://en.wikipedia.org/wiki/Hard_link}{dowiązań twardych}~(\emph{hard links}) i~2~\href{https://en.wikipedia.org/wiki/Named_pipe}{łączy nazwanych}~(\emph{named pipes}/\emph{FIFOs}) na~potrzeby przykładu działania AIDE (por.~rys.~\ref{fig:drzewo-katalogow-przyklad-przed-aide})},label=lst:tree-create-aide-example]
 user@host:/tmp$ mkdir demo && cd demo
 user@host:/tmp/demo$ echo '0th file' > file0
 user@host:/tmp/demo$ echo '1st file' > file1
@@ -82,13 +82,13 @@ user@host:/tmp/demo$ chgrp wireshark dir1/file3
 \end{minipage}
 
 %\begin{minipage}{\linewidth}
-	Listing~\ref{lst:aide-example-second-scan} jest wyjściem programu AIDE, które zostaje przetworzone przez rozwiązanie zaimplementowane w~ramach niniejszej pracy, w~celu ustalenia jakie zmiany zaszły w~systemie plików od~czasu ostatniego, referencyjnego skanowania, którego wynik został zapisany w~przedstawionym przykładzie w~pliku \path{/tmp/aide.db}. Wywołanie AIDE z~flagą \hreftt{https://linux.die.net/man/1/aide}{--scan} z~listingu~\ref{lst:aide-example-second-scan} działa na~konfiguracji AIDE \path{/tmp/aide-demo.conf} przedstawionej na~listingu~\ref{lst:aide-config-example}, w~której ustalono parametr ,,gadatliwości'' (\emph{verbosity}) na~wartość~\texttt{6} --- w~rzeczywistości, w~zaimplementowanym rozwiązaniu wartość ta~jest większa, aby~ułatwić parsowanie wyjścia AIDE, jednak na~potrzeby przykładu przyjęto mniejszą wartość, aby~wynik działania AIDE nie był bardzo długi i~nieczytelny.
+	Listing~\ref{lst:aide-example-second-scan} na~stronach~\pageref{lst:aide-example-second-scan}--\pageref{aide-example-second-scan-last-page} jest wyjściem programu AIDE, które zostaje przetworzone przez rozwiązanie zaimplementowane w~ramach niniejszej pracy, w~celu ustalenia jakie zmiany zaszły w~systemie plików od~czasu ostatniego, referencyjnego skanowania, którego wynik został zapisany w~przedstawionym przykładzie w~pliku \path{/tmp/aide.db}. Wywołanie AIDE z~flagą \hreftt{https://linux.die.net/man/1/aide}{--scan} z~listingu~\ref{lst:aide-example-second-scan} działa na~konfiguracji AIDE \path{/tmp/aide-demo.conf} przedstawionej na~listingu~\ref{lst:aide-config-example}, w~której w~linii~\ref{line:aide-verbosity-line} ustalono parametr ,,gadatliwości'' (\emph{verbosity}) na~wartość~\texttt{6} --- w~rzeczywistości, w~zaimplementowanym rozwiązaniu wartość ta~jest większa celem ułatwienia parsowania wyjścia AIDE, jednak na~potrzeby przykładu przyjęto mniejszą wartość, aby~wynik działania AIDE nie był bardzo długi i~nieczytelny.
 
-	Sekcje \texttt{Added entries}, \texttt{Removed entries} i~\texttt{Changed entries} na~listingu~\ref{lst:aide-example-second-scan} odpowiadają odpowiednio plikom dodanym, usuniętym i~zmienionym (pod względem zawartości lub~atrybutów) od~czasu skanowania referencyjnego. Za~obecność tych sekcji na~wyjściu programu odpowiada opcja \texttt{summarize\_changes = yes} w~konfiguracji AIDE z~listingu \ref{lst:aide-config-example}. Po~wymienionych trzech sekcjach następują linie opisujące co~i~jak się zmieniło w~śledzonych plikach i~ich atrybutach. Przykładowo rozmiar pliku \path{/tmp/demo/file1} zmienił się z~9 na~11~bajtów po~dopisaniu do~niego litery \texttt{x} i~znaku \href{https://superuser.com/questions/395668/how-do-i-echo-something-file-txt-without-carriage-return}{nowej linii} (patrz listing~\ref{lst:tree-change-aide-example}). Po~zmianie zawartości omawianego pliku zmieniły się również jego wartości skrótu \href{https://en.wikipedia.org/wiki/MD5}{MD5} i~\href{https://en.wikipedia.org/wiki/Cyclic_redundancy_check}{CRC32}. Warto zwrócić uwagę na~to, że~AIDE wykrył zmianę ilości dowiązań twardych (z~2 na~1) do~pliku \path{/tmp/demo/dir3/file8} spowodowaną usunięciem pliku \path{/tmp/demo/file8_hardlink}, ale~nie odnotował zmiany ilości dowiązań twardych do~pliku \path{/tmp/demo/dir1/subdir2/file7} po~stworzeniu dowiązania twardego \path{/tmp/demo/file7_hardlink}, którego samo stworzenie zostało odnotowane. Powodem takiego zachowania jest ustawienie w~\hyperref[lst:aide-config-example]{pliku konfiguracyjnym} linii \texttt{!/tmp/demo/dir1/subdir2/.*}, która wyłącza ten~katalog ze~skanowania AIDE.
+	Sekcje \texttt{Added entries}, \texttt{Removed entries} i~\texttt{Changed entries} z~listingu~\ref{lst:aide-example-second-scan} odpowiadają odpowiednio plikom dodanym, usuniętym i~zmienionym (pod względem zawartości lub~atrybutów) od~czasu skanowania referencyjnego. Za~obecność tych sekcji na~wyjściu programu odpowiada opcja \texttt{summarize\_changes = yes} w~konfiguracji AIDE z~listingu \ref{lst:aide-config-example}. Po~wymienionych trzech sekcjach następują linie opisujące co~i~jak się zmieniło w~śledzonych plikach i~ich atrybutach. Przykładowo rozmiar pliku \path{/tmp/demo/file1} zmienił się z~9 na~11~bajtów po~dopisaniu do~niego litery \texttt{x} i~znaku \href{https://superuser.com/questions/395668/how-do-i-echo-something-file-txt-without-carriage-return}{nowej linii} (patrz linia~\ref{line:aide-append-x-char} z~listingu~\ref{lst:tree-change-aide-example}). Po~zmianie zawartości omawianego pliku zmieniły się również jego wartości skrótu \href{https://en.wikipedia.org/wiki/MD5}{MD5} i~\href{https://en.wikipedia.org/wiki/Cyclic_redundancy_check}{CRC32}. Warto zwrócić uwagę na~to, że~AIDE wykrył zmianę ilości dowiązań twardych (z~2 na~1) do~pliku \path{/tmp/demo/dir3/file8} spowodowaną usunięciem pliku \path{/tmp/demo/file8_hardlink}, ale~nie odnotował zmiany ilości dowiązań twardych do~pliku \path{/tmp/demo/dir1/subdir2/file7} po~stworzeniu dowiązania twardego \path{/tmp/demo/file7_hardlink}, którego samo stworzenie zostało odnotowane. Powodem takiego zachowania jest ustawienie w~\hyperref[lst:aide-config-example]{pliku konfiguracyjnym} linii \texttt{!/tmp/demo/dir1/subdir2/.*}, która wyłącza ten~katalog ze~skanowania AIDE.
 %\end{minipage}
 
 \begin{minipage}{\linewidth}
-\begin{lstlisting}[language=,numbers=none,caption={Uruchomienie pierwszego skanowania AIDE z~konfiguracją \protect\path{/tmp/aide-demo.conf} i~z~flagą \hreftt{https://linux.die.net/man/1/aide}{--init}, oznaczającą inicjalizację referencyjnej bazy wynikowej \protect\path{/tmp/aide.db.new}, opisującej stan systemu},label=lst:aide-example-first-scan]
+\begin{lstlisting}[language=,caption={Uruchomienie pierwszego skanowania AIDE z~konfiguracją \protect\path{/tmp/aide-demo.conf} i~z~flagą \hreftt{https://linux.die.net/man/1/aide}{--init}, oznaczającą inicjalizację referencyjnej bazy wynikowej \protect\path{/tmp/aide.db.new}, opisującej stan systemu},label=lst:aide-example-first-scan]
 user@host:/tmp/demo$ aide --init -c /tmp/aide-demo.conf
 Start timestamp: 2017-06-12 23:50:52 +0200 (AIDE 0.16)
 AIDE initialized database at /tmp/aide.db.new
@@ -127,9 +127,9 @@ user@host:/tmp/demo$ mv ../aide.db.new ../aide.db
 
 \vfill
 
-\begin{lstlisting}[language=,numbers=none,caption={Dokonanie demonstracyjnych zmian w~śledzonym przez AIDE drzewie katalogów \protect\path{/tmp/demo}, utworzonym w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example}~(por.~rys.~\ref{fig:drzewo-katalogow-przyklad-przed-aide} i~\ref{fig:drzewo-katalogow-przyklad-po-aide}) przed uruchomieniem drugiego skanowania AIDE z~flagą \hreftt{https://linux.die.net/man/1/aide}{--check}~(patrz listing~\ref{lst:aide-example-second-scan})},label=lst:tree-change-aide-example]
+\begin{lstlisting}[language=,caption={Dokonanie demonstracyjnych zmian w~śledzonym przez AIDE drzewie katalogów \protect\path{/tmp/demo}, utworzonym w~sposób przedstawiony na~listingu~\ref{lst:tree-create-aide-example}~(por.~rys.~\ref{fig:drzewo-katalogow-przyklad-przed-aide} i~\ref{fig:drzewo-katalogow-przyklad-po-aide}) przed uruchomieniem drugiego skanowania AIDE z~flagą \hreftt{https://linux.die.net/man/1/aide}{--check}~(patrz listing~\ref{lst:aide-example-second-scan})},label=lst:tree-change-aide-example,escapechar=|]
 user@host:/tmp/demo$ mv dir2/fifo0 dir0
-user@host:/tmp/demo$ echo 'x' >> file1
+user@host:/tmp/demo$ echo 'x' >> file1|\label{line:aide-append-x-char}|
 user@host:/tmp/demo$ rm file8_hardlink dir1/subdir1/file4
 user@host:/tmp/demo$ mv dir3/file9 .
 user@host:/tmp/demo$ chmod o-rwx dir1/file2
@@ -141,7 +141,7 @@ user@host:/tmp/demo$ touch dir1/subdir1/file5
 \end{lstlisting}
 
 \newpage
-\begin{lstlisting}[language=,numbers=none,caption={Drugie skanowanie drzewa katalogów \protect\path{/tmp/demo} --- skanowanie po~zmianach przedstawionych na~listingu~\ref{lst:tree-change-aide-example} i~zwizualizowanych na~rys.~\ref{fig:drzewo-katalogow-przyklad-aide}},label=lst:aide-example-second-scan]
+\begin{lstlisting}[language=,caption={Drugie skanowanie drzewa katalogów \protect\path{/tmp/demo} --- skanowanie po~zmianach przedstawionych na~listingu~\ref{lst:tree-change-aide-example} i~zwizualizowanych na~rys.~\ref{fig:drzewo-katalogow-przyklad-aide}},label=lst:aide-example-second-scan]
 user@host:/tmp/demo$ aide --check -c /tmp/aide-demo.conf 
 Start timestamp: 2017-06-13 00:05:07 +0200 (AIDE 0.16)
 AIDE found differences between database and filesystem!!
@@ -262,8 +262,9 @@ The attributes of the (uncompressed) database(s):
 
 End timestamp: 2017-06-13 00:05:07 +0200 (run time: 0m 0s)
 \end{lstlisting}
+\label{aide-example-second-scan-last-page} % żeby móc się odwołać do ostatniej strony zajmowanej przez listing
 
-\begin{lstlisting}[language=,numbers=none,caption={Zaktualizowanie pliku stanu systemu \protect\path{/tmp/aide.db.new} po~skanowaniu drzewa katalogów \protect\path{/tmp/demo} po~dokonaniu w~nim zmian przedstawionych na~listingu~\ref{lst:tree-change-aide-example} i~zwizualizowanych na~rys.~\ref{fig:drzewo-katalogow-przyklad-aide}},label=lst:aide-example-update-output]
+\begin{lstlisting}[language=,caption={Zaktualizowanie pliku stanu systemu \protect\path{/tmp/aide.db.new} po~skanowaniu drzewa katalogów \protect\path{/tmp/demo} po~dokonaniu w~nim zmian przedstawionych na~listingu~\ref{lst:tree-change-aide-example} i~zwizualizowanych na~rys.~\ref{fig:drzewo-katalogow-przyklad-aide}},label=lst:aide-example-update-output]
 user@host:/tmp/demo$ aide --update -c /tmp/aide-demo.conf 
 Start timestamp: 2017-06-13 00:11:49 +0200 (AIDE 0.16)
 AIDE found differences between database and filesystem!!
@@ -295,13 +296,13 @@ End timestamp: 2017-06-13 00:11:49 +0200 (run time: 0m 0s)
 \end{lstlisting}
 
 \begin{minipage}{\linewidth}
-\begin{lstlisting}[language=,numbers=none,caption={Zaktualizowany plik stanu systemu \protect\path{/tmp/aide.db.new} po~skanowaniu drzewa katalogów \protect\path{/tmp/demo} po~dokonaniu w~nim zmian przedstawionych na~listingu~\ref{lst:tree-change-aide-example} i~zwizualizowanych na~rys.~\ref{fig:drzewo-katalogow-przyklad-aide}},label=lst:aide-example-second-scan-output]
+\begin{lstlisting}[language=,caption={Zaktualizowany plik stanu systemu \protect\path{/tmp/aide.db.new} po~skanowaniu drzewa katalogów \protect\path{/tmp/demo} po~dokonaniu w~nim zmian przedstawionych na~listingu~\ref{lst:tree-change-aide-example} i~zwizualizowanych na~rys.~\ref{fig:drzewo-katalogow-przyklad-aide}},label=lst:aide-example-second-scan-output,escapechar=|]
 user@host:/tmp/demo$ cat ../aide.db.new
 @@begin_db
 # This file was generated by Aide, version 0.16
 # Time of generation was 2017-06-13 00:11:49
-@@db_spec name lname attr perm inode bcount uid gid size mtime ctime lcount md5 crc32 
-/tmp/demo/dir0 0 34359742397 40755 22 8 1000 1000 4096 MTQ5NzMwNDQ0Mw== MTQ5NzMwNDQ0Mw== 2 0 0
+@@db_spec name lname attr perm inode bcount uid gid size mtime ctime lcount md5 crc32|\label{line:aidedbnew-columns-names}|
+/tmp/demo/dir0 0 34359742397 40755 22 8 1000 1000 4096 MTQ5NzMwNDQ0Mw== MTQ5NzMwNDQ0Mw== 2 0 0|\label{line:aidedbnew-first-from-range}|
 /tmp/demo/dir0/fifo0 0 34359742397 10644 40 0 1000 1000 0 MTQ5NzMwMzk4Mg== MTQ5NzMwNDQ0Mw== 1 0 0
 /tmp/demo/dir1 0 34359742397 40755 23 8 1000 1000 4096 MTQ5NzMwMzkxMA== MTQ5NzMwMzkxMA== 6 0 0
 /tmp/demo/dir1/file 0 34359812029 100644 33 0 1000 1000 0 MTQ5NzMwMzg3Ng== MTQ5NzMwMzg3Ng== 1 1B2M2Y8AsgTpgAmY7PhCfg== AAAAAA==
@@ -322,7 +323,7 @@ user@host:/tmp/demo$ cat ../aide.db.new
 /tmp/demo/file4_hardlink 0 34359812029 100644 36 8 1000 1000 9 MTQ5NzMwMzkzMg== MTQ5NzMwNDYyOA== 1 qX9IDI1OOYA5OfoKfNHY9Q== M2SIzQ==
 /tmp/demo/file6_symlink dir1/subdir2/file6 34359742399 120777 45 0 1000 1000 18 MTQ5NzMwNDk0MA== MTQ5NzMwNDk0MA== 1 0 0
 /tmp/demo/file7_hardlink 0 34359812029 100644 39 8 1000 1000 9 MTQ5NzMwMzk1Ng== MTQ5NzMwNDk2Mg== 2 cgHdmt/roeP+P+HwBdK83g== LodI3w==
-/tmp/demo/file9 0 34359812029 100644 43 8 1000 1000 9 MTQ5NzMwNDAxNA== MTQ5NzMwNDY4Ng== 1 1zYCmaRbg4+M57I7ICdgWw== IUKLdA==
+/tmp/demo/file9 0 34359812029 100644 43 8 1000 1000 9 MTQ5NzMwNDAxNA== MTQ5NzMwNDY4Ng== 1 1zYCmaRbg4+M57I7ICdgWw== IUKLdA==|\label{line:aidedbnew-last-from-range}|
 @@end_db
 \end{lstlisting}
 \end{minipage}
@@ -334,7 +335,7 @@ user@host:/tmp/demo$ cat ../aide.db.new
 %
 
 %\begin{minipage}{\linewidth} % https://tex.stackexchange.com/questions/73231/avoid-page-breaks-in-lstlistings
-\begin{figure}
+\begin{figure}[h!]
 	\centering
 	\begin{subfigure}[t]{0.49\textwidth}
 			\mybox{dirs}{%
@@ -419,6 +420,7 @@ user@host:/tmp/demo$ cat ../aide.db.new
 \end{figure}
 %\end{minipage}
 
+Każdy z~wierszy \ref{line:aidedbnew-first-from-range}--\ref{line:aidedbnew-last-from-range} listingu~\ref{lst:aide-example-second-scan-output} odpowiada pojedynczemu plikowi lub~katalogowi śledzonemu przez AIDE, a~każda z~kolumn, których nazwy znajdują się w~linii~\ref{line:aidedbnew-columns-names}, odpowiada wybranym w~konfiguracji atrybutom śledzonych plików~(por.~listing~\ref{lst:aide-config-example}). Kolumna \texttt{name} oznacza pełną ścieżkę do~śledzonego pliku, kolumna \texttt{lname} to~\texttt{0} jeśli plik nie jest dowiązaniem symbolicznym, a~w~przeciwnym wypadku to~pełna ścieżka do~pliku docelowego, \texttt{attr} to~\href{https://unix.stackexchange.com/questions/342693/understanding-aide-db/343020}{zakodowane kody} żądanych w~konfiguracji AIDE atrybutów śledzonych plików. Pozostałe kolumny odpowiadają atrybutom o~kodach opisanych w~tabeli~\ref{tab:aide-file-attrs}.
 
 %------------------------------------------------------------------------------
 
@@ -456,15 +458,12 @@ Do~pracy dołączono płytę z~zawartością części aplikacyjnej niniejszej pr
 .3 poster.
 .2 lib.
 .2 src.
-.3 build.
 .3 client.
 .3 server.
-.3 common.
-.3 include.
 }
 }
 
-\noindent Skrót \texttt{MD5}~zawartości płyty:
+\noindent Skrót \texttt{MD5}~zawartości płyty:\mynobreakpar
 \begin{center}
 \texttt{TODO}
 \end{center}
