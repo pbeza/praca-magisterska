@@ -10,14 +10,6 @@ LICENSE = '''Copyright © 2017 {}
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.'''.format(AUTHOR_NAME)
-CONFIG_EPILOG = '''This software is part of the master thesis project.  To
-learn more about this implementation, refer project's white paper.'''
-
-# Basic logger configuration, including logger format and log level used before
-# loading logger configuration
-
-BASIC_LOGGER_FORMAT = '[ %(levelname)s ][%(process)d] %(message)s'
-BASIC_CONFIG_LOG_LEVEL = logging.NOTSET
 APP_VERSION_FULL_TEMPLATE = '''{name} {version}
 {license}
 
@@ -28,3 +20,10 @@ def get_app_version(app_name):
     return APP_VERSION_FULL_TEMPLATE.format(
             name=app_name, version=APP_VERSION, license=LICENSE,
             author=AUTHOR_NAME, author_email=AUTHOR_EMAIL)
+
+
+def print_version(app_name):
+        print('{} {}'.format(app_name, APP_VERSION))
+        print(LICENSE.format(AUTHOR_NAME))
+        print()
+        print('Written by {} ({})'.format(AUTHOR_NAME, AUTHOR_EMAIL))

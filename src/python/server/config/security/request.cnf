@@ -9,7 +9,7 @@ input_password     = minipw
 [dn]
 CN                 = Patryk
 OU                 = MiNI
-emailAddress       = patryk.beza@gmail.com
+emailAddress       = bezap@student.mini.pw.edu.pl
 O                  = PW
 L                  = Warsaw
 ST                 = Masovian

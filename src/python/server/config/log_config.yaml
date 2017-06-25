@@ -6,17 +6,16 @@
 version: 1
 formatters:
   file-formatter:
-    format: '[%(process)d] [%(thread)d] [%(asctime)s] [ %(levelname)s ] %(message)s'
+    format: '[%(asctime)s][%(process)d][%(thread)d][ %(levelname)s ] %(message)s'
   syslog-formatter:
-    format: '[%(thread)d] [ %(levelname)s ] %(message)s'
+    format: '[%(thread)d][ %(levelname)s ] %(message)s'
     datefmt: '%Y.%m.%d %H:%M:%S'
   console-formatter:
-    format: '[ %(levelname)s ] [%(process)d] [%(thread)d] %(message)s'
+    format: '[ %(levelname)s ] %(message)s'
 handlers:
   syslog:
     class: logging.handlers.SysLogHandler
-#    level: WARNING
-    level: NOTSET
+    level: WARNING
     formatter: syslog-formatter
     address: /dev/log
   console:
@@ -26,6 +25,7 @@ handlers:
     stream: ext://sys.stderr
   file:
     class: logging.handlers.RotatingFileHandler
+    level: NOTSET
     formatter: file-formatter
     filename: /tmp/myscm/srv/log
     maxBytes: 8192
@@ -34,18 +34,6 @@ loggers:
   server:
     level: NOTSET
     handlers: [file,console]
-    propagate: yes
-  server.multicastserver:
-    level: NOTSET
-    propagate: yes
-  server.pkgproxyserver:
-    level: NOTSET
-    propagate: yes
-  server.logserver:
-    level: NOTSET
-    propagate: yes
-  server.allinoneserver:
-    level: NOTSET
     propagate: yes
 root:
 #  level: DEBUG
