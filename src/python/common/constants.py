@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-import logging
 
 # Basic information about application, eg. license, author etc.
 
-APP_VERSION = '0.1'
-AUTHOR_NAME = 'Patryk Bęza'
-AUTHOR_EMAIL = 'patryk.beza@gmail.com'
+APP_VERSION = "0.1"
+AUTHOR_NAME = "Patryk Bęza"
+AUTHOR_EMAIL = "bezap@student.mini.pw.edu.pl"
 LICENSE = '''Copyright © 2017 {}
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
@@ -23,7 +22,7 @@ def get_app_version(app_name):
 
 
 def print_version(app_name):
-        print('{} {}'.format(app_name, APP_VERSION))
+        print("{} {}".format(app_name, APP_VERSION))
         print(LICENSE.format(AUTHOR_NAME))
         print()
-        print('Written by {} ({})'.format(AUTHOR_NAME, AUTHOR_EMAIL))
+        print("Written by {} ({})".format(AUTHOR_NAME, AUTHOR_EMAIL))

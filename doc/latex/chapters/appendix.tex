@@ -1,4 +1,14 @@
-\documentclass[thesis]{subfiles}
+ > dir1/subdir1/file4
+ echo '5th file' > dir1/subdir1/file5
+ echo '6th file' > dir1/subdir2/file6
+ echo '7th file' > dir1/subdir2/file7
+ mkfifo dir2/fifo{0,1}
+ echo '8th file' > dir3/file8
+ echo '9th file' > dir3/file9
+ ln dir3/file8 file8_hardlink
+ chmod 777 dir1/file2
+ ln dir1/subdir1/file4 file4_hardlink
+ chgrp wireshark dir1/file3\documentclass[thesis]{subfiles}
 
 \begin{document}
 
@@ -270,7 +280,7 @@ Start timestamp: 2017-06-13 00:11:49 +0200 (AIDE 0.16)
 AIDE found differences between database and filesystem!!
 New AIDE database written to /tmp/aide.db.new
 
-(...) Skipped fragment identical to above command's output (...)
+(...) Skipped fragment identical to the command's output from listing B.5 (...)
 
 /tmp/aide.db.new
   MD5      : eORTPtiPLrkyWoezwMCLug==

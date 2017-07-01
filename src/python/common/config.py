@@ -35,7 +35,6 @@ class BaseConfig:
                   log_config_path)
             raise ConfigError(msg, e) from e
 
-
 class ConfigOptions:
     """Representation of all the options read from configuration file and
        command line (CLI)."""
@@ -55,16 +54,16 @@ class ConfigOptions:
     def _camelcase_to_underscore(self, key):
         """Converts eg. 'PIDLockFilePath' to 'PID_lock_file_path'."""
 
-        nkey = ''
+        nkey = ""
         n = len(key)
 
         for i in range(n - 1):
             if key[i].isupper() and key[i + 1].islower():
-                nkey += '_' + key[i].lower()
+                nkey += "_" + key[i].lower()
             else:
                 nkey += key[i]
 
-        if nkey[0] == '_':
+        if nkey[0] == "_":
             nkey = nkey[1:]
 
         return nkey + key[n - 1]

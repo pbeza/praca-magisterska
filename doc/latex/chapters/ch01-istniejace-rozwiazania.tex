@@ -9,7 +9,7 @@
 
 W~niniejszym rozdziale przedstawiono przegląd czterech, prawdopodobnie jednych z~najpopularniejszych w~czasie pisania niniejszej pracy, rozwiązań dla~problemu dystrybuowania oprogramowania w~sieci~\cite{leading-scms,wiki:scm-comparison}.
 
-Wymienione w~tym rozdziale aplikacje, poza możliwością synchronizacji zainstalowanego oprogramowania i~konfiguracji, pozwalają również na~inne manipulacje systemem operacyjnym, np.~zapewnienie istnienia wybranego użytkownika w~systemie, zapewnienie działania zadanego \glslink{demon}{demona} czy~konfigurację interfejsów sieciowych. Takie oprogramowanie jest często nazywane w~skrócie~\emph{Software Configuration Management~(SCM)} implementującym ideę \emph{Infrastructure as~Code}, która polega na~traktowaniu infrastruktury komputerowej jak kodu, który może być zarządzany i~przetwarzany przez programy takie jak \href{https://en.wikipedia.org/wiki/Version_control}{systemy kontroli wersji}, \href{https://en.wikipedia.org/wiki/Test_automation}{automatyczne testy}, \href{https://en.wikipedia.org/wiki/Comparison_of_continuous_integration_software}{systemy ciągłej integracji}~itp.\cite{puppet-iac,wiki:iac,wiki:scm}.
+Wymienione w~tym rozdziale aplikacje, poza możliwością synchronizacji zainstalowanego oprogramowania i~konfiguracji, pozwalają również na~inne manipulacje systemem operacyjnym, np.~zapewnienie istnienia wybranego użytkownika w~systemie, zapewnienie działania zadanego \glslink{daemon}{daemona} czy~konfigurację interfejsów sieciowych. Takie oprogramowanie jest często nazywane w~skrócie~\emph{Software Configuration Management~(SCM)} implementującym ideę \emph{Infrastructure as~Code}, która polega na~traktowaniu infrastruktury komputerowej jak kodu, który może być zarządzany i~przetwarzany przez programy takie jak \href{https://en.wikipedia.org/wiki/Version_control}{systemy kontroli wersji}, \href{https://en.wikipedia.org/wiki/Test_automation}{automatyczne testy}, \href{https://en.wikipedia.org/wiki/Comparison_of_continuous_integration_software}{systemy ciągłej integracji}~itp.\cite{puppet-iac,wiki:iac,wiki:scm}.
 
 %------------------------------------------------------------------------------
 
@@ -47,7 +47,7 @@ file { 'motd':
 }
 \end{lstlisting}
 
-\begin{lstlisting}[language=,caption={Manifest Puppet gwarantujący, że~\gls{demon} \hreftt{https://httpd.apache.org/}{httpd} jest włączony i~działa},label=lst:puppet-httpd-example]
+\begin{lstlisting}[language=,caption={Manifest Puppet gwarantujący, że~\gls{daemon} \hreftt{https://httpd.apache.org/}{httpd} jest włączony i~działa},label=lst:puppet-httpd-example]
 service { 'httpd':
   ensure => running,
   enable => true,
@@ -150,7 +150,7 @@ które zwraca wynik na~standardowym wyjściu w~postaci~\texttt{JSON}:
     "changed": false
 }
 \end{lstlisting}
-Powyższe sposoby uruchamiania Ansible są wykorzystaniem Ansible~\emph{ad-hoc}. Możliwości Ansible w~pełni ujawniają się, gdy~wykorzystamy \hrefemph{http://docs.ansible.com/playbooks_intro.html}{playbook}, czyli odpowiednik manifestu Puppeta i~przepisu Chefa. Przykładowy \emph{playbook} z~listingu~\ref{lst:ansible-playbook-example} przedstawia sposób zainstalowania na~grupie komputerów o~nazwie \texttt{web}~(por. listing~\ref{lst:ansible-inventory-example}) serwera \texttt{nginx}, stworzenia pliku serwowanego przez serwer, a~następnie uruchomienia \glslink{demon}{demona} serwera. Zmiany opisane przez \emph{playbook} można dokonać za~pomocą komendy:\mynobreakpar
+Powyższe sposoby uruchamiania Ansible są wykorzystaniem Ansible~\emph{ad-hoc}. Możliwości Ansible w~pełni ujawniają się, gdy~wykorzystamy \hrefemph{http://docs.ansible.com/playbooks_intro.html}{playbook}, czyli odpowiednik manifestu Puppeta i~przepisu Chefa. Przykładowy \emph{playbook} z~listingu~\ref{lst:ansible-playbook-example} przedstawia sposób zainstalowania na~grupie komputerów o~nazwie \texttt{web}~(por. listing~\ref{lst:ansible-inventory-example}) serwera \texttt{nginx}, stworzenia pliku serwowanego przez serwer, a~następnie uruchomienia \glslink{daemon}{daemona} serwera. Zmiany opisane przez \emph{playbook} można dokonać za~pomocą komendy:\mynobreakpar
 \begin{center}
 \texttt{ansible-playbook -s nginx.yml}
 \end{center}
@@ -384,6 +384,6 @@ Warto pamiętać, że~przedstawione rozwiązania mają za~sobą co~najmniej kilk
 
 Z~racji na~specyfikę pracy magisterskiej, projektowany protokół nie jest tak rozbudowany i~kompleksowy jak największe z~przedstawionych rozwiązań. W~zamian, przygotowane w~ramach tej~pracy oprogramowanie działa według zupełnie innego pomysłu niż~rozwiązania opisane w~niniejszym rozdziale --- w~przeciwieństwie do~nich, administrator nie musi używać języka specyficznego dla~danego rozwiązania do~opisania oczekiwanej konfiguracji systemu. Wystarczy, że~stacja wzorcowa zostanie przeskanowana przed dokonaniem jakichkolwiek zmian, które administrator chce odzwierciedlić na~stacjach klienckich, następnie administrator skonfiguruje stację wzorcową w~taki sposób, w~jaki chciałby skonfigurować grupę stacji klienckich, a~na~koniec przeskanuje system wzorcowy ponownie, w~wyniku czego powstaje \hyperref[sec:obraz-zmian-konfiguracji]{obraz zmian systemu wzorcowego}, który może być przesłany do~stacji klienckich i~przez nich zastosowany. Wszystkie wymienione kroki implementuje zestaw narzędzi przygotowany w~ramach niniejszej pracy.
 
-Podczas projektowania przygotowanego rozwiązania starano się~stworzyć możliwie wiele ułatwień dla~jego modułowej, dalszej rozbudowy. Praca implementuje zarządzanie \emph{elementami} konfiguracji systemu, a~nie jego każdą częścią --- w~szczególności zaimplementowane rozwiązanie nie ma~wbudowanego mechanizmu zapewniającego, że~dany \gls{demon} jest uruchomiony. Zapewnienie uruchomienia \glslink{demon}{demona} można zapewnić przez synchronizowanie katalogu z~ustawieniami \hreftt{https://en.wikipedia.org/wiki/Cron}{cron}, który odpowiada za~harmonogramowanie zadań w~systemie. Stworzone oprogramowanie jest za~to~w~stanie śledzić zmiany i~aktualizować m.in.~konfigurację zapisaną w~plikach tekstowych i~oprogramowanie zapisane w~postaci bibliotek i~innych plików binarnych.
+Podczas projektowania przygotowanego rozwiązania starano się~stworzyć możliwie wiele ułatwień dla~jego modułowej, dalszej rozbudowy. Praca implementuje zarządzanie \emph{elementami} konfiguracji systemu, a~nie jego każdą częścią --- w~szczególności zaimplementowane rozwiązanie nie ma~wbudowanego mechanizmu zapewniającego, że~dany \gls{daemon} jest uruchomiony. Zapewnienie uruchomienia \glslink{daemon}{daemona} można zapewnić przez synchronizowanie katalogu z~ustawieniami \hreftt{https://en.wikipedia.org/wiki/Cron}{cron}, który odpowiada za~harmonogramowanie zadań w~systemie. Stworzone oprogramowanie jest za~to~w~stanie śledzić zmiany i~aktualizować m.in.~konfigurację zapisaną w~plikach tekstowych i~oprogramowanie zapisane w~postaci bibliotek i~innych plików binarnych.
 
 \end{document}

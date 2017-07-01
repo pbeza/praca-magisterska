@@ -1,17 +1,20 @@
 # Server logger configuration.
 #
 # To learn more about read:
-# https://docs.python.org/3.7/library/logging.config.html#dictionary-schema-details
+# https://docs.python.org/dev/library/logging.config.html#dictionary-schema-details
 
 version: 1
 formatters:
   file-formatter:
     format: '[%(asctime)s][%(process)d][%(thread)d][ %(levelname)s ] %(message)s'
   syslog-formatter:
-    format: '[%(thread)d][ %(levelname)s ] %(message)s'
+    format: '%(levelname)s [%(thread)d] %(message)s'
     datefmt: '%Y.%m.%d %H:%M:%S'
+  colored-console-formatter:
+    (): 'colorlog.ColoredFormatter'
+    format: '%(log_color)s%(levelname)s%(reset)s %(blue)s[%(asctime)s]%(reset)s %(message)s'
   console-formatter:
-    format: '[ %(levelname)s ] %(message)s'
+    format: '%(levelname)s [%(asctime)s] %(message)s'
 handlers:
   syslog:
     class: logging.handlers.SysLogHandler
@@ -21,14 +24,14 @@ handlers:
   console:
     class: logging.StreamHandler
     level: NOTSET
-    formatter: console-formatter
+    formatter: colored-console-formatter
     stream: ext://sys.stderr
   file:
     class: logging.handlers.RotatingFileHandler
     level: NOTSET
     formatter: file-formatter
-    filename: /tmp/myscm/srv/log
-    maxBytes: 8192
+    filename: /tmp/myscm-srv/log
+    maxBytes: 1048576
     backupCount: 3
 loggers:
   server:

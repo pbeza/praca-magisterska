@@ -15,5 +15,5 @@ class MySCMError(Exception):
         errmsg = super().__str__()
         details = self.get_details()
         if self.verbose and details is not None:
-            errmsg += '. {}.'.format(details)
+            errmsg += ". {}.".format(details)
         return errmsg

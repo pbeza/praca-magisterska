@@ -40,7 +40,7 @@ W~kolejnych dwóch rozdziałach~\ref{sec:srv-app} i~\ref{sec:cli-app} przedstawi
 	\item[--version] Wypisuje informację o~wersji i~licencji aplikacji.
 \end{description}
 
-Zarówno aplikacji serwera jak i~aplikacji klienckiej towarzyszą skrypty i~konfiguracje pomocnicze, które obsługują m.in.~ładowanie aplikacji jako \glslink{demon}{demonów} uruchamianych przez menadżer usług \hreftt{https://en.wikipedia.org/wiki/Systemd}{systemd}, obsługę zależności pakietu oprogramowania, w~ramach którego zainstalowano aplikację~itp.
+Zarówno aplikacji serwera jak i~aplikacji klienckiej towarzyszą skrypty i~konfiguracje pomocnicze, które obsługują m.in.~ładowanie aplikacji jako \glslink{daemon}{daemonów} uruchamianych przez menadżer usług \hreftt{https://en.wikipedia.org/wiki/Systemd}{systemd}, obsługę zależności pakietu oprogramowania, w~ramach którego zainstalowano aplikację~itp.
 
 %------------------------------------------------------------------------------
 
@@ -117,7 +117,7 @@ Aplikacja serwera i~aplikacja kliencka nie są~zależne od~żadnej konkretnej dy
 \section{Wykorzystane biblioteki}
 \label{sec:wykorzystane-oprogramowanie}
 
-Do~implementacji projektu wykorzystano kilkadziesiąt \href{https://docs.python.org/dev/tutorial/modules.html}{modułów} Pythona\footnote{W~tym m.in.:~\hreftt{https://pypi.python.org/pypi/intervaltree}{intervaltree}, \hreftt{https://docs.python.org/dev/library/configparser.html}{configparser}, \hreftt{https://docs.python.org/dev/library/argparse.html}{argparse}, \hreftt{http://pyyaml.org/wiki/PyYAMLDocumentation}{pyyaml}, \hreftt{https://pypi.python.org/pypi/pyOpenSSL}{pyOpenSSL} i~wiele innych.}, kilka pomocniczych aplikacji i~bibliotek. Wyróżnione z~nich~to:\mynobreakpar
+Do~implementacji projektu wykorzystano kilkadziesiąt \href{https://docs.python.org/dev/tutorial/modules.html}{modułów} Pythona\footnote{W~tym m.in.:~\hreftt{https://pypi.python.org/pypi/intervaltree}{intervaltree}, \hreftt{https://docs.python.org/dev/library/configparser.html}{configparser}, \hreftt{https://docs.python.org/dev/library/argparse.html}{argparse}, \hreftt{https://pypi.python.org/pypi/argcomplete}{argcomplete}, \hreftt{http://pyyaml.org/wiki/PyYAMLDocumentation}{pyyaml}, \hreftt{https://pypi.python.org/pypi/pyOpenSSL}{pyOpenSSL}, \hreftt{https://pypi.python.org/pypi/colorlog}{colorlog} i~wiele innych.}, kilka pomocniczych aplikacji i~bibliotek. Wyróżnione z~nich~to:\mynobreakpar
 \begin{itemize}
 	\item \href{http://aide.sourceforge.net/}{AIDE} (\emph{Advanced Intrusion Detection Environment}) --- skaner integralności plików zaprojektowany w~celu wykrywania złośliwego oprogramowania, np.~\hrefemph{https://en.wikipedia.org/wiki/Rootkit}{rootkitów}. W~niniejszym projekcie został wykorzystany do~wykrywania zmian w~konfiguracji systemu wzorcowego (patrz rozdział~\ref{sec:aide}).
 	\item \href{http://www.pyopenssl.org/}{pyOpenSSL} --- \hrefemph{https://en.wikipedia.org/wiki/Language_binding}{Binding} dla~biblioteki OpenSSL. Biblioteka ta~implementuje wiele protokołów i~algorytmów kryptograficznych, ale~w~ramach projektu została wykorzystana tylko w~celu umożliwia uwierzytelnienie serwera przez klienta przez użycie certyfikatów cyfrowych.
@@ -149,7 +149,7 @@ W~drzewie katalogów systemów \glslink{unix-like-system}{*niksowych}\footnote{S
 	\item \hreftt{https://www.kernel.org/doc/Documentation/filesystems/sysfs.txt}{/sys} --- katalog zawierający m.in.~informacje o~podłączonych urządzeniach,
 	\item \hreftt{http://www.tldp.org/LDP/sag/html/proc-fs.html}{/proc} --- katalog \hreftt{https://en.wikipedia.org/wiki/Procfs}{procfs}, zawierający informacje o~działających procesach,
 	\item \hreftt{http://www.tldp.org/LDP/sag/html/dev-fs.html}{/dev} --- katalog zawierający \href{https://en.wikipedia.org/wiki/Device_file}{pliki urządzeń}, będące interfejsami sterowników urządzeń,
-	\item \hreftt{https://unix.stackexchange.com/questions/13972/what-is-this-new-run-filesystem/13973}{/run} --- katalog zawierający dane dotyczące np.~aktualnie zalogowanych użytkowników i~działających \glslink{demon}{demonów} --- często montowany w~systemie plików \hreftt{https://wiki.archlinux.org/index.php/Tmpfs}{tmpfs}.
+	\item \hreftt{https://unix.stackexchange.com/questions/13972/what-is-this-new-run-filesystem/13973}{/run} --- katalog zawierający dane dotyczące np.~aktualnie zalogowanych użytkowników i~działających \glslink{daemon}{daemonów} --- często montowany w~systemie plików \hreftt{https://wiki.archlinux.org/index.php/Tmpfs}{tmpfs}.
 	\item \hreftt{http://www.tldp.org/LDP/Linux-Filesystem-Hierarchy/html/media.html}{/media} --- miejsce montowania tymczasowo podłączonych nośników danych (\emph{removable media}),
 	\item \hreftt{http://www.tldp.org/LDP/Linux-Filesystem-Hierarchy/html/mnt.html}{/mnt} --- miejsce tymczasowego montowania systemów plików.
 \end{itemize}
