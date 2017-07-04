@@ -38,6 +38,10 @@ loggers:
     level: NOTSET
     handlers: [file,console]
     propagate: yes
+  common:
+    level: NOTSET
+    handlers: [file,console]
+    propagate: yes
 root:
 #  level: DEBUG
   level: NOTSET

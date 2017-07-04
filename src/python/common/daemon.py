@@ -65,8 +65,8 @@ class BaseServer:
         try:
             self.context.open()
         except lockfile.AlreadyLocked as e:
-            msg = "Server is probably already running. PID lock file exists"
-            raise ServerError(msg, e) from e
+            m = "Server is probably already running. PID lock file exists"
+            raise ServerError(m, e) from e
         logger.debug("Daemon '{}' successfully started.".format(
                      self.server_name))
 
@@ -76,22 +76,22 @@ class BaseServer:
                      self.server_name))
 
     def terminate_daemon(self):
-        msg = "Terminating existing daemon based on PID lock file '{}'."\
+        m = "Terminating existing daemon based on PID lock file '{}'."\
               .format(self.config.PID_file_path)
-        logger.info(msg)
+        logger.info(m)
         pid = lockfile.pidlockfile.read_pid_from_pidfile(
                 self.config.PID_file_path)
         if pid is None:
-            msg = "Can't stop daemon because PID lock file '{}' doesn't "\
+            m = "Can't stop daemon because PID lock file '{}' doesn't "\
                   "exist.".format(self.config.PID_file_path)
-            raise ServerError(msg)
+            raise ServerError(m)
 
         try:
             os.kill(pid, signal.SIGTERM)
         except OSError as e:
-            msg = "Sending SIGTERM signal to daemon with PID = {} has failed."\
+            m = "Sending SIGTERM signal to daemon with PID = {} has failed."\
                   .format(pid)
-            raise ServerError(msg)
+            raise ServerError(m)
 
         lockfile.pidlockfile.break_lock(self.config.PID_file_path)
 
@@ -113,9 +113,9 @@ class BaseServer:
 #             self._daemon_work()
 #             super().stop_daemon()
 #         except server.base.baseserver.ServerError as e:
-#             msg = "Multicast server daemon failed with error: {}.".format(e)
-#             logger.error(msg)
-#             raise MulticastServerError(msg, e) from e
+#             m = "Multicast server daemon failed with error: {}.".format(e)
+#             logger.error(m)
+#             raise MulticastServerError(m, e) from e
 #         except Exception as e:
 #             logger.exception("Ups! Daemon failed. Details: {}.".format(e))
 #             raise

@@ -14,12 +14,14 @@ class AIDEDatabasesManagerError(MySCMError):
 
 
 class AIDEDatabasesManager:
+    """Manager of the AIDE aide.db[.X] databases (X is integer)."""
 
     def __init__(self, server_config):
         self.server_config = server_config
 
     def replace_old_aide_db_with_new_one(self):
         """Replace old aide.db with new aide.db.new and rename old aide.db."""
+
         if os.path.isfile(self.server_config.aide_reference_db_path):
             self._rename_aide_reference_db_to_old_fname()
         else:
@@ -30,6 +32,7 @@ class AIDEDatabasesManager:
     def _rename_aide_reference_db_to_old_fname(self):
         """Rename recently created aide.db to aide.db.X, where X is next
            unassigned integer."""
+
         a = self.server_config.aide_reference_db_path
         b = self._get_new_fpath_for_old_db()
         logger.debug("Renaming old database '{}' to '{}'.".format(a, b))
@@ -37,12 +40,13 @@ class AIDEDatabasesManager:
         try:
             os.rename(a, b)
         except OSError as e:
-            msg = "Unable to rename old database '{}' to '{}'".format(a, b)
-            raise AIDEDatabasesManagerError(msg, e) from e
+            m = "Unable to rename old database '{}' to '{}'".format(a, b)
+            raise AIDEDatabasesManagerError(m, e) from e
 
     def _rename_aide_new_db_to_reference_fname(self):
         """Rename newly created database aide.db.new to aide.db to set
            reference database for AIDE subsequent runs."""
+
         a = self.server_config.aide_out_db_path
         b = self.server_config.aide_reference_db_path
         logger.info("Renaming new database '{}' to '{}'.".format(a, b))
@@ -50,11 +54,12 @@ class AIDEDatabasesManager:
         try:
             os.rename(a, b)
         except OSError as e:
-            msg = "Unable to rename new database '{}' to '{}'".format(a, b)
-            raise AIDEDatabasesManagerError(msg, e) from e
+            m = "Unable to rename new database '{}' to '{}'".format(a, b)
+            raise AIDEDatabasesManagerError(m, e) from e
 
     def _get_new_fpath_for_old_db(self):
         """Return new path for old AIDE database."""
+
         num = self._get_last_conf_number()
         fname = "{}.{}".format(self.server_config.aide_reference_db_fname,
                                num + 1)
@@ -62,6 +67,7 @@ class AIDEDatabasesManager:
 
     def _get_last_conf_number(self):
         """Return integer X which corresponds to aide.db.X with greatest X."""
+
         regex_str = r"{}.(\d+)".format(
                                     self.server_config.aide_reference_db_fname)
         regex = re.compile(regex_str)
@@ -85,6 +91,7 @@ class AIDEDatabasesManager:
            Removed old databases are not a problem as long as there is no need
            to generate system image from client's state that corresponds to the
            missing AIDE database."""
+
         if not numbers:
             return
 
@@ -105,10 +112,10 @@ class AIDEDatabasesManager:
                     ranges.append("{}-{}".format(a + 1, b - 1))
 
         if ranges:
-            msg = "Missing {}.X file{}, where X is: {}. This is not a "\
-                  "problem as long as client don't need to update its "\
-                  "configuration from this state.".format(
-                    self.server_config.aide_reference_db_path,
-                    "s" if len(ranges) > 1 else "",
-                    ", ".join(ranges))
-            logger.warning(msg)
+            m = "Missing {}.X file{}, where X is: {}. This is not a "\
+                "problem as long as client don't need to update its "\
+                "configuration from this state.".format(
+                  self.server_config.aide_reference_db_path,
+                  "s" if len(ranges) > 1 else "",
+                  ", ".join(ranges))
+            logger.warning(m)

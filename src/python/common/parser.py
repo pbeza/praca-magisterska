@@ -2,12 +2,18 @@
 import argparse
 import configparser
 import os
+import yaml
 
 from common.error import MySCMError
 
 
 class ParserError(MySCMError):
     pass
+
+
+###################################################
+# Base classes for concrete configuration options #
+###################################################
 
 
 class ConfigOption:
@@ -88,50 +94,82 @@ class GeneralConfigOption(ValidatedCommandLineConfigOption, FileConfigOption):
         self.kwargs.update(dest=name)
 
 
-class PIDFileConfigOption(FileConfigOption):
-    """Configuration option read from config file specifying PID file path."""
+###############################################################
+# Concrete configuration options common for client and server #
+###############################################################
 
-    def __init__(self, pid_file_path):
-        super().__init__("PIDLockFilePath", pid_file_path,
-                         self._assert_pid_path_valid, False)
+
+class PIDFileConfigOption(FileConfigOption):
+    """Configuration option read from configuration file specifying full path
+       to lock file with process ID (PID)."""
+
+    DEFAULT_LOCK_FILE_PATH = "/var/run/lock/myscm.pid"
+
+    def __init__(self, lock_file_path=None):
+        super().__init__("PIDLockFilePath",
+                         lock_file_path or PIDFileConfigOption.DEFAULT_LOCK_FILE_PATH,
+                         self._assert_pid_path_valid,
+                         False)
 
     def _assert_pid_path_valid(self, pid_file_path):
         """PID file path validator."""
 
         if os.path.exists(pid_file_path):
-            msg = "File path '{}' can't be used for PID lock file - file "\
-                  "already exists".format(pid_file_path)
-            raise ParserError(msg)
+            m = "File path '{}' can't be used for PID lock file - file "\
+                "already exists".format(pid_file_path)
+            raise ParserError(m)
 
         return pid_file_path
 
 
 class LogFileConfigOption(FileConfigOption):
-    """Config option read from config file specifying log config file path."""
+    """Configuration option read from configuration file specifying full path
+       to logging configuration file."""
 
-    def __init__(self, log_config_path):
-        super().__init__("LogConfigPath", log_config_path,
-                         self._assert_log_config_path_valid, False)
+    DEFAULT_LOG_CONFIG_PATH = "/etc/myscm/log_config.yaml"
+
+    def __init__(self, log_config_path=None):
+        super().__init__("LogConfigPath",
+                         log_config_path or LogFileConfigOption.DEFAULT_LOG_CONFIG_PATH,
+                         self._assert_log_config_path_valid,
+                         False)
 
     def _assert_log_config_path_valid(self, log_file_path):
         """Log file path validator."""
 
         if not os.path.isfile(log_file_path):
-            msg = "Specified logging configuration '{}' doesn't exist".format(
-                    log_file_path)
-            raise ParserError(msg)
+            m = "Specified logging configuration '{}' doesn't exist".format(
+                 log_file_path)
+            raise ParserError(m)
+
+        try:
+            yaml.load(log_file_path)
+        except yaml.YAMLError as e:
+            if hasattr(e, 'problem_mark'):
+                mark = e.problem_mark
+                m = "Invalid logging configuration YAML file '{}'. Error "\
+                    "position line: {}, column: {}".format(
+                        log_file_path, mark.line + 1, mark.column + 1)
+                raise ParserError(m) from e
 
         return log_file_path
 
 
 class VerbosityGeneralConfigOption(GeneralConfigOption):
-    """Config option read from file and/or CLI specifying logging verbosity."""
+    """Configuration option read from configuration file and/or CLI specifying
+       application logging verbosity."""
 
-    def __init__(self, verbosity_lvl):
-        super().__init__("Verbose", verbosity_lvl,
+    DEFAULT_VERBOSITY_LEVEL = 0
+
+    def __init__(self, verbosity_lvl=None):
+        super().__init__("Verbose",
+                         verbosity_lvl or VerbosityGeneralConfigOption.DEFAULT_VERBOSITY_LEVEL,
                          self._assert_verbosity_valid,
-                         False, "-v", "--verbose", action="count",
-                         help="increase output and log verbosity")
+                         False,
+                         "-v", "--verbose",
+                         action="count",
+                         help="Increase output and log verbosity (default "
+                              "value: {}).".format(VerbosityGeneralConfigOption.DEFAULT_VERBOSITY_LEVEL))
 
     def _assert_verbosity_valid(self, verbosity_string):
         """Verbosity option validator."""
@@ -143,16 +181,16 @@ class VerbosityGeneralConfigOption(GeneralConfigOption):
         try:
             verbosity_lvl = int(verbosity_string)
         except ValueError:
-            msg = "Given verbosity is not integer (given value: '{}')"\
-                  .format(verbosity_string)
-            raise ParserError(msg)
+            m = "Given verbosity is not integer (given value: '{}')".format(
+                 verbosity_string)
+            raise ParserError(m)
 
         if not _MIN_VERBOSITY_LEVEL <= verbosity_lvl <= _MAX_VERBOSITY_LEVEL:
-            msg = "Verbosity must be an integer from range [{}, {}] (given "\
-                  "value: {})".format(_MIN_VERBOSITY_LEVEL,
-                                      _MAX_VERBOSITY_LEVEL,
-                                      verbosity_lvl)
-            raise ParserError(msg)
+            m = "Verbosity must be an integer from range [{}, {}] (given "\
+                "value: {})".format(_MIN_VERBOSITY_LEVEL,
+                                    _MAX_VERBOSITY_LEVEL,
+                                    verbosity_lvl)
+            raise ParserError(m)
 
         return verbosity_lvl
 
@@ -169,9 +207,9 @@ class ConfigParser:
         self.version_full = version_full
 
         _COMMON_CONFIG = [
-            PIDFileConfigOption("/var/run/lock/myscm-srv.pid"),
-            LogFileConfigOption("/etc/myscm/log_config.yaml"),
-            VerbosityGeneralConfigOption(2)
+            PIDFileConfigOption(),
+            LogFileConfigOption(),
+            VerbosityGeneralConfigOption()
         ]
         self.allowed_options = {c.name: c for c in _COMMON_CONFIG}
         self.allowed_options.update({c.name: c for c in default_config})
@@ -181,8 +219,8 @@ class ConfigParser:
         try:
             self.__parse()
         except (configparser.Error, FileNotFoundError) as e:
-            msg = "Loading configuration '{}' failed".format(self.config_path)
-            raise ParserError(msg, e) from e
+            m = "Loading configuration '{}' failed".format(self.config_path)
+            raise ParserError(m, e) from e
 
     def __parse(self):
         root_parser = self._init_root_parser()
@@ -194,9 +232,9 @@ class ConfigParser:
             try:
                 self._update_config_from_file()
             except ParserError as e:
-                msg = "Failed to parse '{}' configuration file".format(
-                        self.config_path)
-                raise ParserError(msg, e) from e
+                m = "Failed to parse '{}' configuration file".format(
+                     self.config_path)
+                raise ParserError(m, e) from e
 
         try:
             self._update_config_from_argv(root_parser, remaining_argv)
@@ -213,10 +251,11 @@ class ConfigParser:
         root_parser.add_argument(
                 "-c", "--config", metavar="FILE", default=self.config_path,
                 type=self._assert_conf_file_valid,
-                help="read configuration from specified FILE")
+                help="Read configuration from specified FILE instead of "
+                     "default '{}' file.".format(self.config_path))
         root_parser.add_argument(
                 "--version", action="version", version=self.version_full,
-                help="output version information and exit", default=False)
+                help="Output version information and exit.", default=False)
         return root_parser
 
     def _update_config_from_file(self):
@@ -266,9 +305,9 @@ class ConfigParser:
 
     def _assert_conf_file_valid(self, config_file_path):
         if not os.path.isfile(config_file_path):
-            msg = "Specified configuration file '{}' doesn't exist".format(
-                    config_file_path)
-            raise ParserError(msg)
+            m = "Specified configuration file '{}' doesn't exist".format(
+                 config_file_path)
+            raise ParserError(m)
 
         return config_file_path
 
@@ -284,9 +323,9 @@ class ConfigParser:
             if isinstance(val, FileConfigOption)\
                and val.required_in_file            \
                and key not in file_options_keys:
-                msg = "Required option '{}' is not specified in "\
-                      "configuration file".format(key)
-                raise ParserError(msg)
+                m = "Required option '{}' is not specified in "\
+                    "configuration file".format(key)
+                raise ParserError(m)
 
     def _assert_file_options_valid(self, file_options):
         for key, val in file_options.items():

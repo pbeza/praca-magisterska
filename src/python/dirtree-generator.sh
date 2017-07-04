@@ -21,7 +21,7 @@ To test process of generating system images by myscm-srv you can follow these
 steps:
   1. create sample testing file tree using this script,
   2. scan testing file tree using myscm-srv application,
-  3. make sample changes using this script,
+  3. make sample changes using this script ran with -m flag,
   4. scan testing file tree again and create system image using myscm-srv.
 
 Options:

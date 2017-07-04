@@ -7,9 +7,9 @@
 import logging
 
 import common
-# import server.error
 from server.parser import ServerConfigParser, ServerParserError
 from server.scanner import Scanner, ScannerError
+from server.sysimggenerator import SystemImageGenerator, SystemImageGeneratorError
 
 logger = logging.getLogger("server")
 
@@ -37,6 +37,8 @@ def _main():
         common.print_version()
     elif config.options.scan:
         _scan(config)
+    elif config.options.gen_img:
+        _gen_img(config)
     else:
         logger.info("This application does nothing unless you specify what "
                     "it should do. See --help to learn more.")
@@ -48,6 +50,14 @@ def _scan(config):
         scanner.scan()
     except ScannerError as e:
         raise ScannerError("AIDE scanner wrapper error", e) from e
+
+
+def _gen_img(config):
+    try:
+        sys_img_generator = SystemImageGenerator(config)
+        sys_img_generator.generate_img(0)
+    except SystemImageGeneratorError as e:
+        raise SystemImageGeneratorError("System image generator error") from e
 
 
 if __name__ == "__main__":

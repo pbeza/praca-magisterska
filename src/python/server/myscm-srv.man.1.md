@@ -1,0 +1,119 @@
+% MYSCM-SRV(1) myscm-srv User Manuals
+% Patryk Bęza
+% July 4, 2017
+
+# NAME
+
+myscm-srv - server side of the MySCM application managing software and
+configuration of the workstations running GNU/Linux.
+
+MySCM is simple Software Configuration Management (SCM) tool for managing
+software and configuration of the clients running GNU/Linux distributions.
+This application is intended to create and customize GNU/Linux system image
+that can be applied by the clients running `myscm-cli` application.
+
+# SYNOPSIS
+
+myscm-srv.py [*OPTIONS*] [**--scan**] [**--gen-img** *CLIENT_AIDE_DB_VER*]
+
+# DESCRIPTION
+
+This is (yet another) Software Configuration Management (SCM) application that
+differs from major existing solutions (e.g. Puppet, Chef, Ansible and Salt) in a
+way of using it. Instead of writing a complex configuration, which describes in
+detail the expected state of the client system, you can simply configure
+reference machine in a way you want to configure your client machines and than
+clone it to them.
+
+This application is briefly referred as a `server`, but its primary role is to
+create GNU/Linux system image that can be applied by client's `myscm-cli`
+application that modifies client's system configuration to match server's
+configuration, NOT to share the created system image with the clients.
+
+System image is archive file that contains all of the information needed to
+modify clients' configuration and software to make them clones of the `server`
+system.
+
+Sharing system image generated
+by this application is handled by myscm-cli application using peer-to-peer
+connection. Therefore myscm-srv should be referred as a master or reference
+system rather than server.
+
+# OPTIONS
+
+\--aide-conf=*PATH*
+:   Specify AIDE configuration file path.  This file determines which
+    directories of the server's system are scanned and synchronized with the
+    client's system.  If not specified `/etc/myscm-srv/aide.conf` AIDE
+    configuration file is read by default.
+
+-c *FILE*, \--config=*FILE*
+:   Read configuration from specified *FILE* instead of default `config.ini`
+    file.
+
+-g *CLIENT_AIDE_DB_VER*, \--gen-img=*CLIENT_AIDE_DB_VER*
+:   Generate system image that can be applied by any client whose system
+    configuration is represented by existing AIDE database identified by
+    non-negative integer number *CLIENT_AIDE_DB_VER* which corresponds to `X`
+    in `aide.db.X` file created with `--scan` flag.  Generated system image is
+    an archive file saved in location specified in configuration file.  System
+    image contains all of the files necessary to modify client's configuration
+    to match server's configuration.  If client has never synchronized its
+    configuration with server, then `0` should be specified as a
+    *CLIENT_AIDE_DB_VER*.  Client application (`myscm-cli`) has option that
+    prints out client's current *CLIENT_AIDE_DB_VER*.
+
+-s, \--scan
+:   Scan system using AIDE, create AIDE's new `aide.db` reference database and
+    rename old one to `aide.db.X` where `X` is incremented integer.  This
+    operation is intended to provide AIDE database with a summary of the
+    current state of the server's software without deleting the old state file.
+    Scanning may take a long time to complete depending on the AIDE
+    configuration file that determines which directories are scanned (see
+    `--aide-conf` option for details).
+
+\--ssl-cert=*PATH*
+:   Specify full path to the server's SSL certificate that is used to digitally
+    sign system image generated with `--gen-img option`.  If this option is not
+    present, then default path `/etc/myscm-srv/ssl.sig` is used.
+
+-t SEC, \--time-prop=*SEC*
+:   Specify time interval in seconds between sending configuration to clients
+    (minimum `3`, maximum `315360000` seconds).  Default value is `3600` sec.
+
+-v, \--verbose
+:   Increase output and log verbosity. Default value is `0`.
+
+-h, \--help
+:   Show help message (which is short version of this manual page) and exit.
+
+\--version
+:   Print version information and exit.
+
+# EXIT STATUS
+
+If no error occurred the exit status is `0`.  Otherwise `1` is returned.
+
+# COPYRIGHT
+
+Copyright © 2017 Patryk Bęza  
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.  
+This is free software: you are free to change and redistribute it.  
+There is NO WARRANTY, to the extent permitted by law.
+
+# BUGS
+
+Email bug reports to the bug-reporting address <bezap@student.mini.pw.edu.pl>.  For now, no bug tracker is available.
+
+# SEE ALSO
+
+`myscm-cli` (1).
+
+You can learn more details about MySCM software from project white paper.  The
+myscm-srv source code and all documentation may be downloaded from GitHub
+repository of the project <https://github.com/pbeza/myscm>.
+
+# NOTES
+
+This software is part of the master thesis project.  To learn more about this
+implementation, refer to project white paper.

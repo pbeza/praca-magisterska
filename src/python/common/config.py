@@ -24,16 +24,17 @@ class BaseConfig:
             with open(log_config_path) as f:
                 log_config = yaml.load(f)
         except (IOError, OSError, yaml.YAMLError) as e:
-            msg = "Malformed or non-existent logging configuration file '{}'"\
-                    .format(log_config_path)
-            raise ConfigError(msg, e) from e
+            m = "Malformed or non-existent logging configuration file '{}'"\
+                .format(log_config_path)
+            raise ConfigError(m, e) from e
 
         try:
             logging.config.dictConfig(log_config)
         except ValueError as e:
-            msg = "Loading logging configuration file '{}' failed".format(
-                  log_config_path)
-            raise ConfigError(msg, e) from e
+            m = "Loading logging configuration file '{}' failed".format(
+                 log_config_path)
+            raise ConfigError(m, e) from e
+
 
 class ConfigOptions:
     """Representation of all the options read from configuration file and
