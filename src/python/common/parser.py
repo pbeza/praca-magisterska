@@ -48,17 +48,17 @@ class CommandLineConfigOption(ConfigOption):
         super().__init__(name, value)
         self.args = args
         self.kwargs = kwargs
+        self.kwargs.update(dest=name)
 
 
-class ValidatedCommandLineConfigOption(CommandLineConfigOption,
-                                       ValidatedConfigOption):
+class ValidatedCommandLineConfigOption(ValidatedConfigOption,
+                                       CommandLineConfigOption):
     """Validated key-value configuration option specified as a command line
        (CLI) argument."""
 
     def __init__(self, name, value, validator, *args, **kwargs):
-        ValidatedConfigOption.__init__(self, name, value, validator)
-        self.args = args
-        self.kwargs = kwargs
+        CommandLineConfigOption.__init__(self, name, value, *args, **kwargs)
+        self.validator = validator
 
 
 class CommandLineFlagConfigOption(CommandLineConfigOption):
@@ -66,9 +66,7 @@ class CommandLineFlagConfigOption(CommandLineConfigOption):
        (CLI) option."""
 
     def __init__(self, name, *args, **kwargs):
-        super().__init__(name, False)
-        self.args = args
-        self.kwargs = kwargs
+        super().__init__(name, False, *args, **kwargs)
 
 
 class FileConfigOption(ValidatedConfigOption):
@@ -89,9 +87,6 @@ class GeneralConfigOption(ValidatedCommandLineConfigOption, FileConfigOption):
         ValidatedCommandLineConfigOption.__init__(
                 self, name, value, validator, *args, **kwargs)
         self.required_in_file = required_in_file
-        # Use the same option's name for both config read from CLI and file to
-        # allow to override options read from file with options read from CLI.
-        self.kwargs.update(dest=name)
 
 
 ###############################################################
@@ -106,10 +101,11 @@ class PIDFileConfigOption(FileConfigOption):
     DEFAULT_LOCK_FILE_PATH = "/var/run/lock/myscm.pid"
 
     def __init__(self, lock_file_path=None):
-        super().__init__("PIDLockFilePath",
-                         lock_file_path or PIDFileConfigOption.DEFAULT_LOCK_FILE_PATH,
-                         self._assert_pid_path_valid,
-                         False)
+        super().__init__(
+                "PIDLockFilePath",
+                lock_file_path or PIDFileConfigOption.DEFAULT_LOCK_FILE_PATH,
+                self._assert_pid_path_valid,
+                False)
 
     def _assert_pid_path_valid(self, pid_file_path):
         """PID file path validator."""
@@ -129,10 +125,11 @@ class LogFileConfigOption(FileConfigOption):
     DEFAULT_LOG_CONFIG_PATH = "/etc/myscm/log_config.yaml"
 
     def __init__(self, log_config_path=None):
-        super().__init__("LogConfigPath",
-                         log_config_path or LogFileConfigOption.DEFAULT_LOG_CONFIG_PATH,
-                         self._assert_log_config_path_valid,
-                         False)
+        super().__init__(
+                "LogConfigPath",
+                log_config_path or LogFileConfigOption.DEFAULT_LOG_CONFIG_PATH,
+                self._assert_log_config_path_valid,
+                False)
 
     def _assert_log_config_path_valid(self, log_file_path):
         """Log file path validator."""
@@ -159,23 +156,24 @@ class VerbosityGeneralConfigOption(GeneralConfigOption):
     """Configuration option read from configuration file and/or CLI specifying
        application logging verbosity."""
 
-    DEFAULT_VERBOSITY_LEVEL = 0
+    DEFAULT_VERBOSITY_LVL = 0
 
     def __init__(self, verbosity_lvl=None):
-        super().__init__("Verbose",
-                         verbosity_lvl or VerbosityGeneralConfigOption.DEFAULT_VERBOSITY_LEVEL,
-                         self._assert_verbosity_valid,
-                         False,
-                         "-v", "--verbose",
-                         action="count",
-                         help="Increase output and log verbosity (default "
-                              "value: {}).".format(VerbosityGeneralConfigOption.DEFAULT_VERBOSITY_LEVEL))
+        super().__init__(
+                "Verbose",
+                verbosity_lvl or VerbosityGeneralConfigOption.DEFAULT_VERBOSITY_LVL,
+                self._assert_verbosity_valid,
+                False,
+                "-v", "--verbose",
+                action="count",
+                help="increase output and log verbosity (default "
+                     "value: {})".format(VerbosityGeneralConfigOption.DEFAULT_VERBOSITY_LVL))
 
     def _assert_verbosity_valid(self, verbosity_string):
         """Verbosity option validator."""
 
-        _MIN_VERBOSITY_LEVEL = 0
-        _MAX_VERBOSITY_LEVEL = 5
+        _MIN_VERBOSITY_LVL = 0
+        _MAX_VERBOSITY_LVL = 5
         verbosity_lvl = None
 
         try:
@@ -185,10 +183,10 @@ class VerbosityGeneralConfigOption(GeneralConfigOption):
                  verbosity_string)
             raise ParserError(m)
 
-        if not _MIN_VERBOSITY_LEVEL <= verbosity_lvl <= _MAX_VERBOSITY_LEVEL:
+        if not _MIN_VERBOSITY_LVL <= verbosity_lvl <= _MAX_VERBOSITY_LVL:
             m = "Verbosity must be an integer from range [{}, {}] (given "\
-                "value: {})".format(_MIN_VERBOSITY_LEVEL,
-                                    _MAX_VERBOSITY_LEVEL,
+                "value: {})".format(_MIN_VERBOSITY_LVL,
+                                    _MAX_VERBOSITY_LVL,
                                     verbosity_lvl)
             raise ParserError(m)
 
@@ -211,6 +209,7 @@ class ConfigParser:
             LogFileConfigOption(),
             VerbosityGeneralConfigOption()
         ]
+
         self.allowed_options = {c.name: c for c in _COMMON_CONFIG}
         self.allowed_options.update({c.name: c for c in default_config})
         self.config = {n: c.value for n, c in self.allowed_options.items()}
@@ -224,6 +223,7 @@ class ConfigParser:
 
     def __parse(self):
         root_parser = self._init_root_parser()
+        wrapper_parser = self._init_wrapper_parser(root_parser)
         args, remaining_argv = root_parser.parse_known_args()
         self.config_path = args.config
 
@@ -237,7 +237,8 @@ class ConfigParser:
                 raise ParserError(m, e) from e
 
         try:
-            self._update_config_from_argv(root_parser, remaining_argv)
+            self._update_config_from_argv(root_parser, wrapper_parser,
+                                          remaining_argv)
         except ParserError as e:
             raise ParserError("Failed to parse command line options", e) from e
 
@@ -251,12 +252,32 @@ class ConfigParser:
         root_parser.add_argument(
                 "-c", "--config", metavar="FILE", default=self.config_path,
                 type=self._assert_conf_file_valid,
-                help="Read configuration from specified FILE instead of "
-                     "default '{}' file.".format(self.config_path))
+                help="read configuration from specified FILE instead of "
+                     "default '{}' file".format(self.config_path))
         root_parser.add_argument(
                 "--version", action="version", version=self.version_full,
-                help="Output version information and exit.", default=False)
+                help="output version information and exit", default=False)
         return root_parser
+
+    def _init_wrapper_parser(self, root_parser):
+        _HELP_EPILOG = '''This software is part of the master thesis
+        project.  To learn more about this implementation, refer to project's
+        white paper and application's manual (man myscm-srv).'''
+        wrapper_parser = argparse.ArgumentParser(
+                parents=[root_parser],
+                description=self.help_desc,
+                epilog=_HELP_EPILOG,
+                formatter_class=SortingHelpFormatter)
+        for key, val in self.allowed_options.items():
+            if isinstance(val, CommandLineConfigOption):
+                wrapper_parser.add_argument(*val.args, **val.kwargs)
+        try:
+            import argcomplete
+            argcomplete.autocomplete(wrapper_parser)
+        except ImportError:
+            pass  # commands autocompletion is not obligatory
+
+        return wrapper_parser
 
     def _update_config_from_file(self):
         parser = configparser.ConfigParser()
@@ -270,24 +291,9 @@ class ConfigParser:
         # Validity of CLI options is checked by argparse
         self.config.update(file_options)
 
-    def _update_config_from_argv(self, root_parser, remaining_argv):
-        _HELP_EPILOG = '''This software is part of the master thesis
-        project.  To learn more about this implementation, refer to project's
-        white paper.'''
-        wrapper_parser = argparse.ArgumentParser(
-                parents=[root_parser],
-                description=self.help_desc,
-                epilog=_HELP_EPILOG,
-                formatter_class=SortingHelpFormatter)
-        for key, val in self.allowed_options.items():
-            if isinstance(val, CommandLineConfigOption):
-                wrapper_parser.add_argument(*val.args, **val.kwargs)
+    def _update_config_from_argv(self, root_parser, wrapper_parser,
+                                 remaining_argv):
         wrapper_parser.set_defaults(**self.config)
-        try:
-            import argcomplete
-            argcomplete.autocomplete(wrapper_parser)
-        except ImportError:
-            pass  # commands autocompletion is not obligatory
         argv_options = wrapper_parser.parse_args(remaining_argv)
         self.config.update(vars(argv_options))
 
@@ -318,11 +324,10 @@ class ConfigParser:
                 raise ParserError("Unrecognized option '{}'".format(key))
 
     def _assert_all_required_options_present(self, file_options):
-        file_options_keys = file_options.keys()
         for key, val in self.allowed_options.items():
             if isinstance(val, FileConfigOption)\
-               and val.required_in_file            \
-               and key not in file_options_keys:
+               and val.required_in_file         \
+               and key not in file_options.keys():
                 m = "Required option '{}' is not specified in "\
                     "configuration file".format(key)
                 raise ParserError(m)

@@ -37,11 +37,11 @@ class PropagationIntervalGeneralConfigOption(GeneralConfigOption):
             self._assert_propagation_interval_valid, False, "-t",
             "--time-prop", metavar="SEC",
             type=self._assert_propagation_interval_valid,
-            help="Time interval in seconds between sending configuration to "
-                 "clients (minimum {}, maximum {} seconds). Default value: {} "
-                 "sec.".format(_MIN_PROP_INTERVAL_SEC,
-                               _MAX_PROP_INTERVAL_SEC,
-                               default_val))
+            help="time interval in seconds between sending configuration to "
+                 "clients (minimum: {}, maximum: {} seconds, default value: "
+                 "{} sec.)".format(_MIN_PROP_INTERVAL_SEC,
+                                   _MAX_PROP_INTERVAL_SEC,
+                                   default_val))
 
     def _assert_propagation_interval_valid(self, interval_sec):
         sec = None
@@ -76,10 +76,9 @@ class SSLCertGeneralConfigOption(GeneralConfigOption):
             ssl_cert_path or SSLCertGeneralConfigOption.DEFAULT_SSL_CERT_PATH,
             self._assert_ssl_cert_path_valid, True, "--ssl-cert",
             metavar="PATH", type=self._assert_ssl_cert_path_valid,
-            help="Full path to the server's SSL certificate that is used to "
+            help="full path to the server's SSL certificate that is used to "
                  "digitally sign system image generated with --gen-img "
-                 "option. If this option is not present, then default value "
-                 "'{}' is used.".format(
+                 "option (default value: '{}')".format(
                   SSLCertGeneralConfigOption.DEFAULT_SSL_CERT_PATH))
 
     def _assert_ssl_cert_path_valid(self, cert_path):
@@ -105,10 +104,10 @@ class AIDEConfigFileGeneralConfigOption(GeneralConfigOption):
             "AIDEConfigPath", aide_config_path or default_val,
             self._assert_AIDE_config_path_valid, False, "--aide-conf",
             metavar="PATH", type=self._assert_AIDE_config_path_valid,
-            help="AIDE configuration file path. This file specifies which "
+            help="AIDE configuration file path that specifies which "
                  "directories of the server system are scanned and "
-                 "synchronized with the client's system. If not specified "
-                 "'{}' file is read by default.".format(default_val))
+                 "synchronized with the client's system (default is: '{}')"
+                    .format(default_val))
 
     def _assert_AIDE_config_path_valid(self, aide_config_path):
         """AIDE configuration file path option validator."""
@@ -122,20 +121,27 @@ class AIDEConfigFileGeneralConfigOption(GeneralConfigOption):
 
 
 class AIDEScanArgConfigOption(CommandLineFlagConfigOption):
-    """Configuration option read from file and/or CLI, specifying whether
-       server's scanning using AIDE should be ran or not."""
+    """Configuration option read from CLI, specifying whether server's scanning
+       using AIDE should be ran or not."""
 
     def __init__(self):
         super().__init__(
-            "scan", "-s", "--scan", action="store_true",
-            help="Scan system using AIDE, create AIDE's new aide.db reference "
+            "Scan", "-s", "--scan", action="store_true",
+            help="scan system using AIDE, create AIDE's new aide.db reference "
                  "database and rename old one to aide.db.X where X is "
-                 "incremented integer. This operation is intended to provide "
-                 "AIDE database with a summary of the current state of the "
-                 "server machine software without deleting the old state "
-                 "file. Scanning may take a long time to complete depending "
-                 "on the AIDE configuration file that determines which "
-                 "directories are scanned (see --aide-conf option).")
+                 "incremented integer")
+
+
+class ConfigCheckConfigOption(CommandLineFlagConfigOption):
+    """Configuration option read from CLI, specifying to check application
+       configuration and exit."""
+
+    def __init__(self):
+        super().__init__(
+                "ConfigCheck", "-k", "--config-check", action="store_true",
+                help="check if application configuration is valid and exit "
+                     "(0 and 1 indicates respectively configuration validity "
+                     "and invalidity)")
 
 
 class GenerateSystemImageConfigOption(ValidatedCommandLineConfigOption):
@@ -144,20 +150,13 @@ class GenerateSystemImageConfigOption(ValidatedCommandLineConfigOption):
 
     def __init__(self):
         super().__init__(
-            "genImg", None, self._assert_client_aide_db_version_valid, "-g",
+            "GenImg", None, self._assert_client_aide_db_version_valid, "-g",
             "--gen-img", metavar="CLIENT_AIDE_DB_VER",
-            help="Generate system image that can be applied by any client "
+            help="generate system image that can be applied by any client "
                  "whose system configuration is represented by existing AIDE "
                  "database identified by non-negative integer number "
                  "CLIENT_AIDE_DB_VER (which corresponds to X in aide.db.X "
-                 "file created with --scan flag). Generated system image is "
-                 "an archive file saved in location specified in "
-                 "configuration file. It contains files necessary to adjust "
-                 "client's configuration to match server's configuration. If "
-                 "client has never synchronized its configuration with "
-                 "server, then 0 should be specified as a CLIENT_AIDE_DB_VER. "
-                 "Client application (myscm-cli) has option that prints out "
-                 "client's CLIENT_AIDE_DB_VER.")
+                 "file created with --scan flag)")
 
     def _assert_client_aide_db_version_valid(self, client_aide_db_version):
         ver = None
@@ -176,8 +175,6 @@ class GenerateSystemImageConfigOption(ValidatedCommandLineConfigOption):
                 "integer".format(client_aide_db_version)
             raise ServerParserError(m)
 
-        # TODO check if file exists
-
         return ver
 
 
@@ -191,12 +188,13 @@ class ServerConfigParser(ConfigParser):
             SSLCertGeneralConfigOption(),
             AIDEConfigFileGeneralConfigOption(),
             AIDEScanArgConfigOption(),
+            ConfigCheckConfigOption(),
             GenerateSystemImageConfigOption()
         ]
-        super().__init__(
-            config_path, config_section_name, _SERVER_DEFAULT_CONFIG,
-            _HELP_DESC, _APP_VERSION)
+        super().__init__(config_path, config_section_name,
+                         _SERVER_DEFAULT_CONFIG, _HELP_DESC, _APP_VERSION)
 
     def parse(self):
         self._parse()
-        return server.config.ServerConfig(self.config)
+        server_config = server.config.ServerConfig(self.config)
+        return server_config

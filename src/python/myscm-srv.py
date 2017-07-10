@@ -5,6 +5,7 @@
    application (myscm-srv)."""
 
 import logging
+import sys
 
 import common
 from server.parser import ServerConfigParser, ServerParserError
@@ -39,6 +40,8 @@ def _main():
         _scan(config)
     elif config.options.gen_img:
         _gen_img(config)
+    elif config.options.config_check:
+        logger.debug("Configuration check is running")
     else:
         logger.info("This application does nothing unless you specify what "
                     "it should do. See --help to learn more.")
@@ -61,12 +64,18 @@ def _gen_img(config):
 
 
 if __name__ == "__main__":
+    exit_code = 0
+
     try:
         _main()
     except (KeyboardInterrupt, EOFError):
         logger.info("Keyboard interrupt or EOF detected.")
     except common.error.MySCMError as e:
         logger.error(e)
+        exit_code = 1
     except Exception as e:
         logger.exception("Unexpected exception handled in {}. "
                          "Details: {}.".format(__name__, str(e)))
+        exit_code = 1
+
+    sys.exit(exit_code)

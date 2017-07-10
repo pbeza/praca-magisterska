@@ -48,6 +48,7 @@ class ConfigOptions:
             for key in d:
                 new_key = self._camelcase_to_underscore(key)
                 setattr(self, new_key, d[key])
+
         for key in kwargs:
             new_key = self._camelcase_to_underscore(key)
             setattr(self, new_key, kwargs[key])
