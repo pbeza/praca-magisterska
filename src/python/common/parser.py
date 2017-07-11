@@ -103,7 +103,7 @@ class PIDFileConfigOption(FileConfigOption):
     def __init__(self, lock_file_path=None):
         super().__init__(
                 "PIDLockFilePath",
-                lock_file_path or PIDFileConfigOption.DEFAULT_LOCK_FILE_PATH,
+                lock_file_path or self.DEFAULT_LOCK_FILE_PATH,
                 self._assert_pid_path_valid,
                 False)
 
@@ -127,7 +127,7 @@ class LogFileConfigOption(FileConfigOption):
     def __init__(self, log_config_path=None):
         super().__init__(
                 "LogConfigPath",
-                log_config_path or LogFileConfigOption.DEFAULT_LOG_CONFIG_PATH,
+                log_config_path or self.DEFAULT_LOG_CONFIG_PATH,
                 self._assert_log_config_path_valid,
                 False)
 
@@ -136,7 +136,7 @@ class LogFileConfigOption(FileConfigOption):
 
         if not os.path.isfile(log_file_path):
             m = "Specified logging configuration '{}' doesn't exist".format(
-                 log_file_path)
+                    log_file_path)
             raise ParserError(m)
 
         try:
@@ -161,13 +161,13 @@ class VerbosityGeneralConfigOption(GeneralConfigOption):
     def __init__(self, verbosity_lvl=None):
         super().__init__(
                 "Verbose",
-                verbosity_lvl or VerbosityGeneralConfigOption.DEFAULT_VERBOSITY_LVL,
+                verbosity_lvl or self.DEFAULT_VERBOSITY_LVL,
                 self._assert_verbosity_valid,
                 False,
                 "-v", "--verbose",
                 action="count",
                 help="increase output and log verbosity (default "
-                     "value: {})".format(VerbosityGeneralConfigOption.DEFAULT_VERBOSITY_LVL))
+                     "value: {})".format(self.DEFAULT_VERBOSITY_LVL))
 
     def _assert_verbosity_valid(self, verbosity_string):
         """Verbosity option validator."""
@@ -180,7 +180,7 @@ class VerbosityGeneralConfigOption(GeneralConfigOption):
             verbosity_lvl = int(verbosity_string)
         except ValueError:
             m = "Given verbosity is not integer (given value: '{}')".format(
-                 verbosity_string)
+                    verbosity_string)
             raise ParserError(m)
 
         if not _MIN_VERBOSITY_LVL <= verbosity_lvl <= _MAX_VERBOSITY_LVL:
@@ -233,7 +233,7 @@ class ConfigParser:
                 self._update_config_from_file()
             except ParserError as e:
                 m = "Failed to parse '{}' configuration file".format(
-                     self.config_path)
+                        self.config_path)
                 raise ParserError(m, e) from e
 
         try:
@@ -312,7 +312,7 @@ class ConfigParser:
     def _assert_conf_file_valid(self, config_file_path):
         if not os.path.isfile(config_file_path):
             m = "Specified configuration file '{}' doesn't exist".format(
-                 config_file_path)
+                    config_file_path)
             raise ParserError(m)
 
         return config_file_path

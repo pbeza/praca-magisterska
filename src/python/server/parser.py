@@ -5,6 +5,7 @@ import common.constants
 import server.config
 from common.parser import CommandLineFlagConfigOption
 from common.parser import ConfigParser
+from common.parser import FileConfigOption
 from common.parser import GeneralConfigOption
 from common.parser import ParserError
 from common.parser import ValidatedCommandLineConfigOption
@@ -30,10 +31,9 @@ class PropagationIntervalGeneralConfigOption(GeneralConfigOption):
     DEFAULT_PROPAGATION_INTERVAL_SEC = 3600
 
     def __init__(self, propagation_interval_sec=None):
-        default_val = PropagationIntervalGeneralConfigOption.DEFAULT_PROPAGATION_INTERVAL_SEC
         super().__init__(
             "PropagationIntervalSeconds",
-            propagation_interval_sec or default_val,
+            propagation_interval_sec or self.DEFAULT_PROPAGATION_INTERVAL_SEC,
             self._assert_propagation_interval_valid, False, "-t",
             "--time-prop", metavar="SEC",
             type=self._assert_propagation_interval_valid,
@@ -41,7 +41,7 @@ class PropagationIntervalGeneralConfigOption(GeneralConfigOption):
                  "clients (minimum: {}, maximum: {} seconds, default value: "
                  "{} sec.)".format(_MIN_PROP_INTERVAL_SEC,
                                    _MAX_PROP_INTERVAL_SEC,
-                                   default_val))
+                                   self.DEFAULT_PROPAGATION_INTERVAL_SEC))
 
     def _assert_propagation_interval_valid(self, interval_sec):
         sec = None
@@ -73,13 +73,13 @@ class SSLCertGeneralConfigOption(GeneralConfigOption):
     def __init__(self, ssl_cert_path=None):
         super().__init__(
             "SSLCertPath",
-            ssl_cert_path or SSLCertGeneralConfigOption.DEFAULT_SSL_CERT_PATH,
+            ssl_cert_path or self.DEFAULT_SSL_CERT_PATH,
             self._assert_ssl_cert_path_valid, True, "--ssl-cert",
             metavar="PATH", type=self._assert_ssl_cert_path_valid,
             help="full path to the server's SSL certificate that is used to "
                  "digitally sign system image generated with --gen-img "
                  "option (default value: '{}')".format(
-                  SSLCertGeneralConfigOption.DEFAULT_SSL_CERT_PATH))
+                    self.DEFAULT_SSL_CERT_PATH))
 
     def _assert_ssl_cert_path_valid(self, cert_path):
         """SSL certificate path option validator."""
@@ -99,22 +99,21 @@ class AIDEConfigFileGeneralConfigOption(GeneralConfigOption):
     DEFAULT_AIDE_CONFIG_PATH = "/etc/myscm-srv/aide.conf"
 
     def __init__(self, aide_config_path=None):
-        default_val = AIDEConfigFileGeneralConfigOption.DEFAULT_AIDE_CONFIG_PATH
         super().__init__(
-            "AIDEConfigPath", aide_config_path or default_val,
+            "AIDEConfigPath", aide_config_path or self.DEFAULT_AIDE_CONFIG_PATH,
             self._assert_AIDE_config_path_valid, False, "--aide-conf",
             metavar="PATH", type=self._assert_AIDE_config_path_valid,
             help="AIDE configuration file path that specifies which "
                  "directories of the server system are scanned and "
                  "synchronized with the client's system (default is: '{}')"
-                    .format(default_val))
+                    .format(self.DEFAULT_AIDE_CONFIG_PATH))
 
     def _assert_AIDE_config_path_valid(self, aide_config_path):
         """AIDE configuration file path option validator."""
 
         if not os.path.isfile(aide_config_path):
             m = "Given AIDE configuration file '{}' doesn't exist".format(
-                 aide_config_path)
+                    aide_config_path)
             raise ServerParserError(m)
 
         return aide_config_path
@@ -178,6 +177,30 @@ class GenerateSystemImageConfigOption(ValidatedCommandLineConfigOption):
         return ver
 
 
+class SystemImgOutDirConfigOption(FileConfigOption):
+    """Configuration option read from file, specifying directory where
+       all generated reference system images are saved."""
+
+    DEFAULT_SYS_IMG_DIR = "/var/lib/myscm-srv"
+
+    def __init__(self, sys_img_dir=None):
+        super().__init__(
+                "SystemImgOutDir",
+                sys_img_dir or self.DEFAULT_SYS_IMG_DIR,
+                self._assert_sys_img_dir_valid,
+                False)
+
+    def _assert_sys_img_dir_valid(self, img_dir_path):
+        """Reference system image directory validator."""
+
+        if not os.path.isdir(img_dir_path):
+            m = "Value '{}' assigned to variable '{}' doesn't refer to "\
+                "directory".format(img_dir_path, self.name)
+            raise ServerParserError(m)
+
+        return img_dir_path
+
+
 class ServerConfigParser(ConfigParser):
     """Application configuration parser for configuration read from both
        configuration file and command line (CLI)."""
@@ -189,7 +212,8 @@ class ServerConfigParser(ConfigParser):
             AIDEConfigFileGeneralConfigOption(),
             AIDEScanArgConfigOption(),
             ConfigCheckConfigOption(),
-            GenerateSystemImageConfigOption()
+            GenerateSystemImageConfigOption(),
+            SystemImgOutDirConfigOption()
         ]
         super().__init__(config_path, config_section_name,
                          _SERVER_DEFAULT_CONFIG, _HELP_DESC, _APP_VERSION)

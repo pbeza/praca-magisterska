@@ -41,7 +41,7 @@ def _main():
     elif config.options.gen_img:
         _gen_img(config)
     elif config.options.config_check:
-        logger.debug("Configuration check is running")
+        logger.debug("Configuration check ended successfully")
     else:
         logger.info("This application does nothing unless you specify what "
                     "it should do. See --help to learn more.")
