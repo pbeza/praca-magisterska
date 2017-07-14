@@ -151,6 +151,7 @@ class GenerateSystemImageConfigOption(ValidatedCommandLineConfigOption):
         super().__init__(
             "GenImg", None, self._assert_client_aide_db_version_valid, "-g",
             "--gen-img", metavar="CLIENT_AIDE_DB_VER",
+            type=self._assert_client_aide_db_version_valid,
             help="generate system image that can be applied by any client "
                  "whose system configuration is represented by existing AIDE "
                  "database identified by non-negative integer number "

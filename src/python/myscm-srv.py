@@ -38,10 +38,11 @@ def _main():
         common.print_version()
     elif config.options.scan:
         _scan(config)
-    elif config.options.gen_img:
+    elif config.options.gen_img is not None:  # Note that 0 is valid argument
         _gen_img(config)
     elif config.options.config_check:
         logger.debug("Configuration check ended successfully")
+        # If check fails, then Exception is raised and caught in __main__
     else:
         logger.info("This application does nothing unless you specify what "
                     "it should do. See --help to learn more.")
@@ -58,9 +59,10 @@ def _scan(config):
 def _gen_img(config):
     try:
         sys_img_generator = SystemImageGenerator(config)
-        sys_img_generator.generate_img(0)
+        sys_img_generator.generate_img()
     except SystemImageGeneratorError as e:
-        raise SystemImageGeneratorError("System image generator error") from e
+        m = "Reference system image generator error"
+        raise SystemImageGeneratorError(m, e) from e
 
 
 if __name__ == "__main__":

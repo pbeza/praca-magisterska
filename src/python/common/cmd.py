@@ -26,7 +26,7 @@ def run_cmd(cmd, check_exitcode=True, stdout_opt=subprocess.PIPE,
         raise CommandLineError(m, e) from e
 
     if completed_proc.stderr:
-        m = "stderr output for '{}' command: '{}'".format(
+        m = "stderr output for '{}' command: '{}'.".format(
              cmd_str, completed_proc.stderr.decode("utf-8"))
         logger.warning(m)
 

@@ -288,13 +288,13 @@ class ConfigParser:
         self._assert_all_required_options_present(file_options)
         self._convert_string_values_to_types(file_options)
         self._assert_file_options_valid(file_options)
-        # Validity of CLI options is checked by argparse
         self.config.update(file_options)
 
     def _update_config_from_argv(self, root_parser, wrapper_parser,
                                  remaining_argv):
         wrapper_parser.set_defaults(**self.config)
         argv_options = wrapper_parser.parse_args(remaining_argv)
+        # Validity of CLI options is assured by argparse
         self.config.update(vars(argv_options))
 
     def _convert_string_values_to_types(self, file_options):

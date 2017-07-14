@@ -5,10 +5,12 @@ import re
 
 import common.config
 
+from server.error import ServerError
+
 logger = logging.getLogger(__name__)
 
 
-class ServerConfigError(common.config.MySCMError):
+class ServerConfigError(ServerError):
     pass
 
 

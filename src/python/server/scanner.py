@@ -3,14 +3,14 @@ import logging
 
 from common.cmd import CommandLineError
 from common.cmd import run_cmd
-from common.error import MySCMError
 from server.aidedbmanager import AIDEDatabasesManager
 from server.aidedbmanager import AIDEDatabasesManagerError
+from server.error import ServerError
 
 logger = logging.getLogger(__name__)
 
 
-class ScannerError(MySCMError):
+class ScannerError(ServerError):
     pass
 
 
@@ -33,7 +33,7 @@ class Scanner:
                 raise ScannerError("AIDE's databases manager error", e) from e
         else:
             m = "Current reference AIDE database '{}' is up-to-date. No need "\
-                "to create new database. I have nothing to do - exiting."     \
+                "to create new database. I have nothing to do - exiting."\
                 .format(self.server_config.aide_reference_db_path)
             logger.info(m)
 

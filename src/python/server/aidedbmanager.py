@@ -4,17 +4,19 @@ import logging
 import os
 import re
 
-from common.error import MySCMError
+from server.error import ServerError
 
 logger = logging.getLogger(__name__)
 
 
-class AIDEDatabasesManagerError(MySCMError):
+class AIDEDatabasesManagerError(ServerError):
     pass
 
 
 class AIDEDatabasesManager:
-    """Manager of the AIDE aide.db[.X] databases (X is integer)."""
+    """Manager of the AIDE aide.db[.X] databases (X is integer). This manager
+       is not AIDE's database parser - it only renames AIDE's databases if
+       requested to do so."""
 
     def __init__(self, server_config):
         self.server_config = server_config
