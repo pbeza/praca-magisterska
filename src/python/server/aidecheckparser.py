@@ -22,6 +22,7 @@ class AIDECheckParser:
     ADDED_ENTRIES = "Added entries:\n"
     REMOVED_ENTRIES = "Removed entries:\n"
     CHANGED_ENTRIES = "Changed entries:\n"
+    FILES_ATTRS = "The attributes of the (uncompressed) database(s):\n"
 
     def __init__(self, client_aide_db_path, server_aide_db_path):
         self.aide_srv_db_parser = AIDEDatabaseFileParser(server_aide_db_path)
@@ -62,9 +63,16 @@ class AIDECheckParser:
                 _read_assert_next_lines(aidediff_f, self.AIDE_SEPARATOR)
                 read_entries_fun(aidediff_f, entries)
                 del expected_entries_mapping[line]
+            elif line == self.FILES_ATTRS:
+                missing = [e.strip() for e in expected_entries_mapping.keys()]
+                m = "{} sections ('{}') not found in --check AIDE output "\
+                    "(this is not an error nor warning).".format(
+                        len(expected_entries_mapping), "', '".join(missing))
+                logger.debug(m)
+                break
             else:
                 m = "Unexpected line '{}' after separator line in AIDE "\
-                     "--check output".format(line)
+                     "--check output".format(line.strip())
                 raise AIDECheckParserError(m)
 
         self._set_entries_info_from_aide_db_file(entries)
@@ -170,7 +178,7 @@ def _read_assert_next_lines(aidediff_f, *expected_lines):
         line = next(aidediff_f)
         if line != expected_line:
             m = "Unexpected line '{}'. '{}' line was expected".format(
-                    line, expected_line)
+                    line.strip(), expected_line.strip())
             raise AIDECheckParserError(m)
 
     return read_lines

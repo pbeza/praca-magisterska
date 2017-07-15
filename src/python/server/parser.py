@@ -17,7 +17,7 @@ _HELP_DESC = '''This is server side of the mySCM application – simple
 Software Configuration Management (SCM) tool for managing software and
 configuration of the clients running GNU/Linux distributions. This application
 is intended to create and customize GNU/Linux system image that can be applied
-by the client.'''
+by the clients using myscm-cli application.'''
 
 
 class ServerParserError(ParserError):
@@ -138,9 +138,9 @@ class ConfigCheckConfigOption(CommandLineFlagConfigOption):
     def __init__(self):
         super().__init__(
                 "ConfigCheck", "-k", "--config-check", action="store_true",
-                help="check if application configuration is valid and exit "
-                     "(0 and 1 indicates respectively configuration validity "
-                     "and invalidity)")
+                help="check if application configuration is valid and exit; "
+                     "0 and 1 indicates respectively: configuration validity "
+                     "and invalidity")
 
 
 class GenerateSystemImageConfigOption(ValidatedCommandLineConfigOption):

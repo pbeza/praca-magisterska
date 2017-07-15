@@ -196,6 +196,12 @@ class VerbosityGeneralConfigOption(GeneralConfigOption):
 class ConfigParser:
     """Base class for CLI and file based configuration parser."""
 
+    _HELP_EPILOG = '''This software is part of the author's master thesis
+                      project at the Faculty of Mathematics and Information
+                      Science at Warsaw University of Technology. To learn more
+                      about the project refer to project white paper and
+                      application manual (`man myscm-srv`).'''
+
     def __init__(self, config_path, config_section_name, default_config,
                  help_desc, version_full):
 
@@ -260,13 +266,10 @@ class ConfigParser:
         return root_parser
 
     def _init_wrapper_parser(self, root_parser):
-        _HELP_EPILOG = '''This software is part of the master thesis
-        project.  To learn more about this implementation, refer to project's
-        white paper and application's manual (man myscm-srv).'''
         wrapper_parser = argparse.ArgumentParser(
                 parents=[root_parser],
                 description=self.help_desc,
-                epilog=_HELP_EPILOG,
+                epilog=self._HELP_EPILOG,
                 formatter_class=SortingHelpFormatter)
         for key, val in self.allowed_options.items():
             if isinstance(val, CommandLineConfigOption):

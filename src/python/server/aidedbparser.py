@@ -42,8 +42,7 @@ class AIDEDatabaseFileParser:
         elif isinstance(requested_properties, str):
             requested_properties = {requested_properties}
 
-        if not requested_paths or                       \
-           not isinstance(requested_properties, set) or \
+        if not isinstance(requested_properties, set) or\
            not isinstance(requested_paths, set):
             m = "get_files_properties() got unexpected parameters"
             raise AIDEDatabaseFileParserError(m)
@@ -60,11 +59,14 @@ class AIDEDatabaseFileParser:
         return files_properties
 
     def _get_files_properties(self, requested_paths, requested_properties):
-        """Return list of dictionaries where key of the dictionary is requested
-           file's full path and value is another dictionary with AIDE requested
-           properties of the file fetched from AIDE database file."""
+        """Return dictionary of dictionaries where key of the outer dictionary
+           is requested file's full path and value is another dictionary with
+           AIDE requested properties of the file fetched from AIDE database."""
 
-        files_properties = None
+        files_properties = {}
+
+        if not requested_paths:
+            return files_properties
 
         # File needs to be open with "b" flag to be able to seek relative to
         # file's end. See: https://stackoverflow.com/a/21533561/1321680
@@ -120,7 +122,7 @@ class AIDEDatabaseFileParser:
         for line in db_file:
             words = line.split(maxsplit=1)
             self._assert_not_empty_properties_values_list(words)
-            path = urllib.parse.unquote(words[0])
+            path = urllib.parse.unquote(words[0])  # unquote full path
 
             if path not in requested_paths:
                 continue
@@ -128,6 +130,7 @@ class AIDEDatabaseFileParser:
             words = line.split()
             n = len(words)
             self._assert_expected_number_of_properties_values(n, N)
+            words[0] = urllib.parse.unquote(words[0])  # unquote full path
             current_file_properties = {}
 
             for prop_name in requested_properties:

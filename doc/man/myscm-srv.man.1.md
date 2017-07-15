@@ -4,10 +4,10 @@
 
 # NAME
 
-myscm-srv - server side of the MySCM application managing software and
+myscm-srv - server side of the mySCM application managing software and
 configuration of the GNU/Linux workstations.
 
-MySCM is simple Software Configuration Management (SCM) tool for managing
+mySCM is simple Software Configuration Management (SCM) tool for managing
 software and configuration of the clients running GNU/Linux distributions.
 This application is intended to create and customize GNU/Linux system image
 that can be applied by the clients running `myscm-cli` application.
@@ -118,7 +118,7 @@ Email bug reports to the bug-reporting address <bezap@student.mini.pw.edu.pl>.  
 
 `myscm-cli` (1).
 
-You can learn more details about MySCM software from project white paper.  The
+You can learn more details about mySCM software from project white paper.  The
 myscm-srv source code and all documentation may be downloaded from GitHub
 repository of the project <https://github.com/pbeza/myscm>.
 
