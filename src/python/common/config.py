@@ -4,6 +4,9 @@ import logging.config
 import yaml
 
 from common.error import MySCMError
+from common.parser import VerbosityGeneralConfigOption
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigError(MySCMError):
@@ -34,6 +37,24 @@ class BaseConfig:
             m = "Loading logging configuration file '{}' failed".format(
                  log_config_path)
             raise ConfigError(m, e) from e
+
+        base_module = __name__.split(".", 2)[0]
+        self.set_log_level(logging.getLogger(base_module))
+
+    def set_log_level(self, logger):
+        """Set logging level with respect to loaded configuration."""
+
+        MIN = VerbosityGeneralConfigOption.MIN_VERBOSITY_LVL
+        LVL_MAPPING = {
+            MIN - 3: logging.CRITICAL,  # least verbose level
+            MIN - 2: logging.ERROR,
+            MIN - 1: logging.WARNING,
+            MIN + 0: logging.INFO,      # default logging level
+            MIN + 1: logging.DEBUG,
+            MIN + 2: logging.NOTSET,    # most verbose level
+        }
+        LVL = LVL_MAPPING.get(self.options.verbose, logging.NOTSET)
+        logger.setLevel(LVL)
 
 
 class ConfigOptions:

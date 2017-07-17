@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
+import OpenSSL
+import getpass
 import logging
 import os
 import re
+import tarfile
+import textwrap
 
 from common.cmd import run_cmd
 from server.aidecheckparser import AIDECheckParser
 from server.aidecheckparser import AIDECheckParserError
+from server.aidedbmanager import AIDEDatabasesManager
 from server.error import ServerError
 from tempfile import TemporaryFile, NamedTemporaryFile
 
@@ -20,10 +25,17 @@ class SystemImageGenerator:
     """Generator of the reference system image that will be applied by the
        client's myscm-cli application."""
 
+    MYSCM_IMG_FILE_NAME = "myscm-img.{}.{}.{}"
     AIDE_MIN_EXITCODE = 14  # see AIDE's manual for details about exitcodes
+    IN_ARCHIVE_ADDED_DIR_NAME = "ADDED"
+    IN_ARCHIVE_CHANGED_DIR_NAME = "CHANGED"
+    IN_ARCHIVE_REMOVED_DIR_NAME = "REMOVED"
+    REMOVED_FILES_FNAME = "removed.txt"
+    SSL_CERT_DIGEST_TYPE = "sha256"
 
     def __init__(self, server_config):
         self.server_config = server_config
+        self.aide_db_manager = AIDEDatabasesManager(server_config)
         self.client_db_path = self._get_client_db_path(server_config.options.gen_img)
         self.aide_output_parser = AIDECheckParser(
                 self.client_db_path, self.server_config.aide_reference_db_path)
@@ -44,10 +56,6 @@ class SystemImageGenerator:
             raise SystemImageGeneratorError(m, e) from e
 
         system_img_path = os.path.realpath(system_img_path)
-
-        logger.info("Successfully created system image '{}' for client "
-                    "identified by AIDE's database '{}'.".format(
-                        system_img_path, self.client_db_path))
 
         return system_img_path
 
@@ -140,6 +148,8 @@ class SystemImageGenerator:
         """Save AIDE --check output to temporary file that will be processed to
            generate reference system image."""
 
+        logger.info("Running AIDE --check. It may take some time...")
+
         cmd = ["aide", "--check", "-c", tmp_aideconf_f.name]
         tmp_aideconf_f.seek(0)
 
@@ -167,4 +177,153 @@ class SystemImageGenerator:
         return self._generate_img_from_aide_entries(entries)
 
     def _generate_img_from_aide_entries(self, entries):
-        return "TODO"  # TODO TODO TODO
+        for k, v in {
+                "Added entries": entries.added_entries,
+                "Removed entries": entries.removed_entries,
+                "Changed entries": entries.changed_entries}.items():
+            print("\n{} (size: {}):\n".format(k, len(v)))
+            for e in v:
+                print(vars(e.aide_properties))  # TODO remove this debug
+
+        img_path = self._create_img_file(entries)
+
+        return img_path
+
+    def _create_img_file(self, entries):
+        img_path = self._get_img_file_full_path()
+
+        if os.path.isfile(img_path):
+            logger.warning("Overwriting '{}' system image.".format(img_path))
+
+        with tarfile.open(img_path, "w:gz") as f:
+            self._add_to_img_file_aide_added_entries(entries.added_entries, f)
+            self._add_to_img_file_removed_entries(entries.removed_entries, f)
+            self._add_to_img_file_changed_entries(entries.changed_entries, f)
+
+        logger.info("Successfully created system image '{}' for client "
+                    "identified by AIDE's database '{}'.".format(
+                        img_path, self.client_db_path))
+
+        img_sig_path = self._create_img_signature(img_path)
+
+        if img_sig_path:  # if generating signature was not skipped
+            logger.info("Signature of the system image '{}' created "
+                        "successfully!".format(img_sig_path))
+
+        return img_path
+
+    def _get_img_file_full_path(self):
+        EXT = "tar.gz"
+        FROM_DB_ID = self.server_config.options.gen_img
+        TO_DB_ID = self.aide_db_manager.get_current_aide_db_number()
+        FNAME = self.MYSCM_IMG_FILE_NAME.format(FROM_DB_ID, TO_DB_ID, EXT)
+        return os.path.join(self.server_config.system_img_out_dir, FNAME)
+
+    def _add_to_img_file_aide_added_entries(self, added_entries, archive_file):
+        for e in added_entries:
+            intar_path = os.path.join(self.IN_ARCHIVE_ADDED_DIR_NAME,
+                                      e.aide_properties.name.lstrip(os.path.sep))
+            archive_file.add(e.aide_properties.name, arcname=intar_path)
+
+    def _add_to_img_file_removed_entries(self, removed_entries, archive_file):
+        with NamedTemporaryFile(mode="r+") as tmp_removed_f:
+            for r in removed_entries:
+                line = "{}\n".format(r.aide_properties.name)
+                tmp_removed_f.write(line)
+            tmp_removed_f.seek(0)
+            intar_path = os.path.join(self.IN_ARCHIVE_REMOVED_DIR_NAME,
+                                      self.REMOVED_FILES_FNAME)
+            archive_file.add(tmp_removed_f.name, arcname=intar_path)
+
+    def _add_to_img_file_changed_entries(self, changed_entries, archive_file):
+        pass  # TODO TODO TODO
+
+    def _create_img_signature(self, img_path):
+        priv_key_obj = self._create_priv_key_openssl_obj(img_path)
+
+        if not priv_key_obj:
+            return None
+
+        signature = None
+
+        with open(img_path, "rb") as img_f:
+            # See: https://stackoverflow.com/q/45141917/1321680
+            bytes_to_sign = img_f.read()
+            signature = OpenSSL.crypto.sign(priv_key_obj, bytes_to_sign,
+                                            self.SSL_CERT_DIGEST_TYPE)
+
+        img_sig_path = "{}.sig".format(img_path)
+
+        with open(img_sig_path, "wb") as sig_f:
+            sig_f.write(signature)
+
+        # To manually verify validity of the signature run:
+        # openssl dgst -sha256 -verify cert_public_key_file.pub -signature cert_file.crt signed_file_path
+
+        return img_sig_path
+
+    def _create_priv_key_openssl_obj(self, img_path):
+        priv_key_path = self.server_config.options.SSL_cert_priv_key_path
+        pem_cert_str = self._get_priv_key_str(priv_key_path)
+        priv_key = None
+
+        while not priv_key:
+            try:
+                passwd = self._get_cert_password(priv_key_path, img_path)
+            except KeyboardInterrupt as e:
+                print()
+                logger.info("Generating SSL signature for '{}' skipped by "
+                            "user (keyboard interrupt).".format(img_path))
+                break
+
+            priv_key = self._get_cert_priv_key(pem_cert_str, passwd)
+
+        return priv_key
+
+    def _get_priv_key_str(self, priv_key_path):
+        pem_cert_str = None
+
+        try:
+            with open(priv_key_path) as f:
+                pem_cert_str = f.read()
+        except OSError as e:
+            m = "Unable to open '{}' SSL private key for certifcate for "\
+                "signing system image".format(priv_key_path)
+            raise SystemImageGeneratorError(m, e) from e
+
+        return pem_cert_str
+
+    def _get_cert_password(self, priv_key_path, img_path):
+        passwd = None
+
+        print()
+        m = "Enter password protecting '{}' private key of the SSL "\
+            "certificate to digitally sign system image '{}'. If you want to "\
+            "skip generating SSL signature press CTRL+C (sends SIGINT "\
+            "signal).".format(os.path.basename(priv_key_path),
+                              os.path.basename(img_path))
+        print(textwrap.fill(m, 80))
+        print()
+
+        try:
+            passwd = getpass.getpass()
+        except getpass.GetPassWarning:
+            logger.warning("SSL certificate password input may be echoed!")
+
+        print()
+
+        return passwd
+
+    def _get_cert_priv_key(self, pem_cert_str, passwd):
+        CERT_FORMAT_TYPE = OpenSSL.crypto.FILETYPE_PEM
+        priv_key = None
+
+        try:
+            priv_key = OpenSSL.crypto.load_privatekey(CERT_FORMAT_TYPE,
+                                                      pem_cert_str,
+                                                      passwd.encode("ascii"))
+        except OpenSSL.crypto.Error as e:
+            logger.warning("Failed to load SSL certificate private key - "
+                           "check if you entered correct password")
+
+        return priv_key

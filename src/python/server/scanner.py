@@ -40,6 +40,8 @@ class Scanner:
     def _is_reference_aide_db_outdated(self):
         """Return True if reference AIDE database aide.db is outdated."""
 
+        logger.info("Running AIDE --check. It may take some time...")
+
         cmd = [
             "aide", "--check", "-c",
             self.server_config.options.AIDE_config_path
@@ -52,6 +54,8 @@ class Scanner:
     def _scan(self):
         """Scan system looking for changes, replace old aide.db with new one
            and move old aide.db to aide.db.X (X is incremented integer)."""
+
+        logger.info("Running AIDE --init. It may take some time...")
 
         cmd = [
             "aide", "--init", "-c",

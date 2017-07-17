@@ -102,17 +102,6 @@ class AIDECheckParser:
                         len(entries.removed_entries),
                         len(entries.changed_entries)))
 
-        for k, v in {
-                "Added entries": entries.added_entries,
-                "Removed entries": entries.removed_entries,
-                "Changed entries": entries.changed_entries}.items():
-            print("\n------------------------------\n")
-            print("{} (size: {}):\n".format(k, len(v)))
-            for e in v:
-                print(vars(e))
-
-        pass  # TODO TODO TODO
-
     def _create_simple_entries_from_lines_up_to_new_line(self, aidediff_f):
         l = []
 

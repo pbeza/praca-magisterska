@@ -157,6 +157,8 @@ class VerbosityGeneralConfigOption(GeneralConfigOption):
        application logging verbosity."""
 
     DEFAULT_VERBOSITY_LVL = 0
+    MIN_VERBOSITY_LVL = 0
+    MAX_VERBOSITY_LVL = 3
 
     def __init__(self, verbosity_lvl=None):
         super().__init__(
@@ -172,25 +174,23 @@ class VerbosityGeneralConfigOption(GeneralConfigOption):
     def _assert_verbosity_valid(self, verbosity_string):
         """Verbosity option validator."""
 
-        _MIN_VERBOSITY_LVL = 0
-        _MAX_VERBOSITY_LVL = 5
-        verbosity_lvl = None
+        lvl = None
 
         try:
-            verbosity_lvl = int(verbosity_string)
+            lvl = int(verbosity_string)
         except ValueError:
             m = "Given verbosity is not integer (given value: '{}')".format(
                     verbosity_string)
             raise ParserError(m)
 
-        if not _MIN_VERBOSITY_LVL <= verbosity_lvl <= _MAX_VERBOSITY_LVL:
+        if not self.MIN_VERBOSITY_LVL <= lvl <= self.MAX_VERBOSITY_LVL:
             m = "Verbosity must be an integer from range [{}, {}] (given "\
-                "value: {})".format(_MIN_VERBOSITY_LVL,
-                                    _MAX_VERBOSITY_LVL,
-                                    verbosity_lvl)
+                "value: {})".format(self.MIN_VERBOSITY_LVL,
+                                    self.MAX_VERBOSITY_LVL,
+                                    lvl)
             raise ParserError(m)
 
-        return verbosity_lvl
+        return lvl
 
 
 class ConfigParser:
@@ -198,8 +198,8 @@ class ConfigParser:
 
     _HELP_EPILOG = '''This software is part of the author's master thesis
                       project at the Faculty of Mathematics and Information
-                      Science at Warsaw University of Technology. To learn more
-                      about the project refer to project white paper and
+                      Science at the Warsaw University of Technology. To learn
+                      more about the project refer to project white paper and
                       application manual (`man myscm-srv`).'''
 
     def __init__(self, config_path, config_section_name, default_config,

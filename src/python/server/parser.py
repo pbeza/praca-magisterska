@@ -92,6 +92,35 @@ class SSLCertGeneralConfigOption(GeneralConfigOption):
         return cert_path
 
 
+class SSLCertPrivKeyGeneralConfigOption(GeneralConfigOption):
+    """Configuration option read from file and/or CLI, specifying SSL private
+       key of the x509 certificate saved in PEM format."""
+
+    DEFAULT_SSL_CERT_PRIV_KEY_PATH = "/etc/myscm-srv/ssl.sig.priv"
+
+    def __init__(self, ssl_priv_key_path=None):
+        super().__init__(
+            "SSLCertPrivKeyPath",
+            ssl_priv_key_path or self.DEFAULT_SSL_CERT_PRIV_KEY_PATH,
+            self._assert_ssl_cert_priv_key_path_valid, True, "--ssl-cert-priv",
+            metavar="PATH", type=self._assert_ssl_cert_priv_key_path_valid,
+            help="full path to the server's SSL private key of the SSL "
+                 "certificate saved in PEM format; this key is used to "
+                 "digitally sign system image generated with --gen-img "
+                 "option (default value: '{}')".format(
+                    self.DEFAULT_SSL_CERT_PRIV_KEY_PATH))
+
+    def _assert_ssl_cert_priv_key_path_valid(self, cert_priv_key_path):
+        """SSL private key path option validator."""
+
+        if not os.path.isfile(cert_priv_key_path):
+            m = "Given private key path '{}' for SSL certificate file "\
+                "probably doesn't exist".format(cert_priv_key_path)
+            raise ServerParserError(m)
+
+        return cert_priv_key_path
+
+
 class AIDEConfigFileGeneralConfigOption(GeneralConfigOption):
     """Configuration option read from file and/or CLI, specifying AIDE
        configuration file path."""
@@ -210,6 +239,7 @@ class ServerConfigParser(ConfigParser):
         _SERVER_DEFAULT_CONFIG = [
             PropagationIntervalGeneralConfigOption(),
             SSLCertGeneralConfigOption(),
+            SSLCertPrivKeyGeneralConfigOption(),
             AIDEConfigFileGeneralConfigOption(),
             AIDEScanArgConfigOption(),
             ConfigCheckConfigOption(),

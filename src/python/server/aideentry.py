@@ -51,7 +51,6 @@ class AIDEProperties:
     def __init__(self, properties):
         AIDEProperties.assert_required_properties_present_in_dict(properties)
 
-        self.aide_info_str = None  # AIDE's 'summarize_changes' info string
         self.ftype = None          # valid only if summarize_changes option set
 
         for prop_name, prop_val in properties.items():
@@ -87,15 +86,6 @@ class AIDEProperties:
         if self.crc32:
             self.crc32_decoded = base64.b64decode(self.crc32).hex()
 
-        if self.aide_info_str:
-            if self.aide_info_str.lower() in {"added", "removed", "changed"}:
-                m = "Required 'summarize_changes' not set in AIDE "\
-                    "configuration file"
-                raise AIDEPropertiesError(m)
-            else:
-                ftype_char = self.aide_info_str[0]
-                self.ftype = FileType(ftype_char)
-
     @staticmethod
     def assert_required_properties_present_in_dict(properties_dict):
         properties_set = {p for p in properties_dict}
@@ -122,48 +112,23 @@ class AIDESimpleEntry:
        application) and full file path of the file."""
 
     def __init__(self, aide_info_str, file_path):
-        self.aide_info_str = aide_info_str
+        self.aide_info_str = aide_info_str  # AIDE's 'summarize_changes' info
         self.file_path = file_path
 
 
-#class AIDEEntry:
-#    """Base class for added, moved, removed and removed AIDE entries."""
-#
-#    def __init__(self, aide_info_str, path):
-#        self.aide_info_str = aide_info_str
-#        self.path = path
-#        self.file_type = self._aide_info_str_to_file_type(aide_info_str)
-#
-#    def _aide_info_str_to_file_type(self, aide_info_str):
-#        ftype_char = aide_info_str[0]
-#        ftype = None
-#
-#        try:
-#            ftype = FileType(ftype_char)
-#        except ValueError:
-#            m = "Unexpected file type reported by AIDE (unexpected '{}' "\
-#                "character in '{}' string)".format(ftype_char, aide_info_str)
-#            raise AIDEParserError(m)
-#
-#        return ftype
-#
-#
-#class AIDEAddedEntry(AIDEEntry):
-#
-#    def __init__(self, aide_info_str, path):
-#        super().__init__(aide_info_str, path)
-#        self.path = path
-#
-#
-#class AIDERemovedEntry:
-#
-#    def __init__(self, path):
-#        self.path = path
-#
-#
-#class AIDEChangedEntry:
-#
-#    def __init__(self, path, gid, uid):
-#        self.path = path
-#        self.gid = gid
-#        self.uid = uid
+class AIDEEntry:
+    """Representation of added, removed and changed AIDE entries."""
+
+    def __init__(self, aide_properties, aide_info_str):
+        self.aide_properties = aide_properties
+        self._assert_valid_aide_info_str(aide_info_str)
+        self.aide_info_str = aide_info_str
+        self.ftype = FileType(self.aide_info_str[0])
+
+    def _assert_valid_aide_info_str(self, aide_info_str):
+        INVALID_SET = {"added", "removed", "changed"}
+
+        if aide_info_str and aide_info_str.lower() in INVALID_SET:
+            m = "Required 'summarize_changes' probably not set in AIDE "\
+                "configuration file (invalid AIDE's info-string)"
+            raise AIDEPropertiesError(m)

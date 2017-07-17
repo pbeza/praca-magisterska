@@ -2,7 +2,7 @@
 import logging
 import urllib.parse
 
-from server.aideentry import AIDEProperties
+from server.aideentry import AIDEEntry, AIDEProperties
 from server.error import ServerError
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,6 @@ class AIDEDatabaseFileParser:
     AIDE_DB_FILE_OPENING = "@@begin_db\n"
     AIDE_DB_FILE_CLOSING = "@@end_db\n"
     AIDE_DB_PROPERTIES_OPENING = "@@db_spec"
-    AIDE_INFO_STR = "aide_info_str"
 
     def __init__(self, aide_db_path):
         """Constructor initialized by full file path of the parsed AIDE
@@ -29,9 +28,24 @@ class AIDEDatabaseFileParser:
     def get_files_entries(self, aide_simple_entries):
         requested_paths = {e.file_path for e in aide_simple_entries}
         files_properties = self.get_files_properties(requested_paths)
+        file_entries = set()
+
         for e in aide_simple_entries:
-            files_properties[e.file_path][self.AIDE_INFO_STR] = e.aide_info_str
-        return {AIDEProperties(v) for _, v in files_properties.items()}
+            properties = AIDEProperties(files_properties[e.file_path])
+            file_entry = AIDEEntry(properties, e.aide_info_str)
+            file_entries.add(file_entry)
+
+        self._assert_requested_files_found_in_aide_db(len(aide_simple_entries),
+                                                      len(file_entries))
+
+        return file_entries
+
+    def _assert_requested_files_found_in_aide_db(self, requested_entries_count,
+                                                 actual_entries_count):
+        if requested_entries_count != actual_entries_count:
+            m = "Not all of the files listed in AIDE --check were found in "\
+                "'{}' AIDE database".format(self.aide_db_path)
+            raise AIDEDatabaseFileParserError(m)
 
     def get_files_properties(self, requested_paths, requested_properties=None):
         """Wrapper handling errors for the the actual _get_files_properties()

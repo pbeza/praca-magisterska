@@ -10,7 +10,8 @@ import sys
 import common
 from server.parser import ServerConfigParser, ServerParserError
 from server.scanner import Scanner, ScannerError
-from server.sysimggenerator import SystemImageGenerator, SystemImageGeneratorError
+from server.sysimggenerator import SystemImageGenerator
+from server.sysimggenerator import SystemImageGeneratorError
 
 logger = logging.getLogger("server")
 
@@ -24,9 +25,9 @@ def get_app_config():
     except ServerParserError as e:
         raise ServerParserError("Parsing error", e) from e
 
-    if config.options.verbose > 1:
-        logger.debug("Loaded server configuration: {}."
-                     .format(vars(config.options)))
+    config.set_log_level(logger)
+
+    logger.debug("Server configuration: {}.".format(vars(config.options)))
 
     return config
 

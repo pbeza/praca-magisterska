@@ -19,6 +19,7 @@ PANDOC_DOCX_OPTIONS=--to docx
 PANDOC_ODT_OPTIONS=--to odt
 PANDOC_LATEX_OPTIONS=--to latex
 
+
 % : %.md
 	$(PANDOC) $(PANDOC_OPTIONS) $(PANDOC_MAN_OPTIONS) -o $@ $<
 
@@ -34,8 +35,6 @@ PANDOC_LATEX_OPTIONS=--to latex
 %.tex : %.md
 	$(PANDOC) $(PANDOC_OPTIONS) $(PANDOC_LATEX_OPTIONS) -o $@ $<
 
-
-# Targets and dependencies
 
 .PHONY: all clean
 

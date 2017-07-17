@@ -62,12 +62,17 @@ class AIDEDatabasesManager:
     def _get_new_fpath_for_old_db(self):
         """Return new path for old AIDE database."""
 
-        num = self._get_last_conf_number()
+        num = self.get_last_aide_db_number()
         fname = "{}.{}".format(self.server_config.aide_reference_db_fname,
                                num + 1)
         return os.path.join(self.server_config.aide_reference_db_dir, fname)
 
-    def _get_last_conf_number(self):
+    def get_current_aide_db_number(self):
+        """Return integer X which corresponds to aide.db.X that aide.db will
+           have after next --scan."""
+        return self.get_last_aide_db_number() + 1
+
+    def get_last_aide_db_number(self):
         """Return integer X which corresponds to aide.db.X with greatest X."""
 
         regex_str = r"{}.(\d+)".format(
