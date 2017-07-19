@@ -25,14 +25,17 @@ class AIDEDatabaseFileParser:
 
         self.aide_db_path = aide_db_path
 
-    def get_files_entries(self, aide_simple_entries):
+    def get_files_entries(self, entry_type, aide_simple_entries):
+        """Get details of given AIDESimpleEntry entries from aide.db[.X]
+           database file and return them in a set."""
+
         requested_paths = {e.file_path for e in aide_simple_entries}
         files_properties = self.get_files_properties(requested_paths)
         file_entries = set()
 
         for e in aide_simple_entries:
             properties = AIDEProperties(files_properties[e.file_path])
-            file_entry = AIDEEntry(properties, e.aide_info_str)
+            file_entry = AIDEEntry(properties, e.aide_info_str, entry_type)
             file_entries.add(file_entry)
 
         self._assert_requested_files_found_in_aide_db(len(aide_simple_entries),
@@ -48,7 +51,7 @@ class AIDEDatabaseFileParser:
             raise AIDEDatabaseFileParserError(m)
 
     def get_files_properties(self, requested_paths, requested_properties=None):
-        """Wrapper handling errors for the the actual _get_files_properties()
+        """Wrapper handling errors for the the actual `_get_files_properties()`
            function."""
 
         if not requested_properties:
@@ -58,7 +61,7 @@ class AIDEDatabaseFileParser:
 
         if not isinstance(requested_properties, set) or\
            not isinstance(requested_paths, set):
-            m = "get_files_properties() got unexpected parameters"
+            m = "Internal error. _get_files_properties() unexpected parameters"
             raise AIDEDatabaseFileParserError(m)
 
         files_properties = {}
@@ -81,9 +84,6 @@ class AIDEDatabaseFileParser:
 
         if not requested_paths:
             return files_properties
-
-        # File needs to be open with "b" flag to be able to seek relative to
-        # file's end. See: https://stackoverflow.com/a/21533561/1321680
 
         with open(self.aide_db_path) as db_file:
             infile_prop_names = self._get_all_infile_properties_names(db_file)
@@ -186,6 +186,7 @@ class AIDEDatabaseFileParser:
                 raise AIDEDatabaseFileParserError(m)
 
     def _assert_required_properties_present(self, infile_prop_names):
+        infile_prop_names = set(infile_prop_names)
         AIDEProperties.assert_required_properties_present(infile_prop_names)
 
     def _assert_requested_properties_present(self, requested_properties,

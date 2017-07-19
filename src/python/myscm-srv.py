@@ -32,23 +32,6 @@ def get_app_config():
     return config
 
 
-def _main():
-    config = get_app_config()
-
-    if config.options.version:
-        common.print_version()
-    elif config.options.scan:
-        _scan(config)
-    elif config.options.gen_img is not None:  # Note that 0 is valid argument
-        _gen_img(config)
-    elif config.options.config_check:
-        logger.debug("Configuration check ended successfully")
-        # If check fails, then Exception is raised and caught in __main__
-    else:
-        logger.info("This application does nothing unless you specify what "
-                    "it should do. See --help to learn more.")
-
-
 def _scan(config):
     try:
         scanner = Scanner(config)
@@ -66,13 +49,30 @@ def _gen_img(config):
         raise SystemImageGeneratorError(m, e) from e
 
 
+def _main():
+    config = get_app_config()
+
+    if config.options.version:
+        common.print_version()
+    elif config.options.scan:
+        _scan(config)
+    elif config.options.gen_img is not None:  # Note that 0 is valid argument
+        _gen_img(config)
+    elif config.options.config_check:
+        logger.debug("Configuration check ended successfully")
+        # If check fails, then Exception is raised and caught in __main__
+    else:
+        logger.info("This application does nothing unless you specify what to "
+                    "do. Read manual or --help to learn more.")
+
+
 if __name__ == "__main__":
     exit_code = 0
 
     try:
         _main()
     except (KeyboardInterrupt, EOFError):
-        logger.info("Keyboard interrupt or EOF detected.")
+        logger.info("Keyboard interrupt or EOF detected. Exiting.")
     except common.error.MySCMError as e:
         logger.error(e)
         exit_code = 1

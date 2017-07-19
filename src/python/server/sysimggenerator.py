@@ -30,7 +30,9 @@ class SystemImageGenerator:
     IN_ARCHIVE_ADDED_DIR_NAME = "ADDED"
     IN_ARCHIVE_CHANGED_DIR_NAME = "CHANGED"
     IN_ARCHIVE_REMOVED_DIR_NAME = "REMOVED"
+    # TODO add added summary text file
     REMOVED_FILES_FNAME = "removed.txt"
+    CHANGED_FILES_FNAME = "changed.txt"
     SSL_CERT_DIGEST_TYPE = "sha256"
 
     def __init__(self, server_config):
@@ -42,17 +44,20 @@ class SystemImageGenerator:
 
     def generate_img(self):
         """Generate system image file for client whose AIDE configuration is
-           identified by given unique client's ID (which is integer number) and
-           return full path to the created system image."""
+           identified by unique client's ID `server_config.options.gen_img`
+           (which is integer number) and return full path to the created system
+           image."""
 
         system_img_path = None
 
         try:
             system_img_path = self._generate_img(self.client_db_path)
         except Exception as e:
-            m = "Failed to generate system image based on the output of " \
-                "comparison server's current configuration's state and "  \
-                "client's '{}' AIDE database".format(self.client_db_path)
+            m = "Failed to generate system image based on the output of "\
+                "comparison server's current configuration's state '{}' and "\
+                "client's '{}' AIDE database".format(
+                    self.server_config.aide_reference_db_path,
+                    self.client_db_path)
             raise SystemImageGeneratorError(m, e) from e
 
         system_img_path = os.path.realpath(system_img_path)
@@ -62,9 +67,6 @@ class SystemImageGenerator:
     def _get_client_db_path(self, client_db_version):
         """Find and get AIDE database that client's configuration database
            version refers to."""
-
-        logger.debug("Searching AIDE database corresponding to the client's "
-                     "database version '{}'.".format(client_db_version))
 
         if not isinstance(client_db_version, int) or client_db_version < 0:
             m = "Client's AIDE database version is expected to be " \
@@ -110,9 +112,12 @@ class SystemImageGenerator:
     def _copy_aide_config_to_tmp_replacing_db_path(self, client_db_path,
                                                    tmp_aideconf_f):
         """Create temporary AIDE configuration file by copying existing one and
-           replacing 'database' variable with path to 'client_db_path' database
+           assigning expected values to some variables.
+
+           To `database` variable path to `client_db_path` database is assigned
            to be able run AIDE --check to compare current state and given state
-           that corresponds to client's system configuration."""
+           that corresponds to client's system configuration. Variable
+           `summarize_changes` is forced to be set to `yes`."""
 
         aide_conf_path = self.server_config.options.AIDE_config_path
 
@@ -155,16 +160,19 @@ class SystemImageGenerator:
 
         # Alternatively it can be handled by using AIDE's --report option
         # instead of capturing stdout
+
         completed_proc = run_cmd(cmd, False, aidediff_f)
 
         # AIDE returns exit code to indicate whether error occured - see manual
+
         if completed_proc.returncode >= self.AIDE_MIN_EXITCODE:
             m = "Erroneous exitcode {} for command '{}'. Refer AIDE's manual "\
                 "for details".format(completed_proc.returncode, " ".join(cmd))
             raise SystemImageGeneratorError(m)
 
     def _generate_img_from_aide_check_result(self, aidediff_f):
-        """Generate system image based on the AIDE --check output."""
+        """Read added, removed and changed entries from AIDE --check result and
+           generate system image based those entries."""
 
         aidediff_f.seek(0)
 
@@ -177,19 +185,19 @@ class SystemImageGenerator:
         return self._generate_img_from_aide_entries(entries)
 
     def _generate_img_from_aide_entries(self, entries):
+        """Generate system image based on the entries read from AIDE --check
+           output."""
+
+        # TODO begin debug to remove
         for k, v in {
                 "Added entries": entries.added_entries,
                 "Removed entries": entries.removed_entries,
                 "Changed entries": entries.changed_entries}.items():
             print("\n{} (size: {}):\n".format(k, len(v)))
             for e in v:
-                print(vars(e.aide_properties))  # TODO remove this debug
+                print(vars(e.aide_properties))
+        # end end to remove
 
-        img_path = self._create_img_file(entries)
-
-        return img_path
-
-    def _create_img_file(self, entries):
         img_path = self._get_img_file_full_path()
 
         if os.path.isfile(img_path):
@@ -206,17 +214,17 @@ class SystemImageGenerator:
 
         img_sig_path = self._create_img_signature(img_path)
 
-        if img_sig_path:  # if generating signature was not skipped
+        if img_sig_path:  # if generating signature was not skipped by the user
             logger.info("Signature of the system image '{}' created "
                         "successfully!".format(img_sig_path))
 
         return img_path
 
     def _get_img_file_full_path(self):
-        EXT = "tar.gz"
+        IMG_EXT = "tar.gz"
         FROM_DB_ID = self.server_config.options.gen_img
         TO_DB_ID = self.aide_db_manager.get_current_aide_db_number()
-        FNAME = self.MYSCM_IMG_FILE_NAME.format(FROM_DB_ID, TO_DB_ID, EXT)
+        FNAME = self.MYSCM_IMG_FILE_NAME.format(FROM_DB_ID, TO_DB_ID, IMG_EXT)
         return os.path.join(self.server_config.system_img_out_dir, FNAME)
 
     def _add_to_img_file_aide_added_entries(self, added_entries, archive_file):
@@ -230,13 +238,25 @@ class SystemImageGenerator:
             for r in removed_entries:
                 line = "{}\n".format(r.aide_properties.name)
                 tmp_removed_f.write(line)
-            tmp_removed_f.seek(0)
             intar_path = os.path.join(self.IN_ARCHIVE_REMOVED_DIR_NAME,
                                       self.REMOVED_FILES_FNAME)
+            tmp_removed_f.seek(0)
             archive_file.add(tmp_removed_f.name, arcname=intar_path)
 
     def _add_to_img_file_changed_entries(self, changed_entries, archive_file):
-        pass  # TODO TODO TODO
+        with NamedTemporaryFile(mode="r+") as tmp_changed_f:
+            for c in changed_entries:
+                self._append_changed_entry(c, tmp_changed_f)
+            intar_path = os.path.join(self.IN_ARCHIVE_CHANGED_DIR_NAME,
+                                      self.CHANGED_FILES_FNAME)
+            tmp_changed_f.seek(0)
+            archive_file.add(tmp_changed_f.name, arcname=intar_path)
+
+    def _append_changed_entry(self, entry, changed_f):
+        properties = entry.get_aide_changed_properties()
+        line = "{}\n".format(entry.aide_properties.name)
+        line += "{}\n\n".format("\n".join(properties))
+        changed_f.write(line)
 
     def _create_img_signature(self, img_path):
         priv_key_obj = self._create_priv_key_openssl_obj(img_path)

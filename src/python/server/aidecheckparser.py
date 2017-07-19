@@ -3,8 +3,7 @@ import logging
 import re
 
 from server.aidedbparser import AIDEDatabaseFileParser
-from server.aideentry import AIDEEntries
-from server.aideentry import AIDESimpleEntry
+from server.aideentry import AIDEEntries, AIDESimpleEntry, EntryType
 from server.error import ServerError
 
 logger = logging.getLogger(__name__)
@@ -66,7 +65,7 @@ class AIDECheckParser:
             elif line == self.FILES_ATTRS:
                 missing = [e.strip() for e in expected_entries_mapping.keys()]
                 m = "{} sections ('{}') not found in --check AIDE output "\
-                    "(this is not an error nor warning).".format(
+                    "(this message is not an error nor warning).".format(
                         len(expected_entries_mapping), "', '".join(missing))
                 logger.debug(m)
                 break
@@ -89,18 +88,26 @@ class AIDECheckParser:
         entries.changed_entries = self._create_simple_entries_from_lines_up_to_new_line(aidediff_f)
 
     def _set_entries_info_from_aide_db_file(self, entries):
+        """Replace AIDESimpleEntry entries with AIDEEntry entries by fetching
+           more information about AIDESimpleEntry entries from AIDE aide.db[.X]
+           database file.
+
+           Reading intermediate AIDESimpleEntry entries first and later
+           replacing them by AIDEEntry entries is needed to avoid rereading
+           aide.db[.X] database N times where N is number of all entries."""
+
         entries.added_entries = self.aide_srv_db_parser.get_files_entries(
-                                                       entries.added_entries)
+                                EntryType.ADDED, entries.added_entries)
         entries.removed_entries = self.aide_cli_db_parser.get_files_entries(
-                                                       entries.removed_entries)
-        entries.changed_entries = self.aide_cli_db_parser.get_files_entries(
-                                                       entries.changed_entries)
+                                EntryType.REMOVED, entries.removed_entries)
+        entries.changed_entries = self.aide_srv_db_parser.get_files_entries(
+                                EntryType.CHANGED, entries.changed_entries)
 
         logger.info("{} files added, {} removed, {} changes since client's "
                     "declared last update.".format(
-                        len(entries.added_entries),
-                        len(entries.removed_entries),
-                        len(entries.changed_entries)))
+                                                 len(entries.added_entries),
+                                                 len(entries.removed_entries),
+                                                 len(entries.changed_entries)))
 
     def _create_simple_entries_from_lines_up_to_new_line(self, aidediff_f):
         l = []

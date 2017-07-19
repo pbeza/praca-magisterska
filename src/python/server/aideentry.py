@@ -23,7 +23,17 @@ class AIDEEntries:
         self.changed_entries = []
 
 
+class EntryType(Enum):
+    """All types of AIDE entries."""
+
+    ADDED = 1
+    REMOVED = 2
+    CHANGED = 3
+
+
 class FileType(Enum):
+    """All types of files."""
+
     REGULAR_FILE = "f"
     DIRECTORY = "d"
     SYMBOLIC_LINK = "l"
@@ -42,6 +52,7 @@ class AIDEPropertiesError(ServerError):
 
 
 class AIDEProperties:
+    """Properties of files tracked by AIDE."""
 
     REQUIRED_PROPERTIES = {
             "name", "lname", "attr", "perm", "inode", "bcount", "uid", "gid",
@@ -51,14 +62,9 @@ class AIDEProperties:
     def __init__(self, properties):
         AIDEProperties.assert_required_properties_present_in_dict(properties)
 
-        self.ftype = None          # valid only if summarize_changes option set
-
         for prop_name, prop_val in properties.items():
             setattr(self, prop_name, prop_val)
 
-        self._convert_from_str_to_types()
-
-    def _convert_from_str_to_types(self):
         if self.lname == "0":                           # if not a symlink
             self.lname = None                           # full path
         self.attr = int(self.attr)                      # attributes
@@ -77,24 +83,22 @@ class AIDEProperties:
             self.crc32 = None
 
         # Reverse of below is: base64.b64encode(bytes.fromhex(md5))
-        if self.md5:
-            self.md5_decoded = base64.b64decode(self.md5).hex()
+        self.md5_decoded = base64.b64decode(self.md5).hex() if self.md5 else 0
 
-        # There are 2 versions of CRC-32 (AIDE uses 1st one - namely CRC-32B)
+        # There are 2 versions of CRC-32 (AIDE uses 1st one)
         #   (1) http://hash.online-convert.com/crc32-generator
         #   (2) http://hash.online-convert.com/crc32b-generator
-        if self.crc32:
-            self.crc32_decoded = base64.b64decode(self.crc32).hex()
+        self.crc32_decoded = base64.b64decode(self.crc32).hex() if self.crc32 else 0
 
     @staticmethod
     def assert_required_properties_present_in_dict(properties_dict):
-        properties_set = {p for p in properties_dict}
+        properties_set = set(properties_dict.keys())
         AIDEProperties.assert_required_properties_present(properties_set)
 
     @staticmethod
     def assert_required_properties_present(properties_set):
         A = AIDEProperties.REQUIRED_PROPERTIES
-        B = set(properties_set)
+        B = properties_set
 
         if not A.issubset(B):
             A_str = "', '".join(A)
@@ -117,13 +121,24 @@ class AIDESimpleEntry:
 
 
 class AIDEEntry:
-    """Representation of added, removed and changed AIDE entries."""
+    """Representation of added, removed and changed AIDE entry. This is
+       structured, extended version of AIDESimpleEntry."""
 
-    def __init__(self, aide_properties, aide_info_str):
+    AIDE_INFO_STR_PATTERN = "YlZbpugamcinCAXSE"
+    AIDE_INFO_STR_LEN = len(AIDE_INFO_STR_PATTERN)
+    COMMENT_CHAR = "#"
+    NO_CHANGE_CHAR = "."
+    ATTR_ADDED_CHAR = "+"
+    ATTR_REMOVED_CHAR = "-"
+    ATTR_IGNORED_CHAR = ":"
+    ATTR_NOT_CHECKED_CHAR = " "
+
+    def __init__(self, aide_properties, aide_info_str, entry_type):
         self.aide_properties = aide_properties
         self._assert_valid_aide_info_str(aide_info_str)
         self.aide_info_str = aide_info_str
         self.ftype = FileType(self.aide_info_str[0])
+        self.entry_type = entry_type
 
     def _assert_valid_aide_info_str(self, aide_info_str):
         INVALID_SET = {"added", "removed", "changed"}
@@ -131,4 +146,77 @@ class AIDEEntry:
         if aide_info_str and aide_info_str.lower() in INVALID_SET:
             m = "Required 'summarize_changes' probably not set in AIDE "\
                 "configuration file (invalid AIDE's info-string)"
-            raise AIDEPropertiesError(m)
+            raise AIDEEntryError(m)
+
+        if len(aide_info_str) != self.AIDE_INFO_STR_LEN:
+            m = "Unexpected length of the AIDE changed properties info string"
+            raise AIDEEntryError(m)
+
+    def get_aide_changed_properties(self):
+        # The general format of the AIDE info string is like the string
+        # YlZbpugamcinCAXSE (see AIDE manual)
+
+        p = self.aide_properties
+        prop_val = [
+            self.ftype.name if self.ftype else "?",
+            p.lname if p.lname else "not symlink",
+            self._get_size_change_info_str(),
+            p.bcount,
+            p.perm,
+            p.uid,
+            p.gid,
+            "atime ignored",  # p.atime,
+            p.mtime,
+            p.ctime,
+            p.inode,
+            p.lcount,
+            "{} {}".format(p.md5_decoded, p.crc32_decoded),
+            "acl changed",
+            "extended attrs changed",
+            "selinux attrs changed",
+            "file attrs on 2nd changed"
+        ]
+        aide_char_mapping = {
+            self.NO_CHANGE_CHAR:        "no change",
+            self.ATTR_IGNORED_CHAR:     "ignored",
+            self.ATTR_NOT_CHECKED_CHAR: "not checked",
+            self.ATTR_ADDED_CHAR:       "added",
+            self.ATTR_REMOVED_CHAR:     "removed"
+        }
+        commented_out_properties = {
+            self.NO_CHANGE_CHAR,
+            self.ATTR_IGNORED_CHAR,
+            self.ATTR_NOT_CHECKED_CHAR
+        }
+        s = ["# {}".format(p) for p in prop_val[:3]]
+        s.append("# {}".format(self.aide_info_str))
+
+        for i in range(3, self.AIDE_INFO_STR_LEN):
+            val = prop_val[i]
+            c = self.aide_info_str[i]
+            if c == self.AIDE_INFO_STR_PATTERN[i]:
+                line = "{:<45} # CHANGED"
+                s.append(line.format(val))
+            else:
+                comment = aide_char_mapping.get(c)
+                if not comment:
+                    m = "Unrecognized AIDE character '{}'".format(c)
+                    raise AIDEEntryError(m)
+                prefix = "# " if c in commented_out_properties else ""
+                line = "{:<45} # {}".format(prefix + str(val), comment)
+                s.append(line)
+
+        return s
+
+    def _get_size_change_info_str(self):
+        info = "unrecognized size status"
+
+        c = self.aide_info_str[2]
+        if c == "=":
+            info = "size has not changed"
+        elif c == "<":
+            info = "shrinked size"
+        elif c == ">":
+            info = "grown size"
+
+        return info
