@@ -3,7 +3,7 @@ import logging
 import re
 
 from server.aidedbparser import AIDEDatabaseFileParser
-from server.aideentry import AIDEEntries, AIDESimpleEntry, EntryType
+from server.aideentry import AIDEEntries, AIDESimpleEntry, EntryType, AIDEProperties
 from server.error import ServerError
 
 logger = logging.getLogger(__name__)
@@ -22,6 +22,7 @@ class AIDECheckParser:
     REMOVED_ENTRIES = "Removed entries:\n"
     CHANGED_ENTRIES = "Changed entries:\n"
     FILES_ATTRS = "The attributes of the (uncompressed) database(s):\n"
+    DETAILED_INFO = "Detailed information about changes:\n"
 
     def __init__(self, client_aide_db_path, server_aide_db_path):
         self.aide_srv_db_parser = AIDEDatabaseFileParser(server_aide_db_path)
@@ -41,6 +42,13 @@ class AIDECheckParser:
         return entries
 
     def _read_all_entries(self, aidediff_f):
+        entries = self._set_added_removed_changed_entries(aidediff_f)
+        self._set_entries_info_from_aide_db_file(entries)
+        self._set_changed_properties_prev_values(entries.changed_entries)
+
+        return entries
+
+    def _set_added_removed_changed_entries(self, aidediff_f):
         entries = AIDEEntries()
         expected_entries_mapping = {
                 self.ADDED_ENTRIES: self._set_added_entries,
@@ -74,8 +82,6 @@ class AIDECheckParser:
                      "--check output".format(line.strip())
                 raise AIDECheckParserError(m)
 
-        self._set_entries_info_from_aide_db_file(entries)
-
         return entries
 
     def _set_added_entries(self, aidediff_f, entries):
@@ -105,19 +111,35 @@ class AIDECheckParser:
 
         logger.info("{} files added, {} removed, {} changes since client's "
                     "declared last update.".format(
-                                                 len(entries.added_entries),
-                                                 len(entries.removed_entries),
-                                                 len(entries.changed_entries)))
+                                len(entries.added_entries),
+                                len(entries.removed_entries),
+                                len(entries.changed_entries)))
+
+    def _set_changed_properties_prev_values(self, changed_entries):
+        # TODO this method shouldn't be here
+
+        s = set(changed_entries.keys())
+        old_properties = self.aide_cli_db_parser.get_files_properties(s)
+
+        for k, v in old_properties.items():
+            e = changed_entries.get(k)
+
+            if not e:
+                m = "Can't find previous properties for changed file '{}'"\
+                    .format(k)
+                raise AIDECheckParserError(m)
+
+            changed_entries[k].aide_prev_properties = AIDEProperties(v)
 
     def _create_simple_entries_from_lines_up_to_new_line(self, aidediff_f):
-        l = []
+        d = {}
 
         # Ignore leading empty lines
 
         for line in aidediff_f:
             if line != "\n":
                 file_entry = self._get_simple_aide_entry(line)
-                l.append(file_entry)
+                d[file_entry.file_path] = file_entry
                 break
 
         # Read until empty line
@@ -125,11 +147,11 @@ class AIDECheckParser:
         for line in aidediff_f:
             if line != "\n":
                 file_entry = self._get_simple_aide_entry(line)
-                l.append(file_entry)
+                d[file_entry.file_path] = file_entry
             else:
                 break
 
-        return l
+        return d
 
     def _get_simple_aide_entry(self, line):
         """Get AIDE summarize string and file path."""

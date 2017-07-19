@@ -18,9 +18,9 @@ class AIDEEntries:
        changed files."""
 
     def __init__(self):
-        self.added_entries = []
-        self.removed_entries = []
-        self.changed_entries = []
+        self.added_entries = {}
+        self.removed_entries = {}
+        self.changed_entries = {}
 
 
 class EntryType(Enum):
@@ -32,7 +32,7 @@ class EntryType(Enum):
 
 
 class FileType(Enum):
-    """All types of files."""
+    """All types of files supported by AIDE."""
 
     REGULAR_FILE = "f"
     DIRECTORY = "d"
@@ -139,6 +139,7 @@ class AIDEEntry:
         self.aide_info_str = aide_info_str
         self.ftype = FileType(self.aide_info_str[0])
         self.entry_type = entry_type
+        self.aide_prev_properties = None  # properties before change loaded elsewhere :(
 
     def _assert_valid_aide_info_str(self, aide_info_str):
         INVALID_SET = {"added", "removed", "changed"}
@@ -157,24 +158,25 @@ class AIDEEntry:
         # YlZbpugamcinCAXSE (see AIDE manual)
 
         p = self.aide_properties
-        prop_val = [
-            self.ftype.name if self.ftype else "?",
-            p.lname if p.lname else "not symlink",
-            self._get_size_change_info_str(),
-            p.bcount,
-            p.perm,
-            p.uid,
-            p.gid,
-            "atime ignored",  # p.atime,
-            p.mtime,
-            p.ctime,
-            p.inode,
-            p.lcount,
-            "{} {}".format(p.md5_decoded, p.crc32_decoded),
-            "acl changed",
-            "extended attrs changed",
-            "selinux attrs changed",
-            "file attrs on 2nd changed"
+        pp = self.aide_prev_properties
+        properties = [
+            ["name",           self.ftype.name if self.ftype else "?",         self.ftype.name if self.ftype else "?"],
+            ["symlink",        p.lname if p.lname else "not symlink",          pp.lname if pp.lname else "?"],
+            ["size",           self._get_size_change_info_str(),               "?"],
+            ["block count",    p.bcount,                                       pp.bcount],
+            ["permissions",    p.perm,                                         pp.perm],
+            ["user id",        p.uid,                                          pp.uid],
+            ["group id",       p.gid,                                          pp.gid],
+            ["atime",          "",                                             ""],
+            ["mtime",          p.mtime,                                        pp.mtime],
+            ["ctime",          p.ctime,                                        pp.ctime],
+            ["inode",          p.inode,                                        pp.inode],
+            ["hardlinks",      p.lcount,                                       pp.lcount],
+            ["md5 crc32",      "{} {}".format(p.md5_decoded, p.crc32_decoded), "{} {}".format(pp.md5_decoded, pp.crc32_decoded)],
+            ["acl",            "",                                             ""],
+            ["extended attrs", "",                                             ""],
+            ["selinux attrs",  "",                                             ""],
+            ["attrs 2nd part", "",                                             ""]
         ]
         aide_char_mapping = {
             self.NO_CHANGE_CHAR:        "no change",
@@ -188,22 +190,27 @@ class AIDEEntry:
             self.ATTR_IGNORED_CHAR,
             self.ATTR_NOT_CHECKED_CHAR
         }
-        s = ["# {}".format(p) for p in prop_val[:3]]
+        s = ["# {}".format(p[1]) for p in properties[:3]]
         s.append("# {}".format(self.aide_info_str))
 
         for i in range(3, self.AIDE_INFO_STR_LEN):
-            val = prop_val[i]
+            prop_name = properties[i][0]
+            prop_val = properties[i][1]
             c = self.aide_info_str[i]
+
             if c == self.AIDE_INFO_STR_PATTERN[i]:
-                line = "{:<45} # CHANGED"
-                s.append(line.format(val))
+                line = "{:<45} # CHANGED from value '{}' ({})"
+                # prev_prop_val = str(vars(self.aide_prev_properties))  # TODO TODO TODO
+                prev_prop_val = properties[i][2]
+                s.append(line.format(prop_val, prev_prop_val, prop_name))
             else:
                 comment = aide_char_mapping.get(c)
                 if not comment:
                     m = "Unrecognized AIDE character '{}'".format(c)
                     raise AIDEEntryError(m)
                 prefix = "# " if c in commented_out_properties else ""
-                line = "{:<45} # {}".format(prefix + str(val), comment)
+                line = "{:<45} # {} ({})".format(prefix + str(prop_val),
+                                                 comment, prop_name)
                 s.append(line)
 
         return s

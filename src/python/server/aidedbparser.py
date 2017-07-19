@@ -29,14 +29,14 @@ class AIDEDatabaseFileParser:
         """Get details of given AIDESimpleEntry entries from aide.db[.X]
            database file and return them in a set."""
 
-        requested_paths = {e.file_path for e in aide_simple_entries}
+        requested_paths = set(aide_simple_entries.keys())
         files_properties = self.get_files_properties(requested_paths)
-        file_entries = set()
+        file_entries = {}
 
-        for e in aide_simple_entries:
+        for e in aide_simple_entries.values():
             properties = AIDEProperties(files_properties[e.file_path])
             file_entry = AIDEEntry(properties, e.aide_info_str, entry_type)
-            file_entries.add(file_entry)
+            file_entries[e.file_path] = file_entry
 
         self._assert_requested_files_found_in_aide_db(len(aide_simple_entries),
                                                       len(file_entries))

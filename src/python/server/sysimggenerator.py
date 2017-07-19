@@ -194,7 +194,7 @@ class SystemImageGenerator:
                 "Removed entries": entries.removed_entries,
                 "Changed entries": entries.changed_entries}.items():
             print("\n{} (size: {}):\n".format(k, len(v)))
-            for e in v:
+            for _, e in v.items():
                 print(vars(e.aide_properties))
         # end end to remove
 
@@ -228,14 +228,14 @@ class SystemImageGenerator:
         return os.path.join(self.server_config.system_img_out_dir, FNAME)
 
     def _add_to_img_file_aide_added_entries(self, added_entries, archive_file):
-        for e in added_entries:
+        for e in added_entries.values():
             intar_path = os.path.join(self.IN_ARCHIVE_ADDED_DIR_NAME,
                                       e.aide_properties.name.lstrip(os.path.sep))
             archive_file.add(e.aide_properties.name, arcname=intar_path)
 
     def _add_to_img_file_removed_entries(self, removed_entries, archive_file):
         with NamedTemporaryFile(mode="r+") as tmp_removed_f:
-            for r in removed_entries:
+            for r in removed_entries.values():
                 line = "{}\n".format(r.aide_properties.name)
                 tmp_removed_f.write(line)
             intar_path = os.path.join(self.IN_ARCHIVE_REMOVED_DIR_NAME,
@@ -245,7 +245,7 @@ class SystemImageGenerator:
 
     def _add_to_img_file_changed_entries(self, changed_entries, archive_file):
         with NamedTemporaryFile(mode="r+") as tmp_changed_f:
-            for c in changed_entries:
+            for c in changed_entries.values():
                 self._append_changed_entry(c, tmp_changed_f)
             intar_path = os.path.join(self.IN_ARCHIVE_CHANGED_DIR_NAME,
                                       self.CHANGED_FILES_FNAME)
