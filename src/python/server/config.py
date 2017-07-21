@@ -34,10 +34,6 @@ class ServerConfig(common.config.BaseConfig):
         self.aide_out_db_dir = os.path.dirname(self.aide_out_db_path)
         self.aide_out_db_fname = os.path.basename(self.aide_out_db_path)
 
-        # Directory in which system images will be saved (TODO read from file conf)
-
-        self.system_img_out_dir = "/tmp"
-
     def _get_aide_reference_db_path(self):
         """Return value of 'database' variable from AIDE configuration."""
 

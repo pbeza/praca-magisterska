@@ -8,9 +8,9 @@ import tarfile
 import textwrap
 
 from common.cmd import run_cmd
-from server.aidecheckparser import AIDECheckParser
-from server.aidecheckparser import AIDECheckParserError
+from server.aidecheckparser import AIDECheckParser, AIDECheckParserError
 from server.aidedbmanager import AIDEDatabasesManager
+from server.aideentry import PropertyType
 from server.error import ServerError
 from tempfile import TemporaryFile, NamedTemporaryFile
 
@@ -225,18 +225,20 @@ class SystemImageGenerator:
         FROM_DB_ID = self.server_config.options.gen_img
         TO_DB_ID = self.aide_db_manager.get_current_aide_db_number()
         FNAME = self.MYSCM_IMG_FILE_NAME.format(FROM_DB_ID, TO_DB_ID, IMG_EXT)
-        return os.path.join(self.server_config.system_img_out_dir, FNAME)
+        return os.path.join(self.server_config.options.system_img_out_dir, FNAME)
 
     def _add_to_img_file_aide_added_entries(self, added_entries, archive_file):
         for e in added_entries.values():
-            intar_path = os.path.join(self.IN_ARCHIVE_ADDED_DIR_NAME,
-                                      e.aide_properties.name.lstrip(os.path.sep))
-            archive_file.add(e.aide_properties.name, arcname=intar_path)
+            path = e.aide_properties[PropertyType.NAME]
+            suffix = path.lstrip(os.path.sep)
+            intar_path = os.path.join(self.IN_ARCHIVE_ADDED_DIR_NAME, suffix)
+            archive_file.add(path, arcname=intar_path)
 
     def _add_to_img_file_removed_entries(self, removed_entries, archive_file):
         with NamedTemporaryFile(mode="r+") as tmp_removed_f:
             for r in removed_entries.values():
-                line = "{}\n".format(r.aide_properties.name)
+                path = r.aide_properties[PropertyType.NAME]
+                line = "{}\n".format(path)
                 tmp_removed_f.write(line)
             intar_path = os.path.join(self.IN_ARCHIVE_REMOVED_DIR_NAME,
                                       self.REMOVED_FILES_FNAME)
@@ -254,8 +256,7 @@ class SystemImageGenerator:
 
     def _append_changed_entry(self, entry, changed_f):
         properties = entry.get_aide_changed_properties()
-        line = "{}\n".format(entry.aide_properties.name)
-        line += "{}\n\n".format("\n".join(properties))
+        line = "{}\n\n".format("\n".join(properties))
         changed_f.write(line)
 
     def _create_img_signature(self, img_path):
