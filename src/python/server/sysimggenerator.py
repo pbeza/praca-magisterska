@@ -10,7 +10,7 @@ import textwrap
 from common.cmd import run_cmd
 from server.aidecheckparser import AIDECheckParser, AIDECheckParserError
 from server.aidedbmanager import AIDEDatabasesManager
-from server.aideentry import PropertyType
+from server.aideentry import PropertyType, AIDEEntry
 from server.error import ServerError
 from tempfile import TemporaryFile, NamedTemporaryFile
 
@@ -247,6 +247,7 @@ class SystemImageGenerator:
 
     def _add_to_img_file_changed_entries(self, changed_entries, archive_file):
         with NamedTemporaryFile(mode="r+") as tmp_changed_f:
+            self._append_changed_files_header(tmp_changed_f)
             for c in changed_entries.values():
                 self._append_changed_entry(c, tmp_changed_f)
             intar_path = os.path.join(self.IN_ARCHIVE_CHANGED_DIR_NAME,
@@ -254,10 +255,45 @@ class SystemImageGenerator:
             tmp_changed_f.seek(0)
             archive_file.add(tmp_changed_f.name, arcname=intar_path)
 
+    def _append_changed_files_header(self, changed_f):
+        m = "This file lists changes between current myscm-srv state "\
+            "described by the '{}' AIDE database file and '{}' file that "\
+            "corresponds to client's system state.  This file is used by "\
+            "myscm-cli to know how to change file's properties.  Lines that "\
+            "starts with '#' are ignored.  Value in brackets is previous "\
+            "value of the property or AIDE info character (eg. '.' or ' ') "\
+            "if property was not changed.".format(
+                self.server_config.aide_reference_db_path, self.client_db_path)
+
+        changed_f.write(textwrap.fill(m, width=140, initial_indent="# ",
+                                      subsequent_indent="# "))
+        changed_f.write("\n\n")
+        names = AIDEEntry.CHANGED_FILES_HEADER_NAMES
+
+        for h in names[:-1]:
+            changed_f.write(h.get_name())
+
+        last_header = names[-1].get_name()
+        changed_f.write(last_header.rstrip() + "\n\n")
+
     def _append_changed_entry(self, entry, changed_f):
         properties = entry.get_aide_changed_properties()
-        line = "{}\n\n".format("\n".join(properties))
-        changed_f.write(line)
+        headers = AIDEEntry.CHANGED_FILES_HEADER_NAMES
+
+        n = len(properties)
+        m = len(headers)
+
+        if n != m:
+            m = "Malformed changed files header ({} != {})".format(n, m)
+            raise SystemImageGeneratorError(m)
+
+        line = ""
+        for i in range(n):
+            p = properties[i]
+            h = headers[i]
+            line += h.formatter.format(p + "\0")
+
+        changed_f.write(line.strip() + "\n")
 
     def _create_img_signature(self, img_path):
         priv_key_obj = self._create_priv_key_openssl_obj(img_path)

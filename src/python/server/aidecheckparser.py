@@ -55,9 +55,8 @@ class AIDECheckParser:
                 self.REMOVED_ENTRIES: self._set_removed_entries,
                 self.CHANGED_ENTRIES: self._set_changed_entries
             }
-        ENTRIES_COUNT = len(expected_entries_mapping)
 
-        for i in range(ENTRIES_COUNT):
+        for i in range(len(expected_entries_mapping)):
             if not _read_to_line(aidediff_f, self.AIDE_SEPARATOR):
                 m = "Expected 1st separator line not found in AIDE --check "\
                     "output"
@@ -70,7 +69,7 @@ class AIDECheckParser:
                 _read_assert_next_lines(aidediff_f, self.AIDE_SEPARATOR)
                 read_entries_fun(aidediff_f, entries)
                 del expected_entries_mapping[line]
-            elif line == self.FILES_ATTRS:
+            elif line in {self.FILES_ATTRS, self.DETAILED_INFO}:
                 missing = [e.strip() for e in expected_entries_mapping.keys()]
                 m = "{} sections ('{}') not found in --check AIDE output "\
                     "(this message is not an error nor warning).".format(

@@ -33,20 +33,19 @@ class Scanner:
                 raise ScannerError("AIDE's databases manager error", e) from e
         else:
             m = "Current reference AIDE database '{}' is up-to-date. No need "\
-                "to create new database. I have nothing to do - exiting."\
+                "to create new database. Nothing to do. Exiting."\
                 .format(self.server_config.aide_reference_db_path)
             logger.info(m)
 
     def _is_reference_aide_db_outdated(self):
         """Return True if reference AIDE database aide.db is outdated."""
 
-        logger.info("Running AIDE --check. It may take some time...")
-
         cmd = [
             "aide", "--check", "-c",
             self.server_config.options.AIDE_config_path
         ]
-        completed_proc = run_cmd(cmd, False)
+        m = "Please wait - it may take some time to finish..."
+        completed_proc = run_cmd(cmd, False, suffix_msg=m)
         uptodate_msg = "AIDE found NO differences between database and "\
                        "filesystem. Looks okay!!"
         return uptodate_msg not in completed_proc.stdout.decode("utf-8")
@@ -55,12 +54,11 @@ class Scanner:
         """Scan system looking for changes, replace old aide.db with new one
            and move old aide.db to aide.db.X (X is incremented integer)."""
 
-        logger.info("Running AIDE --init. It may take some time...")
-
         cmd = [
             "aide", "--init", "-c",
             self.server_config.options.AIDE_config_path
         ]
-        run_cmd(cmd, True)
+        m = "Please wait - it may take some time to finish..."
+        run_cmd(cmd, True, suffix_msg=m)
         self.aide_db_manager.replace_old_aide_db_with_new_one()
         logger.info("New reference AIDE database setup successful.")

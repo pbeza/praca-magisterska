@@ -12,11 +12,12 @@ class CommandLineError(MySCMError):
 
 
 def run_cmd(cmd, check_exitcode=True, stdout_opt=subprocess.PIPE,
-            stderr_opt=subprocess.STDOUT):
+            stderr_opt=subprocess.STDOUT, suffix_msg=None):
     """Run specified command and optionally check exit code for error."""
 
     cmd_str = " ".join(cmd)
-    logger.debug("Running '{}' command.".format(cmd_str))
+    suffix_msg = " {}".format(suffix_msg) if suffix_msg else ""
+    logger.debug("Running '{}' command.{}".format(cmd_str, suffix_msg))
 
     try:
         completed_proc = subprocess.run(cmd, check=check_exitcode,

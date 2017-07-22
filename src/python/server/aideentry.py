@@ -59,7 +59,7 @@ class PropertyType(Enum):
     CTIME = "ctime"              # change time
     LCOUNT = "lcount"            # number of hard links
     MD5 = "md5"                  # base64 encoded MD5 (or 0 if eg. directory)
-    CRC32 = "crc32"              # base64 encoded CRC32 (or 0 if eg. directory)
+    SHA1 = "sha1"                # base64 encoded SHA1 (or 0 if eg. directory)
 
 
 class AIDEPropertiesError(ServerError):
@@ -82,7 +82,7 @@ class AIDEProperties:
             PropertyType.MTIME: self._convert_to_int_from_base64,
             PropertyType.CTIME: self._convert_to_int_from_base64,
             PropertyType.MD5: self._convert_to_hex_from_base64,
-            PropertyType.CRC32: self._convert_to_hex_from_base64
+            PropertyType.SHA1: self._convert_to_hex_from_base64,
         }
 
         for prop_name, prop_val in properties.items():
@@ -92,18 +92,19 @@ class AIDEProperties:
                 prop_enum = PropertyType(prop_name)
             except ValueError:
                 self.extra_properties[prop_name] = prop_val
-                self._save_encoded_in_extras_if_hash(prop_name, prop_val)
             else:
                 prop_conv = properties_converter.get(prop_enum, int)
                 self.properties[prop_enum] = prop_conv(prop_val)
+                self._save_encoded_in_extras_if_hash(prop_enum, prop_val)
 
-    def _save_encoded_hash_in_extras(self, prop_name, prop_val):
-        """AIDE encodes MD5 and CRC32. Save encoded hash for debugging."""
+    def _save_encoded_in_extras_if_hash(self, prop_enum, prop_val):
+        """AIDE encodes hashes (eg. MD5). Save encoded hash for debugging."""
 
-        if prop_name == PropertyType.MD5:
-            self.extra_properties["md5encoded"] = prop_val
-        elif prop_name == PropertyType.CRC32:
-            self.extra_properties["crc32encoded"] = prop_val
+        hashes_set = {PropertyType.MD5, PropertyType.SHA1}
+
+        if prop_enum in hashes_set:
+            key = "{}encoded".format(prop_enum.value)
+            self.extra_properties[key] = prop_val
 
     def _convert_to_hex_from_base64(self, val):
         # Reverse of below is: base64.b64encode(bytes.fromhex(md5))
@@ -134,7 +135,7 @@ class AIDEProperties:
             m = "Some of the required file's AIDE properties were not found "\
                 "- list of fetched properties: '{}', list of required "\
                 "properties: '{}'".format(B_str, A_str)
-            raise AIDEProperties(m)
+            raise AIDEPropertiesError(m)
 
     def __getitem__(self, key):
         val = None
@@ -158,6 +159,16 @@ class AIDESimpleEntry:
         self.file_path = file_path
 
 
+class PropertyHeader:
+
+    def __init__(self, name, formatter="{:<25}"):
+        self.name = name
+        self.formatter = formatter
+
+    def get_name(self):
+        return self.formatter.format(self.name)
+
+
 class AIDEEntryError(ServerError):
     pass
 
@@ -179,7 +190,7 @@ class AIDEEntry:
         "c": [PropertyType.CTIME],
         "i": [PropertyType.INODE],
         "n": [PropertyType.LCOUNT],
-        "C": [PropertyType.MD5, PropertyType.CRC32]
+        "C": [PropertyType.MD5, PropertyType.SHA1]
     }
     COMMENT_CHAR = "#"
     NO_CHANGE_CHAR = "."
@@ -187,18 +198,32 @@ class AIDEEntry:
     ATTR_REMOVED_CHAR = "-"
     ATTR_IGNORED_CHAR = ":"
     ATTR_NOT_CHECKED_CHAR = " "
-    COMMENT_INDICATOR_CHARS = {
+    AIDE_ALLOWED_INFO_STR_CHARS = {
         NO_CHANGE_CHAR,
         ATTR_IGNORED_CHAR,
-        ATTR_NOT_CHECKED_CHAR
+        ATTR_NOT_CHECKED_CHAR,
+        ATTR_ADDED_CHAR,
+        ATTR_REMOVED_CHAR
     }
-    AIDE_CHAR_TO_COMMENT_MAPPING = {
-        NO_CHANGE_CHAR:        "no change",
-        ATTR_IGNORED_CHAR:     "ignored",
-        ATTR_NOT_CHECKED_CHAR: "not checked",
-        ATTR_ADDED_CHAR:       "added",
-        ATTR_REMOVED_CHAR:     "removed"
-    }
+    CHANGED_FILES_HEADER_NAMES = [
+        PropertyHeader("# " + PropertyType.NAME.value, "{:<50}"),
+        PropertyHeader(PropertyType.LNAME.value, "{:<50}"),
+        PropertyHeader("aide_info_str", "{:<24} "),
+        PropertyHeader("attr", "{:<18}"),
+        PropertyHeader("ftype", "{:<10}"),
+        PropertyHeader("size_change", "{:<16}"),
+        PropertyHeader("size"),
+        PropertyHeader(PropertyType.BCOUNT.value),
+        PropertyHeader(PropertyType.PERM.value),
+        PropertyHeader(PropertyType.UID.value),
+        PropertyHeader(PropertyType.GID.value),
+        PropertyHeader(PropertyType.MTIME.value, "{:<30}"),
+        PropertyHeader(PropertyType.CTIME.value, "{:<30}"),
+        PropertyHeader(PropertyType.INODE.value),
+        PropertyHeader(PropertyType.LCOUNT.value, "{:<12}"),
+        PropertyHeader(PropertyType.MD5.value, "{:<73}"),
+        PropertyHeader(PropertyType.SHA1.value, "{:<100}")
+    ]
 
     def __init__(self, aide_properties, aide_info_str, entry_type):
         self.aide_properties = aide_properties
@@ -219,15 +244,26 @@ class AIDEEntry:
 
         s = [
             self.aide_properties[PropertyType.NAME],
-            self.ftype.name,
-            self._get_size_change_info_str(),
-            "# AIDE info  str: '{}'".format(self.aide_info_str)
+            str(self.aide_properties[PropertyType.LNAME]),  # str() for None
+            self.aide_info_str,
+            str(self.aide_properties[PropertyType.ATTR]),  # https://unix.stackexchange.com/a/343020/28115
+            self.ftype.value,
+            self.aide_info_str[2],
+            str(self.aide_properties[PropertyType.SIZE])
         ]
+
+        comment_entry = True
 
         for i in range(3, self.AIDE_INFO_SUBSTR_LEN):
             cur_c = self.aide_info_str[i]
             ref_c = self.AIDE_INFO_STR_PATTERN[i]
-            self._append_property_based_on_current_info_char(cur_c, ref_c, s)
+            entry_changed = self._append_property_based_on_current_info_char(
+                                                               cur_c, ref_c, s)
+            if comment_entry and entry_changed:
+                comment_entry = False
+
+        if comment_entry:
+            s[0] = "# {}".format(s[0])
 
         return s
 
@@ -235,43 +271,31 @@ class AIDEEntry:
         prop_types = self.AIDE_INFO_STR_TO_PROP_TYPES_MAPPING.get(ref_c)
 
         if prop_types is None:
-            # Ignore additional, unnecessary AIDE properties
+            # Ignore additional, unnecessary properties defined in AIDE config
             return
 
-        prop_names = [t.value for t in prop_types]
+        entry_changed = False
+
+        if cur_c == ref_c:
+            entry_changed = True
+        elif cur_c not in self.AIDE_ALLOWED_INFO_STR_CHARS:
+            m = "Unrecognized AIDE info string character '{}'".format(cur_c)
+            raise AIDEEntryError(m)
+
         # str() below is needed to convert None to 'None'
         prop_vals = [str(self.aide_properties[t]) for t in prop_types]
         prev_prop_vals = [str(self.aide_prev_properties[t]) for t in prop_types]
 
-        prop_names_str = ", ".join(prop_names)
-        prop_vals_str = " ".join(map(str, prop_vals))
-        prev_prop_vals_str = " ".join(map(str, prev_prop_vals))
-
-        line = None
-
-        if cur_c == ref_c:  # if something has changed
-            line = "{:<45} # CHANGED from {} ({})".format(
-                        prop_vals_str, prev_prop_vals_str, prop_names_str)
-        else:
-            comment = self.AIDE_CHAR_TO_COMMENT_MAPPING.get(cur_c)
-            if not comment:
-                m = "Unrecognized AIDE infostring character '{}'".format(cur_c)
+        for i in range(len(prop_vals)):
+            if not entry_changed and prop_vals[i] != prev_prop_vals[i]:
+                m = "Current and previous value for property '{}' are not "\
+                    "equal despite AIDE reported they are different".format(
+                        ref_c)
                 raise AIDEEntryError(m)
-            prefix = "# " if cur_c in self.COMMENT_INDICATOR_CHARS else ""
-            prefix += prop_vals_str
-            line = "{:<45} # {} ({})".format(prefix, comment, prop_names_str)
 
-        s.append(line)
+            prop_val_str = str(prop_vals[i])
+            prev_prop_val_str = str(prev_prop_vals[i]) if entry_changed else cur_c
+            line = "{} ({})".format(prop_val_str, prev_prop_val_str)
+            s.append(line)
 
-    def _get_size_change_info_str(self):
-        info = "unrecognized size status"
-        c = self.aide_info_str[2]
-
-        if c == "=":
-            info = "size has not changed"
-        elif c == "<":
-            info = "shrinked size"
-        elif c == ">":
-            info = "grown size"
-
-        return info
+        return entry_changed
