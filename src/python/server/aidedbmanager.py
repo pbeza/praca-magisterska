@@ -93,6 +93,35 @@ class AIDEDatabasesManager:
 
         return numbers[-1] if numbers else -1
 
+    def get_all_aide_db_paths(self):
+        """Return list of all found AIDE databases."""
+
+        regex_str = r"{}.(\d+)".format(
+                                    self.server_config.aide_reference_db_fname)
+        regex = re.compile(regex_str)
+        aide_dir = os.fsencode(self.server_config.aide_reference_db_dir)
+        l = []
+
+        for f in os.listdir(aide_dir):
+            fname = os.fsdecode(f)
+            match = regex.fullmatch(fname)
+            if match:
+                l.append(fname)
+
+        return l
+
+    def print_all_aide_db_paths_sorted(self):
+        """Print on stdout all found AIDE databases."""
+
+        l = self.get_all_aide_db_paths()
+        l.sort()
+        dir_path = self.server_config.aide_reference_db_dir
+
+        for fname in l:
+            full_path = os.path.join(dir_path, fname)
+            full_path = os.path.realpath(full_path)
+            print(full_path)
+
     def _report_missing_aide_db_files(self, numbers):
         """Report to logger all of the old, missing AIDE databases aide.db.X.
            Removed old databases are not a problem as long as there is no need

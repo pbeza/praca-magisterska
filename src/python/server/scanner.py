@@ -2,7 +2,7 @@
 import logging
 
 from common.cmd import CommandLineError
-from common.cmd import run_cmd
+from common.cmd import long_run_cmd
 from server.aidedbmanager import AIDEDatabasesManager
 from server.aidedbmanager import AIDEDatabasesManagerError
 from server.error import ServerError
@@ -44,8 +44,7 @@ class Scanner:
             "aide", "--check", "-c",
             self.server_config.options.AIDE_config_path
         ]
-        m = "Please wait - it may take some time to finish..."
-        completed_proc = run_cmd(cmd, False, suffix_msg=m)
+        completed_proc = long_run_cmd(cmd, False)
         uptodate_msg = "AIDE found NO differences between database and "\
                        "filesystem. Looks okay!!"
         return uptodate_msg not in completed_proc.stdout.decode("utf-8")
@@ -58,7 +57,6 @@ class Scanner:
             "aide", "--init", "-c",
             self.server_config.options.AIDE_config_path
         ]
-        m = "Please wait - it may take some time to finish..."
-        run_cmd(cmd, True, suffix_msg=m)
+        long_run_cmd(cmd, True)
         self.aide_db_manager.replace_old_aide_db_with_new_one()
         logger.info("New reference AIDE database setup successful.")

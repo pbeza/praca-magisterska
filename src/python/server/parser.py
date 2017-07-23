@@ -130,7 +130,7 @@ class AIDEConfigFileGeneralConfigOption(GeneralConfigOption):
     def __init__(self, aide_config_path=None):
         super().__init__(
             "AIDEConfigPath", aide_config_path or self.DEFAULT_AIDE_CONFIG_PATH,
-            self._assert_AIDE_config_path_valid, False, "--aide-conf",
+            self._assert_AIDE_config_path_valid, False, "-a", "--aide-conf",
             metavar="PATH", type=self._assert_AIDE_config_path_valid,
             help="AIDE configuration file path that specifies which "
                  "directories of the server system are scanned and "
@@ -158,6 +158,18 @@ class AIDEScanArgConfigOption(CommandLineFlagConfigOption):
             help="scan system using AIDE, create AIDE's new aide.db reference "
                  "database and rename old one to aide.db.X where X is "
                  "incremented integer")
+
+
+class ListAvailableAIDEDatabasesConfigOption(CommandLineFlagConfigOption):
+    """Configuration option read from CLI, specifying to list all available
+       AIDE databases that describe expected state of the client that want to
+       upgrade its configuration."""
+
+    def __init__(self):
+        super().__init__(
+            "ListDatabases", "-l", "--list", action="store_true",
+            help="list all available AIDE databases created with --scan "
+                 "option")
 
 
 class ConfigCheckConfigOption(CommandLineFlagConfigOption):
@@ -242,6 +254,7 @@ class ServerConfigParser(ConfigParser):
             SSLCertPrivKeyGeneralConfigOption(),
             AIDEConfigFileGeneralConfigOption(),
             AIDEScanArgConfigOption(),
+            ListAvailableAIDEDatabasesConfigOption(),
             ConfigCheckConfigOption(),
             GenerateSystemImageConfigOption(),
             SystemImgOutDirConfigOption()

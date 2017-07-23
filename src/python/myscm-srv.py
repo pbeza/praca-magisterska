@@ -8,6 +8,7 @@ import logging
 import sys
 
 import common
+from server.aidedbmanager import AIDEDatabasesManager
 from server.parser import ServerConfigParser, ServerParserError
 from server.scanner import Scanner, ScannerError
 from server.sysimggenerator import SystemImageGenerator
@@ -59,8 +60,11 @@ def _main():
     elif config.options.gen_img is not None:  # Note that 0 is valid argument
         _gen_img(config)
     elif config.options.config_check:
-        logger.debug("Configuration check ended successfully")
+        print("Config OK")
         # If check fails, then Exception is raised and caught in __main__
+    elif config.options.list_databases:
+        manager = AIDEDatabasesManager(config)
+        manager.print_all_aide_db_paths_sorted()
     else:
         logger.info("This application does nothing unless you specify what to "
                     "do. Read manual or --help to learn more.")

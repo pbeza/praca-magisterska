@@ -11,13 +11,19 @@ class CommandLineError(MySCMError):
     pass
 
 
+def long_run_cmd(cmd, check_exitcode=True, stdout_opt=subprocess.PIPE,
+                 stderr_opt=subprocess.STDOUT):
+    suffix_msg = "Please wait - it may take some time to finish..."
+    run_cmd(cmd, check_exitcode, stdout_opt, stderr_opt, suffix_msg)
+
+
 def run_cmd(cmd, check_exitcode=True, stdout_opt=subprocess.PIPE,
             stderr_opt=subprocess.STDOUT, suffix_msg=None):
     """Run specified command and optionally check exit code for error."""
 
     cmd_str = " ".join(cmd)
     suffix_msg = " {}".format(suffix_msg) if suffix_msg else ""
-    logger.debug("Running '{}' command.{}".format(cmd_str, suffix_msg))
+    logger.info("Running '{}' command.{}".format(cmd_str, suffix_msg))
 
     try:
         completed_proc = subprocess.run(cmd, check=check_exitcode,

@@ -7,7 +7,7 @@ import re
 import tarfile
 import textwrap
 
-from common.cmd import run_cmd
+from common.cmd import long_run_cmd
 from server.aidecheckparser import AIDECheckParser, AIDECheckParserError
 from server.aidedbmanager import AIDEDatabasesManager
 from server.aideentry import PropertyType, AIDEEntry
@@ -153,15 +153,13 @@ class SystemImageGenerator:
         """Save AIDE --check output to temporary file that will be processed to
            generate reference system image."""
 
-        logger.info("Running AIDE --check. It may take some time...")
-
         cmd = ["aide", "--check", "-c", tmp_aideconf_f.name]
         tmp_aideconf_f.seek(0)
 
         # Alternatively it can be handled by using AIDE's --report option
         # instead of capturing stdout
 
-        completed_proc = run_cmd(cmd, False, aidediff_f)
+        completed_proc = long_run_cmd(cmd, False, aidediff_f)
 
         # AIDE returns exit code to indicate whether error occured - see manual
 

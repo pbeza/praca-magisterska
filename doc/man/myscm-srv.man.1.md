@@ -44,7 +44,7 @@ needed to modify clients' configuration and software to make them clones of the
 
 # OPTIONS
 
-\--aide-conf=*PATH*
+-a *PATH*, \--aide-conf=*PATH*
 :   Specify AIDE configuration file path.  This file determines which
     directories of the server's system are scanned and synchronized with the
     client's system.  If not specified `/etc/myscm-srv/aide.conf` AIDE
@@ -54,32 +54,41 @@ needed to modify clients' configuration and software to make them clones of the
 :   Read configuration from specified *FILE* instead of default `config.ini`
     file.
 
---check-config
+-k, \--config-check
 :   Check if application configuration is valid.  If it is valid, then exit
     status is 0  (see `$?` variable).  Otherwise 1.  Both AIDE configuration
     (see `--aide-conf`) and `myscm-srv` validity (see `--config`) are checked.
 
+-l, \--list
+:   List all available AIDE databases created with `--scan` option.  Every line
+    of the output is single full path to the respective aide.db[.X] AIDE
+    database.  Location where aide.db[.X] files are saved is specified by AIDE
+    configuration, specifically by `database` variable read from file specified
+    by `--aide-conf` option or from `/etc/myscm-srv/aide.conf` if this option
+    is not present.
+
+-s, \--scan
+:   Scan system using AIDE, create AIDE's new `aide.db` reference database and
+    rename old one to `aide.db.X` where `X` is incremented integer that is
+    referred as `CLIENT_AIDE_DB_VER` in `--gen-img` option.  This operation is
+    intended to provide AIDE database with a summary of the current state of
+    the server software without deleting the old state file.  Scanning may take
+    a long time to complete depending on the AIDE configuration file that
+    determines which directories are scanned (see `--aide-conf` option for
+    details).
+
 -g *CLIENT_AIDE_DB_VER*, \--gen-img=*CLIENT_AIDE_DB_VER*
 :   Generate system image that can be applied by any client whose system
     configuration is represented by existing AIDE database identified by
-    non-negative integer number *CLIENT_AIDE_DB_VER* which corresponds to `X`
+    non-negative integer number `CLIENT_AIDE_DB_VER` which corresponds to `X`
     in `aide.db.X` file created with `--scan` flag.  Generated system image is
     an archive file saved in location specified in configuration file (in
     `/var/lib/myscm-srv/` by default).  System image contains all of the files
     necessary to modify client's configuration to match server's configuration.
     If client has never synchronized its configuration with server, then `0`
-    should be specified as a *CLIENT_AIDE_DB_VER*.  Client application
+    should be specified as a `CLIENT_AIDE_DB_VER`.  Client application
     (ie. `myscm-cli`) has option that prints out client's current
-    *CLIENT_AIDE_DB_VER*.
-
--s, \--scan
-:   Scan system using AIDE, create AIDE's new `aide.db` reference database and
-    rename old one to `aide.db.X` where `X` is incremented integer.  This
-    operation is intended to provide AIDE database with a summary of the
-    current state of the server's software without deleting the old state file.
-    Scanning may take a long time to complete depending on the AIDE
-    configuration file that determines which directories are scanned (see
-    `--aide-conf` option for details).
+    `CLIENT_AIDE_DB_VER`.
 
 \--ssl-cert=*PATH*
 :   Specify full path to the server's SSL certificate that is used to digitally
