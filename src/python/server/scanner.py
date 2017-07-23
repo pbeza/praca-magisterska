@@ -24,7 +24,7 @@ class Scanner:
         """Scan system software and configuration using AIDE's --init option
            creating new reference AIDE database and renaming old one."""
 
-        if self._is_reference_aide_db_outdated():
+        if is_reference_aide_db_outdated(self.server_config):
             try:
                 self._scan()
             except CommandLineError as e:
@@ -37,18 +37,6 @@ class Scanner:
                 .format(self.server_config.aide_reference_db_path)
             logger.info(m)
 
-    def _is_reference_aide_db_outdated(self):
-        """Return True if reference AIDE database aide.db is outdated."""
-
-        cmd = [
-            "aide", "--check", "-c",
-            self.server_config.options.AIDE_config_path
-        ]
-        completed_proc = long_run_cmd(cmd, False)
-        uptodate_msg = "AIDE found NO differences between database and "\
-                       "filesystem. Looks okay!!"
-        return uptodate_msg not in completed_proc.stdout.decode("utf-8")
-
     def _scan(self):
         """Scan system looking for changes, replace old aide.db with new one
            and move old aide.db to aide.db.X (X is incremented integer)."""
@@ -60,3 +48,16 @@ class Scanner:
         long_run_cmd(cmd, True)
         self.aide_db_manager.replace_old_aide_db_with_new_one()
         logger.info("New reference AIDE database setup successful.")
+
+
+def is_reference_aide_db_outdated(server_config):
+    """Return True if reference AIDE database aide.db is outdated."""
+
+    cmd = [
+        "aide", "--check", "-c",
+        server_config.options.AIDE_config_path
+    ]
+    completed_proc = long_run_cmd(cmd, False)
+    uptodate_msg = "AIDE found NO differences between database and "\
+                   "filesystem. Looks okay!!"
+    return uptodate_msg not in completed_proc.stdout.decode("utf-8")

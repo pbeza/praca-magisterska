@@ -14,7 +14,7 @@ class CommandLineError(MySCMError):
 def long_run_cmd(cmd, check_exitcode=True, stdout_opt=subprocess.PIPE,
                  stderr_opt=subprocess.STDOUT):
     suffix_msg = "Please wait - it may take some time to finish..."
-    run_cmd(cmd, check_exitcode, stdout_opt, stderr_opt, suffix_msg)
+    return run_cmd(cmd, check_exitcode, stdout_opt, stderr_opt, suffix_msg)
 
 
 def run_cmd(cmd, check_exitcode=True, stdout_opt=subprocess.PIPE,

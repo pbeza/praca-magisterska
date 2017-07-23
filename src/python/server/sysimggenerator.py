@@ -7,6 +7,7 @@ import re
 import tarfile
 import textwrap
 
+import server.scanner
 from common.cmd import long_run_cmd
 from server.aidecheckparser import AIDECheckParser, AIDECheckParserError
 from server.aidedbmanager import AIDEDatabasesManager
@@ -49,6 +50,14 @@ class SystemImageGenerator:
            image."""
 
         system_img_path = None
+
+        if server.scanner.is_reference_aide_db_outdated(self.server_config):
+            m = "Current reference AIDE database '{}' is NOT up-to-date. Run "\
+                "myscm-srv with --scan option to create up-to-date aide.db "\
+                "and than rerun with --gen-img.".format(
+                    self.server_config.aide_reference_db_path)
+            logger.info(m)
+            return
 
         try:
             system_img_path = self._generate_img(self.client_db_path)
