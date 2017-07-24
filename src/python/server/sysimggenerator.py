@@ -30,8 +30,7 @@ class SystemImageGenerator:
     AIDE_MIN_EXITCODE = 14  # see AIDE's manual for details about exitcodes
     IN_ARCHIVE_ADDED_DIR_NAME = "ADDED"
     IN_ARCHIVE_CHANGED_DIR_NAME = "CHANGED"
-    IN_ARCHIVE_REMOVED_DIR_NAME = "REMOVED"
-    # TODO add added summary text file
+    ADDED_FILES_FNAME = "added.txt"
     REMOVED_FILES_FNAME = "removed.txt"
     CHANGED_FILES_FNAME = "changed.txt"
     SSL_CERT_DIGEST_TYPE = "sha256"
@@ -235,11 +234,18 @@ class SystemImageGenerator:
         return os.path.join(self.server_config.options.system_img_out_dir, FNAME)
 
     def _add_to_img_file_aide_added_entries(self, added_entries, archive_file):
-        for e in added_entries.values():
-            path = e.aide_properties[PropertyType.NAME]
-            suffix = path.lstrip(os.path.sep)
-            intar_path = os.path.join(self.IN_ARCHIVE_ADDED_DIR_NAME, suffix)
-            archive_file.add(path, arcname=intar_path)
+        with NamedTemporaryFile(mode="r+") as tmp_added_f:
+            for e in added_entries.values():
+                path = e.get_full_path()
+                path_suffix = path.lstrip(os.path.sep)
+                line = "{}\n".format(path)
+                tmp_added_f.write(line)
+                intar_path = os.path.join(self.IN_ARCHIVE_ADDED_DIR_NAME,
+                                          path_suffix)
+                archive_file.add(path, arcname=intar_path)
+            tmp_added_f.seek(0)
+            archive_file.add(tmp_added_f.name,
+                             arcname=self.ADDED_FILES_FNAME)
 
     def _add_to_img_file_removed_entries(self, removed_entries, archive_file):
         with NamedTemporaryFile(mode="r+") as tmp_removed_f:
@@ -247,10 +253,9 @@ class SystemImageGenerator:
                 path = r.aide_properties[PropertyType.NAME]
                 line = "{}\n".format(path)
                 tmp_removed_f.write(line)
-            intar_path = os.path.join(self.IN_ARCHIVE_REMOVED_DIR_NAME,
-                                      self.REMOVED_FILES_FNAME)
             tmp_removed_f.seek(0)
-            archive_file.add(tmp_removed_f.name, arcname=intar_path)
+            archive_file.add(tmp_removed_f.name,
+                             arcname=self.REMOVED_FILES_FNAME)
 
     def _add_to_img_file_changed_entries(self, changed_entries, archive_file):
         with NamedTemporaryFile(mode="r+") as tmp_changed_f:
@@ -260,12 +265,11 @@ class SystemImageGenerator:
                 if c.was_file_content_changed():
                     changed_path = c.get_full_path()
                     intar_path = os.path.join(self.IN_ARCHIVE_CHANGED_DIR_NAME,
-                                              changed_path.lstrip("/"))
+                                              changed_path.lstrip(os.path.sep))
                     archive_file.add(changed_path, arcname=intar_path)
-            intar_path = os.path.join(self.IN_ARCHIVE_CHANGED_DIR_NAME,
-                                      self.CHANGED_FILES_FNAME)
             tmp_changed_f.seek(0)
-            archive_file.add(tmp_changed_f.name, arcname=intar_path)
+            archive_file.add(tmp_changed_f.name,
+                             arcname=self.CHANGED_FILES_FNAME)
 
     def _append_changed_files_header(self, changed_f):
         m = "This file lists changes between current myscm-srv state "\
