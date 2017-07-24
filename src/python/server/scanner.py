@@ -2,7 +2,7 @@
 import logging
 
 from common.cmd import CommandLineError
-from common.cmd import long_run_cmd
+from common.cmd import long_run_cmd, run_check_cmd
 from server.aidedbmanager import AIDEDatabasesManager
 from server.aidedbmanager import AIDEDatabasesManagerError
 from server.error import ServerError
@@ -45,7 +45,8 @@ class Scanner:
             "aide", "--init", "-c",
             self.server_config.options.AIDE_config_path
         ]
-        long_run_cmd(cmd, True)
+        m = "to create new aide.db and rename old one"
+        long_run_cmd(cmd, True, msg=m)
         self.aide_db_manager.replace_old_aide_db_with_new_one()
         logger.info("New reference AIDE database setup successful.")
 
@@ -53,11 +54,8 @@ class Scanner:
 def is_reference_aide_db_outdated(server_config):
     """Return True if reference AIDE database aide.db is outdated."""
 
-    cmd = [
-        "aide", "--check", "-c",
-        server_config.options.AIDE_config_path
-    ]
-    completed_proc = long_run_cmd(cmd, False)
+    aide_config_path = server_config.options.AIDE_config_path
+    completed_proc = run_check_cmd(aide_config_path, False)
     uptodate_msg = "AIDE found NO differences between database and "\
                    "filesystem. Looks okay!!"
     return uptodate_msg not in completed_proc.stdout.decode("utf-8")

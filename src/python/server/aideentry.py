@@ -233,6 +233,12 @@ class AIDEEntry:
         self.entry_type = entry_type
         self.aide_prev_properties = None  # TODO properties before change loaded elsewhere :(
 
+    def get_full_path(self):
+        return self.aide_properties[PropertyType.NAME]
+
+    def was_file_content_changed(self):
+        return self.aide_info_str[12] == 'C'
+
     def _assert_valid_aide_info_str(self, aide_info_str):
         if len(aide_info_str) != self.AIDE_INFO_STR_FULL_LEN:
             m = "Unexpected length of the AIDE changed properties info string"

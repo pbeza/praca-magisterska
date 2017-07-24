@@ -59,10 +59,7 @@ class ServerConfig(common.config.BaseConfig):
         else:
             distro_name = distro.id()
 
-            if distro_name in self.SUPPORTED_DISTROS:
-                logger.debug("Supported '{}' GNU/Linux distribution was "
-                             "detected.".format(distro_name))
-            else:
+            if distro_name not in self.SUPPORTED_DISTROS:
                 if not distro_name:
                     distro_name = "unknown"
                 else:
@@ -71,7 +68,7 @@ class ServerConfig(common.config.BaseConfig):
                 logger.warning("Unsupported {} GNU/Linux distribution was "
                                "detected. {}".format(distro_name, suffix_msg))
 
-            self.distro_name = distro_name
+        return distro_name
 
     def _get_aide_reference_db_path(self):
         """Return value of 'database' variable from AIDE configuration."""

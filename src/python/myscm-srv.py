@@ -27,6 +27,8 @@ def get_app_config():
         raise ServerParserError("Parsing error", e) from e
 
     config.set_log_level(logger)
+    logger.debug("Supported {} GNU/Linux distribution detected."
+                 .format(config.distro_name.title()))
 
     logger.debug("Server configuration: {}.".format(vars(config.options)))
 

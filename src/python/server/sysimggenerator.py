@@ -8,7 +8,7 @@ import tarfile
 import textwrap
 
 import server.scanner
-from common.cmd import long_run_cmd
+from common.cmd import run_check_cmd
 from server.aidecheckparser import AIDECheckParser, AIDECheckParserError
 from server.aidedbmanager import AIDEDatabasesManager
 from server.aideentry import PropertyType, AIDEEntry
@@ -162,19 +162,19 @@ class SystemImageGenerator:
         """Save AIDE --check output to temporary file that will be processed to
            generate reference system image."""
 
-        cmd = ["aide", "--check", "-c", tmp_aideconf_f.name]
+        aide_config_path = tmp_aideconf_f.name
         tmp_aideconf_f.seek(0)
 
         # Alternatively it can be handled by using AIDE's --report option
         # instead of capturing stdout
 
-        completed_proc = long_run_cmd(cmd, False, aidediff_f)
+        completed_proc = run_check_cmd(aide_config_path, False, aidediff_f)
 
         # AIDE returns exit code to indicate whether error occured - see manual
 
         if completed_proc.returncode >= self.AIDE_MIN_EXITCODE:
-            m = "Erroneous exitcode {} for command '{}'. Refer AIDE's manual "\
-                "for details".format(completed_proc.returncode, " ".join(cmd))
+            m = "Erroneous exitcode {} for command AIDE --check. Refer "\
+                "AIDE's manual for details".format(completed_proc.returncode)
             raise SystemImageGeneratorError(m)
 
     def _generate_img_from_aide_check_result(self, aidediff_f):
@@ -257,6 +257,11 @@ class SystemImageGenerator:
             self._append_changed_files_header(tmp_changed_f)
             for c in changed_entries.values():
                 self._append_changed_entry(c, tmp_changed_f)
+                if c.was_file_content_changed():
+                    changed_path = c.get_full_path()
+                    intar_path = os.path.join(self.IN_ARCHIVE_CHANGED_DIR_NAME,
+                                              changed_path.lstrip("/"))
+                    archive_file.add(changed_path, arcname=intar_path)
             intar_path = os.path.join(self.IN_ARCHIVE_CHANGED_DIR_NAME,
                                       self.CHANGED_FILES_FNAME)
             tmp_changed_f.seek(0)
@@ -323,6 +328,7 @@ class SystemImageGenerator:
 
         # To manually verify validity of the signature run:
         # openssl dgst -sha256 -verify cert_public_key_file.pub -signature cert_file.crt signed_file_path
+        # TODO try: gpg --keyserver-options auto-key-retrieve --verify signed_file_path
 
         return img_sig_path
 
