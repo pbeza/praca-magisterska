@@ -40,7 +40,7 @@ def _scan(config):
         scanner = Scanner(config)
         scanner.scan()
     except ScannerError as e:
-        raise ScannerError("AIDE scanner wrapper error", e) from e
+        raise ScannerError("AIDE --init wrapper error", e) from e
 
 
 def _gen_img(config):

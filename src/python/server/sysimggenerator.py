@@ -38,7 +38,8 @@ class SystemImageGenerator:
     def __init__(self, server_config):
         self.server_config = server_config
         self.aide_db_manager = AIDEDatabasesManager(server_config)
-        self.client_db_path = self._get_client_db_path(server_config.options.gen_img)
+        client_aide_db_id = server_config.options.gen_img
+        self.client_db_path = self._get_client_db_path(client_aide_db_id)
         self.aide_output_parser = AIDECheckParser(
                 self.client_db_path, self.server_config.aide_reference_db_path)
 
@@ -82,8 +83,8 @@ class SystemImageGenerator:
                     client_db_version)
             raise SystemImageGeneratorError(m)
 
-        client_db_path = "{}.{}".format(
-                  self.server_config.aide_reference_db_path, client_db_version)
+        client_db_path = self.server_config.aide_old_db_path_pattern.format(
+                                          client_db_version, client_db_version)
 
         if not os.path.isfile(client_db_path):
             m = "Unrecognized client's AIDE database version '{}'. File " \
@@ -106,12 +107,12 @@ class SystemImageGenerator:
         system_img_path = None
 
         with NamedTemporaryFile(mode="r+", suffix=".aide.conf") as tmp_aideconf_f:
-            self._copy_aide_config_to_tmp_replacing_db_path(
-                                                client_db_path, tmp_aideconf_f)
+            self._copy_aide_config_to_tmp_replacing_db_path(client_db_path,
+                                                            tmp_aideconf_f)
 
             with TemporaryFile(mode="r+", suffix=".aide.diff") as aidediff_f:
-                self._save_aide_check_result_to_tmp_file(
-                                                    aidediff_f, tmp_aideconf_f)
+                self._save_aide_check_result_to_tmp_file(aidediff_f,
+                                                         tmp_aideconf_f)
                 system_img_path = self._generate_img_from_aide_check_result(
                                                                     aidediff_f)
 

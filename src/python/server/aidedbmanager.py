@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import logging
 import os
 import re
@@ -14,74 +13,108 @@ class AIDEDatabasesManagerError(ServerError):
 
 
 class AIDEDatabasesManager:
-    """Manager of the AIDE aide.db[.X] databases (X is integer). This manager
-       is not AIDE's database parser - it only renames AIDE's databases if
-       requested to do so."""
+    """Manager of the AIDE aide.db[.X] databases directories (X is integer).
+       This manager is not AIDE's database parser (see AIDECheckParser class).
+       This class is responsible only for renaming AIDE's databases after
+       myscm-srv --scan to keep old databases saved (they are needed to run
+       myscm-srv with --gen-img option."""
 
     def __init__(self, server_config):
         self.server_config = server_config
 
     def replace_old_aide_db_with_new_one(self):
-        """Replace old aide.db with new aide.db.new and rename old aide.db."""
+        """Replace old aide.db.current directory with new aide.db.new and
+           rename old aide.db.current to aide.db.X directory (X is integer)."""
 
-        if os.path.isfile(self.server_config.aide_reference_db_path):
-            self._rename_aide_reference_db_to_old_fname()
+        if os.path.isdir(self.server_config.aide_reference_db_dir):
+            num = self.get_current_aide_db_number()
+            self._rename_aide_reference_db_file_to_old(num)
+            self._rename_aide_reference_db_dir_to_old(num)
         else:
             logger.debug("AIDE reference database file doesn't exist yet - "
-                         "skipping renaming procedure for old database.")
-        self._rename_aide_new_db_to_reference_fname()
+                         "skipping renaming procedure for old database. "
+                         "Renaming only new database to set reference "
+                         "database.")
 
-    def _rename_aide_reference_db_to_old_fname(self):
-        """Rename recently created aide.db to aide.db.X, where X is next
-           unassigned integer."""
+        self._rename_aide_new_db_file_to_reference_file()
+        self._rename_aide_new_db_dir_to_reference_dir()
+
+    def _rename_aide_reference_db_file_to_old(self, num):
+        """Rename recently created aide.db file to aide.db.X, where X is
+           next unassigned integer."""
 
         a = self.server_config.aide_reference_db_path
-        b = self._get_new_fpath_for_old_db()
-        logger.debug("Renaming old database '{}' to '{}'.".format(a, b))
+        b = self._get_new_path_for_old_db_file(num)
 
-        try:
-            os.rename(a, b)
-        except OSError as e:
-            m = "Unable to rename old database '{}' to '{}'".format(a, b)
-            raise AIDEDatabasesManagerError(m, e) from e
+        self._rename(a, b)
 
-    def _rename_aide_new_db_to_reference_fname(self):
-        """Rename newly created database aide.db.new to aide.db to set
-           reference database for AIDE subsequent runs."""
+    def _get_new_path_for_old_db_file(self, num):
+        """Return temporary new path for old AIDE database file."""
+
+        tmp_aide_old_db_file_pattern = os.path.join(
+            self.server_config.aide_reference_db_dir,
+            self.server_config.aide_reference_db_fname + ".{}")
+
+        return tmp_aide_old_db_file_pattern.format(num)
+
+    def _rename_aide_reference_db_dir_to_old(self, num):
+        """Rename recently created aide.db directory to aide.db.X, where X is
+           next unassigned integer."""
+
+        a = self.server_config.aide_reference_db_dir
+        b = self._get_new_path_for_old_db_dir(num)
+
+        self._rename(a, b)
+
+    def _get_new_path_for_old_db_dir(self, num):
+        """Return new path for old AIDE database directory."""
+
+        return self.server_config.aide_old_db_subdir_pattern.format(num)
+
+    def _rename_aide_new_db_file_to_reference_file(self):
+        """Rename aide.db.new file to aide.db."""
 
         a = self.server_config.aide_out_db_path
-        b = self.server_config.aide_reference_db_path
-        logger.info("Renaming new database '{}' to '{}'.".format(a, b))
+        b = os.path.join(self.server_config.aide_out_db_dir,
+                         self.server_config.aide_reference_db_fname)
+
+        self._rename(a, b)
+
+    def _rename_aide_new_db_dir_to_reference_dir(self):
+        """Rename temporary directory aide.db.new with currently newest AIDE
+           database to aide.db.current to set reference database for subsequent
+           myscm-srv runs."""
+
+        a = self.server_config.aide_out_db_dir
+        b = self.server_config.aide_reference_db_dir
+
+        self._rename(a, b)
+
+    def _rename(self, from_path, to_path):
+        m = "Renaming '{}' to '{}'.".format(from_path, to_path)
+        logger.info(m)
 
         try:
-            os.rename(a, b)
+            os.replace(from_path, to_path)
         except OSError as e:
-            m = "Unable to rename new database '{}' to '{}'".format(a, b)
+            m = "Unable to rename '{}' to '{}'".format(from_path, to_path)
             raise AIDEDatabasesManagerError(m, e) from e
 
-    def _get_new_fpath_for_old_db(self):
-        """Return new path for old AIDE database."""
-
-        num = self.get_last_aide_db_number()
-        fname = "{}.{}".format(self.server_config.aide_reference_db_fname,
-                               num + 1)
-        return os.path.join(self.server_config.aide_reference_db_dir, fname)
-
     def get_current_aide_db_number(self):
-        """Return integer X which corresponds to aide.db.X that aide.db will
-           have after next --scan."""
+        """Return integer X which corresponds to aide.db.X directory that
+           newest aide.db will be moved to after next myscm-srv --scan."""
+
         return self.get_last_aide_db_number() + 1
 
     def get_last_aide_db_number(self):
         """Return integer X which corresponds to aide.db.X with greatest X."""
 
-        regex_str = r"{}.(\d+)".format(
-                                    self.server_config.aide_reference_db_fname)
-        regex = re.compile(regex_str)
-        aide_dir = os.fsencode(self.server_config.aide_reference_db_dir)
         numbers = []
+        regex_str = self.server_config.aide_old_db_fname_pattern.format(r"(\d+)")
+        regex = re.compile(regex_str)
+        old_db_dir = os.fsencode(self.server_config.aide_old_db_dir)
 
-        for f in os.listdir(aide_dir):
+        for f in os.listdir(old_db_dir):
             fname = os.fsdecode(f)
             match = regex.fullmatch(fname)
             if match:
@@ -93,34 +126,33 @@ class AIDEDatabasesManager:
 
         return numbers[-1] if numbers else -1
 
-    def get_all_aide_db_paths(self):
-        """Return list of all found AIDE databases."""
-
-        regex_str = r"{}.(\d+)".format(
-                                    self.server_config.aide_reference_db_fname)
-        regex = re.compile(regex_str)
-        aide_dir = os.fsencode(self.server_config.aide_reference_db_dir)
-        l = []
-
-        for f in os.listdir(aide_dir):
-            fname = os.fsdecode(f)
-            match = regex.fullmatch(fname)
-            if match:
-                l.append(fname)
-
-        return l
-
     def print_all_aide_db_paths_sorted(self):
         """Print on stdout all found AIDE databases."""
 
-        l = self.get_all_aide_db_paths()
+        l = self._get_all_aide_db_paths()
         l.sort()
-        dir_path = self.server_config.aide_reference_db_dir
+        dir_path = self.server_config.aide_old_db_dir
 
         for fname in l:
             full_path = os.path.join(dir_path, fname)
             full_path = os.path.realpath(full_path)
             print(full_path)
+
+    def _get_all_aide_db_paths(self):
+        """Return list of all found AIDE databases directories."""
+
+        paths = []
+        regex_str = self.server_config.aide_old_db_fname_pattern.format(r"(\d+)")
+        regex = re.compile(regex_str)
+        old_db_dir = os.fsencode(self.server_config.aide_old_db_dir)
+
+        for f in os.listdir(old_db_dir):
+            fname = os.fsdecode(f)
+            match = regex.fullmatch(fname)
+            if match:
+                paths.append(fname)
+
+        return paths
 
     def _report_missing_aide_db_files(self, numbers):
         """Report to logger all of the old, missing AIDE databases aide.db.X.

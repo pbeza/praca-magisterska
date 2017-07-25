@@ -18,26 +18,67 @@ class ServerConfigError(ServerError):
 class ServerConfig(common.config.BaseConfig):
     """Server-specific configuration manager."""
 
-    SUPPORTED_DISTROS = {"debian", "arch"}
+    SUPPORTED_LINUX_DISTROS = {"debian", "arch"}
 
     def __init__(self, *options, **kwargs):
         super().__init__(*options, **kwargs)
 
+        self.distro_name = self._assert_allowed_linux_distro()
+
+        ###
         # AIDE 'database' related configuration option variables. 'database' is
         # path from which database is read.
+        ###
 
+        # '/var/myscm-srv/aide.db.current/aide.db' by default
         self.aide_reference_db_path = self._get_aide_reference_db_path()
-        self.aide_reference_db_dir = os.path.dirname(self.aide_reference_db_path)
-        self.aide_reference_db_fname = os.path.basename(self.aide_reference_db_path)
 
+        # '/var/myscm-srv/aide.db.current' by default
+        self.aide_reference_db_dir = os.path.dirname(
+                                                   self.aide_reference_db_path)
+
+        # 'aide.db' by default
+        self.aide_reference_db_fname = os.path.basename(
+                                                   self.aide_reference_db_path)
+
+        ###
         # AIDE 'database_out' related configuration option related variables.
         # 'database_out' is path to which the new database is written to.
+        ###
 
+        # '/var/myscm-srv/aide.db.new/aide.db.new' by default
         self.aide_out_db_path = self._get_aide_out_db_path()
+
+        # '/var/myscm-srv/aide.db.new' by default
         self.aide_out_db_dir = os.path.dirname(self.aide_out_db_path)
+
+        # 'aide.db.new' by default
         self.aide_out_db_fname = os.path.basename(self.aide_out_db_path)
 
-        self.distro_name = self._assert_allowed_linux_distro()
+        ###
+        # Variables related to old AIDE databases paths.
+        ###
+
+        # '/var/myscm-srv/' by default
+        self.aide_old_db_dir = os.path.dirname(self.aide_reference_db_dir)
+
+        # '/var/myscm-srv/aide.db' by default
+        self.aide_old_db_subdir_base = os.path.join(
+                            self.aide_old_db_dir, self.aide_reference_db_fname)
+
+        # 'aide.db.{}' by default (placeholder for integer)
+        self.aide_old_db_fname_pattern = self.aide_reference_db_fname + ".{}"
+
+        # '/var/myscm-srv/aide.db.{}' by default (placeholder for integer)
+        self.aide_old_db_subdir_pattern = os.path.join(
+                            self.aide_old_db_dir,
+                            self.aide_old_db_fname_pattern)
+
+        # '/var/myscm-srv/aide.db.{}/aide.db.{}' by default (placeholder for
+        # integer)
+        self.aide_old_db_path_pattern = os.path.join(
+                            self.aide_old_db_subdir_pattern,
+                            self.aide_old_db_fname_pattern)
 
     def _assert_allowed_linux_distro(self):
         os_name = platform.system()
@@ -59,7 +100,7 @@ class ServerConfig(common.config.BaseConfig):
         else:
             distro_name = distro.id()
 
-            if distro_name not in self.SUPPORTED_DISTROS:
+            if distro_name not in self.SUPPORTED_LINUX_DISTROS:
                 if not distro_name:
                     distro_name = "unknown"
                 else:

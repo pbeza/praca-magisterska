@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
+import os
 
-from common.cmd import CommandLineError
-from common.cmd import long_run_cmd, run_check_cmd
+from common.cmd import long_run_cmd, run_check_cmd, CommandLineError
 from server.aidedbmanager import AIDEDatabasesManager
 from server.aidedbmanager import AIDEDatabasesManagerError
 from server.error import ServerError
@@ -41,15 +41,30 @@ class Scanner:
         """Scan system looking for changes, replace old aide.db with new one
            and move old aide.db to aide.db.X (X is incremented integer)."""
 
-        cmd = [
-            "aide", "--init", "-c",
-            self.server_config.options.AIDE_config_path
-        ]
-        m = "to create new aide.db and rename old one"
-        long_run_cmd(cmd, True, msg=m)
-        self.aide_db_manager.replace_old_aide_db_with_new_one()
-        logger.info("New reference AIDE database setup successful.")
+        self._create_tmp_out_dir_if_doesnt_exist()
 
+        aide_config_path = self.server_config.options.AIDE_config_path
+        cmd = ["aide", "--init", "-c", aide_config_path]
+
+        try:
+            long_run_cmd(cmd, True, msg="to create new aide.db")
+        except CommandLineError as e:
+            m = "Make sure that `database[_out|_new]` variables provided in "\
+                "AIDE configuration '{}' are valid".format(aide_config_path)
+            raise ScannerError(m, e) from e
+
+        self.aide_db_manager.replace_old_aide_db_with_new_one()
+        m = "New reference AIDE database '{}' setup successful.".format(
+                self.server_config.aide_reference_db_path)
+        logger.info(m)
+
+    def _create_tmp_out_dir_if_doesnt_exist(self):
+        try:
+            os.makedirs(self.server_config.aide_out_db_dir, exist_ok=True)
+        except OSError as e:
+            m = "Unable to create temporary directory '{}' for storing "\
+                "result of the AIDE --init call"
+            raise ScannerError(m, e) from e
 
 def is_reference_aide_db_outdated(server_config):
     """Return True if reference AIDE database aide.db is outdated."""
