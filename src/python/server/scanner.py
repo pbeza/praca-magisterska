@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
+import shutil
 
 from common.cmd import long_run_cmd, run_check_cmd, CommandLineError
 from server.aidedbmanager import AIDEDatabasesManager
@@ -16,9 +17,10 @@ class ScannerError(ServerError):
 
 class Scanner:
 
+    COPIED_FILES_DIRNAME = "COPIED"
+
     def __init__(self, server_config):
         self.server_config = server_config
-        self.aide_db_manager = AIDEDatabasesManager(self.server_config)
 
     def scan(self):
         """Scan system software and configuration using AIDE's --init option
@@ -41,6 +43,7 @@ class Scanner:
         """Scan system looking for changes, replace old aide.db with new one
            and move old aide.db to aide.db.X (X is incremented integer)."""
 
+        aide_db_manager = AIDEDatabasesManager(self.server_config)
         self._create_tmp_out_dir_if_doesnt_exist()
 
         aide_config_path = self.server_config.options.AIDE_config_path
@@ -53,10 +56,71 @@ class Scanner:
                 "AIDE configuration '{}' are valid".format(aide_config_path)
             raise ScannerError(m, e) from e
 
-        self.aide_db_manager.replace_old_aide_db_with_new_one()
+        aide_db_manager.replace_old_aide_db_with_new_one()
+        self._copy_selected_tracked_dirs()
+
         m = "New reference AIDE database '{}' setup successful.".format(
                 self.server_config.aide_reference_db_path)
         logger.info(m)
+
+    def _copy_selected_tracked_dirs(self):
+        try:
+            dst_dir_path = self._create_copied_files_dir()
+            self.__copy_selected_tracked_dirs_to_scan_dir(dst_dir_path)
+        except OSError as e:
+            m = "Failed to copy files that were specified in AIDE '{}' "\
+                "configuration to be copied to myscm-srv --scan result".format(
+                    self.server_config.options.AIDE_config_path)
+            raise ScannerError(m, e) from e
+
+    def _create_copied_files_dir(self):
+        dst_dir_path = os.path.join(self.server_config.aide_reference_db_dir,
+                                    self.COPIED_FILES_DIRNAME)
+        os.makedirs(dst_dir_path)
+        return dst_dir_path
+
+    def __copy_selected_tracked_dirs_to_scan_dir(self, dst_dir_path):
+        src_paths = self.server_config.get_all_realpaths_of_files_to_copy()
+        n = len(src_paths)
+
+        if n > 0:
+            m = "Copying {} file{} and/or director{} selected in AIDE "\
+                "configuration '{}' to '{}' directory. Please wait, it may "\
+                "take some time to finish...".format(
+                    n,
+                    "s" if n > 1 else "",
+                    "y" if n == 1 else "ies",
+                    self.server_config.options.AIDE_config_path,
+                    dst_dir_path)
+            logger.info(m)
+        else:
+            m = "No files needs to be copied to '{}' directory. See '{}' "\
+                "AIDE configuration file to investigate why.".format(
+                    dst_dir_path, self.server_config.options.AIDE_config_path)
+            logger.info(m)
+
+        # Sort paths to skip e.g. /x/y/z if /x/y was asked to be copied.
+        src_paths.sort()
+        common_path = "/non-existing-path-to-initialize-loop"
+
+        for src in src_paths:
+            if os.path.commonpath([src, common_path]) == common_path:
+                logger.debug("Skipping copying '{}' since it was copied while "
+                             "copying '{}'.".format(src, common_path))
+                continue
+
+            common_path = src
+            dst_file_path = os.path.join(dst_dir_path, src.lstrip(os.sep))
+            os.makedirs(os.path.dirname(dst_file_path), exist_ok=True)
+
+            if os.path.isdir(src):
+                shutil.copytree(src, dst_file_path)
+                logger.debug("'{}' directory copied recursively successfully "
+                             "to '{}' directory.".format(src, dst_file_path))
+            else:
+                shutil.copy2(src, dst_file_path)
+                logger.debug("'{}' file copied successfully.".format(
+                             dst_file_path))
 
     def _create_tmp_out_dir_if_doesnt_exist(self):
         try:
@@ -65,6 +129,7 @@ class Scanner:
             m = "Unable to create temporary directory '{}' for storing "\
                 "result of the AIDE --init call"
             raise ScannerError(m, e) from e
+
 
 def is_reference_aide_db_outdated(server_config):
     """Return True if reference AIDE database aide.db is outdated."""

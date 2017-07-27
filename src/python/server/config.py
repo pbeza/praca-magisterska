@@ -158,3 +158,36 @@ class ServerConfig(common.config.BaseConfig):
                     break
 
         return value
+
+    def get_all_realpaths_of_files_to_copy(self):
+        """Return list of the files and directories that are defined in
+           aide.conf to be copied after myscm-srv --scan to be able to make
+           diffs (patches) instead of copying whole files to the system image
+           created with --gen-img option."""
+
+        paths = []
+        regex_str = r"#!\s*(.*)\n"
+        regex = re.compile(regex_str)
+        line_no = 0
+
+        with open(self.options.AIDE_config_path) as f:
+            for line in f:
+                line_no += 1
+                match = regex.fullmatch(line)
+
+                if not match:
+                    continue
+
+                path = match.group(1)
+                path = os.path.realpath(path)  # expand symlink if symlink
+
+                if os.path.exists(path):
+                    paths.append(path)
+                else:
+                    m = "File '{}' specified in '{}' (line {}) doesn't exist "\
+                        "- skipping.".format(path,
+                                             self.options.AIDE_config_path,
+                                             line_no)
+                    logger.warning(m)
+
+        return paths

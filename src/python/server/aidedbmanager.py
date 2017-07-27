@@ -127,16 +127,26 @@ class AIDEDatabasesManager:
         return numbers[-1] if numbers else -1
 
     def print_all_aide_db_paths_sorted(self):
-        """Print on stdout all found AIDE databases."""
+        """Print on stdout all found AIDE databases created with myscm-srv
+           --scan option."""
 
         l = self._get_all_aide_db_paths()
+        n = len(l)
         l.sort()
         dir_path = self.server_config.aide_old_db_dir
+
+        if l:
+            print("{} director{} created with myscm-srv --scan option:\n"
+                  .format(n, "y" if n == 1 else "ies"))
+        else:
+            print("No directories created as a result of myscm-srv --scan "
+                  "were found.")
 
         for fname in l:
             full_path = os.path.join(dir_path, fname)
             full_path = os.path.realpath(full_path)
-            print(full_path)
+            line = "  {}".format(full_path)
+            print(line)
 
     def _get_all_aide_db_paths(self):
         """Return list of all found AIDE databases directories."""
@@ -151,6 +161,9 @@ class AIDEDatabasesManager:
             match = regex.fullmatch(fname)
             if match:
                 paths.append(fname)
+
+        if os.path.isdir(self.server_config.aide_reference_db_dir):
+            paths.append(self.server_config.aide_reference_db_dir)
 
         return paths
 

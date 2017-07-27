@@ -7,12 +7,15 @@ import re
 import tarfile
 import textwrap
 
+import diff_match_patch as patcher
+
 import server.scanner
 from common.cmd import run_check_cmd
 from server.aidecheckparser import AIDECheckParser, AIDECheckParserError
 from server.aidedbmanager import AIDEDatabasesManager
 from server.aideentry import PropertyType, AIDEEntry
 from server.error import ServerError
+from server.scanner import Scanner
 from tempfile import TemporaryFile, NamedTemporaryFile
 
 logger = logging.getLogger(__name__)
@@ -34,6 +37,7 @@ class SystemImageGenerator:
     REMOVED_FILES_FNAME = "removed.txt"
     CHANGED_FILES_FNAME = "changed.txt"
     SSL_CERT_DIGEST_TYPE = "sha256"
+    PATCH_EXT = ".myscmsrv-patch"
 
     def __init__(self, server_config):
         self.server_config = server_config
@@ -60,7 +64,7 @@ class SystemImageGenerator:
             return
 
         try:
-            system_img_path = self._generate_img(self.client_db_path)
+            system_img_path = self._generate_img()
         except Exception as e:
             m = "Failed to generate system image based on the output of "\
                 "comparison server's current configuration's state '{}' and "\
@@ -96,19 +100,19 @@ class SystemImageGenerator:
 
         return client_db_path
 
-    def _generate_img(self, client_db_path):
+    def _generate_img(self):
         """Generates system image based on AIDE's --check output ran on the
            AIDE's temporary configuration file."""
 
         logger.info("Generating system image based on current server's "
                     "configuration and AIDE database file '{}' corresponding "
-                    "to client's system configuration.".format(client_db_path))
+                    "to client's system configuration.".format(
+                        self.client_db_path))
 
         system_img_path = None
 
         with NamedTemporaryFile(mode="r+", suffix=".aide.conf") as tmp_aideconf_f:
-            self._copy_aide_config_to_tmp_replacing_db_path(client_db_path,
-                                                            tmp_aideconf_f)
+            self._copy_aide_config_to_tmp_replacing_db_path(tmp_aideconf_f)
 
             with TemporaryFile(mode="r+", suffix=".aide.diff") as aidediff_f:
                 self._save_aide_check_result_to_tmp_file(aidediff_f,
@@ -118,8 +122,7 @@ class SystemImageGenerator:
 
         return system_img_path
 
-    def _copy_aide_config_to_tmp_replacing_db_path(self, client_db_path,
-                                                   tmp_aideconf_f):
+    def _copy_aide_config_to_tmp_replacing_db_path(self, tmp_aideconf_f):
         """Create temporary AIDE configuration file by copying existing one and
            assigning expected values to some variables.
 
@@ -133,7 +136,7 @@ class SystemImageGenerator:
         with open(aide_conf_path) as conf_f:
             db_regex_str = r"\s*database\s*=.*\n"
             db_regex = re.compile(db_regex_str)
-            new_conf_db_line = "database = file:{}\n".format(client_db_path)
+            new_conf_db_line = "database = file:{}\n".format(self.client_db_path)
             db_matches = 0
 
             opt_regex_str = r"\s*summarize_changes\s*=.*\n"
@@ -228,11 +231,11 @@ class SystemImageGenerator:
         return img_path
 
     def _get_img_file_full_path(self):
-        IMG_EXT = "tar.gz"
-        FROM_DB_ID = self.server_config.options.gen_img
-        TO_DB_ID = self.aide_db_manager.get_current_aide_db_number()
-        FNAME = self.MYSCM_IMG_FILE_NAME.format(FROM_DB_ID, TO_DB_ID, IMG_EXT)
-        return os.path.join(self.server_config.options.system_img_out_dir, FNAME)
+        img_ext = "tar.gz"
+        from_db_id = self.server_config.options.gen_img
+        to_db_id = self.aide_db_manager.get_current_aide_db_number()
+        fname = self.MYSCM_IMG_FILE_NAME.format(from_db_id, to_db_id, img_ext)
+        return os.path.join(self.server_config.options.system_img_out_dir, fname)
 
     def _add_to_img_file_aide_added_entries(self, added_entries, archive_file):
         with NamedTemporaryFile(mode="r+") as tmp_added_f:
@@ -262,15 +265,60 @@ class SystemImageGenerator:
         with NamedTemporaryFile(mode="r+") as tmp_changed_f:
             self._append_changed_files_header(tmp_changed_f)
             for c in changed_entries.values():
-                self._append_changed_entry(c, tmp_changed_f)
+                self._append_changed_entry_to_file(c, tmp_changed_f)
                 if c.was_file_content_changed():
                     changed_path = c.get_full_path()
-                    intar_path = os.path.join(self.IN_ARCHIVE_CHANGED_DIR_NAME,
-                                              changed_path.lstrip(os.path.sep))
-                    archive_file.add(changed_path, arcname=intar_path)
+                    self._add_file_to_system_img_tar(changed_path,
+                                                     archive_file)
             tmp_changed_f.seek(0)
             archive_file.add(tmp_changed_f.name,
                              arcname=self.CHANGED_FILES_FNAME)
+
+    def _add_file_to_system_img_tar(self, changed_path, archive_file):
+        """Add whole missing file to system image unless it's possible to
+           create patch (diff) file."""
+
+        old_changed_path = self._get_old_changed_file_version(changed_path)
+
+        if os.path.isfile(old_changed_path):
+            self._add_patch_file_to_system_img(changed_path,
+                                               old_changed_path,
+                                               archive_file)
+        else:
+            intar_path = os.path.join(self.IN_ARCHIVE_CHANGED_DIR_NAME,
+                                      changed_path.lstrip(os.path.sep))
+            archive_file.add(changed_path, arcname=intar_path)
+
+    def _get_old_changed_file_version(self, changed_path):
+        client_db_dir = os.path.dirname(self.client_db_path)
+        copied_dir = os.path.join(client_db_dir, Scanner.COPIED_FILES_DIRNAME)
+        return os.path.join(copied_dir, changed_path.lstrip(os.sep))
+
+    def _add_patch_file_to_system_img(self, changed_path, old_changed_path,
+                                      archive_file):
+        old_txt, new_txt = None, None
+
+        with open(old_changed_path) as old_f:
+            old_txt = old_f.read()
+
+        with open(changed_path) as new_f:
+            new_txt = new_f.read()
+
+        p = patcher.diff_match_patch()
+        patch = p.patch_make(old_txt, new_txt)
+        patch_text = p.patch_toText(patch)
+        patch_fname = changed_path.lstrip(os.path.sep) + self.PATCH_EXT
+        intar_patch_path = os.path.join(self.IN_ARCHIVE_CHANGED_DIR_NAME,
+                                        patch_fname)
+
+        with NamedTemporaryFile(mode="r+") as patch_f:
+            patch_f.write(patch_text)
+            patch_f.seek(0)
+            archive_file.add(patch_f.name, arcname=intar_patch_path)
+
+        logger.debug("Patch for '{}' --> '{}' saved '{}' in '{}' tar file."
+                     .format(old_changed_path, changed_path,
+                             intar_patch_path, archive_file.name))
 
     def _append_changed_files_header(self, changed_f):
         m = "This file lists changes between current myscm-srv state "\
@@ -293,7 +341,7 @@ class SystemImageGenerator:
         last_header = names[-1].get_name()
         changed_f.write(last_header.rstrip() + "\n\n")
 
-    def _append_changed_entry(self, entry, changed_f):
+    def _append_changed_entry_to_file(self, entry, changed_f):
         properties = entry.get_aide_changed_properties()
         headers = AIDEEntry.CHANGED_FILES_HEADER_NAMES
 
