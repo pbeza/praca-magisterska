@@ -12,6 +12,7 @@ import textwrap
 
 import diff_match_patch as patcher
 
+import server.pkgmanager as pkgmgr
 import server.scanner
 from common.cmd import run_check_cmd
 from server.aidecheckparser import AIDECheckParser, AIDECheckParserError
@@ -264,10 +265,14 @@ class SystemImageGenerator:
 
             bar = progressbar.ProgressBar(max_value=n)
 
+            header = "{:<100}{}\n\n".format("# name", "package")
+            tmp_added_f.write(header)
+
             for e in bar(added_entries.values()):
                 path = e.get_full_path()
                 path_suffix = path.lstrip(os.path.sep)
-                line = "{}\n".format(path)
+                pkg_name = pkgmgr.get_file_package_name(path, self.server_config)
+                line = "{:<100}{}\0\n".format(path + "\0", pkg_name)
                 tmp_added_f.write(line)
                 intar_path = os.path.join(self.IN_ARCHIVE_ADDED_DIR_NAME,
                                           path_suffix)
@@ -299,9 +304,13 @@ class SystemImageGenerator:
 
             bar = progressbar.ProgressBar(max_value=n)
 
+            header = "{:<100}{}\n\n".format("# name", "package")
+            tmp_removed_f.write(header)
+
             for r in bar(removed_entries.values()):
                 path = r.aide_properties[PropertyType.NAME]
-                line = "{}\n".format(path)
+                pkg_name = pkgmgr.get_file_package_name(path, self.server_config)
+                line = "{:<100}{}\0\n".format(path + "\0", pkg_name)
                 tmp_removed_f.write(line)
 
             tmp_removed_f.seek(0)

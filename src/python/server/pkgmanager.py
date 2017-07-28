@@ -12,30 +12,57 @@ class PackageManagerError(MySCMError):
     pass
 
 
-def get_file_debian_package_name(file_path):
-    # apt-file is alternative to dpkg-query (but it's much slower)
-    file_path = "/bin/ls"
-    cmd = ["dpkg-query", "-S", file_path]
-    msg = " to get package name of the file"
+def get_file_debian_package_name_fallback(file_path):
+    """Get package name of the given file path.
+
+      dpkg-query is not able to find package name of uninstalled packages in
+      opposite to apt-file (which is not installed by default). apt-file is
+      much slower than dpkg-query -S."""
+
+    cmd = ["apt-file", "search", "-l", file_path]
+    msg = " to get package name of the file (`dpkg-query -S` fallback)"
     completed_proc = long_run_cmd(cmd, check_exitcode=False, suffix_msg=msg,
                                   debug_log=True)
 
     if completed_proc.returncode:
         return "?"
 
-    regex_str = r"(.*): .*\n"
+    cmd_stdout = completed_proc.stdout.decode("utf-8").strip()
+    pkg_names = cmd_stdout.split("\n")
+    pkg_names_str = ",".join(pkg_names)
+
+    return pkg_names_str
+
+
+def get_file_debian_package_name(file_path):
+    """Get package name of the given file path."""
+
+    cmd = ["dpkg-query", "-S", file_path]
+    msg = " to get package name of the file"
+    completed_proc = long_run_cmd(cmd, check_exitcode=False, suffix_msg=msg,
+                                  debug_log=True)
+
+    if completed_proc.returncode:
+        return get_file_debian_package_name_fallback(file_path)
+
+    cmd_stdout = completed_proc.stdout.decode("utf-8").strip()
+    detailed_pkg_names = cmd_stdout.split("\n")
+    regex_str = r"(.*): .*"
     regex = re.compile(regex_str)
-    cmd_stdout = completed_proc.stdout.decode("utf-8")
-    pkg_names_match = regex.fullmatch(cmd_stdout)
+    pkg_names = []
 
-    if not pkg_names_match or len(pkg_names_match.groups()) != 1:
-        m = "Unexpected output of the '{}' command".format(" ".join(cmd))
-        raise PackageManagerError(m)
+    for pkg_name in detailed_pkg_names:
+        pkg_name_match = regex.fullmatch(pkg_name)
 
-    pkg_names_str = pkg_names_match.group(1)
-    pkg_names = pkg_names_str.replace(" ", "")
+        if not pkg_name_match or len(pkg_name_match.groups()) != 1:
+            print(pkg_name)
+            m = "Unexpected output of the '{}' command".format(" ".join(cmd))
+            raise PackageManagerError(m)
 
-    return pkg_names
+        pkg_name_str = pkg_name_match.group(1)
+        pkg_names.append(pkg_name_str)
+
+    return ",".join(pkg_names)
 
 
 def get_file_package_name(file_path, server_config):
