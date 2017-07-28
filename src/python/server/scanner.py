@@ -50,7 +50,8 @@ class Scanner:
         cmd = ["aide", "--init", "-c", aide_config_path]
 
         try:
-            long_run_cmd(cmd, True, msg="to create new aide.db")
+            long_run_cmd(cmd, True, suffix_msg="to create new {}".format(
+                            self.server_config.aide_reference_db_fname))
         except CommandLineError as e:
             m = "Make sure that `database[_out|_new]` variables provided in "\
                 "AIDE configuration '{}' are valid".format(aide_config_path)
@@ -59,8 +60,9 @@ class Scanner:
         aide_db_manager.replace_old_aide_db_with_new_one()
         self._copy_selected_tracked_dirs()
 
-        m = "New reference AIDE database '{}' setup successful.".format(
-                self.server_config.aide_reference_db_path)
+        m = "New reference AIDE database '{}' setup successful. Run --list "\
+            "option to list all available AIDE databases created so far."\
+            .format(self.server_config.aide_reference_db_path)
         logger.info(m)
 
     def _copy_selected_tracked_dirs(self):
@@ -97,7 +99,7 @@ class Scanner:
             m = "No files needs to be copied to '{}' directory. See '{}' "\
                 "AIDE configuration file to investigate why.".format(
                     dst_dir_path, self.server_config.options.AIDE_config_path)
-            logger.info(m)
+            logger.debug(m)
 
         # Sort paths to skip e.g. /x/y/z if /x/y was asked to be copied.
         src_paths.sort()

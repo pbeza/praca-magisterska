@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 import OpenSSL
+import datetime
 import getpass
 import logging
 import os
+import platform
+import progressbar
 import re
 import tarfile
 import textwrap
@@ -38,12 +41,14 @@ class SystemImageGenerator:
     CHANGED_FILES_FNAME = "changed.txt"
     SSL_CERT_DIGEST_TYPE = "sha256"
     PATCH_EXT = ".myscmsrv-patch"
+    IMG_EXT = "tar.gz"
 
     def __init__(self, server_config):
         self.server_config = server_config
         self.aide_db_manager = AIDEDatabasesManager(server_config)
-        client_aide_db_id = server_config.options.gen_img
-        self.client_db_path = self._get_client_db_path(client_aide_db_id)
+        self.from_db_id = self.server_config.options.gen_img
+        self.to_db_id = self.aide_db_manager.get_current_aide_db_number()
+        self.client_db_path = self._get_client_db_path(self.from_db_id)
         self.aide_output_parser = AIDECheckParser(
                 self.client_db_path, self.server_config.aide_reference_db_path)
 
@@ -199,13 +204,13 @@ class SystemImageGenerator:
            output."""
 
         # TODO begin debug to remove
-        for k, v in {
-                "Added entries": entries.added_entries,
-                "Removed entries": entries.removed_entries,
-                "Changed entries": entries.changed_entries}.items():
-            print("\n{} (size: {}):\n".format(k, len(v)))
-            for _, e in v.items():
-                print(vars(e.aide_properties))
+        # for k, v in {
+        #         "Added entries": entries.added_entries,
+        #         "Removed entries": entries.removed_entries,
+        #         "Changed entries": entries.changed_entries}.items():
+        #     print("\n{} (size: {}):\n".format(k, len(v)))
+        #     for _, e in v.items():
+        #         print(vars(e.aide_properties))
         # end end to remove
 
         img_path = self._get_img_file_full_path()
@@ -231,15 +236,35 @@ class SystemImageGenerator:
         return img_path
 
     def _get_img_file_full_path(self):
-        img_ext = "tar.gz"
-        from_db_id = self.server_config.options.gen_img
-        to_db_id = self.aide_db_manager.get_current_aide_db_number()
-        fname = self.MYSCM_IMG_FILE_NAME.format(from_db_id, to_db_id, img_ext)
-        return os.path.join(self.server_config.options.system_img_out_dir, fname)
+        fname = self.MYSCM_IMG_FILE_NAME.format(self.from_db_id, self.to_db_id,
+                                                self.IMG_EXT)
+        img_out_dir = self.server_config.options.system_img_out_dir
+        return os.path.join(img_out_dir, fname)
 
     def _add_to_img_file_aide_added_entries(self, added_entries, archive_file):
+        title = "ADDED FILES REPORT"
+        m = "This file lists files added to the myscm-srv system since '{}' "\
+            "state. Detection of the added files is possible thanks to the "\
+            "AIDE --check and --compare options. Current state of the system "\
+            "is stored in '{}' AIDE database file. This is result of the "\
+            "comparison of those two files.".format(
+                self.client_db_path, self.server_config.aide_reference_db_path)
+        n = len(added_entries)
+
+        if n:
+            logger.info("Adding to the system image {} new file{} that were "
+                        "added to the tracked directories...".format(
+                            n, "s" if n > 0 else ""))
+        else:
+            logger.info("No new files were added to the tracked directories, "
+                        "thus no need to add any to the system image.")
+
         with NamedTemporaryFile(mode="r+") as tmp_added_f:
-            for e in added_entries.values():
+            self._append_sys_info_header(title, m, tmp_added_f)
+
+            bar = progressbar.ProgressBar(max_value=n)
+
+            for e in bar(added_entries.values()):
                 path = e.get_full_path()
                 path_suffix = path.lstrip(os.path.sep)
                 line = "{}\n".format(path)
@@ -247,29 +272,66 @@ class SystemImageGenerator:
                 intar_path = os.path.join(self.IN_ARCHIVE_ADDED_DIR_NAME,
                                           path_suffix)
                 archive_file.add(path, arcname=intar_path)
+
             tmp_added_f.seek(0)
-            archive_file.add(tmp_added_f.name,
-                             arcname=self.ADDED_FILES_FNAME)
+            archive_file.add(tmp_added_f.name, arcname=self.ADDED_FILES_FNAME)
 
     def _add_to_img_file_removed_entries(self, removed_entries, archive_file):
+        title = "REMOVED FILES REPORT"
+        m = "This file lists files removed from the myscm-srv system since "\
+            "'{}' state. Detection of the removed files is possible thanks "\
+            "to the AIDE --check and --compare options. Current state of the "\
+            "system is stored in '{}' AIDE database file. This is result of "\
+            "the comparison of those two files.".format(
+                self.client_db_path, self.server_config.aide_reference_db_path)
+        n = len(removed_entries)
+
+        if n:
+            logger.info("Adding to the system image list of the {} file{} "
+                        "removed from the tracked directories...".format(
+                            n, "s" if n > 0 else ""))
+        else:
+            logger.info("No files were removed from the tracked directories, "
+                        "thus list of files removed from the system is empty.")
+
         with NamedTemporaryFile(mode="r+") as tmp_removed_f:
-            for r in removed_entries.values():
+            self._append_sys_info_header(title, m, tmp_removed_f)
+
+            bar = progressbar.ProgressBar(max_value=n)
+
+            for r in bar(removed_entries.values()):
                 path = r.aide_properties[PropertyType.NAME]
                 line = "{}\n".format(path)
                 tmp_removed_f.write(line)
+
             tmp_removed_f.seek(0)
             archive_file.add(tmp_removed_f.name,
                              arcname=self.REMOVED_FILES_FNAME)
 
     def _add_to_img_file_changed_entries(self, changed_entries, archive_file):
+        n = len(changed_entries)
+
+        if n:
+            logger.info("Adding to the system image list of {} changed "
+                        "file{} within tracked directories...".format(
+                            n, "s" if n > 0 else ""))
+        else:
+            logger.info("No files were changed within tracked directories, "
+                        "thus list of changed files that was added to the "
+                        "system image is empty.")
+
         with NamedTemporaryFile(mode="r+") as tmp_changed_f:
             self._append_changed_files_header(tmp_changed_f)
-            for c in changed_entries.values():
+
+            bar = progressbar.ProgressBar(max_value=n)
+
+            for c in bar(changed_entries.values()):
                 self._append_changed_entry_to_file(c, tmp_changed_f)
                 if c.was_file_content_changed():
                     changed_path = c.get_full_path()
                     self._add_file_to_system_img_tar(changed_path,
                                                      archive_file)
+
             tmp_changed_f.seek(0)
             archive_file.add(tmp_changed_f.name,
                              arcname=self.CHANGED_FILES_FNAME)
@@ -321,18 +383,23 @@ class SystemImageGenerator:
                              intar_patch_path, archive_file.name))
 
     def _append_changed_files_header(self, changed_f):
-        m = "This file lists changes between current myscm-srv state "\
-            "described by the '{}' AIDE database file and '{}' file that "\
-            "corresponds to client's system state.  This file is used by "\
-            "myscm-cli to know how to change file's properties.  Lines that "\
-            "starts with '#' are ignored.  Value in brackets is previous "\
-            "value of the property or AIDE info character (eg. '.' or ' ') "\
-            "if property was not changed.".format(
+        title = "MODIFIED FILES REPORT"
+        m = "This file lists changes between current newest state of the "\
+            "configuration of the myscm-srv machine described in '{}' AIDE "\
+            "database and the old configuration '{}' that corresponds to the "\
+            "client's system state which is considered to be out-of-date. "\
+            "This file is sent to the client along with other files within "\
+            "system image since myscm-cli needs to know which properties of "\
+            "its files needs to be updated and how they should be altered. "\
+            "Lines with leading '#' character are ignored. Values in "\
+            "brackets next to the property values correspond to the previous "\
+            "value of the file's property or to the AIDE info-character (eg. "\
+            "'.' or ' ') if property was not altered (see aide.conf(5) "\
+            "manual to learn more). Columns below are null separated.".format(
                 self.server_config.aide_reference_db_path, self.client_db_path)
 
-        changed_f.write(textwrap.fill(m, width=140, initial_indent="# ",
-                                      subsequent_indent="# "))
-        changed_f.write("\n\n")
+        self._append_sys_info_header(title, m, changed_f)
+
         names = AIDEEntry.CHANGED_FILES_HEADER_NAMES
 
         for h in names[:-1]:
@@ -342,7 +409,7 @@ class SystemImageGenerator:
         changed_f.write(last_header.rstrip() + "\n\n")
 
     def _append_changed_entry_to_file(self, entry, changed_f):
-        properties = entry.get_aide_changed_properties()
+        properties = entry.get_aide_changed_properties(self.server_config)
         headers = AIDEEntry.CHANGED_FILES_HEADER_NAMES
 
         n = len(properties)
@@ -359,6 +426,37 @@ class SystemImageGenerator:
             line += h.formatter.format(p + "\0")
 
         changed_f.write(line.strip() + "\n")
+
+    def _append_sys_info_header(self, title, desc, f):
+        f.write("# {}\n#\n".format(title))
+        f.write(textwrap.fill(desc, width=80, initial_indent="# ",
+                              subsequent_indent="# "))
+        f.write("\n#\n")
+
+        local_cur_datetime = datetime.datetime.now()
+        utc_cur_datetime = datetime.datetime.utcnow()
+        sys_info = [
+            ["From database version", self.from_db_id],
+            ["To database version", self.to_db_id],
+            ["Local creation time", local_cur_datetime.strftime("%H:%M:%S")],
+            ["Creation date", local_cur_datetime.strftime("%d.%m.%Y")],
+            ["UTC creation time", utc_cur_datetime.strftime("%H:%M:%S")],
+            ["UTC creation date", utc_cur_datetime.strftime("%d.%m.%Y")],
+            ["System", platform.system()],
+            ["GNU/Linux distribution", self.server_config.distro_name.title()],
+            ["CPU architecture", platform.machine()],
+            ["Hostname", platform.node()],
+            ["Python implementation", platform.python_implementation()],
+            ["Python version", platform.python_version()],
+            ["Python compiler", platform.python_compiler()]
+        ]
+
+        for i in sys_info:
+            k = i[0]
+            v = i[1]
+            f.write("# {:<24}: {}\n".format(k, v if v != "" else "?"))
+
+        f.write("\n\n")
 
     def _create_img_signature(self, img_path):
         priv_key_obj = self._create_priv_key_openssl_obj(img_path)

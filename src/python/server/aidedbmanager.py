@@ -92,7 +92,7 @@ class AIDEDatabasesManager:
 
     def _rename(self, from_path, to_path):
         m = "Renaming '{}' to '{}'.".format(from_path, to_path)
-        logger.info(m)
+        logger.debug(m)
 
         try:
             os.replace(from_path, to_path)

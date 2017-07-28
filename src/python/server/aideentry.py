@@ -5,6 +5,7 @@ import logging
 from enum import Enum
 
 from server.error import ServerError
+import server.pkgmanager as pkgmgr
 
 logger = logging.getLogger(__name__)
 
@@ -222,7 +223,8 @@ class AIDEEntry:
         PropertyHeader(PropertyType.INODE.value),
         PropertyHeader(PropertyType.LCOUNT.value, "{:<12}"),
         PropertyHeader(PropertyType.MD5.value, "{:<73}"),
-        PropertyHeader(PropertyType.SHA1.value, "{:<100}")
+        PropertyHeader(PropertyType.SHA1.value, "{:<100}"),
+        PropertyHeader("package")
     ]
 
     def __init__(self, aide_properties, aide_info_str, entry_type):
@@ -244,7 +246,7 @@ class AIDEEntry:
             m = "Unexpected length of the AIDE changed properties info string"
             raise AIDEEntryError(m)
 
-    def get_aide_changed_properties(self):
+    def get_aide_changed_properties(self, server_config):
         # The general format of the AIDE info string is like the string
         # YlZbpugamcinCAXSE (see AIDE manual).
 
@@ -267,6 +269,10 @@ class AIDEEntry:
                                                                cur_c, ref_c, s)
             if comment_entry and entry_changed:
                 comment_entry = False
+
+        fpath = self.aide_properties[PropertyType.NAME]
+        pkg_name = pkgmgr.get_file_package_name(fpath, server_config)
+        s.append(pkg_name)
 
         if comment_entry:
             s[0] = "# {}".format(s[0])

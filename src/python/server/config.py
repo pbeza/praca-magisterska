@@ -19,6 +19,7 @@ class ServerConfig(common.config.BaseConfig):
     """Server-specific configuration manager."""
 
     SUPPORTED_LINUX_DISTROS = {"debian", "arch"}
+    EXTENDED_AIDE_CONFIG_PREFIX = "#@"
 
     def __init__(self, *options, **kwargs):
         super().__init__(*options, **kwargs)
@@ -166,7 +167,7 @@ class ServerConfig(common.config.BaseConfig):
            created with --gen-img option."""
 
         paths = []
-        regex_str = r"#!\s*(.*)\n"
+        regex_str = r"{}\s*(.*)\n".format(self.EXTENDED_AIDE_CONFIG_PREFIX)
         regex = re.compile(regex_str)
         line_no = 0
 
