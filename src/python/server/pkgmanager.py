@@ -20,7 +20,7 @@ def get_file_debian_package_name_fallback(file_path):
       much slower than dpkg-query -S."""
 
     cmd = ["apt-file", "search", "-l", file_path]
-    msg = " to get package name of the file (`dpkg-query -S` fallback)"
+    msg = "to get package name of the file (`dpkg-query -S` fallback)"
     completed_proc = long_run_cmd(cmd, check_exitcode=False, suffix_msg=msg,
                                   debug_log=True)
 
@@ -38,7 +38,7 @@ def get_file_debian_package_name(file_path):
     """Get package name of the given file path."""
 
     cmd = ["dpkg-query", "-S", file_path]
-    msg = " to get package name of the file"
+    msg = "to get package name of the file"
     completed_proc = long_run_cmd(cmd, check_exitcode=False, suffix_msg=msg,
                                   debug_log=True)
 

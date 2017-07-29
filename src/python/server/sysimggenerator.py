@@ -17,11 +17,12 @@ import server.scanner
 from common.cmd import run_check_cmd
 from server.aidecheckparser import AIDECheckParser, AIDECheckParserError
 from server.aidedbmanager import AIDEDatabasesManager
-from server.aideentry import PropertyType, AIDEEntry
+from server.aideentry import AIDEEntry
 from server.error import ServerError
 from server.scanner import Scanner
 from tempfile import TemporaryFile, NamedTemporaryFile
 
+progressbar.streams.wrap_stderr()
 logger = logging.getLogger(__name__)
 
 
@@ -33,7 +34,7 @@ class SystemImageGenerator:
     """Generator of the reference system image that will be applied by the
        client's myscm-cli application."""
 
-    MYSCM_IMG_FILE_NAME = "myscm-img.{}.{}.{}"
+    MYSCM_IMG_FILE_NAME = "myscm-img.{}.{}{}"
     AIDE_MIN_EXITCODE = 14  # see AIDE's manual for details about exitcodes
     IN_ARCHIVE_ADDED_DIR_NAME = "ADDED"
     IN_ARCHIVE_CHANGED_DIR_NAME = "CHANGED"
@@ -42,7 +43,9 @@ class SystemImageGenerator:
     CHANGED_FILES_FNAME = "changed.txt"
     SSL_CERT_DIGEST_TYPE = "sha256"
     PATCH_EXT = ".myscmsrv-patch"
-    IMG_EXT = "tar.gz"
+    IMG_EXT = ".tar.gz"
+    TEMPLATE_PATH_EXT = ".myscm-template"
+    TARFILE_COMPRESSION = "w:gz"
 
     def __init__(self, server_config):
         self.server_config = server_config
@@ -219,7 +222,7 @@ class SystemImageGenerator:
         if os.path.isfile(img_path):
             logger.warning("Overwriting '{}' system image.".format(img_path))
 
-        with tarfile.open(img_path, "w:gz") as f:
+        with tarfile.open(img_path, self.TARFILE_COMPRESSION) as f:
             self._add_to_img_file_aide_added_entries(entries.added_entries, f)
             self._add_to_img_file_removed_entries(entries.removed_entries, f)
             self._add_to_img_file_changed_entries(entries.changed_entries, f)
@@ -243,13 +246,6 @@ class SystemImageGenerator:
         return os.path.join(img_out_dir, fname)
 
     def _add_to_img_file_aide_added_entries(self, added_entries, archive_file):
-        title = "ADDED FILES REPORT"
-        m = "This file lists files added to the myscm-srv system since '{}' "\
-            "state. Detection of the added files is possible thanks to the "\
-            "AIDE --check and --compare options. Current state of the system "\
-            "is stored in '{}' AIDE database file. This is result of the "\
-            "comparison of those two files.".format(
-                self.client_db_path, self.server_config.aide_reference_db_path)
         n = len(added_entries)
 
         if n:
@@ -261,34 +257,122 @@ class SystemImageGenerator:
                         "thus no need to add any to the system image.")
 
         with NamedTemporaryFile(mode="r+") as tmp_added_f:
-            self._append_sys_info_header(title, m, tmp_added_f)
+            self._append_added_entries_header(tmp_added_f)
 
+            # Sort paths to skip e.g. /x/y/z if /x/y was already copied.
+
+            sorted_added_entries = [e.get_full_path() for e in added_entries.values()]
+            sorted_added_entries.sort()
+            common_path = "/non-existing-path-to-initialize-loop"
             bar = progressbar.ProgressBar(max_value=n)
 
-            header = "{:<100}{}\n\n".format("# name", "package")
-            tmp_added_f.write(header)
+            for path in bar(sorted_added_entries):
 
-            for e in bar(added_entries.values()):
-                path = e.get_full_path()
-                path_suffix = path.lstrip(os.path.sep)
-                pkg_name = pkgmgr.get_file_package_name(path, self.server_config)
-                line = "{:<100}{}\0\n".format(path + "\0", pkg_name)
-                tmp_added_f.write(line)
-                intar_path = os.path.join(self.IN_ARCHIVE_ADDED_DIR_NAME,
-                                          path_suffix)
-                archive_file.add(path, arcname=intar_path)
+                # Check if current file was already copied as a file contained
+                # within directory that was already copied. If so, skip.
+
+                if os.path.commonpath([path, common_path]) == common_path:
+                    logger.debug("Skipping copying '{}' since it was copied "
+                                 "while copying '{}'.".format(
+                                    path, common_path))
+                    continue
+
+                common_path = path
+
+                # If this file has corresponding template file, skip this file
+                # because template is preferred over regular file.
+
+                exist = self._check_if_exist_added_file_template(path)
+                if exist:
+                    continue
+
+                # Get full path to file within system image (tar.gz archive).
+
+                intar_path = self._get_added_entry_intar_path(path)
+
+                # Make sure if file wasn't added by e.g. expanding symlinks.
+
+                try:
+                    if archive_file.getmember(intar_path):
+                        logger.warning("'{}' was already added to the system "
+                                       "image. Skipping.".format(intar_path))
+                        continue
+                except KeyError:
+                    pass
+
+                # Add recursively given file or directory filtering out files
+                # that have corresponding templates.
+
+                logger.debug("Adding {}'{}' to the system image.".format(
+                             "recursively " if os.path.isdir(path) else "",
+                             path))
+
+                archive_file.add(path, arcname=intar_path,
+                                 filter=self._added_files_filter)
+
+                # Append information about current file or directory to the
+                # added.txt file. Note that only top directory are appended,
+                # e.g. /x/y/z will be not listed if /x/y is listed.
+
+                self._append_added_entry_line(path, tmp_added_f)
+
+            # Add added.txt to the system image (tar.gz archive).
 
             tmp_added_f.seek(0)
             archive_file.add(tmp_added_f.name, arcname=self.ADDED_FILES_FNAME)
 
-    def _add_to_img_file_removed_entries(self, removed_entries, archive_file):
-        title = "REMOVED FILES REPORT"
-        m = "This file lists files removed from the myscm-srv system since "\
-            "'{}' state. Detection of the removed files is possible thanks "\
-            "to the AIDE --check and --compare options. Current state of the "\
-            "system is stored in '{}' AIDE database file. This is result of "\
+    def _append_added_entries_header(self, f):
+        title = "ADDED FILES REPORT"
+        m = "This file lists files added to the myscm-srv system since '{}' "\
+            "state. Detection of the added files is possible thanks to the "\
+            "AIDE --check and --compare options. Current state of the system "\
+            "is always stored in '{}' AIDE database file. This is result of "\
             "the comparison of those two files.".format(
                 self.client_db_path, self.server_config.aide_reference_db_path)
+        self._append_sys_info_header(title, m, f)
+        header = "{:<100}{}\n\n".format("# name", "package")
+        f.write(header)
+
+    def _append_added_entry_line(self, path, f):
+        self._append_entry_line(path, f)
+
+    def _get_added_entry_intar_path(self, path):
+        path_suffix = path.lstrip(os.path.sep)
+        intar_path = os.path.join(self.IN_ARCHIVE_ADDED_DIR_NAME, path_suffix)
+        return intar_path
+
+    def _added_files_filter(self, tar_info):
+        """Filter handler for TarFile.add() method."""
+
+        # If this file has corresponding template file, skip this file
+        # because template is preferred over regular file.
+
+        exist = self._check_if_exist_added_file_template(tar_info.name)
+        return None if exist else tar_info
+
+    def _check_if_exist_changed_file_template(self, path):
+        return self._check_if_exist_file_template(path, "changed")
+
+    def _check_if_exist_added_file_template(self, path):
+        return self._check_if_exist_file_template(path, "newly added")
+
+    def _check_if_exist_file_template(self, path, ignore_str):
+        if not os.path.isfile(path) or path.endswith(self.TEMPLATE_PATH_EXT):
+            return False
+
+        template_path = path + self.TEMPLATE_PATH_EXT
+        template_exist = os.path.isfile(template_path)
+
+        if template_exist:
+            m = "Ignoring {} file '{}' since it has corresponding '{}' "\
+                "template file. Make sure that template file is set to be "\
+                "tracked by the AIDE configuration to copy it to the system "\
+                "image.".format(ignore_str, path, template_path)
+            logger.debug(m)
+
+        return template_exist
+
+    def _add_to_img_file_removed_entries(self, removed_entries, archive_file):
         n = len(removed_entries)
 
         if n:
@@ -300,22 +384,73 @@ class SystemImageGenerator:
                         "thus list of files removed from the system is empty.")
 
         with NamedTemporaryFile(mode="r+") as tmp_removed_f:
-            self._append_sys_info_header(title, m, tmp_removed_f)
+            self._append_removed_entries_header(tmp_removed_f)
 
+            # Sort paths to skip e.g. /x/y/z if /x/y was already removed.
+
+            sorted_removed_entries = [e.get_full_path() for e in removed_entries.values()]
+            sorted_removed_entries.sort()
+            common_path = "/non-existing-path-to-initialize-loop"
             bar = progressbar.ProgressBar(max_value=n)
 
-            header = "{:<100}{}\n\n".format("# name", "package")
-            tmp_removed_f.write(header)
+            for path in bar(sorted_removed_entries):
+                self._warn_if_orphaned_template_exists(path)
 
-            for r in bar(removed_entries.values()):
-                path = r.aide_properties[PropertyType.NAME]
-                pkg_name = pkgmgr.get_file_package_name(path, self.server_config)
-                line = "{:<100}{}\0\n".format(path + "\0", pkg_name)
-                tmp_removed_f.write(line)
+                # Check if current file was already listed as removed file (as
+                # a file contained within directory that was removed. If so,
+                # skip.
+
+                if os.path.commonpath([path, common_path]) == common_path:
+                    logger.debug("Skipping listing removed file '{}' since it "
+                                 "was listed as removed while listing removed "
+                                 "'{}'.".format(path, common_path))
+                    continue
+
+                common_path = path
+
+                # Append information about current file or directory to the
+                # added.txt file. Note that only top directory are appended,
+                # e.g. /x/y/z will be not listed if /x/y is listed.
+
+                logger.debug("Adding '{}' file to the '{}' file.".format(
+                             path, self.REMOVED_FILES_FNAME))
+
+                self._append_removed_entry_line(path, tmp_removed_f)
+
+            # Add removed.txt to the system image (tar.gz archive).
 
             tmp_removed_f.seek(0)
             archive_file.add(tmp_removed_f.name,
                              arcname=self.REMOVED_FILES_FNAME)
+
+    def _append_removed_entries_header(self, f):
+        title = "REMOVED FILES REPORT"
+        m = "This file lists files removed from the myscm-srv system since "\
+            "'{}' state. Detection of the removed files is possible thanks "\
+            "to the AIDE --check and --compare options. Current state of the "\
+            "system is stored in '{}' AIDE database file. This is result of "\
+            "the comparison of those two files.".format(
+                self.client_db_path, self.server_config.aide_reference_db_path)
+        self._append_sys_info_header(title, m, f)
+        header = "{:<100}{}\n\n".format("# name", "package")
+        f.write(header)
+
+    def _append_removed_entry_line(self, path, f):
+        self._append_entry_line(path, f)
+
+    def _append_entry_line(self, path, f):
+        pkg_name = pkgmgr.get_file_package_name(path, self.server_config)
+        line = "{:<100}{}\0\n".format(path + "\0", pkg_name)
+        f.write(line)
+
+    def _warn_if_orphaned_template_exists(self, path):
+        template_path = path + self.TEMPLATE_PATH_EXT
+
+        if os.path.isfile(template_path):
+            m = "Orphaned template file '{}' found for corresponding removed "\
+                "file '{}'. Remove it unless you need it.".format(
+                    template_path, path)
+            logger.warning(m)
 
     def _add_to_img_file_changed_entries(self, changed_entries, archive_file):
         n = len(changed_entries)
@@ -330,12 +465,29 @@ class SystemImageGenerator:
                         "system image is empty.")
 
         with NamedTemporaryFile(mode="r+") as tmp_changed_f:
-            self._append_changed_files_header(tmp_changed_f)
-
+            self._append_changed_entries_header(tmp_changed_f)
             bar = progressbar.ProgressBar(max_value=n)
 
             for c in bar(changed_entries.values()):
+                path = c.get_full_path()
+
+                # If this file has corresponding template file, skip this file
+                # because template is preferred over regular file.
+
+                exist = self._check_if_exist_changed_file_template(path)
+                if exist:
+                    continue
+
+                # Append information about current file or directory to the
+                # changed.txt file.
+
+                logger.debug("Adding details of changed file '{}' to the '{}' "
+                             "file.".format(path, self.CHANGED_FILES_FNAME))
                 self._append_changed_entry_to_file(c, tmp_changed_f)
+
+                # If content of the file was changed, then create patch if
+                # possible. Otherwise copy whole file to the system image.
+
                 if c.was_file_content_changed():
                     changed_path = c.get_full_path()
                     self._add_file_to_system_img_tar(changed_path,
@@ -358,6 +510,10 @@ class SystemImageGenerator:
         else:
             intar_path = os.path.join(self.IN_ARCHIVE_CHANGED_DIR_NAME,
                                       changed_path.lstrip(os.path.sep))
+
+            logger.debug("Adding changed file '{}' to the system image."
+                         .format(intar_path))
+
             archive_file.add(changed_path, arcname=intar_path)
 
     def _get_old_changed_file_version(self, changed_path):
@@ -387,11 +543,11 @@ class SystemImageGenerator:
             patch_f.seek(0)
             archive_file.add(patch_f.name, arcname=intar_patch_path)
 
-        logger.debug("Patch for '{}' --> '{}' saved '{}' in '{}' tar file."
-                     .format(old_changed_path, changed_path,
-                             intar_patch_path, archive_file.name))
+        logger.debug("Patch for '{}' --> '{}' saved as '{}' in '{}' system "
+                     "image.".format(old_changed_path, changed_path,
+                                     intar_patch_path, archive_file.name))
 
-    def _append_changed_files_header(self, changed_f):
+    def _append_changed_entries_header(self, changed_f):
         title = "MODIFIED FILES REPORT"
         m = "This file lists changes between current newest state of the "\
             "configuration of the myscm-srv machine described in '{}' AIDE "\
@@ -411,7 +567,7 @@ class SystemImageGenerator:
 
         names = AIDEEntry.CHANGED_FILES_HEADER_NAMES
 
-        for h in names[:-1]:
+        for h in names[:-1]:  # to skip trailing whitespaces
             changed_f.write(h.get_name())
 
         last_header = names[-1].get_name()
@@ -529,9 +685,9 @@ class SystemImageGenerator:
         print()
         m = "Enter password protecting '{}' private key of the SSL "\
             "certificate to digitally sign system image '{}'. If you want to "\
-            "skip generating SSL signature press CTRL+C (sends SIGINT "\
-            "signal).".format(os.path.basename(priv_key_path),
-                              os.path.basename(img_path))
+            "skip generating SSL signature press CTRL+C (or send SIGINT "\
+            "signal in any other way).".format(os.path.basename(priv_key_path),
+                                               os.path.basename(img_path))
         print(textwrap.fill(m, 80))
         print()
 

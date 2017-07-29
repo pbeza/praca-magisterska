@@ -101,7 +101,8 @@ class Scanner:
                     dst_dir_path, self.server_config.options.AIDE_config_path)
             logger.debug(m)
 
-        # Sort paths to skip e.g. /x/y/z if /x/y was asked to be copied.
+        # Sort paths to skip e.g. /x/y/z if /x/y was already copied.
+
         src_paths.sort()
         common_path = "/non-existing-path-to-initialize-loop"
 
