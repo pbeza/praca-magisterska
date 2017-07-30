@@ -14,7 +14,7 @@ that can be applied by the clients running `myscm-cli` application.
 
 # SYNOPSIS
 
-myscm-srv.py [*OPTIONS*] [**--scan**] [**--gen-img** *CLIENT_AIDE_DB_VER*]
+myscm-srv.py [*OPTIONS*] [**--scan**] [**--gen-img** *SYS_IMG_VER*]
 
 # DESCRIPTION
 
@@ -72,25 +72,25 @@ software to make them clones of the `server` system in a sense described in
 -s, \--scan
 :   Scan system using AIDE, create AIDE's new `aide.db` reference database and
     rename old one to `aide.db.X` where `X` is incremented integer that is
-    referred as `CLIENT_AIDE_DB_VER` in `--gen-img` option.  This operation is
+    referred as `SYS_IMG_VER` in `--gen-img` option.  This operation is
     intended to provide AIDE database with a summary of the current state of
     the server software without deleting the old state file.  Scanning may take
     a long time to complete depending on the AIDE configuration file that
     determines which directories are scanned (see `--aide-conf` option for
     details).
 
--g *CLIENT_AIDE_DB_VER*, \--gen-img=*CLIENT_AIDE_DB_VER*
+-g *SYS_IMG_VER*, \--gen-img=*SYS_IMG_VER*
 :   Generate system image that can be applied by any client whose system
     configuration is represented by existing AIDE database identified by
-    non-negative integer number `CLIENT_AIDE_DB_VER` which corresponds to `X`
-    in `aide.db.X` file created with `--scan` flag (see `--list` option).
+    non-negative integer number `SYS_IMG_VER` which corresponds to `X` in
+    `aide.db.X` file created with `--scan` flag (see `--list` option).
     Generated system image is an archive file saved in location specified in
     `/etc/myscm-srv/config.ini` configuration file (`/var/lib/myscm-srv/` is
     default).  System image contains all of the files necessary to modify
     client's configuration to match server's configuration.  If client has
     never synchronized its configuration with server, then `0` should be
-    specified as a `CLIENT_AIDE_DB_VER`.  Client application (ie. `myscm-cli`)
-    has option that prints out client's current `CLIENT_AIDE_DB_VER`.
+    specified as a `SYS_IMG_VER`.  Client application (ie. `myscm-cli`) has
+    option that prints out client's current `SYS_IMG_VER`.
 
 \--ssl-cert=*PATH*
 :   Specify full path to the server's SSL certificate that is used to digitally

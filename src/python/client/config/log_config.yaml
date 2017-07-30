@@ -1,4 +1,4 @@
-# Server logger configuration.
+# Client logger configuration.
 #
 # To learn more about logging configuration read:
 # https://docs.python.org/dev/library/logging.config.html#dictionary-schema-details
@@ -30,11 +30,11 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     level: NOTSET
     formatter: file-formatter
-    filename: /home/patryk/Dokumenty/studia/Magisterskie/praca-magisterska/src/python/logs/myscm-srv.log
+    filename: /home/patryk/Dokumenty/studia/Magisterskie/praca-magisterska/src/python/logs/myscm-cli.log
     maxBytes: 1048576
     backupCount: 3
 loggers:
-  server:
+  client:
     level: NOTSET
     handlers: [file,console]
     propagate: yes

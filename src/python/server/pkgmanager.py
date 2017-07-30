@@ -3,12 +3,12 @@ import logging
 import re
 
 from common.cmd import long_run_cmd
-from common.error import MySCMError
+from server.error import ServerError
 
 logger = logging.getLogger(__name__)
 
 
-class PackageManagerError(MySCMError):
+class PackageManagerError(ServerError):
     pass
 
 

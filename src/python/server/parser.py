@@ -5,7 +5,7 @@ import common.constants
 import server.config
 from common.parser import CommandLineFlagConfigOption
 from common.parser import ConfigParser
-from common.parser import FileConfigOption
+from common.parser import ValidatedFileConfigOption
 from common.parser import GeneralConfigOption
 from common.parser import ParserError
 from common.parser import ValidatedCommandLineConfigOption
@@ -13,19 +13,24 @@ from common.parser import ValidatedCommandLineConfigOption
 _MIN_PROP_INTERVAL_SEC = 3
 _MAX_PROP_INTERVAL_SEC = 60 * 60 * 24 * 365 * 10
 _APP_VERSION = common.constants.get_app_version("myscm-srv")
-_HELP_DESC = '''This is server side of the mySCM application – simple
-Software Configuration Management (SCM) tool for managing software and
-configuration of the clients running GNU/Linux distributions. This application
-is intended to create and customize GNU/Linux system image that can be applied
-by the clients using myscm-cli application.'''
+_HELP_DESC = '''This is server side of the mySCM application – simple Software
+Configuration Management (SCM) tool for managing software and configuration of
+the clients running GNU/Linux distributions. This application is intended to
+create and customize GNU/Linux system image that can be applied by the clients
+using myscm-cli application.'''
 
 
 class ServerParserError(ParserError):
     pass
 
 
-class PropagationIntervalGeneralConfigOption(GeneralConfigOption):
-    """Configuration option read from file and/or CLI, specifying server's
+##################################
+# Server's configuration options #
+##################################
+
+
+class PropagationIntervalConfigOption(GeneralConfigOption):
+    """Configuration option read from file and/or CLI specifying server's
        propagation interval in seconds."""
 
     DEFAULT_PROPAGATION_INTERVAL_SEC = 3600
@@ -64,8 +69,8 @@ class PropagationIntervalGeneralConfigOption(GeneralConfigOption):
         return sec
 
 
-class SSLCertGeneralConfigOption(GeneralConfigOption):
-    """Configuration option read from file and/or CLI, specifying SSL
+class SSLCertConfigOption(GeneralConfigOption):
+    """Configuration option read from file and/or CLI specifying SSL
        certificate file path."""
 
     DEFAULT_SSL_CERT_PATH = "/etc/myscm-srv/ssl.sig"
@@ -76,9 +81,9 @@ class SSLCertGeneralConfigOption(GeneralConfigOption):
             ssl_cert_path or self.DEFAULT_SSL_CERT_PATH,
             self._assert_ssl_cert_path_valid, True, "--ssl-cert",
             metavar="PATH", type=self._assert_ssl_cert_path_valid,
-            help="full path to the server's SSL certificate that is used to "
-                 "digitally sign system image generated with --gen-img "
-                 "option (default value: '{}')".format(
+            help="full path to the server's SSL certificate that is being "
+                 "used to digitally sign system image generated with "
+                 "--gen-img option (default value: '{}')".format(
                     self.DEFAULT_SSL_CERT_PATH))
 
     def _assert_ssl_cert_path_valid(self, cert_path):
@@ -92,8 +97,8 @@ class SSLCertGeneralConfigOption(GeneralConfigOption):
         return cert_path
 
 
-class SSLCertPrivKeyGeneralConfigOption(GeneralConfigOption):
-    """Configuration option read from file and/or CLI, specifying SSL private
+class SSLCertPrivKeyConfigOption(GeneralConfigOption):
+    """Configuration option read from file and/or CLI specifying SSL private
        key of the x509 certificate saved in PEM format."""
 
     DEFAULT_SSL_CERT_PRIV_KEY_PATH = "/etc/myscm-srv/ssl.sig.priv"
@@ -105,7 +110,7 @@ class SSLCertPrivKeyGeneralConfigOption(GeneralConfigOption):
             self._assert_ssl_cert_priv_key_path_valid, True, "--ssl-cert-priv",
             metavar="PATH", type=self._assert_ssl_cert_priv_key_path_valid,
             help="full path to the server's SSL private key of the SSL "
-                 "certificate saved in PEM format; this key is used to "
+                 "certificate saved in PEM format; this key is being used to "
                  "digitally sign system image generated with --gen-img "
                  "option (default value: '{}')".format(
                     self.DEFAULT_SSL_CERT_PRIV_KEY_PATH))
@@ -121,8 +126,8 @@ class SSLCertPrivKeyGeneralConfigOption(GeneralConfigOption):
         return cert_priv_key_path
 
 
-class AIDEConfigFileGeneralConfigOption(GeneralConfigOption):
-    """Configuration option read from file and/or CLI, specifying AIDE
+class AIDEConfigFileConfigOption(GeneralConfigOption):
+    """Configuration option read from file and/or CLI specifying AIDE
        configuration file path."""
 
     DEFAULT_AIDE_CONFIG_PATH = "/etc/myscm-srv/aide.conf"
@@ -149,78 +154,64 @@ class AIDEConfigFileGeneralConfigOption(GeneralConfigOption):
 
 
 class AIDEScanArgConfigOption(CommandLineFlagConfigOption):
-    """Configuration option read from CLI, specifying whether server's scanning
+    """Configuration option read from CLI specifying whether server's scanning
        using AIDE should be ran or not."""
 
     def __init__(self):
         super().__init__(
-            "Scan", "-s", "--scan", action="store_true",
+            "Scan", "-s", "--scan",
             help="scan system using AIDE, create AIDE's new aide.db reference "
                  "database and rename old one to aide.db.X where X is "
                  "incremented integer")
 
 
 class ListAvailableAIDEDatabasesConfigOption(CommandLineFlagConfigOption):
-    """Configuration option read from CLI, specifying to list all available
+    """Configuration option read from CLI specifying to list all available
        AIDE databases that describe expected state of the client that want to
        upgrade its configuration."""
 
     def __init__(self):
         super().__init__(
-            "ListDatabases", "-l", "--list", action="store_true",
+            "ListDatabases", "-l", "--list",
             help="list all available AIDE databases created with --scan "
                  "option")
 
 
 class ConfigCheckConfigOption(CommandLineFlagConfigOption):
-    """Configuration option read from CLI, specifying to check application
+    """Configuration option read from CLI specifying to check application
        configuration and exit."""
 
     def __init__(self):
         super().__init__(
-                "ConfigCheck", "-k", "--config-check", action="store_true",
+                "ConfigCheck", "-k", "--config-check",
                 help="check if application configuration is valid and exit; "
                      "0 and 1 indicates respectively: configuration validity "
                      "and invalidity")
 
 
 class GenerateSystemImageConfigOption(ValidatedCommandLineConfigOption):
-    """Configuration option read from file and/or CLI, specifying whether
-       generating system image for the client should be ran or not."""
+    """Configuration option read from CLI specifying to generate system image
+       from the specified client's cersion to the current newest system
+       version. List of all available client's databases can be checked using
+       --list option."""
 
     def __init__(self):
         super().__init__(
             "GenImg", None, self._assert_client_aide_db_version_valid, "-g",
-            "--gen-img", metavar="CLIENT_AIDE_DB_VER",
+            "--gen-img", metavar="SYS_IMG_VER",
             type=self._assert_client_aide_db_version_valid,
             help="generate system image that can be applied by any client "
                  "whose system configuration is represented by existing AIDE "
                  "database identified by non-negative integer number "
-                 "CLIENT_AIDE_DB_VER (which corresponds to X in aide.db.X "
-                 "file created with --scan flag)")
+                 "SYS_IMG_VER (which corresponds to X in aide.db.X file "
+                 "created with --scan flag)")
 
-    def _assert_client_aide_db_version_valid(self, client_aide_db_version):
-        ver = None
-        valid = True
-
-        try:
-            ver = int(client_aide_db_version)
-        except ValueError:
-            valid = False
-
-        if ver < 0:
-            valid = False
-
-        if not valid:
-            m = "Specified client's state version '{}' is not non-negative "\
-                "integer".format(client_aide_db_version)
-            raise ServerParserError(m)
-
-        return ver
+    def _assert_client_aide_db_version_valid(self, sys_img_ver):
+        return common.parser.assert_sys_img_ver_valid(sys_img_ver)
 
 
-class SystemImgOutDirConfigOption(FileConfigOption):
-    """Configuration option read from file, specifying directory where
+class SystemImgOutDirConfigOption(ValidatedFileConfigOption):
+    """Configuration option read from file specifying directory where
        all generated reference system images are saved."""
 
     DEFAULT_SYS_IMG_DIR = "/var/lib/myscm-srv"
@@ -243,21 +234,42 @@ class SystemImgOutDirConfigOption(FileConfigOption):
         return img_dir_path
 
 
+class UpgradeConfigOption(ValidatedCommandLineConfigOption):
+    """Run --scan and --gen-img option with specified system image version."""
+
+    def __init__(self):
+        super().__init__(
+            "Upgrade", None, self._assert_client_aide_db_version_valid,
+            "--upgrade", metavar="SYS_IMG_VER",
+            type=self._assert_client_aide_db_version_valid,
+            help="run --scan option and --gen-img option to both scan and "
+                 "generate system image")
+
+    def _assert_client_aide_db_version_valid(self, sys_img_ver):
+        return common.parser.assert_sys_img_ver_valid(sys_img_ver)
+
+
+#############################################
+# Core of the server's configuration parser #
+#############################################
+
+
 class ServerConfigParser(ConfigParser):
     """Application configuration parser for configuration read from both
        configuration file and command line (CLI)."""
 
     def __init__(self, config_path, config_section_name):
         _SERVER_DEFAULT_CONFIG = [
-            PropagationIntervalGeneralConfigOption(),
-            SSLCertGeneralConfigOption(),
-            SSLCertPrivKeyGeneralConfigOption(),
-            AIDEConfigFileGeneralConfigOption(),
+            PropagationIntervalConfigOption(),
+            SSLCertConfigOption(),
+            SSLCertPrivKeyConfigOption(),
+            AIDEConfigFileConfigOption(),
             AIDEScanArgConfigOption(),
             ListAvailableAIDEDatabasesConfigOption(),
             ConfigCheckConfigOption(),
             GenerateSystemImageConfigOption(),
-            SystemImgOutDirConfigOption()
+            SystemImgOutDirConfigOption(),
+            UpgradeConfigOption()
         ]
         super().__init__(config_path, config_section_name,
                          _SERVER_DEFAULT_CONFIG, _HELP_DESC, _APP_VERSION)

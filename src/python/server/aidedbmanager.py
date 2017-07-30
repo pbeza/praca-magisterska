@@ -167,12 +167,7 @@ class AIDEDatabasesManager:
 
         return paths
 
-    def _report_missing_aide_db_files(self, numbers):
-        """Report to logger all of the old, missing AIDE databases aide.db.X.
-           Removed old databases are not a problem as long as there is no need
-           to generate system image from client's state that corresponds to the
-           missing AIDE database."""
-
+    def _get_missing_aide_db_files_ranges(self, numbers):
         if not numbers:
             return
 
@@ -191,6 +186,16 @@ class AIDEDatabasesManager:
                     ranges.append(str(a + 1))
                 else:
                     ranges.append("{}-{}".format(a + 1, b - 1))
+
+        return ranges
+
+    def _report_missing_aide_db_files(self, numbers):
+        """Report to logger all of the old, missing AIDE databases aide.db.X.
+           Removed old databases are not a problem as long as there is no need
+           to generate system image from client's state that corresponds to the
+           missing AIDE database."""
+
+        ranges = self._get_missing_aide_db_files_ranges(numbers)
 
         if ranges:
             m = "Missing {}.X file{}, where X is: {}. This is not a "\

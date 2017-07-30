@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
-import platform
 import re
 
 import common.config
@@ -18,13 +17,10 @@ class ServerConfigError(ServerError):
 class ServerConfig(common.config.BaseConfig):
     """Server-specific configuration manager."""
 
-    SUPPORTED_LINUX_DISTROS = {"debian", "arch"}
     EXTENDED_AIDE_CONFIG_PREFIX = "#@"
 
     def __init__(self, *options, **kwargs):
         super().__init__(*options, **kwargs)
-
-        self.distro_name = self._assert_allowed_linux_distro()
 
         ###
         # AIDE 'database' related configuration option variables. 'database' is
@@ -80,37 +76,6 @@ class ServerConfig(common.config.BaseConfig):
         self.aide_old_db_path_pattern = os.path.join(
                             self.aide_old_db_subdir_pattern,
                             self.aide_old_db_fname_pattern)
-
-    def _assert_allowed_linux_distro(self):
-        os_name = platform.system()
-        if not os_name:
-            os_name = "unknown"
-
-        if os_name.lower() != "linux":
-            m = "This software runs on GNU/Linux operating system only ('{}' "\
-                "was detected).".format(os_name)
-            raise ServerConfigError(m)
-
-        suffix_msg = "Only Arch and Debian distributions are supported."
-
-        try:
-            import distro
-        except ImportError:
-            m = "Can't check if GNU/Linux is supported! " + suffix_msg
-            logger.warning(m)
-        else:
-            distro_name = distro.id()
-
-            if distro_name not in self.SUPPORTED_LINUX_DISTROS:
-                if not distro_name:
-                    distro_name = "unknown"
-                else:
-                    distro_name = "'{}'".format(distro_name)
-
-                logger.warning("Unsupported {} GNU/Linux distribution was "
-                               "detected. {}".format(distro_name, suffix_msg))
-
-        return distro_name
 
     def _get_aide_reference_db_path(self):
         """Return value of 'database' variable from AIDE configuration."""

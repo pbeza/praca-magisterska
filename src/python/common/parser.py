@@ -66,19 +66,29 @@ class CommandLineFlagConfigOption(CommandLineConfigOption):
        (CLI) option."""
 
     def __init__(self, name, *args, **kwargs):
-        super().__init__(name, False, *args, **kwargs)
+        super().__init__(name, False, *args, action="store_true", **kwargs)
 
 
-class FileConfigOption(ValidatedConfigOption):
+class FileConfigOption(ConfigOption):
+    """Not validated key-value configuration option read from application's
+       configuration file."""
+
+    def __init__(self, name, value, required_in_file=False):
+        super().__init__(name, value)
+        self.required_in_file = required_in_file
+
+
+class ValidatedFileConfigOption(ValidatedConfigOption, FileConfigOption):
     """Validated key-value configuration option read from application's
        configuration file."""
 
     def __init__(self, name, value, validator, required_in_file=False):
-        super().__init__(name, value, validator)
-        self.required_in_file = required_in_file
+        FileConfigOption.__init__(self, name, value, required_in_file)
+        self.validator = validator
 
 
-class GeneralConfigOption(ValidatedCommandLineConfigOption, FileConfigOption):
+class GeneralConfigOption(ValidatedCommandLineConfigOption,
+                          ValidatedFileConfigOption):
     """Validated key-value configuration option read from file and/or CLI.
        CLI option overrides respective option read from configuration file."""
 
@@ -89,12 +99,37 @@ class GeneralConfigOption(ValidatedCommandLineConfigOption, FileConfigOption):
         self.required_in_file = required_in_file
 
 
+class GeneralChoiceConfigOption(ValidatedFileConfigOption,
+                                CommandLineConfigOption):
+    """Key-value configuration option read from file and/or CLI. Option must be
+       one of the items from defined set. CLI option overrides respective
+       option read from configuration file."""
+
+    def __init__(self, name, value, allowed_values, required_in_file, *args,
+                 **kwargs):
+        CommandLineConfigOption.__init__(self, name, value, *args,
+                                         choices=allowed_values, **kwargs)
+        self.required_in_file = required_in_file
+        self.validator = self._assert_choices_valid
+        self.allowed_values = allowed_values
+
+    def _assert_choices_valid(self, val):
+        """Check if given value is from allowed values set."""
+
+        if val not in self.allowed_values:
+            m = "'{}' is not acceptabe for '{}' option in configuration "\
+                "file. It must be one of the following values: '{}'".format(
+                    val, self.name, "', '".join(self.allowed_values))
+            raise ParserError(m)
+
+        return val
+
 ###############################################################
 # Concrete configuration options common for client and server #
 ###############################################################
 
 
-class PIDFileConfigOption(FileConfigOption):
+class PIDFileConfigOption(ValidatedFileConfigOption):
     """Configuration option read from configuration file specifying full path
        to lock file with process ID (PID)."""
 
@@ -118,7 +153,7 @@ class PIDFileConfigOption(FileConfigOption):
         return pid_file_path
 
 
-class LogFileConfigOption(FileConfigOption):
+class LogFileConfigOption(ValidatedFileConfigOption):
     """Configuration option read from configuration file specifying full path
        to logging configuration file."""
 
@@ -152,7 +187,7 @@ class LogFileConfigOption(FileConfigOption):
         return log_file_path
 
 
-class VerbosityGeneralConfigOption(GeneralConfigOption):
+class VerbosityConfigOption(GeneralConfigOption):
     """Configuration option read from configuration file and/or CLI specifying
        application logging verbosity."""
 
@@ -193,6 +228,36 @@ class VerbosityGeneralConfigOption(GeneralConfigOption):
         return lvl
 
 
+#############################################################################
+# Options' validators (a.k.a. assertions) common for both server and client #
+#############################################################################
+
+
+def assert_sys_img_ver_valid(sys_img_ver):
+    ver = None
+    valid = True
+
+    try:
+        ver = int(sys_img_ver)
+    except ValueError:
+        valid = False
+
+    if ver < 0:
+        valid = False
+
+    if not valid:
+        m = "Specified system image version '{}' cannot be negative integer"\
+            .format(sys_img_ver)
+        raise ParserError(m)
+
+    return ver
+
+
+####################################
+# Core of the configuration parser #
+####################################
+
+
 class ConfigParser:
     """Base class for CLI and file based configuration parser."""
 
@@ -213,7 +278,7 @@ class ConfigParser:
         _COMMON_CONFIG = [
             PIDFileConfigOption(),
             LogFileConfigOption(),
-            VerbosityGeneralConfigOption()
+            VerbosityConfigOption()
         ]
 
         self.allowed_options = {c.name: c for c in _COMMON_CONFIG}
@@ -337,7 +402,9 @@ class ConfigParser:
 
     def _assert_file_options_valid(self, file_options):
         for key, val in file_options.items():
-            self.allowed_options[key].assert_valid(val)
+            option = self.allowed_options[key]
+            if isinstance(option, ValidatedConfigOption):
+                option.assert_valid(val)
 
 
 class SortingHelpFormatter(argparse.HelpFormatter):

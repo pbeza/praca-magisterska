@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import logging
 import logging.config
+import platform
 import yaml
 
 from common.error import MySCMError
-from common.parser import VerbosityGeneralConfigOption
+from common.parser import VerbosityConfigOption
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +17,12 @@ class ConfigError(MySCMError):
 class BaseConfig:
     """Base class for application configuration."""
 
+    SUPPORTED_LINUX_DISTROS = {"debian", "arch"}
+
     def __init__(self, *options, **kwargs):
         self.options = ConfigOptions(*options, **kwargs)
         self._load_logging_config(self.options.log_config_path)
+        self.distro_name = self._assert_allowed_linux_distro()
 
     def _load_logging_config(self, log_config_path):
         """Loads YAML configuration file for logging module."""
@@ -44,7 +48,7 @@ class BaseConfig:
     def set_log_level(self, logger):
         """Set logging level with respect to loaded configuration."""
 
-        MIN = VerbosityGeneralConfigOption.MIN_VERBOSITY_LVL
+        MIN = VerbosityConfigOption.MIN_VERBOSITY_LVL
         LVL_MAPPING = {
             MIN - 3: logging.CRITICAL,  # least verbose level
             MIN - 2: logging.ERROR,
@@ -55,6 +59,37 @@ class BaseConfig:
         }
         LVL = LVL_MAPPING.get(self.options.verbose, logging.NOTSET)
         logger.setLevel(LVL)
+
+    def _assert_allowed_linux_distro(self):
+        os_name = platform.system()
+        if not os_name:
+            os_name = "unknown"
+
+        if os_name.lower() != "linux":
+            m = "This software runs on GNU/Linux operating system only ('{}' "\
+                "was detected).".format(os_name)
+            raise ConfigError(m)
+
+        suffix_msg = "Only Arch and Debian distributions are supported."
+
+        try:
+            import distro
+        except ImportError:
+            m = "Can't check if GNU/Linux is supported! " + suffix_msg
+            logger.warning(m)
+        else:
+            distro_name = distro.id()
+
+            if distro_name not in self.SUPPORTED_LINUX_DISTROS:
+                if not distro_name:
+                    distro_name = "unknown"
+                else:
+                    distro_name = "'{}'".format(distro_name)
+
+                logger.warning("Unsupported {} GNU/Linux distribution was "
+                               "detected. {}".format(distro_name, suffix_msg))
+
+        return distro_name
 
 
 class ConfigOptions:

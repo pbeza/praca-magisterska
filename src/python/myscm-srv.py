@@ -8,31 +8,25 @@ import logging
 import sys
 
 import common
+import common.constants
+import common.main
 from server.aidedbmanager import AIDEDatabasesManager
-from server.parser import ServerConfigParser, ServerParserError
+from server.parser import ServerConfigParser
 from server.scanner import Scanner, ScannerError
 from server.sysimggenerator import SystemImageGenerator
 from server.sysimggenerator import SystemImageGeneratorError
 
 logger = logging.getLogger("server")
 
+SRV_CONFIG_PATH = "server/config/config.ini"
+SRV_SECTION_NAME = "myscm-srv"
+
 
 def get_app_config():
-    config = None
-
-    try:
-        parser = ServerConfigParser("config.ini", "myscm-srv")
-        config = parser.parse()
-    except ServerParserError as e:
-        raise ServerParserError("Parsing error", e) from e
-
-    config.set_log_level(logger)
-    logger.debug("Supported {} GNU/Linux distribution detected."
-                 .format(config.distro_name.title()))
-
-    logger.debug("Server configuration: {}.".format(vars(config.options)))
-
-    return config
+    app_config = common.main.get_app_config(ServerConfigParser,
+                                            SRV_CONFIG_PATH,
+                                            SRV_SECTION_NAME)
+    return app_config
 
 
 def _scan(config):
@@ -59,7 +53,7 @@ def _main():
         common.print_version()
     elif config.options.scan:
         _scan(config)
-    elif config.options.gen_img is not None:  # Note that 0 is valid argument
+    elif config.options.gen_img is not None:  # explicit check since can be 0
         _gen_img(config)
     elif config.options.config_check:
         print("Config OK")
@@ -67,24 +61,14 @@ def _main():
     elif config.options.list_databases:
         manager = AIDEDatabasesManager(config)
         manager.print_all_aide_db_paths_sorted()
+    elif config.options.upgrade is not None:  # explicit check since can be 0
+        _scan(config)
+        config.options.gen_img = config.options.upgrade
+        _gen_img(config)
     else:
-        logger.info("This application does nothing unless you specify what to "
-                    "do. Read manual or --help to learn more.")
+        logger.info(common.constants.APP_NEED_OPTION_TO_RUN_MSG)
 
 
 if __name__ == "__main__":
-    exit_code = 0
-
-    try:
-        _main()
-    except (KeyboardInterrupt, EOFError):
-        logger.info("Keyboard interrupt or EOF detected. Exiting.")
-    except common.error.MySCMError as e:
-        logger.error(e)
-        exit_code = 1
-    except Exception as e:
-        logger.exception("Unexpected exception handled in {}. "
-                         "Details: {}.".format(__name__, str(e)))
-        exit_code = 1
-
+    exit_code = common.main.run_main(_main)
     sys.exit(exit_code)
