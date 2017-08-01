@@ -23,10 +23,11 @@ def get_file_debian_package_name_fallback(file_path):
     msg = "to get package name of the file (`dpkg-query -S` fallback)"
 
     try:
-        completed_proc = long_run_cmd(cmd, check_exitcode=True, suffix_msg=msg,
-                                      debug_log=True)
+        completed_proc = long_run_cmd(cmd, check_exitcode=False,
+                                      suffix_msg=msg, debug_log=True)
     except CommandLineError as e:
-        m = "Failed to run apt-file - check if apt-file is installed"
+        m = "Check if apt-file is installed and updated (run `apt update` if "\
+            "needed)"
         raise PackageManagerError(m, e) from e
 
     if completed_proc.returncode:
