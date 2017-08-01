@@ -172,21 +172,19 @@ class ListAvailableAIDEDatabasesConfigOption(CommandLineFlagConfigOption):
 
     def __init__(self):
         super().__init__(
-            "ListDatabases", "-l", "--list",
+            "ListDatabases", "--list-db",
             help="list all available AIDE databases created with --scan "
                  "option")
 
 
-class ConfigCheckConfigOption(CommandLineFlagConfigOption):
-    """Configuration option read from CLI specifying to check application
-       configuration and exit."""
+class ListGeneratedMyscmSysImgConfigOption(CommandLineFlagConfigOption):
+    """Configuration option read from CLI specifying to list all myscm system
+       images generated with --gen-img option."""
 
     def __init__(self):
         super().__init__(
-                "ConfigCheck", "-k", "--config-check",
-                help="check if application configuration is valid and exit; "
-                     "0 and 1 indicates respectively: configuration validity "
-                     "and invalidity")
+            "ListSysImg", "--list-img",
+            help="list all myscm system images created with --gen-img option")
 
 
 class GenerateSystemImageConfigOption(ValidatedCommandLineConfigOption):
@@ -266,7 +264,7 @@ class ServerConfigParser(ConfigParser):
             AIDEConfigFileConfigOption(),
             AIDEScanArgConfigOption(),
             ListAvailableAIDEDatabasesConfigOption(),
-            ConfigCheckConfigOption(),
+            ListGeneratedMyscmSysImgConfigOption(),
             GenerateSystemImageConfigOption(),
             SystemImgOutDirConfigOption(),
             UpgradeConfigOption()

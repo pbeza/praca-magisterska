@@ -34,7 +34,7 @@ class SystemImageGenerator:
     """Generator of the reference system image that will be applied by the
        client's myscm-cli application."""
 
-    MYSCM_IMG_FILE_NAME = "myscm-img.{}.{}{}"
+    MYSCM_IMG_FILE_NAME = "myscm-img.{}.{}.tar.gz"
     AIDE_MIN_EXITCODE = 14  # see AIDE's manual for details about exitcodes
     IN_ARCHIVE_ADDED_DIR_NAME = "ADDED"
     IN_ARCHIVE_CHANGED_DIR_NAME = "CHANGED"
@@ -43,9 +43,9 @@ class SystemImageGenerator:
     CHANGED_FILES_FNAME = "changed.txt"
     SSL_CERT_DIGEST_TYPE = "sha256"
     PATCH_EXT = ".myscmsrv-patch"
-    IMG_EXT = ".tar.gz"
     TEMPLATE_PATH_EXT = ".myscm-template"
     TARFILE_COMPRESSION = "w:gz"
+    SIGNATURE_EXT = ".sig"
 
     def __init__(self, server_config):
         self.server_config = server_config
@@ -240,8 +240,7 @@ class SystemImageGenerator:
         return img_path
 
     def _get_img_file_full_path(self):
-        fname = self.MYSCM_IMG_FILE_NAME.format(self.from_db_id, self.to_db_id,
-                                                self.IMG_EXT)
+        fname = self.MYSCM_IMG_FILE_NAME.format(self.from_db_id, self.to_db_id)
         img_out_dir = self.server_config.options.system_img_out_dir
         return os.path.join(img_out_dir, fname)
 
@@ -637,7 +636,7 @@ class SystemImageGenerator:
             signature = OpenSSL.crypto.sign(priv_key_obj, bytes_to_sign,
                                             self.SSL_CERT_DIGEST_TYPE)
 
-        img_sig_path = "{}.sig".format(img_path)
+        img_sig_path = "{}{}".format(img_path, self.SIGNATURE_EXT)
 
         with open(img_sig_path, "wb") as sig_f:
             sig_f.write(signature)

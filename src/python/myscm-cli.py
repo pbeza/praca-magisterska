@@ -10,6 +10,7 @@ import sys
 import common
 import common.main
 from client.parser import ClientConfigParser
+from client.sysimgmanager import SysImgManager
 
 logger = logging.getLogger("client")
 
@@ -39,6 +40,12 @@ def _main():
         logger.debug("--verify-img option is not implemented yet")  # TODO
     elif config.options.force_apply:
         logger.debug("--force is not implemented yet")  # TODO
+    elif config.options.list_sys_img:
+        sys_img_manager = SysImgManager(config)
+        sys_img_manager.print_all_verified_img_paths_sorted()
+    elif config.options.config_check:
+        # If check fails, then Exception is raised and caught in __main__
+        print("Configuration OK")
     else:
         logger.info(common.constants.APP_NEED_OPTION_TO_RUN_MSG)
 

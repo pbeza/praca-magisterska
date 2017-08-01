@@ -15,6 +15,7 @@ from server.parser import ServerConfigParser
 from server.scanner import Scanner, ScannerError
 from server.sysimggenerator import SystemImageGenerator
 from server.sysimggenerator import SystemImageGeneratorError
+from server.sysimgmanager import SysImgManager
 
 logger = logging.getLogger("server")
 
@@ -29,7 +30,7 @@ def get_app_config():
     return app_config
 
 
-def _scan(config):
+def scan(config):
     try:
         scanner = Scanner(config)
         scanner.scan()
@@ -37,7 +38,7 @@ def _scan(config):
         raise ScannerError("AIDE --init wrapper error", e) from e
 
 
-def _gen_img(config):
+def gen_img(config):
     try:
         sys_img_generator = SystemImageGenerator(config)
         sys_img_generator.generate_img()
@@ -52,19 +53,22 @@ def _main():
     if config.options.version:
         common.print_version()
     elif config.options.scan:
-        _scan(config)
+        scan(config)
     elif config.options.gen_img is not None:  # explicit check since can be 0
-        _gen_img(config)
+        gen_img(config)
     elif config.options.config_check:
-        print("Config OK")
         # If check fails, then Exception is raised and caught in __main__
+        print("Configuration OK")
     elif config.options.list_databases:
         manager = AIDEDatabasesManager(config)
         manager.print_all_aide_db_paths_sorted()
+    elif config.options.list_sys_img:
+        manager = SysImgManager(config)
+        manager.print_all_verified_img_paths_sorted()
     elif config.options.upgrade is not None:  # explicit check since can be 0
-        _scan(config)
+        scan(config)
         config.options.gen_img = config.options.upgrade
-        _gen_img(config)
+        gen_img(config)
     else:
         logger.info(common.constants.APP_NEED_OPTION_TO_RUN_MSG)
 

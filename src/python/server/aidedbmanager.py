@@ -14,6 +14,7 @@ class AIDEDatabasesManagerError(ServerError):
 
 class AIDEDatabasesManager:
     """Manager of the AIDE aide.db[.X] databases directories (X is integer).
+
        This manager is not AIDE's database parser (see AIDECheckParser class).
        This class is responsible only for renaming AIDE's databases after
        myscm-srv --scan to keep old databases saved (they are needed to run
@@ -145,7 +146,7 @@ class AIDEDatabasesManager:
         for fname in l:
             full_path = os.path.join(dir_path, fname)
             full_path = os.path.realpath(full_path)
-            line = "  {}".format(full_path)
+            line = "    {}".format(full_path)
             print(line)
 
     def _get_all_aide_db_paths(self):

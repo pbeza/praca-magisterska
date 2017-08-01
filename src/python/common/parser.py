@@ -124,6 +124,7 @@ class GeneralChoiceConfigOption(ValidatedFileConfigOption,
 
         return val
 
+
 ###############################################################
 # Concrete configuration options common for client and server #
 ###############################################################
@@ -228,6 +229,43 @@ class VerbosityConfigOption(GeneralConfigOption):
         return lvl
 
 
+class ConfigCheckConfigOption(CommandLineFlagConfigOption):
+    """Configuration option read from CLI specifying to check application
+       configuration and exit."""
+
+    def __init__(self):
+        super().__init__(
+                "ConfigCheck", "-k", "--config-check",
+                help="check if application configuration is valid and exit; "
+                     "0 and 1 indicates respectively: configuration validity "
+                     "and invalidity")
+
+
+class SSLCertPublicKeyConfigOption(GeneralConfigOption):
+    """Configuration option read from file and/or CLI specifying file path of
+       the SSL certificate public key to verify system image created with
+       --gen-img option."""
+
+    def __init__(self):
+        super().__init__(
+            "SSLCertPublicKeyPath", None, self._assert_cert_pub_key_path_valid,
+            True, "--ssl-pubkey", metavar="PATH",
+            type=self._assert_cert_pub_key_path_valid,
+            help="full path to the server's public key of the SSL certificate "
+                 "that is being used to verify signature of the myscm system "
+                 "image generated with the myscm-srv --gen-img option")
+
+    def _assert_cert_pub_key_path_valid(self, cert_pub_key_path):
+        """File path to the public key of the SSL certificate validator."""
+
+        if not os.path.isfile(cert_pub_key_path):
+            m = "Given SSL certificate public key file '{}' probably doesn't "\
+                "exist".format(cert_pub_key_path)
+            raise ParserError(m)
+
+        return cert_pub_key_path
+
+
 #############################################################################
 # Options' validators (a.k.a. assertions) common for both server and client #
 #############################################################################
@@ -278,7 +316,9 @@ class ConfigParser:
         _COMMON_CONFIG = [
             PIDFileConfigOption(),
             LogFileConfigOption(),
-            VerbosityConfigOption()
+            VerbosityConfigOption(),
+            ConfigCheckConfigOption(),
+            SSLCertPublicKeyConfigOption()
         ]
 
         self.allowed_options = {c.name: c for c in _COMMON_CONFIG}

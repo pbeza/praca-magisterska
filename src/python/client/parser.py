@@ -166,6 +166,55 @@ class SFTPPasswordConfigOption(ValidatedFileConfigOption):
         return sftp_passwd
 
 
+class ListSysImgConfigOption(CommandLineFlagConfigOption):
+    """Configuration option read from CLI specifying to list all available
+       system images created by myscm-srv."""
+
+    def __init__(self):
+        super().__init__(
+            "ListSysImg", "-l", "--list",
+            help="list all locally available system images created by "
+                 "myscm-srv")
+
+
+class SysImgExtractDirConfigOption(ValidatedFileConfigOption):
+
+    DEFAULT_SYS_IMG_EXTRACT_DIR = "/tmp"
+
+    def __init__(self, sys_img_extract_dir=None):
+        super().__init__(
+            "SysImgExtractDir",
+            sys_img_extract_dir or self.DEFAULT_SYS_IMG_EXTRACT_DIR,
+            self._assert_sys_img_extract_dir_valid, True)
+
+    def _assert_sys_img_extract_dir_valid(self, sys_img_extract_dir):
+        if not os.path.isdir(sys_img_extract_dir):
+            m = "Value '{}' assigned to variable '{}' doesn't refer to "\
+                "directory".format(sys_img_extract_dir, self.name)
+            raise ClientParserError(m)
+
+        return sys_img_extract_dir
+
+
+class SysImgDownloadDirConfigOption(ValidatedFileConfigOption):
+
+    DEFAULT_SYS_IMG_DOWNLOAD_DIR = "/var/lib/myscm-cli"
+
+    def __init__(self, sys_img_download_dir=None):
+        super().__init__(
+            "SysImgDownloadDir",
+            sys_img_download_dir or self.DEFAULT_SYS_IMG_DOWNLOAD_DIR,
+            self._assert_sys_img_download_dir_valid, True)
+
+    def _assert_sys_img_download_dir_valid(self, sys_img_download_dir):
+        if not os.path.isdir(sys_img_download_dir):
+            m = "Value '{}' assigned to variable '{}' doesn't refer to "\
+                "directory".format(sys_img_download_dir, self.name)
+            raise ClientParserError(m)
+
+        return sys_img_download_dir
+
+
 #############################################
 # Core of the client's configuration parser #
 #############################################
@@ -185,7 +234,10 @@ class ClientConfigParser(ConfigParser):
             VerifySysImgConfigOption(),
             ForceApplyConfigOption(),
             SFTPUsernameConfigOption(),
-            SFTPPasswordConfigOption()
+            SFTPPasswordConfigOption(),
+            ListSysImgConfigOption(),
+            SysImgExtractDirConfigOption(),
+            SysImgDownloadDirConfigOption()
         ]
         super().__init__(config_path, config_section_name,
                          _CLIENT_DEFAULT_CONFIG, _HELP_DESC, _APP_VERSION)
