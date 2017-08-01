@@ -75,4 +75,8 @@ def _main():
 
 if __name__ == "__main__":
     exit_code = common.main.run_main(_main)
+
+    import progressbar
+    progressbar.streams.flush()  # probably progressbar2 bug
+
     sys.exit(exit_code)

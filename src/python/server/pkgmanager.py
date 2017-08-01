@@ -2,7 +2,7 @@
 import logging
 import re
 
-from common.cmd import long_run_cmd
+from common.cmd import long_run_cmd, CommandLineError
 from server.error import ServerError
 
 logger = logging.getLogger(__name__)
@@ -21,8 +21,13 @@ def get_file_debian_package_name_fallback(file_path):
 
     cmd = ["apt-file", "search", "-l", file_path]
     msg = "to get package name of the file (`dpkg-query -S` fallback)"
-    completed_proc = long_run_cmd(cmd, check_exitcode=False, suffix_msg=msg,
-                                  debug_log=True)
+
+    try:
+        completed_proc = long_run_cmd(cmd, check_exitcode=True, suffix_msg=msg,
+                                      debug_log=True)
+    except CommandLineError as e:
+        m = "Failed to run apt-file - check if apt-file is installed"
+        raise PackageManagerError(m, e) from e
 
     if completed_proc.returncode:
         return "?"

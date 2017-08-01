@@ -40,7 +40,11 @@ def run_cmd(cmd, check_exitcode=True, stdout_opt=subprocess.PIPE,
         completed_proc = subprocess.run(cmd, check=check_exitcode,
                                         stdout=stdout_opt, stderr=stderr_opt)
     except subprocess.CalledProcessError as e:
-        m = "Failed to run '{}' command".format(cmd_str)
+        m = "Failed to run '{}' command - non-zero exit code".format(cmd_str)
+        raise CommandLineError(m, e) from e
+    except Exception as e:
+        m = "Failed to run '{}' command - check if you have installed "\
+            "referred software".format(cmd_str)
         raise CommandLineError(m, e) from e
 
     if completed_proc.stderr:
