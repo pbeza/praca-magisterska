@@ -226,6 +226,7 @@ class AIDEEntry:
         PropertyHeader(PropertyType.SHA1.value, "{:<100}"),
         PropertyHeader("package")
     ]
+    PROPERTIES_COUNT = len(CHANGED_FILES_HEADER_NAMES)
 
     def __init__(self, aide_properties, aide_info_str, entry_type):
         self.aide_properties = aide_properties
@@ -251,6 +252,9 @@ class AIDEEntry:
         # The general format of the AIDE info string is like the string
         # YlZbpugamcinCAXSE (see AIDE manual).
 
+        cur_size = self.aide_properties[PropertyType.SIZE]
+        prev_size = self.aide_prev_properties[PropertyType.SIZE]
+
         s = [
             self.aide_properties[PropertyType.NAME],
             str(self.aide_properties[PropertyType.LNAME]),  # str() for None
@@ -258,7 +262,8 @@ class AIDEEntry:
             str(self.aide_properties[PropertyType.ATTR]),  # https://unix.stackexchange.com/a/343020/28115
             self.ftype.value,
             self.aide_info_str[2],
-            str(self.aide_properties[PropertyType.SIZE])
+            "{} ({})".format(cur_size,
+                             "=" if cur_size == prev_size else prev_size)
         ]
 
         comment_entry = True
@@ -302,8 +307,8 @@ class AIDEEntry:
         for i in range(len(prop_vals)):
             if not entry_changed and prop_vals[i] != prev_prop_vals[i]:
                 m = "Current and previous value for property '{}' are not "\
-                    "equal despite AIDE reported they are different".format(
-                        ref_c)
+                    "equal despite AIDE reported they are not different"\
+                    .format(ref_c)
                 raise AIDEEntryError(m)
 
             prop_val_str = str(prop_vals[i])

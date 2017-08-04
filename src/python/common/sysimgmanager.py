@@ -65,16 +65,20 @@ class SysImgManagerBase:
 
         sys_img_signature_path = "{}{}".format(sys_img_path, signature_ext)
         info = None
+        color = None
 
         if not os.path.isfile(sys_img_signature_path):
-            info = self._color_bold_msg("SSL signature not found", "grey")
+            info = "SSL signature not found"
+            color = "grey"
         elif self._verify_sys_img(sys_img_path, sys_img_signature_path,
                                   ssl_pub_key_path, ssl_digest_type):
-            info = self._color_bold_msg("SSL signature valid", "green")
+            info = "SSL signature valid"
+            color = "green"
         else:
-            info = self._color_bold_msg("SSL signature invalid", "red")
+            info = "SSL signature invalid"
+            color = "red"
 
-        return info
+        return self._color_bold_msg(info, color)
 
     def _verify_sys_img(self, sys_img_path, sys_img_signature_path,
                         ssl_pub_key_path, ssl_digest_type):

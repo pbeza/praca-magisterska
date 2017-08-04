@@ -5,6 +5,7 @@
    application (myscm-srv)."""
 
 import logging
+import progressbar
 import sys
 
 import common
@@ -75,8 +76,5 @@ def _main():
 
 if __name__ == "__main__":
     exit_code = common.main.run_main(_main)
-
-    import progressbar
-    progressbar.streams.flush()  # probably progressbar2 bug
-
+    progressbar.streams.flush()  # progressbar2 bug if app ends with exception
     sys.exit(exit_code)

@@ -439,7 +439,7 @@ class SystemImageGenerator:
 
     def _append_entry_line(self, path, f):
         pkg_name = pkgmgr.get_file_package_name(path, self.server_config)
-        line = "{:<100}{}\0\n".format(path + "\0", pkg_name)
+        line = "{:<100}{}\n".format(path + "\0", pkg_name)
         f.write(line)
 
     def _warn_if_orphaned_template_exists(self, path):
@@ -589,7 +589,10 @@ class SystemImageGenerator:
             h = headers[i]
             line += h.formatter.format(p + "\0")
 
-        changed_f.write(line.strip() + "\n")
+        line = line.strip()
+        line = line.rstrip("\0")
+
+        changed_f.write(line + "\n")
 
     def _append_sys_info_header(self, title, desc, f):
         f.write("# {}\n#\n".format(title))

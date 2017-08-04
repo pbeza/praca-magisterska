@@ -5,11 +5,13 @@
    application (myscm-cli)."""
 
 import logging
+import progressbar
 import sys
 
 import common
 import common.main
 from client.parser import ClientConfigParser
+from client.sysimgextractor import SysImgExtractor
 from client.sysimgmanager import SysImgManager
 
 logger = logging.getLogger("client")
@@ -31,13 +33,16 @@ def _main():
     if config.options.version:
         common.print_version()
     elif config.options.apply_img is not None:  # explicit check since can be 0
-        logger.debug("--apply-img option is not implemented yet")  # TODO
+        logger.debug("--apply-img option is not implemented yet")  # TODO TODO
+        sys_img_extractor = SysImgExtractor(config)
+        sys_img_extractor.apply_sys_img()
     elif config.options.update_sys_img:
         logger.debug("--update option is not implemented yet")  # TODO
     elif config.options.upgrade_sys_img:
         logger.debug("--upgrade option is not implemented yet")  # TODO
     elif config.options.verify_sys_img:
-        logger.debug("--verify-img option is not implemented yet")  # TODO
+        sys_img_manager = SysImgManager(config)
+        sys_img_manager.verify_sys_img()
     elif config.options.force_apply:
         logger.debug("--force is not implemented yet")  # TODO
     elif config.options.list_sys_img:
@@ -52,4 +57,5 @@ def _main():
 
 if __name__ == "__main__":
     exit_code = common.main.run_main(_main)
+    progressbar.streams.flush()  # progressbar2 bug if app ends with exception
     sys.exit(exit_code)

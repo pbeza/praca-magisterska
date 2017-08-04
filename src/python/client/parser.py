@@ -11,6 +11,7 @@ from common.parser import GeneralConfigOption
 from common.parser import ParserError
 from common.parser import ValidatedCommandLineConfigOption
 from common.parser import ValidatedFileConfigOption
+from server.sysimggenerator import SystemImageGenerator
 
 _APP_VERSION = common.constants.get_app_version("myscm-cli")
 _HELP_DESC = '''This is client side of the mySCM application – simple Software
@@ -41,6 +42,9 @@ class ApplySysImgConfigOption(ValidatedCommandLineConfigOption):
                  "identified by unique SYS_IMG_VER integer")
 
     def _assert_sys_img_version_valid(self, sys_img_ver):
+        # After parsing RecentlyAppliedSysImgVerPathConfigOption we need to
+        # check if system image myscm-img.X.Y.tar.gz exist (X is recently
+        # applied myscm system image version and Y is sys_img_ver).
         return common.parser.assert_sys_img_ver_valid(sys_img_ver)
 
 
@@ -114,15 +118,34 @@ class UpdateProtocolConfigOption(GeneralChoiceConfigOption):
                  .format(self.DEFAULT_PROTOCOL))
 
 
-class VerifySysImgConfigOption(CommandLineFlagConfigOption):
+class VerifySysImgConfigOption(ValidatedCommandLineConfigOption):
     """Configuration option read from CLI specifying to verify signature of
        the given system image."""
 
     def __init__(self):
         super().__init__(
-            "VerifySysImg", "--verify-img",
-            help="verify signature of the system image identified unique "
-                 "SYS_IMG_VER integer")
+            "VerifySysImg", None, self._assert_sys_img_to_verify_valid,
+            "--verify-img", metavar="PATH",
+            type=self._assert_sys_img_to_verify_valid,
+            help="verify signature of the given system image")
+
+    def _assert_sys_img_to_verify_valid(self, sys_img_path):
+        """System image path option validator."""
+
+        if not os.path.isfile(sys_img_path):
+            m = "Given myscm system image file '{}' probably doesn't exist"\
+                .format(sys_img_path)
+            raise ClientParserError(m)
+
+        signature_path = sys_img_path + SystemImageGenerator.SIGNATURE_EXT
+
+        if not os.path.isfile(signature_path):
+            m = "Given myscm system image file '{}' doesn't have expected "\
+                "corresponding '{}' certificate".format(sys_img_path,
+                                                        signature_path)
+            raise ClientParserError(m)
+
+        return sys_img_path
 
 
 class ForceApplyConfigOption(CommandLineFlagConfigOption):
@@ -215,6 +238,68 @@ class SysImgDownloadDirConfigOption(ValidatedFileConfigOption):
         return sys_img_download_dir
 
 
+class RecentlyAppliedSysImgVerPathConfigOption(ValidatedFileConfigOption):
+
+    DEFAULT_RECENT_IMG_VER_PATH = "/var/myscm-cli/id.myscm"
+    OPTION_NAME = "RecentSysImgVerPath"
+
+    def __init__(self, recent_img_ver_path=None):
+        super().__init__(
+            self.OPTION_NAME,
+            recent_img_ver_path or self.DEFAULT_RECENT_IMG_VER_PATH,
+            self._assert_recent_img_ver_path_valid, True)
+
+    def _assert_recent_img_ver_path_valid(self, recent_img_ver_path):
+        if os.path.isfile(recent_img_ver_path):
+            # It's OK if this file doesn't exist yet
+            assert_recent_img_ver_file_content_valid(recent_img_ver_path)
+
+        return recent_img_ver_path
+
+
+def assert_recent_img_ver_file_content_valid(recent_img_ver_path):
+    ver = -1
+    first_line = None
+    second_line = None
+    var_name = RecentlyAppliedSysImgVerPathConfigOption.OPTION_NAME
+
+    try:
+        with open(recent_img_ver_path) as f:
+            first_line = f.readline().strip()
+            second_line = f.readline()
+    except Exception as e:
+        m = "Unable to open '{}' assigned to variable '{}'".format(
+            recent_img_ver_path, var_name)
+        raise ClientParserError(m, e) from e
+
+    if not first_line:
+        m = "'{}' assigned to '{}' is empty".format(recent_img_ver_path,
+                                                    var_name)
+        raise ClientParserError(m)
+
+    if second_line:
+        m = "'{}' assigned to '{}' is expected to have one line with version "\
+            "of the recently applied myscm system image".format(
+                recent_img_ver_path, var_name)
+        raise ClientParserError(m)
+
+    try:
+        ver = int(first_line)
+    except:
+        m = "First and only line of the '{}' line is supposed to be integer "\
+            "corresponding to recently applied myscm system image version "\
+            "(current value: '{}')".format(recent_img_ver_path,
+                                           first_line.strip())
+        raise ClientParserError(m)
+
+    if ver < 0:
+        m = "Negative integer assigned to the recent system version read "\
+            "from file '{}'".format(recent_img_ver_path)
+        raise ClientParserError(m)
+
+    return ver
+
+
 #############################################
 # Core of the client's configuration parser #
 #############################################
@@ -237,7 +322,8 @@ class ClientConfigParser(ConfigParser):
             SFTPPasswordConfigOption(),
             ListSysImgConfigOption(),
             SysImgExtractDirConfigOption(),
-            SysImgDownloadDirConfigOption()
+            SysImgDownloadDirConfigOption(),
+            RecentlyAppliedSysImgVerPathConfigOption()
         ]
         super().__init__(config_path, config_section_name,
                          _CLIENT_DEFAULT_CONFIG, _HELP_DESC, _APP_VERSION)

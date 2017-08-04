@@ -191,7 +191,7 @@ class GenerateSystemImageConfigOption(ValidatedCommandLineConfigOption):
     """Configuration option read from CLI specifying to generate system image
        from the specified client's cersion to the current newest system
        version. List of all available client's databases can be checked using
-       --list option."""
+       --list-db option."""
 
     def __init__(self):
         super().__init__(

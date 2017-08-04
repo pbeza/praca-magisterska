@@ -60,9 +60,9 @@ class Scanner:
         aide_db_manager.replace_old_aide_db_with_new_one()
         self._copy_selected_tracked_dirs()
 
-        m = "New reference AIDE database '{}' setup successful. Run --list "\
-            "option to list all available AIDE databases created so far."\
-            .format(self.server_config.aide_reference_db_path)
+        m = "New reference AIDE database '{}' setup successful. Run "\
+            "--list-db option to list all available AIDE databases created "\
+            "so far.".format(self.server_config.aide_reference_db_path)
         logger.info(m)
 
     def _copy_selected_tracked_dirs(self):
