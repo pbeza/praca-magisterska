@@ -5,6 +5,7 @@
    application (myscm-srv)."""
 
 import logging
+import os
 import progressbar
 import sys
 
@@ -50,6 +51,12 @@ def gen_img(config):
 
 def _main():
     config = get_app_config()
+
+    if os.geteuid() != 0:
+        m = "This application is supposed to be ran with root permissions. "\
+            "Root permissions may be not needed if you don't need to scan "\
+            "restricted parts of the filesystem."
+        logger.warning(m)
 
     if config.options.version:
         common.print_version()

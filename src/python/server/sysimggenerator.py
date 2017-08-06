@@ -34,7 +34,8 @@ class SystemImageGenerator:
     """Generator of the reference system image that will be applied by the
        client's myscm-cli application."""
 
-    MYSCM_IMG_FILE_NAME = "myscm-img.{}.{}.tar.gz"
+    MYSCM_IMG_EXT = ".tar.gz"
+    MYSCM_IMG_FILE_NAME = "myscm-img.{}.{}" + MYSCM_IMG_EXT
     AIDE_MIN_EXITCODE = 14  # see AIDE's manual for details about exitcodes
     IN_ARCHIVE_ADDED_DIR_NAME = "ADDED"
     IN_ARCHIVE_CHANGED_DIR_NAME = "CHANGED"
@@ -46,6 +47,9 @@ class SystemImageGenerator:
     TEMPLATE_PATH_EXT = ".myscm-template"
     TARFILE_COMPRESSION = "w:gz"
     SIGNATURE_EXT = ".sig"
+    SYSTEM_STR = "System"
+    LINUX_DISTRO_STR = "GNU/Linux distribution"
+    CPU_ARCHITECTURE_STR = "CPU architecture"
 
     def __init__(self, server_config):
         self.server_config = server_config
@@ -206,16 +210,6 @@ class SystemImageGenerator:
     def _generate_img_from_aide_entries(self, entries):
         """Generate system image based on the entries read from AIDE --check
            output."""
-
-        # TODO begin debug to remove
-        # for k, v in {
-        #         "Added entries": entries.added_entries,
-        #         "Removed entries": entries.removed_entries,
-        #         "Changed entries": entries.changed_entries}.items():
-        #     print("\n{} (size: {}):\n".format(k, len(v)))
-        #     for _, e in v.items():
-        #         print(vars(e.aide_properties))
-        # end end to remove
 
         img_path = self._get_img_file_full_path()
 
@@ -609,9 +603,9 @@ class SystemImageGenerator:
             ["Creation date", local_cur_datetime.strftime("%d.%m.%Y")],
             ["UTC creation time", utc_cur_datetime.strftime("%H:%M:%S")],
             ["UTC creation date", utc_cur_datetime.strftime("%d.%m.%Y")],
-            ["System", platform.system()],
-            ["GNU/Linux distribution", self.server_config.distro_name.title()],
-            ["CPU architecture", platform.machine()],
+            [self.SYSTEM_STR, platform.system()],
+            [self.LINUX_DISTRO_STR, self.server_config.distro_name.title()],
+            [self.CPU_ARCHITECTURE_STR, platform.machine()],
             ["Hostname", platform.node()],
             ["Python implementation", platform.python_implementation()],
             ["Python version", platform.python_version()],
