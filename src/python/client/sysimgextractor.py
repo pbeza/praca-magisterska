@@ -47,7 +47,7 @@ class SysImgExtractor:
                         "'{}' myscm system image.".format(
                             self.extracted_sys_img_dir, sys_img_path))
 
-            self._apply_added_files()
+            self._apply_added_files(sys_img_f)
             self._apply_changed_files(sys_img_f)
             self._apply_removed_files(sys_img_f)
         except SysImgExtractorError:
@@ -94,7 +94,7 @@ class SysImgExtractor:
     # Apply added files #
     #####################
 
-    def _apply_added_files(self):
+    def _apply_added_files(self, sys_img_f):
 
         src = os.path.join(self.extracted_sys_img_dir,
                            SystemImageGenerator.IN_ARCHIVE_ADDED_DIR_NAME)
@@ -104,9 +104,44 @@ class SysImgExtractor:
                     .format(src))
 
         self._movetree(src, dst)
+        added_packages = self._get_packages_of_added_files(sys_img_f)
+        n = len(added_packages)
 
         logger.info("Applying newly added files from '{}' directory ended "
-                    "successfully.".format(src))
+                    "successfully (files from {} package{}).".format(
+                        src, n, "s" if n != 1 else ""))
+        logger.debug("Packages of the added files: '{}'".format(
+                     "', '".join(added_packages)))
+
+    def _get_packages_of_added_files(self, sys_img_f):
+        added_report_path = os.path.join(
+                                      self.extracted_sys_img_dir,
+                                      SystemImageGenerator.ADDED_FILES_FNAME)
+
+        n = self.sys_img_validator.added_entries
+        bar = progressbar.ProgressBar(max_value=n)
+
+        logger.debug("Collecting packages' names of {} added file{}.".format(
+                        n, "s" if n != 1 else ""))
+
+        pkg_set = set()
+
+        with open(added_report_path) as f:
+            expected_added_count = 2
+            run_fun_for_each_report_line(
+                f, sys_img_f, self._added_files_per_line_fun,
+                expected_added_count, self.client_config.distro_name,
+                False, bar, pkg_set)
+
+        return pkg_set
+
+    def _added_files_per_line_fun(self, values, sys_img_f, *args):
+        bar = args[0]
+        pkg_set = args[1]
+        pkg_name = values[1]
+        if pkg_name != "?":
+            pkg_set.add(pkg_name)
+        bar.update(bar.value + 1)
 
     def _movetree(self, src, dst):
         """Move recursively source directory to destination directory
@@ -248,16 +283,16 @@ class SysImgExtractor:
         if ftype == FileType.REGULAR_FILE.value and size_was_changed:
             self._apply_changed_file(path)
 
-        # TODO TODO TODO Modify permissions to file if permissions were modified
+        # Modify permissions to file if permissions were modified
 
         new_perm, old_perm = get_new_old_property_from_string(values[8], path)
+        self._change_file_permissions(new_perm, old_perm, path)
 
-        if old_perm != ".":  # If permissions should be changed
-            new_hex_perm = int(new_perm, 8)
-            m = "Changing permissions of the '{}' to {}.".format(
-                                                    path, oct(new_hex_perm))
-            logger.debug(m)
-            os.chmod(path, new_hex_perm)
+        # Modify owner and group of the file (owner/group must already exist!)
+
+        new_uid, old_uid = get_new_old_property_from_string(values[9], path)
+        new_gid, old_gid = get_new_old_property_from_string(values[10], path)
+        self._change_file_uid_gid(new_uid, old_uid, new_gid, old_gid, path)
 
         # TODO TODO TODO Run apt-get or pacman if file is part of the package
 
@@ -265,6 +300,36 @@ class SysImgExtractor:
 
         bar = args[0]
         bar.update(bar.value + 1)
+
+    def _change_file_permissions(self, new_perm, old_perm, path):
+        if old_perm != ".":  # If permissions should be changed
+            new_hex_perm = int(new_perm, 8)
+            m = "Changing permissions of the '{}' to {}.".format(
+                    path, oct(new_hex_perm))
+            logger.debug(m)
+            os.chmod(path, new_hex_perm)  # follow_symlinks=False ?
+
+    def _change_file_uid_gid(self, new_uid, old_uid, new_gid, old_gid, path):
+        uid = new_uid if old_uid != "." else -1
+        gid = new_gid if old_gid != "." else -1
+
+        if uid is not None or gid is not None:
+            if old_uid == ".":
+                old_uid = new_uid
+
+            if old_gid == ".":
+                old_gid = new_gid
+
+            try:
+                m = "Changing UID, GID of the '{}' from {}, {} to {}, {}."\
+                    .format(path, old_uid, old_gid, new_uid, new_gid)
+                # shutil.chown(path, uid, gid) doesn't have follow_symlinks arg
+                os.chown(path, int(uid), int(gid), follow_symlinks=False)
+            except Exception as e:
+                m = "Failed to change UID, GID of the '{}' from {}, {} to "\
+                    "{}, {}. Details: '{}'.".format(
+                        path, old_uid, old_gid, new_uid, new_gid, e)
+                logger.error(m)
 
     def _apply_changed_file(self, path):
         orig_path = os.path.join(

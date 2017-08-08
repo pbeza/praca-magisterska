@@ -49,6 +49,7 @@ class SysImgValidator:
 
         # Variables needed for sysimgextractor's module progressbar
 
+        self.added_entries = a2
         self.changed_entries = c2
         self.removed_entries = r2
 

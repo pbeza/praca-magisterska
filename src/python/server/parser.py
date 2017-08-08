@@ -10,8 +10,6 @@ from common.parser import GeneralConfigOption
 from common.parser import ParserError
 from common.parser import ValidatedCommandLineConfigOption
 
-_MIN_PROP_INTERVAL_SEC = 3
-_MAX_PROP_INTERVAL_SEC = 60 * 60 * 24 * 365 * 10
 _APP_VERSION = common.constants.get_app_version("myscm-srv")
 _HELP_DESC = '''This is server side of the mySCM application – simple Software
 Configuration Management (SCM) tool for managing software and configuration of
@@ -27,46 +25,6 @@ class ServerParserError(ParserError):
 ##################################
 # Server's configuration options #
 ##################################
-
-
-class PropagationIntervalConfigOption(GeneralConfigOption):
-    """Configuration option read from file and/or CLI specifying server's
-       propagation interval in seconds."""
-
-    DEFAULT_PROPAGATION_INTERVAL_SEC = 3600
-
-    def __init__(self, propagation_interval_sec=None):
-        super().__init__(
-            "PropagationIntervalSeconds",
-            propagation_interval_sec or self.DEFAULT_PROPAGATION_INTERVAL_SEC,
-            self._assert_propagation_interval_valid, False, "-t",
-            "--time-prop", metavar="SEC",
-            type=self._assert_propagation_interval_valid,
-            help="time interval in seconds between sending configuration to "
-                 "clients (minimum: {}, maximum: {} seconds, default value: "
-                 "{} sec.)".format(_MIN_PROP_INTERVAL_SEC,
-                                   _MAX_PROP_INTERVAL_SEC,
-                                   self.DEFAULT_PROPAGATION_INTERVAL_SEC))
-
-    def _assert_propagation_interval_valid(self, interval_sec):
-        sec = None
-
-        try:
-            sec = int(interval_sec)
-        except ValueError:
-            m = "Specified propagation interval '{}' is not integer from "\
-                "range [{}, {}]".format(interval_sec,
-                                        _MIN_PROP_INTERVAL_SEC,
-                                        _MAX_PROP_INTERVAL_SEC)
-            raise ServerParserError(m)
-
-        if not _MIN_PROP_INTERVAL_SEC <= sec <= _MAX_PROP_INTERVAL_SEC:
-            m = "Propagation interval must be integer from range [{}, {}] "\
-                "(current value: {} sec)".format(
-                    _MIN_PROP_INTERVAL_SEC, _MAX_PROP_INTERVAL_SEC, sec)
-            raise ServerParserError(m)
-
-        return sec
 
 
 class SSLCertConfigOption(GeneralConfigOption):
@@ -258,7 +216,6 @@ class ServerConfigParser(ConfigParser):
 
     def __init__(self, config_path, config_section_name):
         _SERVER_DEFAULT_CONFIG = [
-            PropagationIntervalConfigOption(),
             SSLCertConfigOption(),
             SSLCertPrivKeyConfigOption(),
             AIDEConfigFileConfigOption(),
