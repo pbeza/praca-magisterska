@@ -37,6 +37,13 @@ Functionality of this application boils down to applying changes in client's sys
     system images to be recognized (by default in
     '/var/lib/myscm-cli/downloaded').
 
+\--print-ver
+:   Print recently applied mySCM system image version (ie. print current myscm
+    system version). If no image was applied yet, then -1 is printed. mySCM
+    system image version is referred in mySCM system image filename, e.g.
+    `myscm-img.1.2.tar.gz` system image can be applied only on the system that
+    is in state *1* and is going to be upgraded to state *2*.
+
 -p PROTO, \--protocol=*PROTO*
 :   Select protocol that will be used to download newest system image generated
     by the `myscm-srv` (default is 'FTP') with `--update` option.  Allowed

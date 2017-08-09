@@ -267,7 +267,7 @@ class PrintSysImgVerConfigOption(CommandLineFlagConfigOption):
     def __init__(self):
         super().__init__(
             "PrintSysImgVer", "--print-ver",
-            help="print lately applied mySCM system image version (if no "
+            help="print recently applied mySCM system image version (if no "
                  "image was applied yet, then -1 is printed)")
 
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
+import re
 
 from myscm.client.error import ClientError
 from myscm.client.parser import assert_recent_img_ver_file_content_valid
@@ -32,7 +33,7 @@ class SysImgManager(SysImgManagerBase):
             d = "newer than" if current_state_id > sys_img_ver else "same as"
             m = "Current state of the system (version {}) is {} and "\
                 "requested version of the system image (version {}) thus no "\
-                "need to apply image".format(current_state_id, d, sys_img_ver)
+                "need to apply image.".format(current_state_id, d, sys_img_ver)
             raise SysImgManagerError(m)
 
         sys_img_dir = self.client_config.options.sys_img_download_dir
@@ -50,43 +51,63 @@ class SysImgManager(SysImgManagerBase):
         return sys_img_path
 
     def get_current_system_state_version(self):
-        recent_img_ver_path = self.client_config.options.recent_sys_img_ver_path
+        img_ver_path = self.client_config.options.recent_sys_img_ver_path
         ver = None
 
-        if os.path.isfile(recent_img_ver_path):
-            ver = self._read_img_ver_from_file(recent_img_ver_path)
+        if os.path.isfile(img_ver_path):
+            ver = self._read_img_ver_from_file(img_ver_path)
         else:
-            ver = self._create_new_recent_img_ver_file(recent_img_ver_path)
+            ver = self._create_new_recent_img_ver_file(img_ver_path)
 
         return ver
 
+    def update_current_system_state_version(self, sys_img_ver):
+        img_ver_path = self.client_config.options.recent_sys_img_ver_path
+
+        if sys_img_ver < 0:
+            m = "Updating '{}' file has file since system image version "\
+                "can't be less than 0 (is {}).".format(img_ver_path,
+                                                       sys_img_ver)
+            raise SysImgManagerError(m)
+
+        logger.debug("Updating '{}' file with recently applied system image "
+                     "to value {}.".format(img_ver_path, sys_img_ver))
+
+        try:
+            with open(img_ver_path, "w") as f:
+                f.write(str(sys_img_ver))
+        except OSError as e:
+            m = "Failed to update '{}' file holding version of the recently "\
+                "applied myscm system image".format(img_ver_path)
+            raise SysImgManagerError(m, e) from e
+
     def print_current_system_state_version(self):
-        recent_img_ver_path = self.client_config.options.recent_sys_img_ver_path
+        img_ver_path = self.client_config.options.recent_sys_img_ver_path
         ver = -1
 
-        if os.path.isfile(recent_img_ver_path):
-            ver = self._read_img_ver_from_file(recent_img_ver_path)
+        if os.path.isfile(img_ver_path):
+            ver = self._read_img_ver_from_file(img_ver_path)
 
         print(ver)
 
-    def _read_img_ver_from_file(self, recent_img_ver_path):
-        ver = assert_recent_img_ver_file_content_valid(recent_img_ver_path)
+    def _read_img_ver_from_file(self, img_ver_path):
+        ver = assert_recent_img_ver_file_content_valid(img_ver_path)
         logger.debug("Recently applied myscm system image version read from "
-                     "'{}': {}.".format(recent_img_ver_path, ver))
+                     "'{}': {}.".format(img_ver_path, ver))
         return ver
 
-    def _create_new_recent_img_ver_file(self, recent_img_ver_path):
+    def _create_new_recent_img_ver_file(self, img_ver_path):
         logger.debug("'{}' file with recently applied system image doesn't "
                      "exist yet - creating new one".format(
-                        recent_img_ver_path))
+                        img_ver_path))
         try:
-            with open(recent_img_ver_path, "w+") as f:
+            with open(img_ver_path, "w+") as f:
                 first_sys_img_ver = self.FIRST_SYS_IMG_VER
                 f.write(str(first_sys_img_ver))
         except OSError as e:
             m = "Failed to create new '{}' file holding version of the "\
                 "recently applied myscm system image".format(
-                    recent_img_ver_path)
+                    img_ver_path)
             raise SysImgManagerError(m, e) from e
 
         return self.FIRST_SYS_IMG_VER
@@ -108,3 +129,32 @@ class SysImgManager(SysImgManagerBase):
                         SystemImageGenerator.SSL_CERT_DIGEST_TYPE)
         info = "SSL signature {}valid".format("" if verification else "in")
         print(info)
+
+    def get_target_sys_img_ver_from_fname(self, fname):
+        regex_str = SystemImageGenerator.MYSCM_IMG_FILE_NAME.format(
+                                                            r"(\d+)", r"(\d+)")
+        regex = re.compile(regex_str)
+        fname = os.path.basename(fname)
+        corrupted = False
+        m = "Given system image '{}' has unexpected format. MySCM system "\
+            "images need to have '{}' format (X, Y are non negative "\
+            "integers).".format(
+                fname,
+                SystemImageGenerator.MYSCM_IMG_FILE_NAME.format("X", "Y"))
+        ver = -1
+
+        match = regex.fullmatch(fname)
+
+        if not match or len(match.groups()) != 2:
+            corrupted = True
+        else:
+            try:
+                int(match.group(1))
+                ver = int(match.group(2))
+            except:
+                corrupted = True
+
+        if corrupted:
+            raise SysImgManagerError(m)
+
+        return ver

@@ -40,7 +40,6 @@ def _main():
     if config.options.version:
         myscm.common.print_version()
     elif config.options.apply_img is not None:  # explicit check since can be 0
-        logger.debug("--apply-img option is not implemented yet")  # TODO TODO
         sys_img_extractor = SysImgExtractor(config)
         sys_img_extractor.apply_sys_img()
     elif config.options.update_sys_img:

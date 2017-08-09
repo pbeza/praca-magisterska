@@ -37,6 +37,8 @@ class SysImgExtractor:
 
         sys_img_path = self.sys_img_manager.get_sys_img_path()
         self.extracted_sys_img_dir = None
+        sys_img_ver = self.sys_img_manager.get_target_sys_img_ver_from_fname(
+                                                                  sys_img_path)
 
         try:
             with tarfile.open(sys_img_path) as sys_img_f:
@@ -56,6 +58,8 @@ class SysImgExtractor:
             m = "Failed to apply '{}' myscm system image".format(
                     sys_img_f.name)
             raise SysImgExtractorError(m, e) from e
+
+        self.sys_img_manager.update_current_system_state_version(sys_img_ver)
 
         logger.info("Applying changes from '{}' myscm system image ended "
                     "successfully.".format(sys_img_f.name))
