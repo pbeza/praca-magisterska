@@ -58,6 +58,9 @@ def _main():
     elif config.options.config_check:
         # If check fails, then Exception is raised and caught in __main__
         print("Configuration OK")
+    elif config.options.print_sys_img_ver:
+        manager = SysImgManager(config)
+        manager.print_current_system_state_version()
     else:
         logger.info(myscm.common.constants.APP_NEED_OPTION_TO_RUN_MSG)
 

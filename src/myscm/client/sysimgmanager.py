@@ -60,6 +60,15 @@ class SysImgManager(SysImgManagerBase):
 
         return ver
 
+    def print_current_system_state_version(self):
+        recent_img_ver_path = self.client_config.options.recent_sys_img_ver_path
+        ver = -1
+
+        if os.path.isfile(recent_img_ver_path):
+            ver = self._read_img_ver_from_file(recent_img_ver_path)
+
+        print(ver)
+
     def _read_img_ver_from_file(self, recent_img_ver_path):
         ver = assert_recent_img_ver_file_content_valid(recent_img_ver_path)
         logger.debug("Recently applied myscm system image version read from "

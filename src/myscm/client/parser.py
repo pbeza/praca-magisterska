@@ -39,7 +39,10 @@ class ApplySysImgConfigOption(ValidatedCommandLineConfigOption):
             "--apply-img", metavar="SYS_IMG_VER",
             type=self._assert_sys_img_version_valid,
             help="apply changes to the system updating it to the system state "
-                 "identified by unique SYS_IMG_VER integer")
+                 "identified by unique SYS_IMG_VER integer (which is Y "
+                 "integer in {}; X is integer representing current state of "
+                 "the system)".format(
+                    SystemImageGenerator.MYSCM_IMG_FILE_NAME.format("X", "Y")))
 
     def _assert_sys_img_version_valid(self, sys_img_ver):
         # After parsing RecentlyAppliedSysImgVerPathConfigOption we need to
@@ -259,6 +262,15 @@ class RecentlyAppliedSysImgVerPathConfigOption(ValidatedFileConfigOption):
         return recent_img_ver_path
 
 
+class PrintSysImgVerConfigOption(CommandLineFlagConfigOption):
+
+    def __init__(self):
+        super().__init__(
+            "PrintSysImgVer", "--print-ver",
+            help="print lately applied mySCM system image version (if no "
+                 "image was applied yet, then -1 is printed)")
+
+
 def assert_recent_img_ver_file_content_valid(recent_img_ver_path):
     ver = -1
     first_line = None
@@ -325,7 +337,8 @@ class ClientConfigParser(ConfigParser):
             ListSysImgConfigOption(),
             SysImgExtractDirConfigOption(),
             SysImgDownloadDirConfigOption(),
-            RecentlyAppliedSysImgVerPathConfigOption()
+            RecentlyAppliedSysImgVerPathConfigOption(),
+            PrintSysImgVerConfigOption()
         ]
         super().__init__(config_path, config_section_name,
                          _CLIENT_DEFAULT_CONFIG, _HELP_DESC, _APP_VERSION)
