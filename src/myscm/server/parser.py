@@ -93,7 +93,7 @@ class AIDEConfigFileConfigOption(GeneralConfigOption):
     def __init__(self, aide_config_path=None):
         super().__init__(
             "AIDEConfigPath", aide_config_path or self.DEFAULT_AIDE_CONFIG_PATH,
-            self._assert_AIDE_config_path_valid, False, "-a", "--aide-conf",
+            self._assert_AIDE_config_path_valid, False, "-a", "--aide-config",
             metavar="PATH", type=self._assert_AIDE_config_path_valid,
             help="AIDE configuration file path that specifies which "
                  "directories of the server system are scanned and "

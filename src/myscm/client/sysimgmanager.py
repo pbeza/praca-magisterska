@@ -136,7 +136,7 @@ class SysImgManager(SysImgManagerBase):
         regex = re.compile(regex_str)
         fname = os.path.basename(fname)
         corrupted = False
-        m = "Given system image '{}' has unexpected format. MySCM system "\
+        m = "Given system image '{}' has unexpected format. mySCM system "\
             "images need to have '{}' format (X, Y are non negative "\
             "integers).".format(
                 fname,

@@ -70,7 +70,7 @@ reference system rather than the server.
 Reference system image is an `.tar.gz` archive file that contains all of the
 information needed by `myscm-cli` to modify clients' configuration and software
 to make them clones of the `server` system in a sense described in `myscm-srv`
-configuration; see `--aide-conf` option).
+configuration; see `--aide-config` option).
 
 # OPTIONS
 
@@ -81,7 +81,7 @@ argument takes precedence.  Some of the options have their default fallback
 value even if they are not specified neither in configuration file nor as
 command line option.
 
--a *PATH*, \--aide-conf=*PATH*
+-a *PATH*, \--aide-config=*PATH*
 :   Specify AIDE configuration file path.  This file determines which
     directories of the server's system are scanned and synchronized with the
     client's system.  If not specified `/etc/myscm-srv/aide.conf` AIDE
@@ -116,8 +116,8 @@ command line option.
 :   Check if application configuration is valid.  If it's valid, then exit
     status is 0 (see `$?` variable) and `Config OK` message is printed on
     stdout.  Otherwise exit status is 1 and no message is printed.  This option
-    checks both AIDE and `myscm-srv` configuration validity (see `--aide-conf`
-    and `--config`).
+    checks both AIDE and `myscm-srv` configuration validity (see
+    `--aide-config` and `--config`).
 
 -s, \--scan
 :   Scan system using AIDE, create AIDE's new `aide.db` reference database and
@@ -126,7 +126,7 @@ command line option.
     intended to provide AIDE database with a summary of the current state of
     the server software without deleting the old state file.  Scanning may take
     a long time to complete depending on the AIDE configuration file that
-    determines which directories are scanned (see `--aide-conf` option for
+    determines which directories are scanned (see `--aide-config` option for
     details).
 
 -g *SYS_IMG_VER*, \--gen-img=*SYS_IMG_VER*
@@ -150,8 +150,8 @@ command line option.
     of the output is single full path to the respective aide.db[.X] AIDE
     database directory.  Location where aide.db[.X] files are saved is
     specified by AIDE configuration, specifically by the `database` variable
-    read from file specified by the `--aide-conf` option or from
-    `/etc/myscm-srv/aide.conf` if `--aide-conf` option is not present.
+    read from file specified by the `--aide-config` option or from
+    `/etc/myscm-srv/aide.conf` if `--aide-config` option is not present.
 
 \--list-img
     List all available mySCM system images created with `--gen-img` option.

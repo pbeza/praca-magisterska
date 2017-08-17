@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import socket
 
 import myscm.common.constants
 import myscm.client.config
@@ -51,15 +52,39 @@ class ApplySysImgConfigOption(ValidatedCommandLineConfigOption):
         return myscm.common.parser.assert_sys_img_ver_valid(sys_img_ver)
 
 
-class UpdateSysImgConfigOption(CommandLineFlagConfigOption):
+class UpdateSysImgConfigOption(ValidatedCommandLineConfigOption):
     """Configuration option read from CLI specifying to update system image
        by downloading it from other client or server."""
 
     def __init__(self):
         super().__init__(
-            "UpdateSysImg", "--update",
+            "UpdateSysImg", False, self._assert_ip_valid, "--update",
+            metavar="IP_ADDR", type=self._assert_ip_valid, nargs="?",
+            const=True,
             help="update system image by downloading it from one of the "
-                 "clients predefined in configuration file")
+                 "clients (chosen randomly) predefined in configuration file "
+                 "or by IP_ADDR if given; protocol that is used for "
+                 "connection is defined by --protocol option or by "
+                 "configuration file if --protocol option is not present")
+
+    def _assert_ip_valid(self, ip_str):
+        is_bool_var = isinstance(ip_str, bool)
+
+        if is_bool_var:  # if --update or --update not specified
+            return ip_str
+
+        valid_ip = True
+
+        try:
+            socket.inet_aton(ip_str)
+        except socket.error:
+            valid_ip = False
+
+        if not valid_ip:
+            m = "Not valid IP address '{}'".format(ip_str)
+            raise ClientParserError(m)
+
+        return ip_str
 
 
 class UpgradeSysImgConfigOption(CommandLineFlagConfigOption):
@@ -69,8 +94,9 @@ class UpgradeSysImgConfigOption(CommandLineFlagConfigOption):
 
     def __init__(self):
         super().__init__(
-            "UpgradeSysImg", "--upgrade",
-            help="equivalent of running --update and --apply-img option")
+            "UpgradeSysImg", "--upgrade SYS_IMG_VER",
+            help="equivalent of running --update and --apply-img SYS_IMG_VER "
+                 "option")
 
 
 class SSLCertConfigOption(GeneralConfigOption):
@@ -103,13 +129,13 @@ class SSLCertConfigOption(GeneralConfigOption):
 
 
 class UpdateProtocolConfigOption(GeneralChoiceConfigOption):
-    """Configuration option read from CLI specifying which protocol should be
-       preferred to download new system image from one of the predefined
-       client. This option makes sense only with --update and --upgrade
-       options."""
+    """Configuration option read from file and/or CLI specifying which protocol
+       should be preferred to download new system image from one of the
+       predefined client. This option makes sense only with --update and
+       --upgrade options."""
 
-    ALLOWED_PROTOCOLS = ["FTP", "SFTP"]
-    DEFAULT_PROTOCOL = "FTP"  # default if not provided in config file
+    ALLOWED_PROTOCOLS = ["SFTP"]
+    DEFAULT_PROTOCOL = "SFTP"  # default if not provided in config file
 
     def __init__(self, protocol=None):
         super().__init__(
@@ -121,6 +147,38 @@ class UpdateProtocolConfigOption(GeneralChoiceConfigOption):
                  "--update and --upgrade options".format(
                     self.DEFAULT_PROTOCOL,
                     "', '".join(self.ALLOWED_PROTOCOLS)))
+
+
+class PeersListConfigOption(ValidatedFileConfigOption):
+    """Configuration option read from file specifying IP adresses of the peers
+       that share mySCM system images. --update and --upgrade options use this
+       list to randomly select client that will be used to download mySCM
+       system image (unless IP is explicitly specified for those options)."""
+
+    def __init__(self):
+        super().__init__(
+            "PeersList", [], self._assert_peers_list_valid, True)
+
+    def _assert_peers_list_valid(self, peers_str):
+        peers_list = peers_str.lstrip("[").rstrip("]").split(",")
+
+        for i in range(len(peers_list)):
+            valid_ip = True
+            ip = peers_list[i].strip()
+
+            try:
+                socket.inet_aton(ip)
+            except socket.error:
+                valid_ip = False
+
+            if not valid_ip:
+                m = "One of the IP addresses assigned to variable PeersList "\
+                    "is not valid (has value: '{}')".format(ip)
+                raise ClientParserError(m)
+
+            peers_list[i] = ip
+
+        return peers_list
 
 
 class VerifySysImgConfigOption(ValidatedCommandLineConfigOption):
@@ -330,6 +388,7 @@ class ClientConfigParser(ConfigParser):
             UpgradeSysImgConfigOption(),
             SSLCertConfigOption(),
             UpdateProtocolConfigOption(),
+            PeersListConfigOption(),
             VerifySysImgConfigOption(),
             ForceApplyConfigOption(),
             SFTPUsernameConfigOption(),

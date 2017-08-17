@@ -37,7 +37,9 @@ class ValidatedConfigOption(ConfigOption):
         if self.validator is not None:
             if value is None:
                 value = self.value
-            self.validator(value)
+            value = self.validator(value)
+
+        return value
 
 
 class CommandLineConfigOption(ConfigOption):
@@ -251,9 +253,10 @@ class SSLCertPublicKeyConfigOption(GeneralConfigOption):
             "SSLCertPublicKeyPath", None, self._assert_cert_pub_key_path_valid,
             True, "--ssl-pubkey", metavar="PATH",
             type=self._assert_cert_pub_key_path_valid,
-            help="full path to the server's public key of the SSL certificate "
-                 "that is being used to verify signature of the myscm system "
-                 "image generated with the myscm-srv --gen-img option")
+            help="full path to the PEM formatted server's public key of the "
+                 "SSL certificate that is being used to verify signature of "
+                 "the myscm system image generated with the myscm-srv "
+                 "--gen-img option")
 
     def _assert_cert_pub_key_path_valid(self, cert_pub_key_path):
         """File path to the public key of the SSL certificate validator."""
@@ -395,7 +398,7 @@ class ConfigParser:
         self._assert_no_unrecognized_file_options(file_options)
         self._assert_all_required_options_present(file_options)
         self._convert_string_values_to_types(file_options)
-        self._assert_file_options_valid(file_options)
+        file_options = self._assert_file_options_valid(file_options)
         self.config.update(file_options)
 
     def _update_config_from_argv(self, root_parser, wrapper_parser,
@@ -441,10 +444,18 @@ class ConfigParser:
                 raise ParserError(m)
 
     def _assert_file_options_valid(self, file_options):
+        converted_file_options = {}
+
         for key, val in file_options.items():
             option = self.allowed_options[key]
+            new_val = val
+
             if isinstance(option, ValidatedConfigOption):
-                option.assert_valid(val)
+                new_val = option.assert_valid(val)
+
+            converted_file_options[key] = new_val
+
+        return converted_file_options
 
 
 class SortingHelpFormatter(argparse.HelpFormatter):
