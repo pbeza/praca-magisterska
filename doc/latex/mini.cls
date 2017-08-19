@@ -236,8 +236,9 @@ lower separated=false, fontupper=\footnotesize, nobeforeafter}{#2}
 %\RequirePackage{url}
 %\PassOptionsToPackage{hyphens}{url}
 %\RequirePackage[unicode,plainpages=false,hypertexnames=true]{hyperref}
-\RequirePackage[unicode]{hyperref}
 %\RequirePackage[all]{hypcap} % żeby dało się użyć hyperref w caption
+%\RequirePackage[unicode]{hyperref}
+\RequirePackage[unicode,hidelinks]{hyperref}
 
 % Zwykły \href z emph font
 

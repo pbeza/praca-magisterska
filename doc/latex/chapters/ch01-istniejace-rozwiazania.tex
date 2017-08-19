@@ -127,7 +127,7 @@ Ansible jest rozwiązaniem do~zarządzania oprogramowaniem różniącym się od~
 Ansible został opublikowany na~licencji~\glslink{gpl}{GPL} w~wersji~3, a~jego pierwsza wersja została wydana w~2012~roku. Projekt został zaimplementowany w~języku Python przez \href{http://michaeldehaan.net/}{\mbox{Michaela} \mbox{Dehaana}}~\cite{ansible-github}.
 
 
-\begin{lstlisting}[language=,caption={Przykładowy plik konfiguracyjny klientów serwera Ansible \protect\path{/etc/ansible/hosts} (w~numenklaturze Ansible nazywany \hrefemph{http://docs.ansible.com/ansible/intro_inventory.html}{Inventory file}) definiujący adresy~IP zarządzanych klientów},label=lst:ansible-inventory-example]
+\begin{lstlisting}[language=,caption={Przykładowy plik konfiguracyjny klientów serwera Ansible \protect\path{/etc/ansible/hosts} (w~nomenklaturze Ansible nazywany \hrefemph{http://docs.ansible.com/ansible/intro_inventory.html}{Inventory file}) definiujący adresy~IP zarządzanych klientów},label=lst:ansible-inventory-example]
 [local]
 127.0.0.1
 
@@ -224,7 +224,7 @@ base:
 \end{lstlisting}
 Nazwy znajdujące się w~pliku konfiguracyjnym pod~wyrażeniami regularnymi --- np.~w~przykładzie~\ref{lst:salt-topfile-example}: \texttt{vim}, \texttt{scripts} i~\texttt{users} pod~wyrażeniem regularnym \texttt{'*'} --- to~nazwy stanów opisanych innymi plikami konfiguracyjnymi nazywanymi plikami stanu~(\emph{State Files}). Przykład~\ref{lst:salt-statefile} przedstawia przykładowy plik stanu \path{nettools.sls} (niewystępujący w~przykładowym pliku~\path{top.sls} w~przykładzie~\ref{lst:salt-topfile-example}). Plik ten~wymusza: instalację pakietów \hreftt{https://wiki.archlinux.org/index.php/rsync}{rsync}, \hreftt{https://lftp.yar.ru/}{lftp} i~\hreftt{https://curl.haxx.se/}{curl} oraz~obecność użytkownika \texttt{fred} z~przypisanym \href{https://superuser.com/questions/144666/what-is-the-difference-between-shell-console-and-terminal}{shellem} \href{https://en.wikipedia.org/wiki/Z_shell}{\path{/bin/zsh}}.
 
-\begin{lstlisting}[language=,caption={Plik stanu \texttt{nettools.sls} definujący 3~pakiety, które agent ma~zainstalować oraz~użytkownika \texttt{fred}, który musi być w~systemie i~mieć przypisany shell~\texttt{/bin/zsh}},label=lst:salt-statefile]
+\begin{lstlisting}[language=,caption={Plik stanu \texttt{nettools.sls} definiujący 3~pakiety, które agent ma~zainstalować oraz~użytkownika \texttt{fred}, który musi być w~systemie i~mieć przypisany shell~\texttt{/bin/zsh}},label=lst:salt-statefile]
 install_network_packages:
   pkg.installed:
     - pkgs:
@@ -368,7 +368,7 @@ W~rozdziałach~\ref{sec:puppet}, \ref{sec:chef}, \ref{sec:ansible} i~\ref{sec:sa
 	\label{tab:existing-solutions-comparison}
 \end{table}
 
-Konfiguracja każdego z~czterech, najpopularniejszych rozwiązań sprowadza się do~opisania oczekiwanego stanu systemu w~języku tworzącym warstwę abstrakcji nad~konfiguracją konkretnych systemów. Jedną z~ról wszystkich wymienionych aplikacji jest przetłumaczenie takiej uniwersalnie zapisanej konfiguracji na~konkretne działania systemu, np.~systemu menadżera pakietów. Każde z~przedstawionych rozwiązań ma~podobny zakres wspieranych najpopularniejszych systemów operacyjnych i~oferowanej podstawowej funkcjonalności, w~tym m.in.~instalację pakietów za~pomocą różnych menadżerów pakietów. Dzięki modułowości opisanych rozwiązań, istnieje możliwość względnie łatwego rozszerzenia ich funkcjonalności. Tysiące modułów \hyperref[sec:puppet]{Puppeta}, \hyperref[sec:chef]{Chefa}, \hyperref[sec:ansible]{Ansible} i~\hyperref[sec:salt]{Salt} można znaleźć odpowiednio na~stronach internetowych projektów:\mynobreakpar
+Konfiguracja każdego z~czterech, najpopularniejszych rozwiązań sprowadza się do~opisania oczekiwanego stanu systemu w~języku tworzącym warstwę abstrakcji nad~konfiguracją konkretnych systemów. Jedną z~ról wszystkich wymienionych aplikacji jest przetłumaczenie takiej uniwersalnie zapisanej konfiguracji na~konkretne działania systemu, np.~systemu menadżera pakietów. Każde z~przedstawionych rozwiązań ma~podobny zakres wspieranych najpopularniejszych systemów operacyjnych i~oferowanej podstawowej funkcjonalności, w~tym m.in.~instalację pakietów za~pomocą różnych menadżerów pakietów. Dzięki \href{https://sjp.pwn.pl/poradnia/haslo/modularny-modulowy-i-nie-tylko;3162.html}{modułowości} opisanych rozwiązań, istnieje możliwość względnie łatwego rozszerzenia ich funkcjonalności. Tysiące modułów \hyperref[sec:puppet]{Puppeta}, \hyperref[sec:chef]{Chefa}, \hyperref[sec:ansible]{Ansible} i~\hyperref[sec:salt]{Salt} można znaleźć odpowiednio na~stronach internetowych projektów:\mynobreakpar
 \begin{itemize}
 	\item Puppet Forge --- \hreftt{https://forge.puppet.com/}{forge.puppet.com},
 	\item Chef Supermarket --- \hreftt{https://supermarket.chef.io/cookbooks/}{supermarket.chef.io/cookbooks},
