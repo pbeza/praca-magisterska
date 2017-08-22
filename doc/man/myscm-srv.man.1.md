@@ -143,7 +143,7 @@ command line option.
     option that prints out client's current `SYS_IMG_VER`.
 
 \--upgrade *SYS_IMG_VER*
-    Run `myscm-srv` with `--scan` option and then with `--gen-img` option.
+:   Run `myscm-srv` with `--scan` option and then with `--gen-img` option.
 
 \--list-db
 :   List all available AIDE databases created with `--scan` option.  Every line
@@ -154,7 +154,7 @@ command line option.
     `/etc/myscm-srv/aide.conf` if `--aide-config` option is not present.
 
 \--list-img
-    List all available mySCM system images created with `--gen-img` option.
+:   List all available mySCM system images created with `--gen-img` option.
     Every line of the output is single full path to the mySCM system image and
     message that informs whether within directory that contains listed mySCM
     system image is respective verified SSL digital signature of the mySCM

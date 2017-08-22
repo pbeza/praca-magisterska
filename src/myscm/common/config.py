@@ -72,6 +72,8 @@ class BaseConfig:
 
         suffix_msg = "Only Arch and Debian distributions are supported."
 
+        distro_name = "unknown"
+
         try:
             import distro
         except ImportError:
