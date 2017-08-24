@@ -49,8 +49,6 @@ def _main():
     elif config.options.verify_sys_img:
         sys_img_manager = SysImgManager(config)
         sys_img_manager.verify_sys_img()
-    elif config.options.force_apply:
-        logger.debug("--force is not implemented yet")  # TODO
     elif config.options.list_sys_img:
         sys_img_manager = SysImgManager(config)
         sys_img_manager.print_all_verified_img_paths_sorted()

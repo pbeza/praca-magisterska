@@ -60,9 +60,15 @@ class SysImgExtractor:
             raise SysImgExtractorError(m, e) from e
 
         self.sys_img_manager.update_current_system_state_version(sys_img_ver)
+        self._remove_extracted_sys_img_dir()
 
         logger.info("Applying changes from '{}' myscm system image ended "
                     "successfully.".format(sys_img_f.name))
+
+    def _remove_extracted_sys_img_dir(self):
+        logger.debug("Removing temporarily extracted system image '{}'."
+                     .format(self.extracted_sys_img_dir))
+        shutil.rmtree(self.extracted_sys_img_dir, ignore_errors=True)
 
     def _extract_sys_img(self, sys_img_f):
         sys_img_ext = SystemImageGenerator.MYSCM_IMG_EXT
@@ -154,7 +160,7 @@ class SysImgExtractor:
            There is a problem with universal function that is able to copy all
            types of files. See: https://stackoverflow.com/a/7420617/1321680
            Note that neither shutil.copytree nor distutils.dir_util.copy_tree
-           are able to handle copying special files (e.g. named pipes)."""
+           is able to handle copying special files (e.g. named pipes)."""
 
         # Count all files first to introduce progress bar
 
@@ -165,18 +171,21 @@ class SysImgExtractor:
 
         bar = progressbar.ProgressBar(max_value=total_to_move)
 
-        # Move recursively all types of files including pipes and symlinks
-        # (possibly from one filesystem to the another).
+        # Move recursively all types of files including pipes, symlinks and
+        # others possibly from one filesystem to the another (which can't be
+        # handled using move() call).
 
         for src_dir, dirs, files in os.walk(src, followlinks=False):
             dst_dir = os.path.realpath(src_dir.replace(src, dst, 1))
 
-            # Create directory with the same stats (TODO UID and GID)
+            # Create directory with the same stats
 
-            if not os.path.exists(dst_dir):  # for debug only to skip root
-                os.makedirs(dst_dir, exist_ok=True)
-                shutil.copystat(src_dir, dst_dir, follow_symlinks=False)
+            if not os.path.exists(dst_dir):
                 logger.debug("Creating '{}'.".format(dst_dir))
+                os.makedirs(dst_dir, exist_ok=True)
+                fstat = os.stat(src_dir)
+                shutil.chown(dst_dir, user=fstat.st_uid, group=fstat.st_gid)
+                shutil.copystat(src_dir, dst_dir, follow_symlinks=False)
 
             # Move all symlinks to directories
 
@@ -228,13 +237,18 @@ class SysImgExtractor:
 
         # Remove empty directories
 
+        self._remove_empty_dirs(src)
+
+        os.sync()
+
+    def _remove_empty_dirs(self, src):
+        logger.debug("Removing empty directories from '{}'.".format(src))
+
         for path, _, _ in os.walk(src, topdown=False, followlinks=False):
             try:
                 os.removedirs(path)
             except:
                 pass
-
-        os.sync()
 
     def _mycopy2(self, src, dst):
         try:
@@ -273,6 +287,12 @@ class SysImgExtractor:
                 f, sys_img_f, self._changed_files_per_line_fun,
                 AIDEEntry.PROPERTIES_COUNT, self.client_config.distro_name,
                 False, bar)
+
+        changed_dir = os.path.join(
+            self.extracted_sys_img_dir,
+            SystemImageGenerator.IN_ARCHIVE_CHANGED_DIR_NAME)
+
+        self._remove_empty_dirs(changed_dir)
 
         logger.info("Applying changed files listed in '{}' report ended "
                     "successfully.".format(changed_report_path))

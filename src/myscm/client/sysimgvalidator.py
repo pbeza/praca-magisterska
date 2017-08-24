@@ -205,13 +205,13 @@ class SysImgValidator:
 
         # Check file mtime
 
-        mtime_str = values[11]
-        self._assert_changed_mtime_valid(path, mtime_str, file_stat)
+        # mtime_str = values[11]
+        # self._assert_changed_mtime_valid(path, mtime_str, file_stat)
 
         # Check file ctime
 
-        ctime_str = values[12]
-        self._assert_changed_ctime_valid(path, ctime_str, file_stat)
+        # ctime_str = values[12]
+        # self._assert_changed_ctime_valid(path, ctime_str, file_stat)
 
         # Check file link count
 
