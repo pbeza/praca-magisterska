@@ -4,7 +4,6 @@ import os
 import re
 
 from myscm.client.error import ClientError
-from myscm.client.parser import assert_recent_img_ver_file_content_valid
 from myscm.common.sysimgmanager import SysImgManagerBase
 from myscm.server.sysimggenerator import SystemImageGenerator
 
@@ -91,6 +90,7 @@ class SysImgManager(SysImgManagerBase):
         print(ver)
 
     def _read_img_ver_from_file(self, img_ver_path):
+        from myscm.client.parser import assert_recent_img_ver_file_content_valid
         ver = assert_recent_img_ver_file_content_valid(img_ver_path)
         logger.debug("Recently applied myscm system image version read from "
                      "'{}': {}.".format(img_ver_path, ver))
@@ -115,9 +115,6 @@ class SysImgManager(SysImgManagerBase):
     def print_all_verified_img_paths_sorted(self):
         self._print_all_verified_img_paths_sorted(
                         self.client_config.options.sys_img_download_dir,
-                        SystemImageGenerator.SIGNATURE_EXT,
-                        SystemImageGenerator.MYSCM_IMG_FILE_NAME,
-                        SystemImageGenerator.SSL_CERT_DIGEST_TYPE,
                         self.client_config.options.SSL_cert_public_key_path)
 
     def verify_sys_img(self):
@@ -131,8 +128,7 @@ class SysImgManager(SysImgManagerBase):
         print(info)
 
     def get_target_sys_img_ver_from_fname(self, fname):
-        regex_str = SystemImageGenerator.MYSCM_IMG_FILE_NAME.format(
-                                                            r"(\d+)", r"(\d+)")
+        regex_str = SystemImageGenerator.MYSCM_IMG_FILE_NAME_REGEX
         regex = re.compile(regex_str)
         fname = os.path.basename(fname)
         corrupted = False

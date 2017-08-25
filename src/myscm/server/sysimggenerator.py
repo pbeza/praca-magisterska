@@ -36,6 +36,7 @@ class SystemImageGenerator:
 
     MYSCM_IMG_EXT = ".tar.gz"
     MYSCM_IMG_FILE_NAME = "myscm-img.{}.{}" + MYSCM_IMG_EXT
+    MYSCM_IMG_FILE_NAME_REGEX = MYSCM_IMG_FILE_NAME.format(r"(\d+)", r"(\d+)")
     AIDE_MIN_EXITCODE = 14  # see AIDE's manual for details about exitcodes
     IN_ARCHIVE_ADDED_DIR_NAME = "ADDED"
     IN_ARCHIVE_CHANGED_DIR_NAME = "CHANGED"

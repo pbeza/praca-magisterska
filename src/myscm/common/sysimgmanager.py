@@ -7,6 +7,7 @@ import re
 import termcolor
 
 from myscm.common.error import MySCMError
+from myscm.server.sysimggenerator import SystemImageGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -22,20 +23,18 @@ class SysImgManagerBase:
     def __init__(self):
         pass
 
-    def _print_all_verified_img_paths_sorted(self, dir_path, signature_ext,
-                                             sys_img_fname, ssl_digest_type,
-                                             ssl_pub_key_path):
+    def _print_all_verified_img_paths_sorted(self, dir_path, ssl_pub_key_path):
+        signature_ext = SystemImageGenerator.SIGNATURE_EXT,
+        ssl_digest_type = SystemImageGenerator.SSL_CERT_DIGEST_TYPE,
 
-        self._print_all_img_paths_sorted(dir_path, sys_img_fname, True,
-                                         signature_ext, ssl_pub_key_path,
-                                         ssl_digest_type)
+        self._print_all_img_paths_sorted(dir_path, True, signature_ext,
+                                         ssl_pub_key_path, ssl_digest_type)
 
-    def _print_all_img_paths_sorted(self, dir_path, sys_img_fname,
-                                    check_signature=False, signature_ext=None,
-                                    ssl_pub_key_path=None,
+    def _print_all_img_paths_sorted(self, dir_path, check_signature=False,
+                                    signature_ext=None, ssl_pub_key_path=None,
                                     ssl_digest_type=None):
 
-        paths = self._get_all_img_paths(dir_path, sys_img_fname)
+        paths = self._get_all_img_paths(dir_path)
         n = len(paths)
         paths.sort()
 
@@ -124,11 +123,11 @@ class SysImgManagerBase:
 
         return verify_result
 
-    def _get_all_img_paths(self, dir_path, sys_img_fname):
+    def _get_all_img_paths(self, dir_path):
         """Return list of all found myscm-img.X.Y.tar.gz system images."""
 
         paths = []
-        regex_str = sys_img_fname.format(r"(\d+)", r"(\d+)")
+        regex_str = SystemImageGenerator.MYSCM_IMG_FILE_NAME_REGEX
         regex = re.compile(regex_str)
         downloaded_sys_img_dir = os.fsencode(dir_path)
 

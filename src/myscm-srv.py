@@ -25,13 +25,6 @@ SRV_CONFIG_PATH = "myscm/server/config/config.ini"
 SRV_SECTION_NAME = "myscm-srv"
 
 
-def get_app_config():
-    app_config = myscm.common.main.get_app_config(ServerConfigParser,
-                                                  SRV_CONFIG_PATH,
-                                                  SRV_SECTION_NAME)
-    return app_config
-
-
 def scan(config):
     try:
         scanner = Scanner(config)
@@ -50,7 +43,9 @@ def gen_img(config):
 
 
 def _main():
-    config = get_app_config()
+    config = myscm.common.main.get_app_config(ServerConfigParser,
+                                              SRV_CONFIG_PATH,
+                                              SRV_SECTION_NAME)
 
     if os.geteuid() != 0:
         m = "This application is supposed to be ran with root permissions. "\

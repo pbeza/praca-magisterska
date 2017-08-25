@@ -14,6 +14,7 @@ import myscm.common.main
 from myscm.client.parser import ClientConfigParser
 from myscm.client.sysimgextractor import SysImgExtractor
 from myscm.client.sysimgmanager import SysImgManager
+from myscm.client.sysimgupdater import SysImgUpdater
 
 logger = logging.getLogger("myscm")
 
@@ -21,15 +22,10 @@ CLI_CONFIG_PATH = "myscm/client/config/config.ini"
 CLI_SECTION_NAME = "myscm-cli"
 
 
-def get_app_config():
-    app_config = myscm.common.main.get_app_config(ClientConfigParser,
-                                                  CLI_CONFIG_PATH,
-                                                  CLI_SECTION_NAME)
-    return app_config
-
-
 def _main():
-    config = get_app_config()
+    config = myscm.common.main.get_app_config(ClientConfigParser,
+                                              CLI_CONFIG_PATH,
+                                              CLI_SECTION_NAME)
 
     if os.geteuid() != 0:
         m = "This application is supposed to be ran with root permissions. "\
@@ -43,7 +39,8 @@ def _main():
         sys_img_extractor = SysImgExtractor(config)
         sys_img_extractor.apply_sys_img()
     elif config.options.update_sys_img:
-        logger.debug("--update option is not implemented yet")  # TODO
+        updater = SysImgUpdater(config)
+        updater.update()
     elif config.options.upgrade_sys_img:
         logger.debug("--upgrade option is not implemented yet")  # TODO
     elif config.options.verify_sys_img:
