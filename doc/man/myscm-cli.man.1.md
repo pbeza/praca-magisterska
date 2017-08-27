@@ -78,11 +78,11 @@ using credentials provided in configuration file.
     and `A` is integer representing current state of the system which can be
     obtained by running application with `--print-ver` option.
 
-\--update=[*IP_ADDR*]
-:   Update system image by downloading it from the client identified by IP
-    address *IP_ADDR* or from randomly chosen client from set of peers loaded
-    from configuration file (if *IP_ADDR* is not present).  Connection is being
-    established using protocol defined by `--protocol` option or by
+\--update=[*HOST*]
+:   Update mySCM system image by downloading it from *HOST* (which can be
+    peer's IP or hostname) or, if *HOST* is not specified, from randomly chosen
+    client from *PeersList* variable read from configuration file. Connection
+    is being established using protocol defined by `--protocol` option or by
     configuration file if `--protocol` option is not present.  Downloaded file
     is saved in `/var/myscm-cli/myscm-img.A.B.tar.gz` where `A` and `B` are
     non-negative integers referring to the current and target system version

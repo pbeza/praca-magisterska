@@ -3,7 +3,6 @@ import logging
 import os
 import paramiko
 import pysftp
-import random
 import re
 
 from myscm.client.error import ClientError
@@ -17,50 +16,67 @@ class SFTPSysImgDownloaderError(ClientError):
     pass
 
 
-class SFTPSysImgDownloaderNoImageFoundError(SFTPSysImgDownloaderError):
-    pass
-
-
 class SFTPSysImgDownloader:
-
-    DEFAULT_SFTP_PORT = 22
 
     def __init__(self, client_config):
         super().__init__()
         self.client_config = client_config
 
-    def download(self):
-        try:
-            self._sftp_download_myscm_img()
-        except SFTPSysImgDownloaderNoImageFoundError as e:
-            logger.info(e)
+    def download(self, host_details):
+        self._sftp_download_myscm_img(host_details)
 
-    def _sftp_download_myscm_img(self):
-        host = self._get_host()
-        port = self.DEFAULT_SFTP_PORT
-
+    def _sftp_download_myscm_img(self, host_details):
         try:
-            self.__sftp_download_myscm_img(host, port)
+            self.__sftp_download_myscm_img(host_details)
         except (paramiko.ssh_exception.AuthenticationException,
                 FileNotFoundError) as e:
             m = "Connection to SFTP peer failed"
             raise SFTPSysImgDownloaderError(m, e) from e
         except paramiko.ssh_exception.SSHException as e:
             m = "Connection to SFTP peer failed. Check if '{}' is present in "\
-                "SSH known_hosts file".format(host)
+                "SSH known_hosts file. If you are using private key to "\
+                "connect to the server, check if password provided in "\
+                "configuration file is correct".format(host_details["host"])
             raise SFTPSysImgDownloaderError(m, e) from e
 
-    def __sftp_download_myscm_img(self, host, port):
-        user = self.client_config.options.SFTP_username
-        passwd = self.client_config.options.SFTP_password  # TODO cert
+    def __sftp_download_myscm_img(self, host_details):
+        protocol = host_details["protocol"]
+        host = host_details["host"]
+        port = host_details["port"]
+        username = host_details["username"]
+        password = host_details["password"]
+        private_key = host_details["private_key"]
+        private_key_pass = host_details["private_key_pass"]
+        remote_dir = host_details["remote_dir"]
+
+        conn_details = {
+            "host": host,
+            "port": port,
+            "username": username,
+            "password": password,
+            "private_key": private_key,
+            "private_key_pass": private_key_pass,
+        }
         download_dir = self.client_config.options.sys_img_download_dir
-        remote_dir = "/tmp/myscm"
 
-        logger.debug("Downloading myscm system image from {} (port: {})."
-                     .format(host, port))
+        logger.info("Downloading mySCM system image from {} (port: {}) "
+                    "using {} protocol.".format(host, port, protocol))
 
-        # with pysftp.Connection(host, username=user, password=passwd, private_key=..., private_key_pass=...) as sftp:
-        with pysftp.Connection(host, username=user, password=passwd) as sftp:
+        if private_key:  # prefer public key authentication over password
+            del conn_details["password"]
+
+        # Quite ugly hotfix for bug in pysftp module that leads to printing
+        # module's ignored internal exception when e.g. SFTP credentials are
+        # incorrect.
+
+        _tmp_del = pysftp.Connection.__del__
+        pysftp.Connection.__del__ = lambda x: None  # in case of failure
+
+        with pysftp.Connection(**conn_details) as sftp:
+            # Revert hotfix is success
+            pysftp.Connection.__del__ = _tmp_del
+            sftp.__del__ = _tmp_del
+
             with sftp.cd(remote_dir):
                 img_local_path = self._sftp_get_myscm_img(sftp, download_dir)
                 signature_img_path = self._sftp_get_myscm_img_signature(
@@ -95,21 +111,6 @@ class SFTPSysImgDownloader:
 
         return img_sign_local_path if signature_downloaded else None
 
-    def _get_host(self):
-        host = self.client_config.options.update_sys_img
-
-        if isinstance(host, bool):
-            if not host:
-                m = "IP address option was not specified (internal error)"
-                raise SFTPSysImgDownloaderError(m)
-            host = random.choice(self.client_config.options.peers_list)
-            m = "No host was specified to download myscm image from - "\
-                "random host '{}' read from configuration file was selected."\
-                .format(host)
-            logger.debug(m)
-
-        return host
-
     def _get_newest_myscm_sys_img_fname(self, sftp_conn):
         img_manager = SysImgManager(self.client_config)
         current_id = img_manager.get_current_system_state_version()
@@ -131,7 +132,8 @@ class SFTPSysImgDownloader:
         if max_target_id < 0:
             m = "No mySCM system images matching current system ID (which is "\
                 "{}) found on the connected peer.".format(current_id)
-            raise SFTPSysImgDownloaderNoImageFoundError(m)
+            from myscm.client.sysimgupdater import SysImgDownloaderNoImageFoundError
+            raise SysImgDownloaderNoImageFoundError(m)
 
         newest_img_fname = SystemImageGenerator.MYSCM_IMG_FILE_NAME
         newest_img_fname = newest_img_fname.format(current_id, max_target_id)

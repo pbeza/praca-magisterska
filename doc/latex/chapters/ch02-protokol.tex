@@ -147,10 +147,10 @@ Wygenerowanie i~podpisanie certyfikatu zostało wykonane z~użyciem \gls{openssl
 
 \begin{minipage}{\linewidth} % https://tex.stackexchange.com/questions/73231/avoid-page-breaks-in-lstlistings
 \begin{lstlisting}[language=,caption={Ciąg komend służący wygenerowaniu i~podpisaniu cyfrowego certyfikatu X.509},label=lst:openssl-gencert]
-openssl genrsa -aes256 -out rsa_aes256_4096.key 4096
-openssl req -new -key rsa_aes256_4096.key -out request.csr
+openssl genrsa -aes256 -out certificate.key 4096
+openssl req -new -key certificate.key -out request.csr
 openssl req -new -config request.cnf -key fd.key -out request.csr
-openssl x509 -req -days 365 -in request.csr -signkey rsa_aes256_4096.key -out certificate.pem
+openssl x509 -req -days 365 -in request.csr -signkey certificate.key -out certificate.pem
 \end{lstlisting}
 \end{minipage}
 
@@ -171,7 +171,7 @@ Obraz konfiguracji podpisany certyfikatem, poza uwierzytelnieniem gwarantuje ró
 \begin{lstlisting}[language=,caption={Plik z~konfiguracją cyfrowego certyfikatu X.509},label=lst:openssl-request-config]
 [req]
 default_bits       = 4096
-default_keyfile    = rsa_aes256_4096.key
+default_keyfile    = certificate.key
 prompt             = no
 distinguished_name = dn
 req_extensions     = ext

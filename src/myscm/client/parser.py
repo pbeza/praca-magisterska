@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import configparser
 import os
 import socket
 
@@ -57,7 +58,7 @@ class UpdateSysImgConfigOption(ValidatedCommandLineConfigOption):
     """Configuration option read from CLI specifying to update system image
        by downloading it from other client or server."""
 
-    def __init__(self):
+    def __init__(self, config_path):
         super().__init__(
             "UpdateSysImg", False, self._assert_host_valid, "--update",
             metavar="HOST", type=self._assert_host_valid, nargs="?",
@@ -67,20 +68,41 @@ class UpdateSysImgConfigOption(ValidatedCommandLineConfigOption):
                  "or by HOST if given; protocol that is used for connection "
                  "is defined by --protocol option or by configuration file if "
                  "--protocol option is not present")
+        self.config_path = config_path
 
     def _assert_host_valid(self, host):
         is_bool_var = isinstance(host, bool)
 
-        if is_bool_var:  # if --update or --update not specified
+        if is_bool_var:  # if --update or --update not specified take random
             return host
 
         valid_host = check_if_host_valid(host)
+        self._assert_respective_config_section_exist(host)
 
         if not valid_host:
             m = "Not valid hostname '{}'".format(host)
             raise ClientParserError(m)
 
         return host
+
+    def _assert_respective_config_section_exist(self, host):
+        # TODO Below parser can be passed as param instead of creating new one
+        parser = configparser.ConfigParser()
+        parser.optionxform = str  # case sensitive
+        parser.read(self.config_path)
+        config_sections = parser.sections()
+
+        if host not in config_sections:
+            m = "Connection details of the host '{}' are not specified in "\
+                "configuration file".format(host)
+            raise ClientParserError(m)
+
+        peers_list = parser["myscm-cli"].get("PeersList")
+
+        if host not in peers_list:
+            m = "Specified host '{}' needs to be in 'PeersList' "\
+                "configuration file list to be able to use it".format(host)
+            raise ClientParserError(m)
 
 
 class UpgradeSysImgConfigOption(CommandLineFlagConfigOption):
@@ -151,9 +173,10 @@ class PeersListConfigOption(ValidatedFileConfigOption):
        list to randomly select client that will be used to download mySCM
        system image (unless host is explicitly specified for those options)."""
 
-    def __init__(self):
+    def __init__(self, config_path):
         super().__init__(
             "PeersList", [], self._assert_peers_list_valid, True)
+        self.config_path = config_path  # to check referred hostnames' sections
 
     def _assert_peers_list_valid(self, peers_str):
         peers_list = peers_str.lstrip("[").rstrip("]").split(",")
@@ -169,7 +192,102 @@ class PeersListConfigOption(ValidatedFileConfigOption):
 
             peers_list[i] = host
 
-        return peers_list
+        return self._peers_list_to_extended_dict(peers_list)
+
+    def _peers_list_to_extended_dict(self, peers_list):
+        # Every hostname has its own section, thus need ConfigParser
+        # TODO Below parser can be passed as param instead of creating new one
+        parser = configparser.ConfigParser()
+        parser.optionxform = str  # case sensitive
+        parser.read(self.config_path)
+        config_sections = parser.sections()
+
+        peers_dict = dict()
+
+        for host in peers_list:
+            if host not in config_sections:
+                m = "Host '{}' referred in PeersList variable doesn't have "\
+                    "respective configuration section with connection details"\
+                    .format(host)
+                raise ClientParserError(m)
+
+            peers_dict[host] = self._get_host_connection_details(host, parser)
+
+        return peers_dict
+
+    def _get_host_connection_details(self, host, parser):
+        host_conn_details = {
+            "host": host,
+            "protocol": self._get_host_protocol(host, parser),
+            "port": self._get_host_port(host, parser),
+            "username": self._get_variable_value(host, parser, "Username"),
+            "password": self._get_variable_value(
+                            host, parser, "Password", required=False),
+            "private_key": self._get_variable_fpath(
+                            host, parser, "PrivateKey", required=False),
+            "private_key_pass": self._get_variable_value(
+                            host, parser, "PrivateKeyPasswd", required=False),
+            "remote_dir": self._get_variable_value(host, parser, "RemoteDir")
+        }
+
+        if not host_conn_details["password"] and\
+           not host_conn_details["private_key"]:
+            m = "At least one of the 'Password', 'PrivateKey' variables must"\
+                "be set in '{}' section".format(host)
+            raise ClientParserError(m)
+
+        return host_conn_details
+
+    def _get_host_protocol(self, host, parser):
+        protocol = self._get_variable_value(host, parser, "Protocol").upper()
+
+        if protocol not in SysImgUpdater.SUPPORTED_PROTOCOLS:
+            m = "Protocol '{}' is not supported".format(protocol)
+            raise ClientParserError(m)
+
+        return protocol
+
+    def _get_host_port(self, host, parser):
+        MIN_PORT = 1
+        MAX_PORT = 65535
+        port = self._get_variable_value(host, parser, "Port")
+        m = "Value assigned to 'Port' variable needs to be integer from "\
+            "range {} - {} (current value: '{}')".format(
+                MIN_PORT, MAX_PORT, port)
+
+        try:
+            port = int(port)
+        except ValueError:
+            raise ClientParserError(m)
+
+        if not MIN_PORT <= port <= MAX_PORT:
+            raise ClientParserError(m)
+
+        return port
+
+    def _get_variable_fpath(self, host, parser, variable_name, required=True):
+        path = self._get_variable_value(host, parser, variable_name, required)
+
+        if not path:
+            return path
+
+        if not os.path.isfile(path):
+            m = "File path '{}' referred in configuration file section '{}' "\
+                "in '{}' variable doesn't exist".format(
+                    path, host, variable_name)
+            raise ClientParserError(m)
+
+        return path
+
+    def _get_variable_value(self, host, parser, variable_name, required=True):
+        value = parser[host].get(variable_name)
+
+        if required and not value:
+            m = "Section '{}' doesn't have required '{}' variable"\
+                .format(host, variable_name)
+            raise ClientParserError(m)
+
+        return value
 
 
 class VerifySysImgConfigOption(ValidatedCommandLineConfigOption):
@@ -211,36 +329,6 @@ class ForceApplyConfigOption(CommandLineFlagConfigOption):
             "ForceApply", "--force",
             help="take default actions and do not ask interactive questions "
                  "while --apply-img")
-
-
-class SFTPUsernameConfigOption(ValidatedFileConfigOption):
-    """Configuration option read from CLI specifying SFTP username being used
-       to connect to other client to download newest system image."""
-
-    def __init__(self):
-        super().__init__(
-            "SFTPUsername", None, self._assert_sftp_username_valid, False)
-
-    def _assert_sftp_username_valid(self, sftp_username):
-        if sftp_username == "":
-            raise ClientParserError("SFTP username cannot be empty")
-
-        return sftp_username
-
-
-class SFTPPasswordConfigOption(ValidatedFileConfigOption):
-    """Configuration option read from CLI specifying SFTP password being used
-       to connect to other client to download newest system image."""
-
-    def __init__(self):
-        super().__init__(
-            "SFTPPassword", None, self._assert_sftp_passwd_valid, False)
-
-    def _assert_sftp_passwd_valid(self, sftp_passwd):
-        if sftp_passwd == "":
-            raise ClientParserError("SFTP password cannot be empty")
-
-        return sftp_passwd
 
 
 class ListSysImgConfigOption(CommandLineFlagConfigOption):
@@ -386,15 +474,13 @@ class ClientConfigParser(ConfigParser):
     def __init__(self, config_path, config_section_name):
         _CLIENT_DEFAULT_CONFIG = [
             ApplySysImgConfigOption(),
-            UpdateSysImgConfigOption(),
+            UpdateSysImgConfigOption(config_path),
             UpgradeSysImgConfigOption(),
             SSLCertConfigOption(),
             UpdateProtocolConfigOption(),
-            PeersListConfigOption(),
+            PeersListConfigOption(config_path),
             VerifySysImgConfigOption(),
             ForceApplyConfigOption(),
-            SFTPUsernameConfigOption(),
-            SFTPPasswordConfigOption(),
             ListSysImgConfigOption(),
             SysImgExtractDirConfigOption(),
             SysImgDownloadDirConfigOption(),

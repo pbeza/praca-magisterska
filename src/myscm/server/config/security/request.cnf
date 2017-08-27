@@ -1,6 +1,6 @@
 [req]
 default_bits       = 4096
-default_keyfile    = rsa_aes256_4096.key
+default_keyfile    = certificate.key
 prompt             = no
 distinguished_name = dn
 req_extensions     = ext
