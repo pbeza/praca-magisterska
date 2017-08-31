@@ -14,7 +14,8 @@ APP_VERSION_FULL_TEMPLATE = '''{name} {version}
 
 Written by {author} ({author_email})'''
 APP_NEED_OPTION_TO_RUN_MSG = "This application does nothing unless you "\
-"specify what to do. Read manual or --help to learn more."
+                             "specify what to do. Read manual or --help to "\
+                             "learn more."
 
 
 def get_app_version(app_name):

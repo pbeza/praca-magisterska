@@ -18,7 +18,7 @@ class AIDEDatabasesManager:
        This manager is not AIDE's database parser (see AIDECheckParser class).
        This class is responsible only for renaming AIDE's databases after
        myscm-srv --scan to keep old databases saved (they are needed to run
-       myscm-srv with --gen-img option."""
+       myscm-srv with --gen-img option)."""
 
     def __init__(self, server_config):
         self.server_config = server_config
@@ -28,7 +28,7 @@ class AIDEDatabasesManager:
            rename old aide.db.current to aide.db.X directory (X is integer)."""
 
         if os.path.isdir(self.server_config.aide_reference_db_dir):
-            num = self.get_current_aide_db_number()
+            num = self.get_recent_aide_db_version()
             self._rename_aide_reference_db_file_to_old(num)
             self._rename_aide_reference_db_dir_to_old(num)
         else:
@@ -39,6 +39,7 @@ class AIDEDatabasesManager:
 
         self._rename_aide_new_db_file_to_reference_file()
         self._rename_aide_new_db_dir_to_reference_dir()
+        self.server_config.db_ver_file.increment()
 
     def _rename_aide_reference_db_file_to_old(self, num):
         """Rename recently created aide.db file to aide.db.X, where X is
@@ -101,16 +102,40 @@ class AIDEDatabasesManager:
             m = "Unable to rename '{}' to '{}'".format(from_path, to_path)
             raise AIDEDatabasesManagerError(m, e) from e
 
-    def get_current_aide_db_number(self):
+    def get_recent_aide_db_version(self):
         """Return integer X which corresponds to aide.db.X directory that
            newest aide.db will be moved to after next myscm-srv --scan."""
 
-        return self.get_last_aide_db_number() + 1
+        # Get recent AIDE database version from file that holds it
 
-    def get_last_aide_db_number(self):
-        """Return integer X which corresponds to aide.db.X with greatest X."""
+        db_ver_file = self.server_config.db_ver_file
+        db_ver_from_file = None
 
-        numbers = []
+        try:
+            db_ver_from_file = db_ver_file.get_version(create=False)
+        except Exception as e:
+            logger.warning("Parsing file '{}' has failed.".format(
+                            db_ver_file.path))
+            db_ver_from_file = -1
+
+        # Get recent AIDE database reading directory with databases
+
+        versions = self._get_aide_db_ver_list().sort()
+        self._report_missing_aide_db_files(versions)
+        db_ver_from_dir = versions[-1] if versions else -1
+
+        # Compare both results to detect inconsistency
+
+        if db_ver_from_file < db_ver_from_dir:
+            m = "Recently generated AIDE database version read from '{}' is "\
+                "{}, but there was found database file with version number {}"\
+                .format(db_ver_file.path, db_ver_from_file, db_ver_from_dir)
+            raise AIDEDatabasesManagerError(m)
+
+        return db_ver_from_file
+
+    def _get_aide_db_ver_list(self):
+        versions = []
         regex_str = self.server_config.aide_old_db_fname_pattern.format(r"(\d+)")
         regex = re.compile(regex_str)
         old_db_dir = os.fsencode(self.server_config.aide_old_db_dir)
@@ -120,12 +145,9 @@ class AIDEDatabasesManager:
             match = regex.fullmatch(fname)
             if match:
                 num = int(match.group(1))
-                numbers.append(num)
+                versions.append(num)
 
-        numbers.sort()
-        self._report_missing_aide_db_files(numbers)
-
-        return numbers[-1] if numbers else -1
+        return versions
 
     def print_all_aide_db_paths_sorted(self):
         """Print on stdout all found AIDE databases created with myscm-srv

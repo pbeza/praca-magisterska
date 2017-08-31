@@ -3,9 +3,11 @@ import configparser
 import os
 import socket
 
-import myscm.common.constants
 import myscm.client.config
+import myscm.common.constants
+import myscm.common.parser
 
+from myscm.client.myscmimgverfile import MySCMImgVersionFile
 from myscm.client.sysimgupdater import SysImgUpdater
 from myscm.common.parser import CommandLineFlagConfigOption
 from myscm.common.parser import ConfigParser
@@ -50,7 +52,7 @@ class ApplySysImgConfigOption(ValidatedCommandLineConfigOption):
     def _assert_sys_img_version_valid(self, sys_img_ver):
         # After parsing RecentlyAppliedSysImgVerPathConfigOption we need to
         # check if system image myscm-img.X.Y.tar.gz exist (X is recently
-        # applied myscm system image version and Y is sys_img_ver).
+        # applied mySCM system image version and Y is sys_img_ver).
         return myscm.common.parser.assert_sys_img_ver_valid(sys_img_ver)
 
 
@@ -73,7 +75,7 @@ class UpdateSysImgConfigOption(ValidatedCommandLineConfigOption):
     def _assert_host_valid(self, host):
         is_bool_var = isinstance(host, bool)
 
-        if is_bool_var:  # if --update or --update not specified take random
+        if is_bool_var:  # take random if --update HOST not specified
             return host
 
         valid_host = check_if_host_valid(host)
@@ -305,14 +307,14 @@ class VerifySysImgConfigOption(ValidatedCommandLineConfigOption):
         """System image path option validator."""
 
         if not os.path.isfile(sys_img_path):
-            m = "Given myscm system image file '{}' probably doesn't exist"\
+            m = "Given mySCM system image file '{}' probably doesn't exist"\
                 .format(sys_img_path)
             raise ClientParserError(m)
 
         signature_path = sys_img_path + SystemImageGenerator.SIGNATURE_EXT
 
         if not os.path.isfile(signature_path):
-            m = "Given myscm system image file '{}' doesn't have expected "\
+            m = "Given mySCM system image file '{}' doesn't have expected "\
                 "corresponding '{}' certificate".format(sys_img_path,
                                                         signature_path)
             raise ClientParserError(m)
@@ -382,7 +384,7 @@ class SysImgDownloadDirConfigOption(ValidatedFileConfigOption):
 
 class RecentlyAppliedSysImgVerPathConfigOption(ValidatedFileConfigOption):
 
-    DEFAULT_RECENT_IMG_VER_PATH = "/var/myscm-cli/id.myscm"
+    DEFAULT_RECENT_IMG_VER_PATH = "/var/myscm-cli/img_ver.myscm-cli"
     OPTION_NAME = "RecentSysImgVerPath"
 
     def __init__(self, recent_img_ver_path=None):
@@ -392,9 +394,20 @@ class RecentlyAppliedSysImgVerPathConfigOption(ValidatedFileConfigOption):
             self._assert_recent_img_ver_path_valid, True)
 
     def _assert_recent_img_ver_path_valid(self, recent_img_ver_path):
-        if os.path.isfile(recent_img_ver_path):
-            # It's OK if this file doesn't exist yet
-            assert_recent_img_ver_file_content_valid(recent_img_ver_path)
+        if not os.path.isfile(recent_img_ver_path):
+            m = "Given path '{}' of file holding version of recently "\
+                "applied mySCM system image doesn't exist".format(
+                    recent_img_ver_path)
+            raise ClientParserError(m)
+
+        img_ver_file = MySCMImgVersionFile(recent_img_ver_path)
+
+        try:
+            img_ver_file.parse()
+        except Exception as e:
+            m = "Parsing file '{}' assigned to variable '{}' has failed".format(
+                    recent_img_ver_path, self.OPTION_NAME)
+            raise ClientParserError(m, e) from e
 
         return recent_img_ver_path
 
@@ -406,49 +419,6 @@ class PrintSysImgVerConfigOption(CommandLineFlagConfigOption):
             "PrintSysImgVer", "--print-ver",
             help="print recently applied mySCM system image version (if no "
                  "image was applied yet, then -1 is printed)")
-
-
-def assert_recent_img_ver_file_content_valid(recent_img_ver_path):
-    ver = -1
-    first_line = None
-    second_line = None
-    var_name = RecentlyAppliedSysImgVerPathConfigOption.OPTION_NAME
-
-    try:
-        with open(recent_img_ver_path) as f:
-            first_line = f.readline().strip()
-            second_line = f.readline()
-    except Exception as e:
-        m = "Unable to open '{}' assigned to variable '{}'".format(
-            recent_img_ver_path, var_name)
-        raise ClientParserError(m, e) from e
-
-    if not first_line:
-        m = "'{}' assigned to '{}' is empty".format(recent_img_ver_path,
-                                                    var_name)
-        raise ClientParserError(m)
-
-    if second_line:
-        m = "'{}' assigned to '{}' is expected to have one line with version "\
-            "of the recently applied myscm system image".format(
-                recent_img_ver_path, var_name)
-        raise ClientParserError(m)
-
-    try:
-        ver = int(first_line)
-    except:
-        m = "First and only line of the '{}' line is supposed to be integer "\
-            "corresponding to recently applied myscm system image version "\
-            "(current value: '{}')".format(recent_img_ver_path,
-                                           first_line.strip())
-        raise ClientParserError(m)
-
-    if ver < 0:
-        m = "Negative integer assigned to the recent system version read "\
-            "from file '{}'".format(recent_img_ver_path)
-        raise ClientParserError(m)
-
-    return ver
 
 
 def check_if_host_valid(host):

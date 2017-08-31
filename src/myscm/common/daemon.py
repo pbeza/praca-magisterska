@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from lockfile.pidlockfile import PIDLockFile
-import lockfile
 import daemon
+import lockfile
 import logging
 import logging.config
 import os

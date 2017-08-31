@@ -255,7 +255,7 @@ class SSLCertPublicKeyConfigOption(GeneralConfigOption):
             type=self._assert_cert_pub_key_path_valid,
             help="full path to the PEM formatted server's public key of the "
                  "SSL certificate that is being used to verify signature of "
-                 "the myscm system image generated with the myscm-srv "
+                 "the mySCM system image generated with the myscm-srv "
                  "--gen-img option")
 
     def _assert_cert_pub_key_path_valid(self, cert_pub_key_path):

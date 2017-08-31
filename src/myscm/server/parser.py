@@ -2,13 +2,16 @@
 import os
 
 import myscm.common.constants
+import myscm.common.parser
 import myscm.server.config
+
 from myscm.common.parser import CommandLineFlagConfigOption
 from myscm.common.parser import ConfigParser
-from myscm.common.parser import ValidatedFileConfigOption
 from myscm.common.parser import GeneralConfigOption
 from myscm.common.parser import ParserError
 from myscm.common.parser import ValidatedCommandLineConfigOption
+from myscm.common.parser import ValidatedFileConfigOption
+from myscm.server.aidedbverfile import MySCMDatabaseVersionFile
 
 _APP_VERSION = myscm.common.constants.get_app_version("myscm-srv")
 _HELP_DESC = '''This is server side of the mySCM application – simple Software
@@ -136,13 +139,13 @@ class ListAvailableAIDEDatabasesConfigOption(CommandLineFlagConfigOption):
 
 
 class ListGeneratedMyscmSysImgConfigOption(CommandLineFlagConfigOption):
-    """Configuration option read from CLI specifying to list all myscm system
+    """Configuration option read from CLI specifying to list all mySCM system
        images generated with --gen-img option."""
 
     def __init__(self):
         super().__init__(
             "ListSysImg", "--list-img",
-            help="list all myscm system images created with --gen-img option")
+            help="list all mySCM system images created with --gen-img option")
 
 
 class GenerateSystemImageConfigOption(ValidatedCommandLineConfigOption):
@@ -205,6 +208,41 @@ class UpgradeConfigOption(ValidatedCommandLineConfigOption):
         return myscm.common.parser.assert_sys_img_ver_valid(sys_img_ver)
 
 
+class RecentlyGeneratedDbVerPathConfigOption(ValidatedFileConfigOption):
+
+    DEFAULT_RECENT_DB_VER_PATH = "/var/myscm-srv/db_ver.myscm-srv"
+    OPTION_NAME = "RecentlyGenDbVerPath"
+
+    def __init__(self, recent_db_ver_path=None):
+        super().__init__(
+            self.OPTION_NAME,
+            recent_db_ver_path or self.DEFAULT_RECENT_DB_VER_PATH,
+            self._assert_recent_db_ver_path_valid, True)
+
+    def _assert_recent_db_ver_path_valid(self, recent_db_ver_path):
+        if not os.path.isfile(recent_db_ver_path):
+            m = "Given path '{}' of file holding version of recently "\
+                " generated mySCM database file doesn't exist".format(
+                    recent_db_ver_path)
+            raise ServerParserError(m)
+
+        self._assert_recent_db_ver_file_content_valid(recent_db_ver_path)
+
+        return recent_db_ver_path
+
+    def _assert_recent_db_ver_file_content_valid(self, recent_db_ver_path):
+        db_ver_file = MySCMDatabaseVersionFile(recent_db_ver_path)
+
+        try:
+            db_ver_file.parse()
+        except Exception as e:
+            m = "Parsing file '{}' assigned to variable '{}' has failed"\
+                .format(recent_db_ver_path, self.OPTION_NAME)
+            raise ServerParserError(m, e) from e
+
+        return recent_db_ver_path
+
+
 #############################################
 # Core of the server's configuration parser #
 #############################################
@@ -224,7 +262,8 @@ class ServerConfigParser(ConfigParser):
             ListGeneratedMyscmSysImgConfigOption(),
             GenerateSystemImageConfigOption(),
             SystemImgOutDirConfigOption(),
-            UpgradeConfigOption()
+            UpgradeConfigOption(),
+            RecentlyGeneratedDbVerPathConfigOption()
         ]
         super().__init__(config_path, config_section_name,
                          _SERVER_DEFAULT_CONFIG, _HELP_DESC, _APP_VERSION)

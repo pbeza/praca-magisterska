@@ -16,6 +16,7 @@ class ScannerError(ServerError):
 
 
 class Scanner:
+    """Wrapper of the AIDE scanner."""
 
     COPIED_FILES_DIRNAME = "COPIED"
 

@@ -24,8 +24,8 @@ class SysImgManagerBase:
         pass
 
     def _print_all_verified_img_paths_sorted(self, dir_path, ssl_pub_key_path):
-        signature_ext = SystemImageGenerator.SIGNATURE_EXT,
-        ssl_digest_type = SystemImageGenerator.SSL_CERT_DIGEST_TYPE,
+        signature_ext = SystemImageGenerator.SIGNATURE_EXT
+        ssl_digest_type = SystemImageGenerator.SSL_CERT_DIGEST_TYPE
 
         self._print_all_img_paths_sorted(dir_path, True, signature_ext,
                                          ssl_pub_key_path, ssl_digest_type)
@@ -39,10 +39,10 @@ class SysImgManagerBase:
         paths.sort()
 
         if paths:
-            print("{} myscm system image{} found in '{}':\n"
+            print("{} mySCM system image{} found in '{}':\n"
                   .format(n, "s" if n > 1 else "", dir_path))
         else:
-            print("No myscm system images found in '{}'.".format(dir_path))
+            print("No mySCM system images found in '{}'.".format(dir_path))
 
         for fname in paths:
             full_path = os.path.join(dir_path, fname)

@@ -6,7 +6,6 @@ import pysftp
 import re
 
 from myscm.client.error import ClientError
-from myscm.client.sysimgmanager import SysImgManager
 from myscm.server.sysimggenerator import SystemImageGenerator
 
 logger = logging.getLogger(__name__)
@@ -64,6 +63,9 @@ class SFTPSysImgDownloader:
 
         if private_key:  # prefer public key authentication over password
             del conn_details["password"]
+        else:
+            del conn_details["private_key"]
+            del conn_details["private_key_pass"]
 
         # Quite ugly hotfix for bug in pysftp module that leads to printing
         # module's ignored internal exception when e.g. SFTP credentials are
@@ -112,14 +114,13 @@ class SFTPSysImgDownloader:
         return img_sign_local_path if signature_downloaded else None
 
     def _get_newest_myscm_sys_img_fname(self, sftp_conn):
-        img_manager = SysImgManager(self.client_config)
-        current_id = img_manager.get_current_system_state_version()
+        current_id = self.client_config.img_ver_file.get_version(create=False)
         regex_str = SystemImageGenerator.MYSCM_IMG_FILE_NAME.format(current_id,
                                                                     r"(\d+)")
         regex = re.compile(regex_str)
         max_target_id = -1
 
-        logger.debug("Searching newest myscm image that name matches to '{}' "
+        logger.debug("Searching newest mySCM image that name matches to '{}' "
                      "regex.".format(regex_str))
 
         for f in sftp_conn.listdir():

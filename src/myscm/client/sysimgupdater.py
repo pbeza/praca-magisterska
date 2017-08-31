@@ -62,7 +62,7 @@ class SysImgUpdater:
                 downloader.download(host_details)
                 downloaded = True
             except SysImgDownloaderNoImageFoundError as e:
-                m = "{}. Trying out next host".format(e)
+                m = "{} Trying out next host".format(e)
                 logger.info(m)
             except SFTPSysImgDownloaderError as e:
                 m = "{}. Trying out next host".format(e)

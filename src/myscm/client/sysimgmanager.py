@@ -15,17 +15,15 @@ class SysImgManagerError(ClientError):
 
 
 class SysImgManager(SysImgManagerBase):
-    """Manager of the system images myscm-img.X.Y.tar.gz (X, Y are integers)
-       created by myscm-srv and downloaded from other client."""
-
-    FIRST_SYS_IMG_VER = 0
+    """Manager of the myscm-img.X.Y.tar.gz system images (X, Y are integers)
+       created by myscm-srv and downloaded from peer."""
 
     def __init__(self, client_config):
         super().__init__()
         self.client_config = client_config
 
     def get_sys_img_path(self):
-        current_state_id = self.get_current_system_state_version()
+        current_state_id = self.client_config.img_ver_file.get_version(create=True)
         sys_img_ver = self.client_config.options.apply_img
 
         if current_state_id >= sys_img_ver:
@@ -49,68 +47,26 @@ class SysImgManager(SysImgManagerBase):
 
         return sys_img_path
 
-    def get_current_system_state_version(self):
-        img_ver_path = self.client_config.options.recent_sys_img_ver_path
-        ver = None
-
-        if os.path.isfile(img_ver_path):
-            ver = self._read_img_ver_from_file(img_ver_path)
-        else:
-            ver = self._create_new_recent_img_ver_file(img_ver_path)
-
-        return ver
-
     def update_current_system_state_version(self, sys_img_ver):
-        img_ver_path = self.client_config.options.recent_sys_img_ver_path
-
-        if sys_img_ver < 0:
-            m = "Updating '{}' file has file since system image version "\
-                "can't be less than 0 (is {}).".format(img_ver_path,
-                                                       sys_img_ver)
-            raise SysImgManagerError(m)
-
-        logger.debug("Updating '{}' file with recently applied system image "
-                     "to value {}.".format(img_ver_path, sys_img_ver))
+        new_ver = None
 
         try:
-            with open(img_ver_path, "w") as f:
-                f.write(str(sys_img_ver))
-        except OSError as e:
+            new_ver = self.client_config.img_ver_file.set_value(sys_img_ver)
+        except Exception as e:
             m = "Failed to update '{}' file holding version of the recently "\
-                "applied myscm system image".format(img_ver_path)
+                "applied mySCM system image".format(
+                    self.client_config.img_ver_file.path)
             raise SysImgManagerError(m, e) from e
+
+        return new_ver
 
     def print_current_system_state_version(self):
-        img_ver_path = self.client_config.options.recent_sys_img_ver_path
         ver = -1
 
-        if os.path.isfile(img_ver_path):
-            ver = self._read_img_ver_from_file(img_ver_path)
+        if self.client_config.img_ver_file.exist():
+            ver = self.client_config.img_ver_file.get_version(create=False)
 
         print(ver)
-
-    def _read_img_ver_from_file(self, img_ver_path):
-        from myscm.client.parser import assert_recent_img_ver_file_content_valid
-        ver = assert_recent_img_ver_file_content_valid(img_ver_path)
-        logger.debug("Recently applied myscm system image version read from "
-                     "'{}': {}.".format(img_ver_path, ver))
-        return ver
-
-    def _create_new_recent_img_ver_file(self, img_ver_path):
-        logger.debug("'{}' file with recently applied system image doesn't "
-                     "exist yet - creating new one".format(
-                        img_ver_path))
-        try:
-            with open(img_ver_path, "w+") as f:
-                first_sys_img_ver = self.FIRST_SYS_IMG_VER
-                f.write(str(first_sys_img_ver))
-        except OSError as e:
-            m = "Failed to create new '{}' file holding version of the "\
-                "recently applied myscm system image".format(
-                    img_ver_path)
-            raise SysImgManagerError(m, e) from e
-
-        return self.FIRST_SYS_IMG_VER
 
     def print_all_verified_img_paths_sorted(self):
         self._print_all_verified_img_paths_sorted(

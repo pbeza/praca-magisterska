@@ -5,6 +5,7 @@ import re
 
 import myscm.common.config
 
+from myscm.server.aidedbverfile import MySCMDatabaseVersionFile
 from myscm.server.error import ServerError
 
 logger = logging.getLogger(__name__)
@@ -76,6 +77,13 @@ class ServerConfig(myscm.common.config.BaseConfig):
         self.aide_old_db_path_pattern = os.path.join(
                             self.aide_old_db_subdir_pattern,
                             self.aide_old_db_fname_pattern)
+
+        ###
+        # Variables holding current versions of AIDE database and generated
+        # mySCM system image
+        ###
+
+        self.db_ver_file = MySCMDatabaseVersionFile(self.options.recently_gen_db_ver_path)
 
     def _get_aide_reference_db_path(self):
         """Return value of 'database' variable from AIDE configuration."""

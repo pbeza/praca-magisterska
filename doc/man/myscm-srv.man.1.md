@@ -46,7 +46,7 @@ You can configure scope of the scanned directories by editing
 `/etc/myscm-srv/scanned.aide` configuration file which uses AIDE syntax
 extended with special kind of `#@` comments that indicate which of the scanned
 directories or files should be copied between successive scans to be able to
-create patches (a.k.a. diffs) instead of copying whole files to the myscm
+create patches (a.k.a. diffs) instead of copying whole files to the mySCM
 system image.
 
 There are also special template files that are recognized by `.myscm-template`
@@ -90,7 +90,7 @@ command line option.
 -c *FILE*, \--config=*FILE*
 :   Read `myscm-srv` configuration from specified *FILE* instead of default
     `/etc/myscm-srv/config.ini` file.  This file determines e.g. logging
-    options, SSL certificate path that is used to digitally sign the myscm
+    options, SSL certificate path that is used to digitally sign the mySCM
     system image and more.
 
 \--ssl-cert=*PATH*
@@ -190,7 +190,7 @@ For now, no bug tracker is available.
 `myscm-cli` (1).
 
 You can learn more details about mySCM software from project white paper.  The
-myscm-srv source code and all documentation may be downloaded from GitHub
+`myscm-srv` source code and all documentation may be downloaded from GitHub
 repository of the project <https://github.com/pbeza/myscm>.
 
 # NOTES

@@ -56,7 +56,7 @@ class SystemImageGenerator:
         self.server_config = server_config
         self.aide_db_manager = AIDEDatabasesManager(server_config)
         self.from_db_id = self.server_config.options.gen_img
-        self.to_db_id = self.aide_db_manager.get_current_aide_db_number()
+        self.to_db_id = self.aide_db_manager.get_recent_aide_db_version()
         self.client_db_path = self._get_client_db_path(self.from_db_id)
         self.aide_output_parser = AIDECheckParser(
                 self.client_db_path, self.server_config.aide_reference_db_path)
@@ -106,7 +106,9 @@ class SystemImageGenerator:
 
         if not os.path.isfile(client_db_path):
             m = "Unrecognized client's AIDE database version '{}'. File " \
-                "'{}' doesn't exist".format(client_db_version, client_db_path)
+                "'{}' doesn't exist. Run --list-db option to list all "\
+                "available AIDE databases created so far".format(
+                    client_db_version, client_db_path)
             raise SystemImageGeneratorError(m)
 
         logger.debug("Found client's AIDE database file '{}' that will be "
@@ -670,7 +672,7 @@ class SystemImageGenerator:
             with open(priv_key_path) as f:
                 pem_cert_str = f.read()
         except OSError as e:
-            m = "Unable to open '{}' SSL private key for certifcate for "\
+            m = "Unable to open '{}' SSL private key for certificate for "\
                 "signing system image".format(priv_key_path)
             raise SystemImageGeneratorError(m, e) from e
 

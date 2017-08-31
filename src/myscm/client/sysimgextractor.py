@@ -33,12 +33,12 @@ class SysImgExtractor:
         self.sys_img_validator = SysImgValidator(self.client_config.distro_name)
 
     def apply_sys_img(self):
-        """Extract, validate and apply myscm system image."""
+        """Extract, validate and apply mySCM system image."""
 
         sys_img_path = self.sys_img_manager.get_sys_img_path()
-        self.extracted_sys_img_dir = None
         sys_img_ver = self.sys_img_manager.get_target_sys_img_ver_from_fname(
                                                                   sys_img_path)
+        self.extracted_sys_img_dir = None
 
         try:
             with tarfile.open(sys_img_path) as sys_img_f:
@@ -46,7 +46,7 @@ class SysImgExtractor:
                 self.extracted_sys_img_dir = self._extract_sys_img(sys_img_f)
 
             logger.info("Applying changes from '{}' directory extracted from "
-                        "'{}' myscm system image.".format(
+                        "'{}' mySCM system image.".format(
                             self.extracted_sys_img_dir, sys_img_path))
 
             self._apply_added_files(sys_img_f)
@@ -55,14 +55,14 @@ class SysImgExtractor:
         except SysImgExtractorError:
             raise
         except Exception as e:
-            m = "Failed to apply '{}' myscm system image".format(
+            m = "Failed to apply '{}' mySCM system image".format(
                     sys_img_f.name)
             raise SysImgExtractorError(m, e) from e
 
         self.sys_img_manager.update_current_system_state_version(sys_img_ver)
         self._remove_extracted_sys_img_dir()
 
-        logger.info("Applying changes from '{}' myscm system image ended "
+        logger.info("Applying changes from '{}' mySCM system image ended "
                     "successfully.".format(sys_img_f.name))
 
     def _remove_extracted_sys_img_dir(self):

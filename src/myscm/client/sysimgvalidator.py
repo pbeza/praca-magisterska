@@ -34,14 +34,14 @@ class SysImgValidator:
             raise SysImgValidatorError(m, e) from e
 
     def _assert_valid_sys_img(self, sys_img_f):
-        logger.info("Checking whether myscm system image file '{}' is valid."
+        logger.info("Checking whether mySCM system image file '{}' is valid."
                     .format(sys_img_f.name))
 
         a1, a2 = self._assert_added_summary_valid(sys_img_f)
         c1, c2 = self._assert_changed_summary_valid(sys_img_f)
         r1, r2 = self._assert_removed_summary_valid(sys_img_f)
 
-        m = "myscm system image file '{}' seems to be valid. {} added files "\
+        m = "mySCM system image file '{}' seems to be valid. {} added files "\
             "({} lines in report), {} changed files ({} lines in report), {} "\
             "removed files ({} lines in report).".format(
                 sys_img_f.name, a2, a1, c2, c1, r2, r1)
@@ -86,7 +86,7 @@ class SysImgValidator:
         try:
             sys_img_f.getmember(path)
         except KeyError:
-            m = "Missing '{}' file in '{}' myscm system image".format(
+            m = "Missing '{}' file in '{}' mySCM system image".format(
                     path, sys_img_f.name)
             raise SysImgValidatorError(m)
 
@@ -133,7 +133,7 @@ class SysImgValidator:
         try:
             myscm_img_f.getmember(intar_path)
         except KeyError:
-            m = "File '{}' is supposed to be present in myscm system image "\
+            m = "File '{}' is supposed to be present in mySCM system image "\
                 "'{}' in '{}' directory but was not found (info read from "\
                 "added files report)".format(
                     intar_path, myscm_img_f.name,
@@ -230,7 +230,7 @@ class SysImgValidator:
 
     def _assert_changed_file_in_sys_img_changed_files(self, path, sys_img_f):
         """Make sure that file that is about to be changed is present in the
-           myscm system image (or its patch a.k.a. diff)."""
+           mySCM system image (or its patch a.k.a. diff)."""
 
         intar_orig_path = os.path.join(
             SystemImageGenerator.IN_ARCHIVE_CHANGED_DIR_NAME,
@@ -248,7 +248,7 @@ class SysImgValidator:
                 found_path = intar_diff_path
             except KeyError:
                 m = "File '{}' or its patch '{}' is supposed to be present "\
-                    "in myscm system image '{}' in '{}' directory but was "\
+                    "in mySCM system image '{}' in '{}' directory but was "\
                     "not found (info read from added files report)".format(
                         intar_orig_path, intar_diff_path, sys_img_f.name,
                         SystemImageGenerator.IN_ARCHIVE_CHANGED_DIR_NAME)
@@ -286,12 +286,12 @@ class SysImgValidator:
             validator_fun = validator_mapping[ftype_char]
         except KeyError:
             m = "Unknown file type of '{}' indentified by '{}' character "\
-                "read from myscm system's image changed files report".format(
+                "read from mySCM system's image changed files report".format(
                     path, ftype_char)
             raise SysImgValidatorError(m)
 
         if not validator_fun(path):
-            m = "File '{}' was declared in system's myscm image changed "\
+            m = "File '{}' was declared in system's mySCM image changed "\
                 "files report as a '{}' but it isn't".format(
                     path, FileType(ftype_char).name)
             raise SysImgValidatorError(m)
@@ -318,7 +318,7 @@ class SysImgValidator:
 
         if computed_checksum != expected_checksum:
             m = "{} checksum of the '{}' file is '{}' instead of expected "\
-                "'{}' (read from myscm system's image file)".format(
+                "'{}' (read from mySCM system's image file)".format(
                     hash_name, path, computed_checksum, expected_checksum)
             raise SysImgValidatorError(m)
 
@@ -367,17 +367,17 @@ class SysImgValidator:
 
         if local_file_size != expected_file_size:
             m = "File size of the '{}' file is '{}' instead of expected '{}' "\
-                "(read from myscm system's image file)".format(
+                "(read from mySCM system's image file)".format(
                     path, local_file_size, expected_file_size)
             raise SysImgValidatorError(m)
 
     def _assert_changed_perm_valid(self, path, perm_str, file_stat):
-        local_perm = oct(file_stat.st_mode)[2:]  # TODO TODO TODO symlink or file permissions?
+        local_perm = oct(file_stat.st_mode)[2:]
         expected_perm = self._get_expected_val_from_property_string(perm_str,
                                                                     path)
         if local_perm != expected_perm:
             m = "Permissions of the '{}' file are {} instead of {} as they "\
-                "supposed to be (read from myscm system's image file)".format(
+                "supposed to be (read from mySCM system's image file)".format(
                     path, local_perm, expected_perm)
             raise SysImgValidatorError(m)
 
@@ -417,7 +417,7 @@ class SysImgValidator:
 
         if local_val != expected_val:
             m = "{} of the '{}' file is '{}' instead of expected '{}' (read "\
-                "from myscm system's image file)".format(name, path, local_val,
+                "from mySCM system's image file)".format(name, path, local_val,
                                                          expected_val)
             if noexcept:
                 logger.warning(m)
@@ -503,7 +503,7 @@ def _assert_valid_system_version(comment, local_distro):
     name = None
     local = None
     expected = None
-    msg = "Expected {} for given myscm system image is '{}' (local is '{}')"
+    msg = "Expected {} for given mySCM system image is '{}' (local is '{}')"
 
     if expected_system:
         name = "system"
