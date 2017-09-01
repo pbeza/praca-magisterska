@@ -22,11 +22,13 @@ class SFTPSysImgDownloader:
         self.client_config = client_config
 
     def download(self, host_details):
-        self._sftp_download_myscm_img(host_details)
+        return self._sftp_download_myscm_img(host_details)
 
     def _sftp_download_myscm_img(self, host_details):
+        img_local_path = None
+
         try:
-            self.__sftp_download_myscm_img(host_details)
+            img_local_path = self.__sftp_download_myscm_img(host_details)
         except (paramiko.ssh_exception.AuthenticationException,
                 FileNotFoundError) as e:
             m = "Connection to SFTP peer failed"
@@ -37,6 +39,8 @@ class SFTPSysImgDownloader:
                 "connect to the server, check if password provided in "\
                 "configuration file is correct".format(host_details["host"])
             raise SFTPSysImgDownloaderError(m, e) from e
+
+        return img_local_path
 
     def __sftp_download_myscm_img(self, host_details):
         protocol = host_details["protocol"]
@@ -73,6 +77,7 @@ class SFTPSysImgDownloader:
 
         _tmp_del = pysftp.Connection.__del__
         pysftp.Connection.__del__ = lambda x: None  # in case of failure
+        img_local_path = None
 
         with pysftp.Connection(**conn_details) as sftp:
             # Revert hotfix is success
@@ -90,6 +95,8 @@ class SFTPSysImgDownloader:
                             host, port,
                             os.path.join(remote_dir, img_local_path),
                             img_local_path))
+
+        return img_local_path
 
     def _sftp_get_myscm_img(self, sftp_conn, download_dir):
         img_name = self._get_newest_myscm_sys_img_fname(sftp_conn)

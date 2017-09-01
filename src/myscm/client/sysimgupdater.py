@@ -31,12 +31,14 @@ class SysImgUpdater:
 
     def update(self):
         host = self.client_config.options.update_sys_img
+        img_local_path = None
 
         if isinstance(host, bool):  # if --update was called without argument
-            assert host
-            self._download_from_random_host()
+            img_local_path = self._download_from_random_host()
         else:
-            self._download_from_selected_host(host)
+            img_local_path = self._download_from_selected_host(host)
+
+        return img_local_path
 
     def _download_from_random_host(self):
         protocol = self.client_config.options.sys_img_update_protocol
@@ -45,6 +47,7 @@ class SysImgUpdater:
         filtered_hosts_count = len(filtered_hosts)
         tries = 0
         downloaded = False
+        img_local_path = None
 
         while filtered_hosts and not downloaded:
             tries += 1
@@ -59,19 +62,21 @@ class SysImgUpdater:
             logger.info(m)
 
             try:
-                downloader.download(host_details)
+                img_local_path = downloader.download(host_details)
                 downloaded = True
             except SysImgDownloaderNoImageFoundError as e:
-                m = "{} Trying out next host".format(e)
+                m = "{} Trying out next host.".format(e)
                 logger.info(m)
             except SFTPSysImgDownloaderError as e:
-                m = "{}. Trying out next host".format(e)
+                m = "{}. Trying out next host.".format(e)
                 logger.warning(m)
 
         if not downloaded:
-            m = "No applicable mySCM system image found ({} host{} checked)"\
+            m = "No applicable mySCM system image found ({} host{} checked)."\
                 .format(tries, "s" if tries > 1 else "")
-            raise SysImgUpdaterError(m)
+            logger.warning(m)
+
+        return img_local_path
 
     def _get_filtered_hosts(self, protocol):
         all_peers = self.client_config.options.peers_list
@@ -99,8 +104,11 @@ class SysImgUpdater:
         host_details = self.client_config.options.peers_list[host]
         protocol = host_details["protocol"]
         downloader = self._get_downloader(protocol)
+        img_local_path = None
 
         try:
-            downloader.download(host_details)
+            img_local_path = downloader.download(host_details)
         except SysImgDownloaderNoImageFoundError as e:
             logger.info(e)
+
+        return img_local_path

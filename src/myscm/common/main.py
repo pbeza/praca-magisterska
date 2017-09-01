@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from lockfile import LockError, UnlockError
+from lockfile.pidlockfile import PIDLockFile
+
 import myscm.common.error
 import myscm.common.parser
 
 logger = logging.getLogger(__name__)
 
 
-def get_app_config(config_parser, config_path, section_name):
+def _get_app_config(config_parser, config_path, section_name):
     config = None
 
     try:
@@ -25,11 +28,23 @@ def get_app_config(config_parser, config_path, section_name):
     return config
 
 
-def run_main(main_fun):
+def _run_single_instance_app(main_fun, config):
+    try:
+        with PIDLockFile(config.options.PID_lock_file_path, timeout=0) as lock:
+            main_fun(config)
+            assert lock.is_locked()
+    except (LockError, UnlockError) as e:
+        logger.error("Can't run two instances of the application at the same "
+                     "time. Error details: {}.".format(e))
+
+
+def run_main(main_fun, config_parser_class, config_path, config_section_name):
     exit_code = 0
 
     try:
-        main_fun()
+        config = _get_app_config(config_parser_class, config_path,
+                                 config_section_name)
+        _run_single_instance_app(main_fun, config)
     except (KeyboardInterrupt, EOFError):
         logger.info("Keyboard interrupt or EOF detected. Exiting.")
     except myscm.common.error.MySCMError as e:

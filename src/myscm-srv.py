@@ -42,11 +42,7 @@ def gen_img(config):
         raise SystemImageGeneratorError(m, e) from e
 
 
-def _main():
-    config = myscm.common.main.get_app_config(ServerConfigParser,
-                                              SRV_CONFIG_PATH,
-                                              SRV_SECTION_NAME)
-
+def _main(config):
     if os.geteuid() != 0:
         m = "This application is supposed to be ran with root permissions. "\
             "Root permissions may be not needed if you don't need to scan "\
@@ -77,6 +73,7 @@ def _main():
 
 
 if __name__ == "__main__":
-    exit_code = myscm.common.main.run_main(_main)
-    progressbar.streams.flush()  # progressbar2 bug if app ends with exception
+    exit_code = myscm.common.main.run_main(_main, ServerConfigParser,
+                                           SRV_CONFIG_PATH, SRV_SECTION_NAME)
+    progressbar.streams.flush()  # progressbar2 hotfix if exception
     sys.exit(exit_code)

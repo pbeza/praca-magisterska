@@ -22,11 +22,7 @@ CLI_CONFIG_PATH = "myscm/client/config/config.ini"
 CLI_SECTION_NAME = "myscm-cli"
 
 
-def _main():
-    config = myscm.common.main.get_app_config(ClientConfigParser,
-                                              CLI_CONFIG_PATH,
-                                              CLI_SECTION_NAME)
-
+def _main(config):
     if os.geteuid() != 0:
         m = "This application is supposed to be ran with root permissions. "\
             "Root permissions may be not needed if you don't need to apply "\
@@ -42,7 +38,18 @@ def _main():
         updater = SysImgUpdater(config)
         updater.update()
     elif config.options.upgrade_sys_img:
-        logger.debug("--upgrade option is not implemented yet")  # TODO
+        updater = SysImgUpdater(config)
+        sys_img_path = updater.update()
+        if sys_img_path is not None:
+            sys_img_fname = os.path.basename(sys_img_path)
+            sys_img_manager = SysImgManager(config)
+            if isinstance(config.options.upgrade_sys_img, bool):
+                ver = sys_img_manager.get_target_sys_img_ver_from_fname(sys_img_fname)
+            else:
+                ver = config.options.upgrade_sys_img
+            config.options.apply_img = ver
+            sys_img_extractor = SysImgExtractor(config)
+            sys_img_extractor.apply_sys_img()
     elif config.options.verify_sys_img:
         sys_img_manager = SysImgManager(config)
         sys_img_manager.verify_sys_img()
@@ -60,6 +67,7 @@ def _main():
 
 
 if __name__ == "__main__":
-    exit_code = myscm.common.main.run_main(_main)
-    progressbar.streams.flush()  # progressbar2 bug if app ends with exception
+    exit_code = myscm.common.main.run_main(_main, ClientConfigParser,
+                                           CLI_CONFIG_PATH, CLI_SECTION_NAME)
+    progressbar.streams.flush()  # progressbar2 hotfix if exception
     sys.exit(exit_code)

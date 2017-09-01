@@ -94,9 +94,10 @@ using credentials provided in configuration file.
     non-negative integers referring to the current and target system version
     respectively.
 
-\--upgrade=*SYS_IMG_VER*
+\--upgrade=[*SYS_IMG_VER*]
 :   Equivalent of running `--update` and then `--apply-img` *SYS_IMG_VER*
-    option.
+    option.  If *SYS_IMG_VER* is not given then downloaded mySCM system image
+    is applied.
 
 -k, \--config-check
 :   Check if application configuration is valid.  If it's valid, then exit

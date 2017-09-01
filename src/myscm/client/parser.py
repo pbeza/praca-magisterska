@@ -107,16 +107,22 @@ class UpdateSysImgConfigOption(ValidatedCommandLineConfigOption):
             raise ClientParserError(m)
 
 
-class UpgradeSysImgConfigOption(CommandLineFlagConfigOption):
+class UpgradeSysImgConfigOption(ValidatedCommandLineConfigOption):
     """Configuration option read from CLI specifying to update system image
        by downloading it from other client or server and then to apply
        downloaded system image."""
 
     def __init__(self):
         super().__init__(
-            "UpgradeSysImg", "--upgrade SYS_IMG_VER",
+            "UpgradeSysImg", None, self._assert_sys_img_version_valid,
+            "--upgrade", metavar="SYS_IMG_VER", nargs="?", const=True,
+            type=self._assert_sys_img_version_valid,
             help="equivalent of running --update and --apply-img SYS_IMG_VER "
-                 "option")
+                 "option; if SYS_IMG_VER is not given, then downloaded mySCM "
+                 "will be applied")
+
+    def _assert_sys_img_version_valid(self, sys_img_ver):
+        return myscm.common.parser.assert_sys_img_ver_valid(sys_img_ver)
 
 
 class SSLCertConfigOption(GeneralConfigOption):

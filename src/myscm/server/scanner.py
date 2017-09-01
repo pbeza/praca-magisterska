@@ -36,8 +36,8 @@ class Scanner:
                 raise ScannerError("AIDE's databases manager error", e) from e
         else:
             m = "Current reference AIDE database '{}' is up-to-date. No need "\
-                "to create new database. Nothing to do. Exiting."\
-                .format(self.server_config.aide_reference_db_path)
+                "to create new database. Nothing to do. Exiting.".format(
+                    self.server_config.aide_reference_db_path)
             logger.info(m)
 
     def _scan(self):
