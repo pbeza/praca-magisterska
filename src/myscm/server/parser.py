@@ -87,6 +87,29 @@ class SSLCertPrivKeyConfigOption(GeneralConfigOption):
         return cert_priv_key_path
 
 
+class SignFileConfigOption(ValidatedCommandLineConfigOption):
+    """Configuration option read from CLI specifying to digitally sign given
+       file."""
+
+    def __init__(self):
+        super().__init__(
+            "SignFile", None, self._assert_file_to_sign_valid, "--sign",
+            metavar="PATH", type=self._assert_file_to_sign_valid,
+            help="sign given file with SSL digital certificate specified in "
+                 "configuration file and save the result within the same "
+                 "directory as PATH file (appending '.sig' extension to the "
+                 "filename)")
+
+    def _assert_file_to_sign_valid(self, path):
+        """Validator of the file that will be signed."""
+
+        if not os.path.isfile(path):
+            m = "Given file '{}' probably doesn't exist".format(path)
+            raise ServerParserError(m)
+
+        return path
+
+
 class AIDEConfigFileConfigOption(GeneralConfigOption):
     """Configuration option read from file and/or CLI specifying AIDE
        configuration file path."""
@@ -222,7 +245,7 @@ class RecentlyGeneratedDbVerPathConfigOption(ValidatedFileConfigOption):
     def _assert_recent_db_ver_path_valid(self, recent_db_ver_path):
         if not os.path.isfile(recent_db_ver_path):
             m = "Given path '{}' of file holding version of recently "\
-                " generated mySCM database file doesn't exist".format(
+                "generated mySCM database file doesn't exist".format(
                     recent_db_ver_path)
             raise ServerParserError(m)
 
@@ -256,6 +279,7 @@ class ServerConfigParser(ConfigParser):
         _SERVER_DEFAULT_CONFIG = [
             SSLCertConfigOption(),
             SSLCertPrivKeyConfigOption(),
+            SignFileConfigOption(),
             AIDEConfigFileConfigOption(),
             AIDEScanArgConfigOption(),
             ListAvailableAIDEDatabasesConfigOption(),

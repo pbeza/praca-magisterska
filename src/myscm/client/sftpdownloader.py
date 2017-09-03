@@ -6,6 +6,7 @@ import pysftp
 import re
 
 from myscm.client.error import ClientError
+from myscm.common.signaturemanager import SignatureManager
 from myscm.server.sysimggenerator import SystemImageGenerator
 
 logger = logging.getLogger(__name__)
@@ -107,7 +108,7 @@ class SFTPSysImgDownloader:
 
     def _sftp_get_myscm_img_signature(self, sftp_conn, download_dir, img_path):
         img_name = os.path.basename(img_path)
-        img_sign_name = img_name + SystemImageGenerator.SIGNATURE_EXT
+        img_sign_name = img_name + SignatureManager.SIGNATURE_EXT
         img_sign_local_path = os.path.join(download_dir, img_sign_name)
         signature_downloaded = False
 

@@ -160,6 +160,15 @@ command line option.
     system image is respective verified SSL digital signature of the mySCM
     system image.
 
+\--sign *PATH*
+:   Sign given file using SSL certificate set in configuration file.  Digital
+    signature is saved in the same directory that given file.  Its filename is
+    the same as given file with *.sig* suffix appended.
+
+\--verify *SIGNATURE_PATH* *SIGNED_PATH*
+:   Verify given SSL signature *SIGNATURE_PATH* of the given file
+    *SIGNED_PATH*.
+
 -v, \--verbose
 :   Increase output and log verbosity.  Default value is `0`.
 

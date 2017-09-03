@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-import OpenSSL
 import datetime
-import getpass
 import logging
 import os
 import platform
@@ -13,14 +11,15 @@ import textwrap
 import diff_match_patch as patcher
 from tempfile import TemporaryFile, NamedTemporaryFile
 
-import myscm.server.pkgmanager as pkgmgr
-import myscm.server.scanner
 from myscm.common.cmd import run_check_cmd
+from myscm.common.signaturemanager import SignatureManager, SignatureManagerError
 from myscm.server.aidecheckparser import AIDECheckParser, AIDECheckParserError
 from myscm.server.aidedbmanager import AIDEDatabasesManager
 from myscm.server.aideentry import AIDEEntry
 from myscm.server.error import ServerError
 from myscm.server.scanner import Scanner
+import myscm.server.pkgmanager as pkgmgr
+import myscm.server.scanner
 
 progressbar.streams.wrap_stderr()
 logger = logging.getLogger(__name__)
@@ -43,11 +42,9 @@ class SystemImageGenerator:
     ADDED_FILES_FNAME = "added.txt"
     REMOVED_FILES_FNAME = "removed.txt"
     CHANGED_FILES_FNAME = "changed.txt"
-    SSL_CERT_DIGEST_TYPE = "sha256"
     PATCH_EXT = ".myscmsrv-patch"
     TEMPLATE_PATH_EXT = ".myscm-template"
     TARFILE_COMPRESSION = "w:gz"
-    SIGNATURE_EXT = ".sig"
     SYSTEM_STR = "System"
     LINUX_DISTRO_STR = "GNU/Linux distribution"
     CPU_ARCHITECTURE_STR = "CPU architecture"
@@ -80,11 +77,11 @@ class SystemImageGenerator:
         try:
             system_img_path = self._generate_img()
         except Exception as e:
-            m = "Failed to generate system image based on the output of "\
-                "comparison server's current configuration's state '{}' and "\
-                "client's '{}' AIDE database".format(
-                    self.server_config.aide_reference_db_path,
-                    self.client_db_path)
+            m = "Reference system image generator error. Failed to generate "\
+                "system image based on the output of comparison server's "\
+                "current configuration's state '{}' and client's '{}' AIDE "\
+                "database".format(self.server_config.aide_reference_db_path,
+                                  self.client_db_path)
             raise SystemImageGeneratorError(m, e) from e
 
         system_img_path = os.path.realpath(system_img_path)
@@ -215,6 +212,7 @@ class SystemImageGenerator:
            output."""
 
         img_path = self._get_img_file_full_path()
+        img_sig_path = "{}{}".format(img_path, SignatureManager.SIGNATURE_EXT)
 
         if os.path.isfile(img_path):
             logger.warning("Overwriting '{}' system image.".format(img_path))
@@ -228,7 +226,7 @@ class SystemImageGenerator:
                     "identified by AIDE's database '{}'.".format(
                         img_path, self.client_db_path))
 
-        img_sig_path = self._create_img_signature(img_path)
+        img_sig_path = self._create_img_signature(img_path, img_sig_path)
 
         if img_sig_path:  # if generating signature was not skipped by the user
             logger.info("Signature of the system image '{}' created "
@@ -622,93 +620,12 @@ class SystemImageGenerator:
 
         f.write("\n\n")
 
-    def _create_img_signature(self, img_path):
-        priv_key_obj = self._create_priv_key_openssl_obj(img_path)
-
-        if not priv_key_obj:
-            return None
-
-        signature = None
-
-        with open(img_path, "rb") as img_f:
-            # See: https://stackoverflow.com/q/45141917/1321680
-            bytes_to_sign = img_f.read()
-            signature = OpenSSL.crypto.sign(priv_key_obj, bytes_to_sign,
-                                            self.SSL_CERT_DIGEST_TYPE)
-
-        img_sig_path = "{}{}".format(img_path, self.SIGNATURE_EXT)
-
-        with open(img_sig_path, "wb") as sig_f:
-            sig_f.write(signature)
-
-        # To manually verify validity of the signature run:
-        # openssl dgst -sha256 -verify cert_public_key_file.pub -signature cert_file.crt signed_file_path
-        # TODO try: gpg --keyserver-options auto-key-retrieve --verify signed_file_path
-
-        return img_sig_path
-
-    def _create_priv_key_openssl_obj(self, img_path):
-        priv_key_path = self.server_config.options.SSL_cert_priv_key_path
-        pem_cert_str = self._get_priv_key_str(priv_key_path)
-        priv_key = None
-
-        while not priv_key:
-            try:
-                passwd = self._get_cert_password(priv_key_path, img_path)
-            except KeyboardInterrupt as e:
-                print()
-                logger.info("Generating SSL signature for '{}' skipped by "
-                            "user (keyboard interrupt).".format(img_path))
-                break
-
-            priv_key = self._get_cert_priv_key(pem_cert_str, passwd)
-
-        return priv_key
-
-    def _get_priv_key_str(self, priv_key_path):
-        pem_cert_str = None
+    def _create_img_signature(self, img_path, img_sig_path):
+        m = SignatureManager()
 
         try:
-            with open(priv_key_path) as f:
-                pem_cert_str = f.read()
-        except OSError as e:
-            m = "Unable to open '{}' SSL private key for certificate for "\
-                "signing system image".format(priv_key_path)
+            priv_key = self.server_config.options.SSL_cert_priv_key_path
+            m.ssl_sign(img_path, img_sig_path, priv_key)
+        except SignatureManagerError as e:
+            m = "Failed to create digital signature for '{}'".format(img_path)
             raise SystemImageGeneratorError(m, e) from e
-
-        return pem_cert_str
-
-    def _get_cert_password(self, priv_key_path, img_path):
-        passwd = None
-
-        print()
-        m = "Enter password protecting '{}' private key of the SSL "\
-            "certificate to digitally sign system image '{}'. If you want to "\
-            "skip generating SSL signature press CTRL+C (or send SIGINT "\
-            "signal in any other way).".format(os.path.basename(priv_key_path),
-                                               os.path.basename(img_path))
-        print(textwrap.fill(m, 80))
-        print()
-
-        try:
-            passwd = getpass.getpass()
-        except getpass.GetPassWarning:
-            logger.warning("SSL certificate password input may be echoed!")
-
-        print()
-
-        return passwd
-
-    def _get_cert_priv_key(self, pem_cert_str, passwd):
-        CERT_FORMAT_TYPE = OpenSSL.crypto.FILETYPE_PEM
-        priv_key = None
-
-        try:
-            priv_key = OpenSSL.crypto.load_privatekey(CERT_FORMAT_TYPE,
-                                                      pem_cert_str,
-                                                      passwd.encode("ascii"))
-        except OpenSSL.crypto.Error as e:
-            logger.warning("Failed to load SSL certificate private key - "
-                           "check if you entered correct password")
-
-        return priv_key

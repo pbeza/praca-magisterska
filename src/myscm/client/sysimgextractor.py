@@ -13,6 +13,7 @@ from myscm.client.sysimgmanager import SysImgManager
 from myscm.client.sysimgvalidator import SysImgValidator
 from myscm.client.sysimgvalidator import get_new_old_property_from_string
 from myscm.client.sysimgvalidator import run_fun_for_each_report_line
+from myscm.common.signaturemanager import SignatureManager
 from myscm.server.aideentry import AIDEEntry
 from myscm.server.aideentry import FileType
 from myscm.server.sysimggenerator import SystemImageGenerator
@@ -71,7 +72,7 @@ class SysImgExtractor:
         shutil.rmtree(self.extracted_sys_img_dir, ignore_errors=True)
 
     def _extract_sys_img(self, sys_img_f):
-        sys_img_ext = SystemImageGenerator.MYSCM_IMG_EXT
+        sys_img_ext = SignatureManager.MYSCM_IMG_EXT
         extract_maindir = self.client_config.options.sys_img_extract_dir
         extract_subdir = sys_img_f.name.rstrip(sys_img_ext)
         extract_dir = os.path.join(extract_maindir, extract_subdir)

@@ -16,6 +16,7 @@ from myscm.common.parser import GeneralConfigOption
 from myscm.common.parser import ParserError
 from myscm.common.parser import ValidatedCommandLineConfigOption
 from myscm.common.parser import ValidatedFileConfigOption
+from myscm.common.signaturemanager import SignatureManager
 from myscm.server.sysimggenerator import SystemImageGenerator
 
 _APP_VERSION = myscm.common.constants.get_app_version("myscm-cli")
@@ -317,7 +318,7 @@ class VerifySysImgConfigOption(ValidatedCommandLineConfigOption):
                 .format(sys_img_path)
             raise ClientParserError(m)
 
-        signature_path = sys_img_path + SystemImageGenerator.SIGNATURE_EXT
+        signature_path = sys_img_path + SignatureManager.SIGNATURE_EXT
 
         if not os.path.isfile(signature_path):
             m = "Given mySCM system image file '{}' doesn't have expected "\

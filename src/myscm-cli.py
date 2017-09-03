@@ -9,14 +9,15 @@ import os
 import progressbar
 import sys
 
-import myscm.common
-import myscm.common.main
 from myscm.client.parser import ClientConfigParser
 from myscm.client.sysimgextractor import SysImgExtractor
 from myscm.client.sysimgmanager import SysImgManager
 from myscm.client.sysimgupdater import SysImgUpdater
+from myscm.common.signaturemanager import SignatureManager
+import myscm.common
+import myscm.common.main
 
-logger = logging.getLogger("myscm")
+logger = logging.getLogger("myscm.client")
 
 CLI_CONFIG_PATH = "myscm/client/config/config.ini"
 CLI_SECTION_NAME = "myscm-cli"
@@ -62,6 +63,13 @@ def _main(config):
     elif config.options.print_sys_img_ver:
         manager = SysImgManager(config)
         manager.print_current_system_state_version()
+    elif config.options.verify_file:
+        signature_path = config.options.verify_file[0]
+        path_to_verify = config.options.verify_file[1]
+        ssl_pub_key_path = config.options.SSL_cert_public_key_path
+        m = SignatureManager()
+        valid = m.ssl_verify(path_to_verify, signature_path, ssl_pub_key_path)
+        print("SSL signature {}valid".format("" if valid else "in"))
     else:
         logger.info(myscm.common.constants.APP_NEED_OPTION_TO_RUN_MSG)
 

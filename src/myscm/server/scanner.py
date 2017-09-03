@@ -31,9 +31,11 @@ class Scanner:
             try:
                 self._scan()
             except CommandLineError as e:
-                raise ScannerError("Error executing AIDE's command", e) from e
+                m = "AIDE --init wrapper error while executing AIDE's command"
+                raise ScannerError(m, e) from e
             except AIDEDatabasesManagerError as e:
-                raise ScannerError("AIDE's databases manager error", e) from e
+                m = "AIDE --init wrapper error. AIDE's databases manager error"
+                raise ScannerError(m, e) from e
         else:
             m = "Current reference AIDE database '{}' is up-to-date. No need "\
                 "to create new database. Nothing to do. Exiting.".format(

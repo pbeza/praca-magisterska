@@ -269,6 +269,28 @@ class SSLCertPublicKeyConfigOption(GeneralConfigOption):
         return cert_pub_key_path
 
 
+class VerifyFileConfigOption(ValidatedCommandLineConfigOption):
+    """Configuration option read from CLI specifying to verify authenticity of
+       the given SSL signature."""
+
+    def __init__(self):
+        super().__init__(
+            "VerifyFile", (None, None), self._assert_signature_file_valid,
+            "--verify", nargs=2, metavar=("SIGNATURE_PATH", "SIGNED_PATH"),
+            type=self._assert_signature_file_valid,
+            help="verify given SSL signature of the given file")
+
+    def _assert_signature_file_valid(self, path):
+        """Validator of the signed file and SSL signature file that will be
+           validated."""
+
+        if not os.path.isfile(path):
+            m = "Given file '{}' probably doesn't exist".format(path)
+            raise ParserError(m)
+
+        return path
+
+
 #############################################################################
 # Options' validators (a.k.a. assertions) common for both server and client #
 #############################################################################
@@ -321,7 +343,8 @@ class ConfigParser:
             LogFileConfigOption(),
             VerbosityConfigOption(),
             ConfigCheckConfigOption(),
-            SSLCertPublicKeyConfigOption()
+            SSLCertPublicKeyConfigOption(),
+            VerifyFileConfigOption()
         ]
 
         self.allowed_options = {c.name: c for c in _COMMON_CONFIG}

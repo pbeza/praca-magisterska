@@ -4,6 +4,7 @@ import os
 import re
 
 from myscm.client.error import ClientError
+from myscm.common.signaturemanager import SignatureManager, SignatureManagerError
 from myscm.common.sysimgmanager import SysImgManagerBase
 from myscm.server.sysimggenerator import SystemImageGenerator
 
@@ -74,13 +75,20 @@ class SysImgManager(SysImgManagerBase):
                         self.client_config.options.SSL_cert_public_key_path)
 
     def verify_sys_img(self):
+        m = SignatureManager()
         sys_img_path = self.client_config.options.verify_sys_img
-        verification = self._verify_sys_img(
-                        sys_img_path,
-                        sys_img_path + SystemImageGenerator.SIGNATURE_EXT,
-                        self.client_config.options.SSL_cert_public_key_path,
-                        SystemImageGenerator.SSL_CERT_DIGEST_TYPE)
-        info = "SSL signature {}valid".format("" if verification else "in")
+        signature_path = sys_img_path + SignatureManager.SIGNATURE_EXT
+        ssl_pub_key_path = self.client_config.options.SSL_cert_public_key_path
+        valid = False
+
+        try:
+            valid = m.ssl_verify(sys_img_path, signature_path, ssl_pub_key_path)
+        except SignatureManagerError as e:
+            m = "Failed to verify '{}' mySCM system image certificate".format(
+                    signature_path)
+            raise SysImgManagerError(m, e) from e
+
+        info = "SSL signature {}valid".format("" if valid else "in")
         print(info)
 
     def get_target_sys_img_ver_from_fname(self, fname):
