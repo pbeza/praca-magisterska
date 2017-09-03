@@ -13,7 +13,7 @@ from myscm.client.sysimgmanager import SysImgManager
 from myscm.client.sysimgvalidator import SysImgValidator
 from myscm.client.sysimgvalidator import get_new_old_property_from_string
 from myscm.client.sysimgvalidator import run_fun_for_each_report_line
-from myscm.common.signaturemanager import SignatureManager
+from myscm.client.templatefile import TemplateFile
 from myscm.server.aideentry import AIDEEntry
 from myscm.server.aideentry import FileType
 from myscm.server.sysimggenerator import SystemImageGenerator
@@ -72,7 +72,7 @@ class SysImgExtractor:
         shutil.rmtree(self.extracted_sys_img_dir, ignore_errors=True)
 
     def _extract_sys_img(self, sys_img_f):
-        sys_img_ext = SignatureManager.MYSCM_IMG_EXT
+        sys_img_ext = SystemImageGenerator.MYSCM_IMG_EXT
         extract_maindir = self.client_config.options.sys_img_extract_dir
         extract_subdir = sys_img_f.name.rstrip(sys_img_ext)
         extract_dir = os.path.join(extract_maindir, extract_subdir)
@@ -230,9 +230,7 @@ class SysImgExtractor:
                 # shutil.move() copies symlinks and fifos unless copy to
                 # different filesystem
 
-                shutil.move(src_file, dst_file, copy_function=self._mycopy2)
-                m = "Moving '{}' to '{}'.".format(src_file, dst_file)
-                logger.debug(m)
+                self._move_and_replace_template(src_file, dst_file)
 
                 bar.update(bar.value + 1)
 
@@ -241,6 +239,21 @@ class SysImgExtractor:
         self._remove_empty_dirs(src)
 
         os.sync()
+
+    def _move_and_replace_template(self, src_file, dst_file):
+        if src_file.endswith(SystemImageGenerator.TEMPLATE_PATH_EXT):
+            templater = TemplateFile(src_file)
+            n = -len(SystemImageGenerator.TEMPLATE_PATH_EXT)
+            dst_file = dst_file[:n]
+            logger.debug("Replacing template file '{}' with values and "
+                         "saving the result in '{}'.".format(src_file,
+                                                             dst_file))
+            templater.replace_placeholders_with_values(dst_file)
+            os.remove(src_file)
+        else:
+            shutil.move(src_file, dst_file, copy_function=self._mycopy2)
+            m = "Moving '{}' to '{}'.".format(src_file, dst_file)
+            logger.debug(m)
 
     def _remove_empty_dirs(self, src):
         logger.debug("Removing empty directories from '{}'.".format(src))
