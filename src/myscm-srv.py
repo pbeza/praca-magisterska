@@ -61,7 +61,7 @@ def _main(config):
         signature_path = path_to_sign + SignatureManager.SIGNATURE_EXT
         priv_key = config.options.SSL_cert_priv_key_path
         m.ssl_sign(path_to_sign, signature_path, priv_key)
-    elif config.options.verify_file:
+    elif config.options.verify_file != (None, None):
         signature_path = config.options.verify_file[0]
         path_to_verify = config.options.verify_file[1]
         ssl_pub_key_path = config.options.SSL_cert_public_key_path

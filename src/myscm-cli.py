@@ -63,7 +63,7 @@ def _main(config):
     elif config.options.print_sys_img_ver:
         manager = SysImgManager(config)
         manager.print_current_system_state_version()
-    elif config.options.verify_file:
+    elif config.options.verify_file != (None, None):
         signature_path = config.options.verify_file[0]
         path_to_verify = config.options.verify_file[1]
         ssl_pub_key_path = config.options.SSL_cert_public_key_path
