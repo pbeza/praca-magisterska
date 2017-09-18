@@ -11,6 +11,8 @@ all: $(MAIN_FILENAME)
 $(MAIN_FILENAME):
 	latexmk -xelatex $(STATEMENT_TEX_FILENAME) $(MAIN_TEX_FILENAME)
 #	latexmk -pdf -outdir=$(BUILD_DIR) -auxdir=$(BUILD_DIR) $(STATEMENT_TEX_FILENAME) $(MAIN_TEX_FILENAME)
+#	Make PDF smaller - see: https://tex.stackexchange.com/questions/18987/how-to-make-the-pdfs-produced-by-pdflatex-smaller
+#	gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dNOPAUSE -dQUIET -dBATCH -sOutputFile=foo-compressed.pdf foo.pdf
 
 clean:
 	latexmk -C -bibtex # bibtex to remove *.bbl files

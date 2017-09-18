@@ -15,40 +15,40 @@
 
 \section{Temat pracy}
 
-\noindent Tematem niniejszej pracy jest:
+\noindent Tematem niniejszej pracy jest:\mynobreakpar
 \begin{displayquote}
 \inserttitle.
 \end{displayquote}
-Angielska wersja tytułu pracy:
+Angielska wersja tytułu pracy:\mynobreakpar
 \begin{displayquote}
 \inserttitleaux.
 \end{displayquote}
-Wybór tematu pracy jest podyktowany zainteresowaniami autora pracy dotyczącymi m.in.~systemów \glslink{unix-like-system}{*nixowych}, protokołów sieciowych, ich bezpieczeństwa oraz~problemem zautomatyzowanego dystrybuowania oprogramowania, który dotyka wiele firm, o~czym może świadczyć długa lista korporacji, uniwersytetów, ośrodków badawczych i~innych instytucji, które korzystają z~istniejących rozwiązań tego problemu, przedstawionych w~rozdziale \ref{ch:istniejace-rozwiazania}. Problem ten dotknął również Wydział~MiNI~PW, co~stało się bezpośrednią motywacją do~alternatywnego rozwiązania tego problemu.
+Wybór tematu pracy jest podyktowany zainteresowaniami autora dotyczącymi m.in.~budowy i~działania systemów operacyjnych, w~szczególności \glslink{unix-like-system}{*nixowych}, protokołów sieciowych, ich bezpieczeństwa oraz~problemem zautomatyzowanego dystrybuowania oprogramowania, który dotyka wiele instytucji, o~czym może świadczyć długa lista firm, uniwersytetów, ośrodków badawczych i~innych organizacji, które korzystają z~istniejących rozwiązań tego problemu, przedstawionych w~rozdziale \ref{ch:istniejace-rozwiazania}. Problem ten dotknął również Wydział~MiNI~PW, co~stało się bezpośrednią motywacją do~alternatywnego rozwiązania problemu.
 
 %------------------------------------------------------------------------------
 
 \section{Cel i~zakres pracy}
 \label{sec:cel-i-zakres}
 
-\noindent Celem niniejszej pracy jest:
+\noindent Celem niniejszej pracy jest:\mynobreakpar
 \blockcquote{formularz-zgloszenia-pracy}{Zaprojektowanie i~zaimplementowanie protokołu umożliwiającego propagowanie zmian w~systemie plików, pakietów oraz~elementów konfiguracji do~stacji roboczych pod~kontrolą systemu operacyjnego \glslink{gnulinux}{Linux/GNU} lub~innego systemu \glslink{unix-like-system}{*nix}, a~także elastycznego standardu opisu zmian oraz~narzędzi dla~ich rejestrowania i~dostosowywania. Proponowaną architekturą jest model klient-serwer. Konkretny \hyperref[sec:obraz-zmian-konfiguracji]{obraz zmian} może być przeznaczony dla~konkretnej dystrybucji, jednakże stworzone rozwiązania praktyczne powinny dawać się w~prosty sposób dostosowywać do~popularnych dystrybucji systemu \glslink{gnulinux}{Linux/GNU} oraz~systemów \glslink{unix-like-system}{*nix}.}
-W~uproszczeniu, celem niniejszej pracy jest zaprojektowanie i~zaimplementowanie zestawu narzędzi dla~systemów \glslink{unix-like-system}{*niksowych} pozwalających na~zarządzanie synchronizacją oprogramowania i~jego konfiguracji na~grupie komputerów podłączonych do~sieci opartej na~protokole~\gls{tcpip}. Takie oprogramowanie często jest nazywane oprogramowaniem typu \hrefemph{https://en.wikipedia.org/wiki/Software_configuration_management}{Software Configuration Management~(SCM\footnote{Skrót \href{https://en.wikipedia.org/wiki/SCM}{SCM} jest używany również w~kontekście \emph{systemów kontroli wersji} (\hrefemph{https://en.wikipedia.org/wiki/Version_control}{Source control management}), których reprezentatami są~np.:~\hrefemph{https://en.wikipedia.org/wiki/Git}{git}, \hrefemph{https://en.wikipedia.org/wiki/Apache_Subversion}{Subversion (SVN)}, \hrefemph{https://en.wikipedia.org/wiki/Mercurial}{Mercurial}, \hrefemph{https://en.wikipedia.org/wiki/Concurrent_Versions_System}{CVS (Concurrent Versions System)}~itd.})}~\cite{wiki:scm}.
+Innymi słowy, celem niniejszej pracy jest zaprojektowanie i~zaimplementowanie zestawu narzędzi dla~systemów \glslink{unix-like-system}{*niksowych} pozwalających na~zarządzanie synchronizacją oprogramowania i~jego konfiguracji na~grupie komputerów podłączonych do~sieci opartej na~protokole~\gls{tcpip}. Takie oprogramowanie często jest nazywane oprogramowaniem typu \hrefemph{https://en.wikipedia.org/wiki/Software_configuration_management}{Software Configuration Management~(SCM\footnote{Skrót \href{https://en.wikipedia.org/wiki/SCM}{SCM} jest używany również w~kontekście \emph{systemów kontroli wersji} (\hrefemph{https://en.wikipedia.org/wiki/Version_control}{Source Control Management}), których reprezentatami są~np.:~\hrefemph{https://en.wikipedia.org/wiki/Git}{git}, \hrefemph{https://en.wikipedia.org/wiki/Apache_Subversion}{Subversion (SVN)}, \hrefemph{https://en.wikipedia.org/wiki/Mercurial}{Mercurial}, \hrefemph{https://en.wikipedia.org/wiki/Concurrent_Versions_System}{CVS (Concurrent Versions System)}~itd.})}~\cite{wiki:scm}.
 
 %------------------------------------------------------------------------------
 
 \section{Motywacja}
 
-Motywacją do~napisania pracy magisterskiej na~przedstawiony w~rozdziale~\ref{sec:cel-i-zakres} temat, jest problem, który wynika ze~specyfiki pracy administratora komputerowego, często odpowiedzialnego za~dziesiątki, setki lub~nawet tysiące komputerów, które wymagają podobnego lub~identycznego oprogramowania --- problem automatycznego dystrybuowania ujednoliconego oprogramowania i~jego konfiguracji na~komputerach połączonych siecią komputerową~\cite{so-problem-intro}. W~ogólności nie~muszą to~być komputery takie jak serwery czy stacje robocze --- choć zdaje się, że~to~zazwyczaj z~nimi administratorzy komputerowi mają do~czynienia. Omawiany problem może dotyczyć również niektórych systemów wbudowanych nie będących systemami typu~\mbox{\hrefemph{https://en.wikipedia.org/wiki/Bare_machine}{bare~metal}}, tzn.~pracujących pod~kontrolą systemu operacyjnego. Przykładem takich urządzeń są~niektóre biletomaty, bankomaty, maszyny \emph{vendingowe} i~wyświetlacze np.~na lotniskach, peronach i~przystankach komunikacji miejskiej.
+Motywacją do~napisania pracy magisterskiej na~przedstawiony w~rozdziale~\ref{sec:cel-i-zakres} temat, jest problem, który wynika ze~specyfiki pracy administratora komputerowego, często odpowiedzialnego za~dziesiątki, setki lub~nawet tysiące komputerów, które wymagają podobnego lub~identycznego oprogramowania --- problem automatycznego dystrybuowania ujednoliconego oprogramowania i~jego konfiguracji na~komputerach połączonych siecią komputerową~\cite{so-problem-intro}. W~ogólności nie~muszą to~być komputery takie jak serwery czy stacje robocze --- choć zdaje się, że~to~zazwyczaj z~nimi administratorzy komputerowi mają do~czynienia. Omawiany problem może dotyczyć również niektórych systemów wbudowanych nie będących systemami typu~\mbox{\hrefemph{https://en.wikipedia.org/wiki/Bare_machine}{bare~metal}}, tzn.~pracujących pod~kontrolą systemu operacyjnego. Przykładem takich urządzeń są~niektóre biletomaty, bankomaty, maszyny \hrefemph{https://en.wikipedia.org/wiki/Vending_machine}{vendingowe} i~wyświetlacze np.~na lotniskach, peronach i~przystankach komunikacji miejskiej.
 
-Popularne sposoby radzenia sobie z~tym problemem bywają w~praktyce uciążliwe, a~istniejące rozwiązania w~pełni automatyzujące cały proces synchronizacji oprogramowania i~konfiguracji~(patrz rozdział~\ref{ch:istniejace-rozwiazania}), są~stosunkowo młode, przez co~mogą być nieznane części administratorom komputerowym. Wszystkie cztery istniejące rozwiązania opisane w~rozdziale~\ref{ch:istniejace-rozwiazania} działają w~podobny sposób. W~dużym uproszczeniu typowy przypadek użycia każdego z~tych rozwiązań sprowadza się~do tego, że~administrator komputerowy tworzy w~języku danego rozwiązania pliki konfiguracyjne opisujące wymagany stan konfiguracji klientów. Następnie tak przygotowana konfiguracja jest tłumaczona przez aplikację serwera lub~klienta (w~zależności od~rozwiązania) na~język zrozumiały dla~systemu klienta i~zostaje przez niego zastosowana.
+Popularne sposoby radzenia sobie z~tym problemem bywają w~praktyce uciążliwe, a~istniejące rozwiązania w~pełni automatyzujące cały proces synchronizacji oprogramowania i~konfiguracji~(patrz rozdział~\ref{ch:istniejace-rozwiazania}) są~stosunkowo młode, przez co~mogą być nieznane części administratorom komputerowym. Wszystkie cztery istniejące rozwiązania opisane w~rozdziale~\ref{ch:istniejace-rozwiazania} zasadniczo działają w~podobny sposób. Typowy przypadek użycia każdego z~tych rozwiązań sprowadza się~do tego, że~administrator komputerowy tworzy w~języku danego rozwiązania pliki konfiguracyjne opisujące wymagany stan konfiguracji klientów. Następnie tak przygotowana konfiguracja jest tłumaczona przez aplikację serwera lub~klienta (w~zależności od~rozwiązania) na~język zrozumiały dla~systemu klienta i~zostaje przez niego zastosowana.
 
-Niniejsza praca prezentuje alternatywne rozwiązanie tego problemu. W~uproszczeniu, alternatywny model działania polega na~tym, że~administrator komputerowy skanuje system ,,wzorcowy'' przed dokonaniem jakichkolwiek zmian, które będą odzwierciedlone na~systemach klienckich, następnie dokonuje zmian w~przeskanowanym systemie i~ponownie skanuje ten sam system, do~którego chce upodobnić systemy klientów. Podczas drugiego skanowania powstaje \hyperref[sec:obraz-zmian-konfiguracji]{obraz zmian} dokonanych od~czasu przeprowadzenia pierwszego skanowania, który może być przejrzany i~dostosowany przez administratora, a~następnie przesłany lub~ręcznie przeniesiony na~stacje klientów i~zastosowany przez~nie.
+Niniejsza praca prezentuje alternatywne rozwiązanie tego problemu. Alternatywny model działania polega na~tym, że~administrator komputerowy skanuje system ,,wzorcowy'' przed dokonaniem przez niego jakichkolwiek zmian, które będą odzwierciedlone na~systemach klienckich, następnie dokonuje zmian w~przeskanowanym systemie i~ponownie skanuje ten sam system, do~którego chce upodobnić systemy klientów. Podczas drugiego skanowania powstaje \hyperref[sec:obraz-zmian-konfiguracji]{obraz zmian}\footnote{\emph{Obraz zmian}, nazywany dalej również \emph{obrazem konfiguracji} i~\emph{obrazem zmian konfiguracji systemu wzorcowego}, został zdefiniowany w~rozdziale~\ref{sec:obraz-zmian-konfiguracji}.} dokonanych od~czasu przeprowadzenia pierwszego skanowania, który może być przejrzany i~dostosowany przez administratora, a~następnie przesłany lub~,,ręcznie'' przeniesiony na~stacje klientów (np.~za~pomocą pamięci zewnętrznej) i~zastosowany przez~nie.
 
 %------------------------------------------------------------------------------
 
 \section{Zastosowania}
 
-Zastosowania rozwiązania problemu dystrybuowania jednolitego oprogramowania można znaleźć prawdopodobnie wszędzie tam,~gdzie istnieje grupa ludzi, procesów lub~komputerów, z~których każdy wykorzystuje to~samo lub~podobnie skonfigurowane oprogramowanie na~urządzeniu wyposażonym w~system operacyjny, podłączonym do~sieci komputerowej. W~szczególności mogą to~być grupy serwerów pracujących w~podobnym środowisku, np.~maszyny \emph{developerskie}, testowe i~produkcyjne, \emph{load-balancery}, serwery działające w~ramach systemu rozproszonego, laboratoria komputerowe na~uczelniach, w~szkołach i~bibliotekach, biura, komputery administracji publicznej (w~szczególności w~urzędach), bankomaty, biletomaty, automaty sprzedające~(tzn.~automaty \emph{vendingowe}), komputery osobiste osób korzystających z~kilku(nastu) komputerów, komputery kasjerów w~hipermarketach, komputery obsługujące wyświetlacze informacyjne np.~na~przystankach komunikacji miejskiej, peronach, galeriach handlowych~itp.
+Zastosowania rozwiązania problemu dystrybuowania jednolitego oprogramowania można znaleźć prawdopodobnie wszędzie tam,~gdzie istnieje grupa ludzi, procesów lub~komputerów, z~których każdy wykorzystuje to~samo lub~podobnie skonfigurowane oprogramowanie na~urządzeniu wyposażonym w~system operacyjny, podłączonym do~sieci komputerowej. W~szczególności mogą to~być grupy serwerów pracujących w~podobnym środowisku, np.~maszyny \emph{developerskie}, testowe i~produkcyjne, \hrefemph{https://en.wikipedia.org/wiki/Load_balancing_(computing)}{load-balancery}, serwery działające w~ramach systemu rozproszonego, laboratoria komputerowe na~uczelniach, w~szkołach i~bibliotekach, biura, komputery administracji publicznej (w~szczególności w~urzędach), bankomaty, biletomaty, automaty sprzedające~(tzn.~automaty \hrefemph{https://en.wikipedia.org/wiki/Vending_machine}{vendingowe}), \href{https://en.wikipedia.org/wiki/Networking_hardware}{urządzenia sieciowe}, komputery osobiste osób korzystających z~kilku(nastu) komputerów, komputery kasjerów w~hipermarketach, komputery obsługujące wyświetlacze informacyjne np.~na~przystankach komunikacji miejskiej, peronach, galeriach handlowych, szpitalach, miejscach użyteczności publicznej~itp.
 
 %------------------------------------------------------------------------------
 
@@ -56,26 +56,26 @@ Zastosowania rozwiązania problemu dystrybuowania jednolitego oprogramowania mo�
 
 \noindent Niniejsza praca magisterska składa się z~dwóch zasadniczych części:\mynobreakpar
 \begin{enumerate}
-	\item niniejszej dokumentacji napisanej w~\href{https://en.wikipedia.org/wiki/LaTeX}{\LaTeX}, opisującej problem, istniejące rozwiązania, projekt rozwiązania przedstawionego problemu i~podsumowanie całej pracy,
-	\item aplikacji napisanej w~języku Python oraz~towarzyszącej jej~dokumentacji wygenerowanej z~komentarzy umieszczonych w~jej~kodzie źródłowym.
+	\item niniejszej dokumentacji napisanej w~\href{https://en.wikipedia.org/wiki/LaTeX}{\LaTeX}, opisującej problem, istniejące rozwiązania, projekt rozwiązania przedstawionego problemu, przeprowadzone testy stworzonej aplikacji, możliwe kierunki dalszego jej~rozwoju i~podsumowanie całej pracy,
+	\item aplikacji napisanej w~języku \python{} oraz~towarzyszącej jej~dokumentacji wygenerowanej z~komentarzy umieszczonych w~jej~kodzie źródłowym.
 \end{enumerate}
 Przygotowana aplikacja również składa~się z~dwóch części, tj.~z:\mynobreakpar%, co~jest naturalne dla~przyjętej architektury klient-serwer~(por.~rozdział~\ref{sec:cel-i-zakres}):\mynobreakpar
 \begin{enumerate}
-	\item wzorca oprogramowania i~konfiguracji dla~klientów tworzącego \hyperref[sec:obraz-zmian-konfiguracji]{obraz zmian konfiguracji systemu} dla~maszyn klienckich,
-	\item maszyn klienckich synchronizujących swoje oprogramowanie i~konfigurację z~otrzymanym \hyperref[sec:obraz-zmian-konfiguracji]{obrazem zmian konfiguracji systemu wzorcowego}.
+	\item aplikacji dla~maszyny odgrywającej rolę wzorca oprogramowania i~konfiguracji dla~klientów; aplikacja ta~m.in.~tworzy \hyperref[sec:obraz-zmian-konfiguracji]{obraz zmian konfiguracji systemu} dla~maszyn klienckich,
+	\item aplikacji dla~maszyn klienckich synchronizujących swoje oprogramowanie i~konfigurację z~otrzymanym \hyperref[sec:obraz-zmian-konfiguracji]{obrazem zmian konfiguracji systemu wzorcowego}.
 \end{enumerate}
 
 W~czasie prac nad~implementacją projektu, korzystano z~wielu pomocnych dokumentacji, materiałów dydaktycznych i~innych źródeł wiedzy, takich jak np.~listy dyskusyjne i~programistyczne fora dyskusyjne. Na~szczególne wyróżnienie zasługują następujące źródła:\mynobreakpar
 \begin{enumerate}
 	\item dokumentacje:\mynobreakpar
 	\begin{enumerate}
-		\item dokumentacja języka  programowania Python i~towarzyszących mu~modułów~\cite{python-doc},%~\cite{glibc-doc},
-		\item dokumentacja \hyperref[sec:aide]{AIDE}, \href{https://en.wikipedia.org/wiki/OpenSSL}{OpenSSL} i~innych narzędzi wykorzystanych do~implementacji projektu wymienionych i~niewymienionych, z~racji na~ich dużą liczbę, w~rozdziale~\ref{sec:wykorzystane-oprogramowanie}~\cite{openssl-doc},
-		\item dokumentacja deweloperów dla wybranych dystrybucji/systemów~\cite{archlinux-wiki,gentoo-wiki},
+		\item dokumentacja języka programowania \python{} i~towarzyszących mu~modułów~\cite{python-doc},%~\cite{glibc-doc},
+		\item dokumentacja \hyperref[sec:aide]{AIDE}, \href{https://en.wikipedia.org/wiki/OpenSSL}{OpenSSL} i~innych narzędzi wykorzystanych do~implementacji projektu wymienionych i~niewymienionych z~racji na~ich dużą liczbę, w~rozdziale~\ref{sec:wykorzystane-oprogramowanie}~\cite{openssl-doc},
+		\item dokumentacja deweloperów dla wybranych na~potrzeby testów dystrybucji \emph{\gls{gnulinux}} \hrefemph{https://en.wikipedia.org/wiki/Debian}{Debian} i~\hrefemph{https://en.wikipedia.org/wiki/Arch_Linux}{Arch}~\cite{archlinux-wiki,debian-wiki},
 		\item dokumenty \gls{ietf}~(\gls{rfc})~\cite{rfc-editor},
 		\item dokumentacja TLDP~\cite{tldp},
 		\item dokumenty W3C~\cite{w3c},
-		\item \hreftt{http://www.tcpipguide.com/}{tcpipguide.com}, czyli szczegółowy przegląd protokołu \glslink{tcpip}{TCP/IP} i~pokrewnych protokołów, opublikowany również w~formie obszernej\footnote{Książka ma~1616 stron. ISBN:~\href{https://www.nostarch.com/tcpip.htm}{9781593270476}. Wydawnictwo: \emph{No Starch Press}.} książki autorstwa \href{https://www.linkedin.com/in/charles-kozierok-708112/}{\mbox{Charlesa} \mbox{Kozieroka}} pt.~\emph{The~TCP/IP Guide},
+		\item \hreftt{http://www.tcpipguide.com/}{tcpipguide.com}, czyli szczegółowy przegląd protokołu \glslink{tcpip}{TCP/IP} i~pokrewnych protokołów, opublikowany również w~formie obszernej\footnote{Książka ma~1616 stron. \isbn{}:~\href{https://www.nostarch.com/tcpip.htm}{9781593270476}. Wydawnictwo: \emph{No Starch Press}.} książki autorstwa \href{https://www.linkedin.com/in/charles-kozierok-708112/}{\mbox{Charlesa} \mbox{Kozieroka}} pt.~\emph{The~TCP/IP Guide},
 		\item dokumentacja \gls{posix}~\cite{posix}.
 %		\item dokumentacja biblioteki libconfig~\cite{libconfig-doc}.
 	\end{enumerate}
@@ -84,10 +84,11 @@ W~czasie prac nad~implementacją projektu, korzystano z~wielu pomocnych dokument
 		\item \href{http://www.mini.pw.edu.pl/~kozlowsm/tcpip}{,,TCP/IP''} --- przedmiot prowadzony przez dra~inż.~Marka~Kozłowskiego~\cite{kozlowski},
 		\item \href{http://www.mini.pw.edu.pl/~marcinbo/strona/glowna/unix.html}{,,UNIX''} --- przedmiot prowadzony przez mgra~inż.~Marcina~Borkowskiego~\cite{borkowski}.
 	\end{enumerate}
-	\item programistyczne fora i~listy dyskusyjne:
+	\item programistyczne fora i~listy dyskusyjne, w~tym m.in.:\mynobreakpar
 	\begin{enumerate}
 		\item \hreftt{http://stackoverflow.com/}{stackoverflow.com},
-		\item \hreftt{http://superuser.com/}{superuser.com}.
+		\item \hreftt{http://superuser.com/}{superuser.com},
+		\item \hreftt{https://unix.stackexchange.com/}{unix.stackexchange.com}.
 	\end{enumerate}
 \end{enumerate}
 Kompletny spis odwołań cytowanych w~niniejszej pracy, znajduje się~na~jej \hyperref[bibliography-page]{końcu}. % uważać na to odwołanie - czasem powołuje zapętlenie kompilacji LaTeX
@@ -100,7 +101,7 @@ Niniejsza praca wpisuje się w~tematykę \glslink{wolne-oprogramowanie}{wolnego 
 
 W~związku z~obowiązującym w~czasie pisania i~obrony tej~pracy \hrefemph{http://isap.sejm.gov.pl/DetailsServlet?id=WDU19940240083}{art.~15a~ustawy z~dnia 4~lutego~1994r. o~prawie autorskim i~prawach pokrewnych}, kod źródłowy aplikacji powstałej w~ramach niniejszej pracy, może zostać opublikowany na~warunkach licencji wybranej przez autora pracy po~upływie co~najmniej 6~miesięcy od~momentu obrony autora niniejszej pracy, pod~warunkiem, że~Uczelnia, tj.~w~tym przypadku Politechnika Warszawska, sama nie~opublikuje jej przez ten~czas~\cite{papp}. Jeśli warunek ten~będzie spełniony, stworzona w~ramach tej~pracy aplikacja może zostać opublikowana w~przyszłości np.~w~repozytorium \hreftt{https://github.com/}{github.com} na~warunkach zmodyfikowanej licencji \glslink{gpl}{GNU~GPL~3} z~dodanym wyjątkiem dla~biblioteki OpenSSL --- bez~dodania wyjątku \href{https://www.openssl.org/source/license.html}{podwójna licencja OpenSSL} jest \href{https://www.openssl.org/docs/faq.html\#LEGAL2}{niekompatybilna} z~rodziną licencji~\glslink{gpl}{GPL}~\cite{openssl-license-incompatibility,openssl-license-incompatibility-2}. Pełny tekst licencji niniejszego projektu znajduje się na~\hyperref[ch:cd-appendix]{dołączonej płycie~CD} w~pliku tekstowym \path{LICENSE}.
 
-%Lista wykorzystanych bibliotek i~odpowiadających im~licencji, na~prawach której zostały opublikowane:
+%Lista wykorzystanych bibliotek i~odpowiadających im~licencji, na~prawach której zostały opublikowane:\mynobreakpar
 %\begin{itemize}
 %\item \textbf{libconfig} --- licencja \glslink{lgpl}{\emph{LGPL}}~\cite{libconfig-webpage},
 %\item \textbf{OpenSSL} --- podwójna licencja \emph{SSLeay License} i~\emph{OpenSSL License}~\cite{openssl-license}.

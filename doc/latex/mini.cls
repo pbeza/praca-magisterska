@@ -334,7 +334,7 @@ lower separated=false, fontupper=\footnotesize, nobeforeafter}{#2}
 %\setlength{\parindent}{1cm}
 
 \RequirePackage{array}
-\RequirePackage{enumitem}
+\RequirePackage[inline]{enumitem}
 \RequirePackage{wrapfig}
 \def\@schapter#1{
 	\phantomsection\addcontentsline{toc}{chapter}{#1}

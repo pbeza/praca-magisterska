@@ -32,6 +32,8 @@
 }
 \makeatother
 
+\glsdisablehyper
+
 % Właściwy początek dokumentu
 
 \begin{document}
@@ -84,6 +86,7 @@
 \subfile{chapters/ch01-istniejace-rozwiazania}
 \subfile{chapters/ch02-protokol}
 \subfile{chapters/ch03-implementacja}
+\addtocontents{toc}{\protect\newpage}  % see: https://tex.stackexchange.com/questions/17071/how-can-i-force-toc-not-to-end-with-a-chapter
 \subfile{chapters/ch04-testy}
 \subfile{chapters/ch05-podsumowanie}
 \subfile{chapters/appendix}
