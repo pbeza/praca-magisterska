@@ -18,7 +18,7 @@ Opisane w~tym rozdziale aplikacje, poza możliwością synchronizacji zainstalow
 
 Jednym z~najpopularniejszych w~czasie pisania tej~pracy rozwiązań problemu dystrybuowania oprogramowania jest projekt Puppet, który jest dedykowany nie tylko dla systemów~\glslink{unix-like-system}{*niksowych}, ale~również dla~systemów Windows i~\href{https://en.wikipedia.org/wiki/MacOS}{Mac~OS}~\cite{puppet,puppet-github,puppet-clients}.
 
-Puppet został napisany w~języku programowania \href{https://en.wikipedia.org/wiki/Ruby_(programming_language)}{Ruby}, a~jego rozwój jest wspierany i~wykorzystywany przez wiele czołowych firm i~organizacji w~branży~IT, takich jak: \hrefemph{https://en.wikipedia.org/wiki/Google}{Google}, \hrefemph{https://en.wikipedia.org/wiki/NASA}{NASA}, \hrefemph{https://en.wikipedia.org/wiki/Verizon_Communications}{Verizon}, \hrefemph{https://en.wikipedia.org/wiki/Sony}{Sony}, \hrefemph{https://en.wikipedia.org/wiki/The_Walt_Disney_Company}{Disney}, \hrefemph{https://en.wikipedia.org/wiki/Uber}{Uber}, \hrefemph{https://en.wikipedia.org/wiki/Getty_Images}{gettyimages}, \hrefemph{https://en.wikipedia.org/wiki/CERN}{CERN} i~wiele innych\footnote{Oficjalna strona internetowa Puppet \href{https://puppet.com/company/leadership/luke-kanies}{podaje}, że~Puppet jest używany przez ponad 30~tys. firm.}~\cite{puppet,puppet-google,puppet-cern,puppet-chef-disney}. Pierwsza wersja Puppet została opublikowana w~2005~roku przez \href{https://puppet.com/company/leadership/luke-kanies}{Luke'a Kaniesa} na~licencji~\glslink{gpl}{GPL}. Od~wersji 2.0~Puppet jest licencjonowany na~warunkach licencji~\glslink{apache2.0-license}{Apache~2.0}. Istnieje również komercyjna wersja projektu, znana pod~nazwą \emph{Puppet Enterprise}.
+Puppet został napisany w~języku programowania \href{https://en.wikipedia.org/wiki/Ruby_(programming_language)}{Ruby}, a~jego rozwój jest wspierany i~wykorzystywany przez wiele czołowych firm i~organizacji w~branży~IT, takich jak: \emph{\google{}}, \emph{\nasa{}}, \emph{\intel{}}, \hrefemph{https://en.wikipedia.org/wiki/Verizon_Communications}{Verizon}, \hrefemph{https://en.wikipedia.org/wiki/Sony}{Sony}, \hrefemph{https://en.wikipedia.org/wiki/The_Walt_Disney_Company}{Disney}, \emph{\twitter{}}, \emph{\uber{}}, \hrefemph{https://en.wikipedia.org/wiki/Getty_Images}{gettyimages}, \emph{\cern{}}, \emph{\stanford{}}, \emph{\wikipedia{}}, \emph{\paypal{}}, \emph{\dell{}} i~wiele innych\footnote{Oficjalna strona internetowa Puppet \href{https://puppet.com/company/leadership/luke-kanies}{podaje}, że~Puppet jest używany przez ponad 30~tys. firm.}~\cite{puppet,puppet-google,puppet-cern,puppet-chef-disney}. Pierwsza wersja Puppet została opublikowana w~2005~roku przez \href{https://puppet.com/company/leadership/luke-kanies}{Luke'a Kaniesa} na~licencji~\glslink{gpl}{GPL}. Od~wersji 2.0~Puppet jest licencjonowany na~warunkach licencji~\glslink{apache2.0-license}{Apache~2.0}. Istnieje również komercyjna wersja projektu, znana pod~nazwą \emph{Puppet Enterprise}.
 
 Konfiguracja Puppet polega na~napisaniu reguł tekstowych, w~języku niezależnym od~systemu operacyjnego (\hrefemph{https://en.wikipedia.org/wiki/Domain-specific_language}{Domain Specific Language}), przechowywanych zwyczajowo w~plikach z~rozszerzeniem~\texttt{.pp}, zwanych \emph{manifestami}. Reguły są~zapisane w~postaci deklaratywnej, a~nie imperatywnej, tzn.~opisują oczekiwany stan systemu, a~nie sposób przeprowadzenia zmian w~systemie. Struktura manifestu jest w~postaci tablicy asocjacyjnej (struktura danych \hreftt{https://docs.ruby-lang.org/en/trunk/Hash.html}{Hash}) z~języka programowania Ruby. Przykładowe manifesty przedstawiono na~listingach \ref{lst:puppet-openssh-example}, \ref{lst:puppet-motd-example} i~\ref{lst:puppet-httpd-example}~\cite{puppet-examples}. Poprawność składni w~manifeście \path{example.pp} można zweryfikować komendą:\mynobreakpar
 \begin{center}
@@ -85,7 +85,7 @@ Chef działa w~architekturze klient-serwer. Serwer może być uruchomiony na~sys
 
 Klientami mogą być systemy działające pod~kontrolą m.in.: \hrefemph{https://en.wikipedia.org/wiki/IBM_AIX}{AIX}, \hrefemph{https://en.wikipedia.org/wiki/CentOS}{CentOS}, \hrefemph{https://en.wikipedia.org/wiki/FreeBSD}{FreeBSD}, \hrefemph{https://en.wikipedia.org/wiki/Macintosh_operating_systems}{Mac~OS~X}, \hrefemph{https://en.wikipedia.org/wiki/Oracle_Linux}{Oracle Linux}, \hrefemph{https://en.wikipedia.org/wiki/Red_Hat_Enterprise_Linux}{Red Hat Enterprise Linux}, \hrefemph{https://en.wikipedia.org/wiki/Solaris_(operating_system)}{Solaris}, \hrefemph{https://en.wikipedia.org/wiki/Ubuntu_(operating_system)}{Ubuntu}, \hrefemph{https://en.wikipedia.org/wiki/Microsoft_Windows}{Windows}, \hrefemph{https://en.wikipedia.org/wiki/NX-OS}{Cisco NX-OS} i~\hrefemph{https://en.wikipedia.org/wiki/IOS_XR}{Cisco IOS~XR}~\cite{chef-supported-platforms}. Lista wspieranych systemów operacyjnych dla~maszyn działających w~roli klienta jest dłuższa, ale~są~one określone jako \emph{Secondary Platforms} i~\emph{Other Platforms} w~przeciwieństwie do~wymienionych, które są~określane jako~\emph{Foundational Platforms}, co~sugeruje ich~gorsze wsparcie lub~brak wsparcia.
 
-Użytkownikami Chefa, tak jak w~przypadku Puppeta, jest wiele dużych firm i~uniwersytetów takich jak: \hrefemph{https://en.wikipedia.org/wiki/Airbnb}{Airbnb}, \hrefemph{https://en.wikipedia.org/wiki/The_Walt_Disney_Company}{Disney}, \hrefemph{https://en.wikipedia.org/wiki/Mozilla}{Mozilla}, \hrefemph{https://en.wikipedia.org/wiki/Facebook}{Facebook}, \hrefemph{https://en.wikipedia.org/wiki/HP_Cloud\#HP_Public_Cloud}{HP Public Cloud}, \hrefemph{https://en.wikipedia.org/wiki/Prezi}{Prezi}, \hrefemph{https://en.wikipedia.org/wiki/University_of_Minnesota}{Uniwersytet Minnesoty}~\cite{chef-customers,puppet-chef-disney}.
+Użytkownikami Chefa, tak jak w~przypadku Puppeta, jest wiele dużych firm i~uniwersytetów takich jak: \hrefemph{https://en.wikipedia.org/wiki/Airbnb}{Airbnb}, \hrefemph{https://en.wikipedia.org/wiki/The_Walt_Disney_Company}{Disney}, \hrefemph{https://en.wikipedia.org/wiki/Mozilla}{Mozilla}, \emph{\facebook{}}, \hrefemph{https://en.wikipedia.org/wiki/IBM}{IBM}, \hrefemph{https://en.wikipedia.org/wiki/HP_Cloud\#HP_Public_Cloud}{HP Public Cloud}, \hrefemph{https://en.wikipedia.org/wiki/Prezi}{Prezi}, \hrefemph{https://en.wikipedia.org/wiki/University_of_Minnesota}{Uniwersytet Minnesoty}~\cite{chef-customers,puppet-chef-disney}.
 
 Odpowiednikiem plików konfiguracyjnych, które w~Puppet nazywane są~\emph{manifestami}, są~pliki nazywane w~nomenklaturze Chef \emph{przepisami}~(ang.~\emph{recipe}). Przykładowe przepisy przedstawiono w~przykładach~\ref{lst:chef-apache-example}, \ref{lst:chef-user-example} i~\ref{lst:chef-service-example}. Więcej przykładów można znaleźć w,~bogatej w~przykładowe przepisy, dokumentacji Chef~\cite{chef-examples}.
 
@@ -287,6 +287,12 @@ Ciekawym trybem pracy Salt jest tryb \emph{agentless}, który polega na~tym, że
 \newcommand{\ansiblegithub}{{\tiny\hreftt{https://github.com/ansible/ansible}{github.com/ansible/ansible}}}
 \newcommand{\saltgithub}{{\tiny\hreftt{https://github.com/saltstack/salt}{github.com/saltstack/salt}}}
 
+\newcommand{\fixedcustomercell}[1]{\parbox[l][1.1cm][c]{3.0cm}{#1}}
+\newcommand{\puppetcustomers}{\fixedcustomercell{\cern{}, \google{}, \nasa{}, \intel{}, \twitter{}, \paypal{}, \wikipedia{}, \uber{}, \dell{}}}
+\newcommand{\chefcustomers}{\fixedcustomercell{\facebook{}, \ibm{}, \hpcompany{}, \mozilla{}}}
+\newcommand{\ansiblecustomers}{\fixedcustomercell{\apple{}, \nasa{}, \juniper{}}}
+\newcommand{\saltcustomers}{\fixedcustomercell{\linkedin{}, \tdbank{}}}
+
 \newcommand{\puppetenterprise}{\href{https://puppet.com/product}{Puppet Enterprise}}
 \newcommand{\chefenterprise}{\href{https://www.chef.io/automate/}{Chef Automate}}
 \newcommand{\ansibleenterprise}{\href{https://www.ansible.com/pricing}{Ansible Tower}}
@@ -308,17 +314,17 @@ Ciekawym trybem pracy Salt jest tryb \emph{agentless}, który polega na~tym, że
 \newcommand{\ansiblepricing}{\href{https://www.ansible.com/pricing}{\$5,000 za~100~maszyn/rok}}
 \newcommand{\saltpricing}{\href{https://saltstack.com/saltstack-enterprise/}{Nie podano}\tablefootnote{Cena zostaje podana po~kontakcie przez e-mail \hreftt{mailto:sales@saltstack.com}{sales@saltstack.com}.}}
 
-\newcommand{\ansiblewinpartialsupport}{\href{http://docs.ansible.com/ansible/intro_installation.html\#control-machine-requirements}{Częściowe}}
+\newcommand{\ansiblewinpartialsupport}{\href{http://docs.ansible.com/ansible/intro_installation.html\#control-machine-requirements}{częściowe}}
 
 \newcommand{\usaorwiki}{\href{https://en.wikipedia.org/wiki/Oregon}{OR}}
 \newcommand{\usawawiki}{\href{https://en.wikipedia.org/wiki/Washington_(state)}{WA}}
 \newcommand{\usancwiki}{\href{https://en.wikipedia.org/wiki/North_Carolina}{NC}}
 \newcommand{\usautwiki}{\href{https://en.wikipedia.org/wiki/Utah}{UT}}
 
-\newcommand{\puppetdebrank}{\href{https://qa.debian.org/popcon.php?package=puppet}{5978}}
-\newcommand{\chefdebrank}{\href{https://qa.debian.org/popcon.php?package=chef}{12417}}
-\newcommand{\ansibledebrank}{\href{https://qa.debian.org/popcon.php?package=ansible}{8669}}
-\newcommand{\saltdebrank}{\href{https://qa.debian.org/popcon.php?package=salt}{8726}}
+\newcommand{\puppetdebrank}{\href{https://qa.debian.org/popcon.php?package=puppet}{5996}}
+\newcommand{\chefdebrank}{\href{https://qa.debian.org/popcon.php?package=chef}{12410}}
+\newcommand{\ansibledebrank}{\href{https://qa.debian.org/popcon.php?package=ansible}{8610}}
+\newcommand{\saltdebrank}{\href{https://qa.debian.org/popcon.php?package=salt}{8738}}
 \newcommand{\isconf}{\href{https://en.wikipedia.org/wiki/ISconf}{ISconf}}
 \newcommand{\rudder}{\href{https://en.wikipedia.org/wiki/Rudder_(software)}{Rudder}}
 \newcommand{\cfengine}{\href{https://en.wikipedia.org/wiki/CFEngine}{CFEngine}}
@@ -354,32 +360,34 @@ Wszystkie opisane rozwiązania oprócz Ansible i~poza specjalnym \href{https://d
 \newcommand{\tablelogoheight}{0.9cm}
 \newcommand*{\centerheader}[1]{\multicolumn{1}{c|}{\includegraphics[height=\tablelogoheight]{#1}}}
 
-\newcommand{\debcontest}{\specialcell{\setstretch{0.5}Miejsce w~rankingu\\[-0.7em]liczby pobrań \emph{\debian{}}\\[-0.7em]\hrefemph{https://tex.stackexchange.com/a/19678/44382}{Pupularity Contest}\\[-0.7em](stan na~16 IX 2017)}}
+\newcommand{\debcontest}{\specialcell{\setstretch{0.5}Miejsce w~rankingu\\[-0.7em]liczby pobrań \emph{\debian{}}\\[-0.7em]\hrefemph{https://tex.stackexchange.com/a/19678/44382}{Pupularity Contest}\\[-0.7em](stan na~21 IX 2017)}}
+\newcommand{\famouscompanies}{\specialcell{\setstretch{0.5}Wybrani znani\\[-0.7em]użytkownicy}}
 \newcommand{\specialcell}[2][c]{%
   \begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
 
 \begin{table}[t]
 	\scriptsize
-	\makebox[\textwidth][c]{ % center too wide table
+	\makebox[0.95\textwidth][c]{ % center too wide table
 	\begin{tabular}{l|l|l|l|l}
-		                        & \puppetlogo                     & \cheflogo                       & \ansiblelogo                     & \saltlogo                    \\\hline\hline
-		Rok powstania           & 2005                            & 2009                            & 2012                             & 2011                         \\\hline
-		Autor                   & \puppetauthor~(USA,~\usaorwiki) & \chefauthor~(USA,~\usawawiki)   & \ansibleauthor~(USA,~\usancwiki) & \saltauthor~(USA,~\usautwiki)\\\hline
-		Język programowania     & \rubylink                       & \rubylink, \erlanglink          & \pythonlink, \powershelllink     & \pythonlink                  \\\hline
-		Architektura            & Klient-serwer                   & Klient-serwer                   & Tylko serwer                     & Klient-serwer                \\\hline
-		Model komunikacji       & \emph{pull}                     & \emph{pull}                     & \emph{push}                      & \emph{push} i~\emph{pull}    \\\hline
-		Nazwa konfiguracji      & \emph{manifest}                 & \emph{recipe} / \emph{cookbook} & \emph{playbook}                  & ---                          \\\hline
-		Wsparcie \gls{gnulinux} & \cmark                          & \cmark                          & \cmark                           & \cmark                       \\\hline
-		Wsparcie Mac~OS         & \cmark                          & \cmark                          & \cmark                           & \cmark                       \\\hline
-		Wsparcie Windows        & \cmark                          & \cmark                          & \ansiblewinpartialsupport        & \cmark                       \\\hline
-		Licencja                & \apachegls                      & \apachegls                      & \gplgls                          & \apachegls                   \\\hline
-		Wersja komercyjna       & \puppetenterprise               & \chefenterprise                 & \ansibleenterprise               & \saltenterprise              \\\hline
-		\pricingtitle           & \puppetpricing                  & \chefpricing                    & \ansiblepricing                  & \saltpricing                 \\\hline
-		Firma                   & \puppetcompany                  & \chefcompany                    & \redhatcompany                   & \saltcompany                 \\\hline
-		Strona internetowa      & \puppetpage                     & \chefpage                       & \ansiblepage                     & \saltpage                    \\\hline
-		Dokumentacja            & \puppetdocs                     & \chefdocs                       & \ansibledocs                     & \saltdocs                    \\\hline
-		Kod źródłowy            & \puppetgithub                   & \chefgithub                     & \ansiblegithub                   & \saltgithub                  \\\hline
-		\debcontest             & \puppetdebrank                  & \chefdebrank                    & \ansibledebrank                  & \saltdebrank % https://tex.stackexchange.com/a/19678/44382
+		                        & \puppetlogo                           & \cheflogo                         & \ansiblelogo                         & \saltlogo                        \\\hline\hline
+		Rok powstania           & 2005                                  & 2009                              & 2012                                 & 2011                             \\\hline
+		Autor                   & \puppetauthor{}~(USA,~\usaorwiki{})   & \chefauthor{}~(USA,~\usawawiki{}) & \ansibleauthor{}~(USA,~\usancwiki{}) & \saltauthor{} (USA,~\usautwiki{})\\\hline
+		Język programowania     & \rubylink{}                           & \rubylink{}, \erlanglink{}        & \pythonlink{}, \powershelllink{}     & \pythonlink{}                    \\\hline
+		Architektura            & klient-serwer                         & klient-serwer                     & tylko serwer                         & klient-serwer                    \\\hline
+		Model komunikacji       & \emph{pull}                           & \emph{pull}                       & \emph{push}                          & \emph{push} i~\emph{pull}        \\\hline
+		Nazwa konfiguracji      & \emph{manifest}                       & \emph{recipe} / \emph{cookbook}   & \emph{playbook}                      & ---                              \\\hline
+		Wsparcie \gls{gnulinux} & \cmark{}                              & \cmark{}                          & \cmark{}                             & \cmark{}                         \\\hline
+		Wsparcie Mac~OS         & \cmark{}                              & \cmark{}                          & \cmark{}                             & \cmark{}                         \\\hline
+		Wsparcie Windows        & \cmark{}                              & \cmark{}                          & \ansiblewinpartialsupport{}          & \cmark{}                         \\\hline
+		Licencja                & \apachegls{}                          & \apachegls{}                      & \gplgls{}                            & \apachegls{}                     \\\hline
+		Wersja komercyjna       & \puppetenterprise{}                   & \chefenterprise{}                 & \ansibleenterprise{}                 & \saltenterprise{}                \\\hline
+		\pricingtitle{}         & \puppetpricing{}                      & \chefpricing{}                    & \ansiblepricing{}                    & \saltpricing{}                   \\\hline
+		Firma                   & \puppetcompany{}                      & \chefcompany{}                    & \redhatcompany{}                     & \saltcompany{}                   \\\hline
+		Strona internetowa      & \puppetpage{}                         & \chefpage{}                       & \ansiblepage{}                       & \saltpage{}                      \\\hline
+		Dokumentacja            & \puppetdocs{}                         & \chefdocs{}                       & \ansibledocs{}                       & \saltdocs{}                      \\\hline
+		Kod źródłowy            & \puppetgithub{}                       & \chefgithub{}                     & \ansiblegithub{}                     & \saltgithub{}                    \\\hline
+		\famouscompanies{}      & \puppetcustomers{}                    & \chefcustomers{}                  & \ansiblecustomers{}                  & \saltcustomers{}                 \\\hline
+		\debcontest{}           & \puppetdebrank{}                      & \chefdebrank{}                    & \ansibledebrank{}                    & \saltdebrank{} % https://tex.stackexchange.com/a/19678/44382
 	\end{tabular}}
 	\caption{Porównanie wybranych cech \emph{\puppetref}, \emph{\chefref}, \emph{\ansibleref}, \emph{\saltref}}
 	\label{tab:existing-solutions-comparison}

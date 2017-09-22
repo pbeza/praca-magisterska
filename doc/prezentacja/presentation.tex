@@ -1,0 +1,319 @@
+%\documentclass[notes,polish,xcolor=dvipsnames]{beamer}             % wygenerować prezentację również w tym formacie
+\documentclass[notes,polish,xcolor=dvipsnames,aspectratio=169]{beamer}
+
+%\usefonttheme{professionalfonts} % using non standard fonts for beamer
+%\usefonttheme{serif} % default family is serif
+%\usepackage{fontspec}
+%\setmainfont{Liberation Serif}
+
+\usetheme{Rochester}
+\usepackage[polish]{babel}
+\usepackage{xcolor}
+\definecolor{UniBlue}{RGB}{0,103,148}
+\setbeamercolor{structure}{fg=UniBlue}
+%\documentclass[notes=only]{beamer}			% only notes
+%\setbeamertemplate{note page}[plain]
+%\usefonttheme[onlymath]{serif}
+%\usepackage[OT4,plmath]{polski}
+\usepackage[utf8]{inputenc}
+%\usepackage[polish]{translator}                        % https://tex.stackexchange.com/q/62185/44382
+\usepackage[T1,plmath]{polski}
+\usepackage{booktabs}
+%\usepackage{enumitem}
+%\usepackage{graphicx}                                  % loaded implicitly by Beamer
+\usepackage{breakurl}
+\usepackage{hyperref}
+%\usepackage[hyphens]{url}
+\usepackage{lmodern}
+\usepackage{multimedia}
+\usepackage{pgfpages}
+%\usepackage{unicode-math}
+\usepackage{wrapfig}
+\usepackage{mathtools}
+%\usepackage[compatibility=false]{caption}
+\usepackage{float}
+\usepackage[caption=false]{subfig}
+\usepackage{listings}
+\usepackage{fancyvrb}
+\usepackage{bytefield}
+\usepackage{array}
+\usepackage[none]{hyphenat}
+\usepackage{tabto}
+\usepackage{textcomp}
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata}
+\usepackage[absolute,overlay]{textpos}                   % podpisy autorów obrazków
+\usepackage{adjustbox}
+
+%\beamertemplatenavigationsymbolsempty
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+
+\newcommand{\smalllogoheight}{0.85cm}
+
+%------------------------------------------------------------------------------
+% Strona tytułowa
+%------------------------------------------------------------------------------
+
+\title{Protokół zarządzania stacjami komputerowymi\\pod~kontrolą systemu Linux}
+\subtitle{(Management Protocol for Linux Workstations)}
+\author[P.Bęza]{Patryk Bęza}
+\institute[MiNI PW]{
+	Promotor: dr~inż.~Marek~Kozłowski\\[3pt]
+	Wydział Matematyki i~Nauk Informacyjnych\\
+	Politechnika Warszawska\\[10pt]
+	\begin{tikzpicture}[remember picture,overlay]
+		\node {\includegraphics[height=\smalllogoheight]{img/mini}};%
+	\end{tikzpicture}\hspace{30pt}
+	\begin{tikzpicture}[remember picture,overlay]
+		\node {\includegraphics[height=\smalllogoheight]{img/pw}};%
+	\end{tikzpicture}\\[4pt]
+}
+\date{\today}
+
+% Obrazek na stronie tytułowej
+
+%\titlegraphic{\hspace*{1em}\includegraphics[height=.22\textheight]{img/package-manager}}
+
+% Logo MiNI i PW na górze slajdu tytułowego
+
+\addtobeamertemplate{title page}{}{%
+	\newcommand{\titlepagelogoheight}{1.33cm}
+	\begin{tikzpicture}[remember picture,overlay]
+	\node[anchor=north west,yshift=0pt,xshift=3pt] at (current page.north west) {\includegraphics[height=\titlepagelogoheight]{img/mini-white}};%
+	\node[anchor=north west,yshift=0pt,xshift=3pt] at (current page.north west) {\includegraphics[height=\titlepagelogoheight]{img/mini-white}};%
+	\node[anchor=north east,yshift=0pt,xshift=-3pt] at (current page.north east) {\includegraphics[height=\titlepagelogoheight]{img/pw-white}};%
+	\node[anchor=north east,yshift=0pt,xshift=-3pt] at (current page.north east) {\includegraphics[height=\titlepagelogoheight]{img/pw-white}};%
+\end{tikzpicture}}
+
+% Logo MiNI i PW w prawym górnym rogu slajdów (https://tex.stackexchange.com/q/27906/44382)
+
+\addtobeamertemplate{frametitle}{}{%
+	\newcommand{\frametitlelogoheight}{1.2cm}
+	\begin{tikzpicture}[remember picture,overlay]
+	\node[anchor=north east,yshift=0pt,xshift=-3pt] at (current page.north east) {\includegraphics[height=\frametitlelogoheight]{img/pw-white}};%
+	\node[anchor=north east,yshift=0pt,xshift=-3pt] at (current page.north east) {\includegraphics[height=\frametitlelogoheight]{img/pw-white}};%
+	\node[anchor=north east,yshift=-1pt,xshift=-45pt] at (current page.north east) {\includegraphics[height=\frametitlelogoheight]{img/mini-white}};%
+	\node[anchor=north east,yshift=-1pt,xshift=-45pt] at (current page.north east) {\includegraphics[height=\frametitlelogoheight]{img/mini-white}};%
+\end{tikzpicture}}
+
+% Usunięcie przycisków nawigacji prezentacji
+
+\setbeamertemplate{navigation symbols}{}
+
+\begin{document}
+
+%------------------------------------------------------------------------------
+
+\begin{frame}
+
+\titlepage
+
+\end{frame}
+
+%------------------------------------------------------------------------------
+
+\begin{frame}{Spis treści}
+
+\tableofcontents
+
+\end{frame}
+
+%------------------------------------------------------------------------------
+
+\section{Problem, temat i~cel pracy}
+
+%------------------------------------------------------------------------------
+
+\begin{frame}{Problem pracy}
+
+Problem dystrybuowania ujednoliconego oprogramowania do~dużej ilości maszyn roboczych pracujących pod kontrolą systemu \texttt{Linux}.
+
+\begin{center}
+	\begin{minipage}{1.1\textheight}
+		\includegraphics[width=\linewidth]{img/busy-admin}\\
+		\raggedleft\color{gray}\tiny Źródło: \emph{virtuallnk.com (za zgodą sales@virtuallnk.com)}
+	\end{minipage}
+\end{center}
+
+\end{frame}
+
+\note[itemize]{
+	\item \textbf{Przedstawienie problemu, którego dotyczy praca.} Zwrócenie uwagi na to, że~oprogramowanie na~konfigurowanych systemach nie musi być identyczne (szablony konfiguracji).
+	\item \textbf{Kto może mieć ten problem?}\\\emph{Administratorzy komputerowi.}
+	\item \textbf{Gdzie można znaleźć zastosowania rozwiązania tego problemu?}\\\emph{Wszędzie tam gdzie działa grupa podobnie skonfigurowanych maszyn, np.: komputery w~laboratoriach na~uczelniach, szkołach, bibliotekach, urzędach, sklepach, grupy serwerów, biletomaty, bankomaty, automaty sprzedające (maszyny \emph{vendingowe}), komputery osób korzystających z~wielu komputerów.}
+	\item \textbf{Jakie są ,,ręczne'' metody radzenia sobie z~tym problemem bez wykorzystania dedykowanego oprogramowania?}\\\emph{Ręczna instalacja gotowego obrazu systemu na każdym z~komputerów, SSH, zdalny pulpit~(VNC).}
+}
+
+%------------------------------------------------------------------------------
+
+\begin{frame}{Temat i~cel pracy}
+
+\textbf{Zaprojektowanie i~zaimplementowanie protokołu} umożliwiającego \textbf{propagowanie zmian w~systemie plików, pakietów oraz~elementów konfiguracji} do~stacji roboczych pod~kontrolą systemu operacyjnego \texttt{GNU/Linux} lub~innego systemu \texttt{*nix}, a~także elastycznego standardu opisu zmian oraz~narzędzi dla~ich rejestrowania i~dostosowywania.
+
+\begin{figure}
+	\includegraphics[height=.5\textheight]{img/client_server}
+\end{figure}
+
+\end{frame}
+
+\note[itemize]{
+	\item \textbf{Przeczytanie formalnie zgłoszonego do~Dziekanatu celu pracy.} Zwrócenie uwagi na, to, że~głównym celem było zaimplementowanie aplikacji ,,serwera'', która umożliwia przygotowanie i~dostosowanie obrazu zmian konfiguracji systemu wzorcowego, który można zastosować na~systemie klienckim za~pomocą aplikacji ,,klienckiej'', a~nie samo przesłanie takiego obrazu do~klienta (co~zostało zaimplementowane za~pomocą \texttt{SFTP}).
+	\item \textbf{Zwrócenie uwagi na~obsługę różnych systemów \texttt{GNU/Linux} i~na~to, że~zaimplementowane rozwiązanie było testowane na~dystrybucjach \texttt{Debian} i~\texttt{ArchLinux}.}
+}
+
+%------------------------------------------------------------------------------
+
+\section{Istniejące rozwiązania}
+
+\begin{frame}[fragile]{Istniejące rozwiązania --- systemy SCM}
+
+\newcommand{\tablelogoheight}{0.71cm}
+\newcommand*{\centerheader}[1]{\multicolumn{1}{c|}{\includegraphics[height=\tablelogoheight]{#1}}}
+\newcommand{\puppetlogo}{\centerheader{img/Puppet_logo}}
+\newcommand{\saltlogo}{\centerheader{img/SaltStack_logo}}
+\newcommand{\ansiblelogo}{\centerheader{img/Ansible_logo}}
+\newcommand{\cheflogo}{\multicolumn{1}{c}{\includegraphics[height=\tablelogoheight]{img/Chef_logo}}}
+\newcommand{\fixedcell}[1]{\parbox[l][0.52cm][c]{1.8cm}{\raggedleft #1}}
+\renewcommand{\arraystretch}{1.7}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}}
+\newcolumntype{N}{@{}m{0pt}@{}}
+
+\renewcommand*{\thefootnote}{\fnsymbol{footnote}} % gwiazdka zamiast numeracji arabskiej w przypisach
+\setbeamerfont{footnote}{size=\tiny} % wielkość czcionki przypisów
+\newcommand{\popularity}{miejsce w~rankingu popularności\footnote{Popularność wg liczby pobrań w~\emph{Debian Popularity Contest} (stan na~dzień 21.09.2017). W~nawiasach podano miejsce w~rankingu względem 3~pozostałych rozwiązań.}}
+
+\begin{adjustbox}{center}
+	\tiny
+	\begin{tabular}{L{1.8cm}|M{2cm}|M{2cm}|M{2cm}|M{2cm}N}
+		                               & \puppetlogo               & \ansiblelogo             & \saltlogo              & \cheflogo                       \\\hline\hline
+		\fixedcell{rok założenia}      & 2005                      & 2012                     & 2011                   & 2009                            \\\hline
+		\fixedcell{język}              & Ruby                      & Python, PowerShell       & Python                 & Ruby, Erlang                    \\\hline
+		\fixedcell{model}              & klient-serwer             & tylko serwer             & klient-serwer          & klient-serwer                   \\\hline
+		\fixedcell{plik konfiguracji}  & \emph{manifest}           & \emph{playbook}          & ---                    & \emph{recipe} / \emph{cookbook} \\\hline
+		\fixedcell{znani użytkownicy}  & CERN, Google, NASA, Intel & Apple, NASA, Juniper     & LinkedIn, TD~Bank      & Facebook, IBM, HP, Mozilla      \\\hline
+		\fixedcell{licencja}           & Apache~2.0                & GPLv3                    & Apache~2.0             & Apache~2.0                      \\\hline
+		\fixedcell{założyciel}         & Luke Kanies (USA,~OR)     & Michael Dehaan (USA,~NC) & Thomas Hatch (USA,~UT) & Adam Jacob (USA,~WA)            \\\hline
+		\fixedcell{\popularity}        & 5996 (1)                  & 8610 (2)                 & 8738 (3)               & 12410 (4)
+% Deklaratywny język konfiguracji wszystkich rozwiązań (nie imperatywny)
+	\end{tabular}
+\end{adjustbox}
+\vfill
+
+\end{frame}
+
+\note[itemize]{
+	\item \textbf{Wyjaśnienie, że~rozwiązaniem przedstawionego problemu są~systemy nazywane systemami SCM, czyli \emph{Software Configuration Systems}} --- nie mylić z~oprogramowaniem typu \emph{Source Control Management}, takimi jak np.~\texttt{git} i~\texttt{svn}.
+	\item \textbf{Scharakteryzowanie 4 (prawdopodobnie jednych z~najpopularniejszych) systemów zarządzania konfiguracją opisanych w~pracy.} Powołanie się na~zestawiania systemów SCM, w~których podane 4~rozwiązania są~niemal zawsze uwzględniane --- czasami są~też określane jako \emph{Four Major Configuration Management Systems}. Zwrócenie uwagi na~duże firmy i~instytucje używające tego wymienionych rozwiązań (CERN, NASA, Google~itd.).
+	\item \textbf{Deklaratywna konfiguracja przedstawionych rozwiązań (a~nie imperatywna).}
+	\item \textbf{Wyróżnienie Puppet pod~względem wyrafinowania i~popularności (vide ranking).} Wyrafinowanie polega na~budowaniu grafu zależności zasobów i~decydowanie na~jego podstawie w~jakiej kolejności zmieniać konfigurację systemu.
+	\item \textbf{Powiedzenie, że~istnieje więcej systemów SCM, ale~co do~zasady działania nie różnią się znacząco od~4~wymienionych w~przeciwieństwie do~mojego rozwiązania.}
+}
+
+%------------------------------------------------------------------------------
+
+\section{Własne rozwiązanie problemu}
+
+\begin{frame}{Alternatywne rozwiązanie problemu}
+
+Sposób wykorzystania alternatywnego rozwiązania:
+\begin{itemize}
+	\item \textbf{skanowanie} systemu wzorcowego
+	\item \textbf{modyfikacja} konfiguracji i~oprogramowania systemu wzorcowego
+	\item ponowne \textbf{skanowanie} systemu wzorcowego
+	\item \textbf{generowanie obrazu} zmian konfiguracji systemu wzorcowego na~podstawie ostatniego skanowania i~wybranego
+	\item \textbf{pobranie i~zastosowanie obrazu} zmian konfiguracji przez klienta
+\end{itemize}
+
+\begin{figure}
+	\centering
+	\begin{tikzpicture}[>=latex',shorten >=1pt,auto,node distance=3.1cm]
+		\node[state,ultra thick] (q0)               {};
+		\node[state,ultra thick] (q1) [right of=q0] {};
+
+		\path[->] (q0) edge[very thick,font=\scriptsize,bend left] node[align=center] {skanowanie\\systemu}  (q1);
+		\path[->] (q1) edge[very thick,font=\scriptsize,bend left]  node[align=center] {zmiany\\konfiguracji} (q0);
+		\path[->] (q1) edge[very thick,font=\scriptsize,loop right] node[align=center] {tworzenie\\obrazu zmian\\konfiguracji} (q1);
+	\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+
+\note{\textbf{Zupełnie inne podejście w~porównaniu do~istniejących rozwiązań} --- zamiast deklaratywnie/imperatywnie opisywać oczekiwany stan systemu wystarczy skonfigurować maszynę wzorcową.}
+
+%------------------------------------------------------------------------------
+
+\begin{frame}{Alternatywne rozwiązanie problemu cd.}
+
+Cechy rozwiązania:
+\begin{itemize}
+	\item \textbf{łatwość użytkowania} --- brak potrzeby pisania reguł określających pożądaną konfigurację klientów i~nauki języka w~którym byłyby one wyrażone
+	\item \textbf{rozproszenie} --- rozproszony model dzielenia się konfiguracją systemu wzorcowego
+	\item \textbf{wykorzystanie szablonów} --- parametryzacja konfiguracji np.~zmiennymi środowiskowymi
+	\item \textbf{uniwersalność} --- obsługa różnych dystrybucji \texttt{Linux}
+	\item \textbf{bezpieczeństwo} --- konfiguracja systemu wzorcowego podpisana cyfrowo
+	\item \textbf{modułowość} --- wykorzystanie m.in.~AIDE i~OpenSSL
+	\item \textbf{elastyczność} --- możliwość synchronizacji części konfiguracji
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------------------------------------
+
+\section{Implementacja}
+
+\begin{frame}{Implementacja}
+
+\begin{itemize}
+	\item początkowo w~języku~\texttt{C}, ostatecznie w~\texttt{Python~3},
+	\item przetestowana obsługa dystrybucji \texttt{Arch Linux} i~\texttt{Debian}
+	\item wykorzystanie m.in.~\texttt{AIDE}, \texttt{OpenSSL}
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------------------------------------
+
+\section{Dalsze możliwe kierunki rozwoju projektu}
+
+\begin{frame}{Dalsze możliwe kierunki rozwoju}
+
+\begin{itemize}
+	\item dodanie obsługi innych protokołów wymiany plików lub~zastąpienie \texttt{SFTP} protokołem \emph{multicastowym}
+	\item obsługa kłopotliwych sytuacji np.~podczas aktualizacji jądra systemu (\texttt{GRUB})
+	\item dodanie możliwości tworzenia obrazów zmian na~podstawie dowolnych dwóch wyników skanowań systemu wzorcowego
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------------------------------------
+
+\section{Podsumowanie}
+
+\begin{frame}{Podsumowanie}
+
+\begin{itemize}
+	\item zaimplementowano aplikację przeznaczoną do~\textbf{tworzenia, dostosowywania i~zastosowania obrazów} zmian konfiguracji systemu wzorcowego
+	\item autentyczność (uwierzytelnienie) wygenerowanego obrazu zmian jest zapewniona przez \textbf{podpis cyfrowy~SSL}
+	\item \textbf{klienci mogą pobrać obraz zmian przez \texttt{SFTP}} od~innego klienta lub~od~stacji wzorcowej
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------------------------------------
+
+\begin{frame}{Koniec}
+
+\begin{center}
+	\Large Dziękuję za~uwagę\\[0.6em]
+	\begin{minipage}{1.2\textheight}
+		\includegraphics[width=\linewidth]{img/busy-admin}\\
+		\raggedleft\color{gray}\tiny Źródło: \emph{virtuallnk.com (za zgodą sales@virtuallnk.com)}
+	\end{minipage}
+\end{center}
+
+\end{frame}
+
+%------------------------------------------------------------------------------
+
+\end{document}
