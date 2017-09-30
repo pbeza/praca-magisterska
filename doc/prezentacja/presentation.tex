@@ -100,6 +100,12 @@
 
 \setbeamertemplate{navigation symbols}{}
 
+% Obrazek przy spisie treści
+% https://tex.stackexchange.com/a/392822/44382
+
+\DeclareRobustCommand\PICINTOC{}%
+\newcommand\MYPICINTOC{\hfill\smash{\raisebox{-1.2\height}{\includegraphics[width=.38\textwidth]{img/package-manager}}}}
+
 \begin{document}
 
 %------------------------------------------------------------------------------
@@ -114,17 +120,18 @@
 
 \begin{frame}{Spis treści}
 
+\addtocontents{toc}{\let\PICINTOC\string\MYPICINTOC}
 \tableofcontents
 
 \end{frame}
 
 %------------------------------------------------------------------------------
 
-\section{Problem, temat i~cel pracy}
+\section{Problem, temat i~cel pracy\PICINTOC}
 
 %------------------------------------------------------------------------------
 
-\begin{frame}{Problem pracy}
+\begin{frame}{Problem}
 
 Problem dystrybuowania ujednoliconego oprogramowania do~dużej ilości maszyn roboczych pracujących pod kontrolą systemu \texttt{Linux}.
 
@@ -252,7 +259,6 @@ Cechy rozwiązania:
 	\item \textbf{wykorzystanie szablonów} --- parametryzacja konfiguracji np.~zmiennymi środowiskowymi
 	\item \textbf{uniwersalność} --- obsługa różnych dystrybucji \texttt{Linux}
 	\item \textbf{bezpieczeństwo} --- konfiguracja systemu wzorcowego podpisana cyfrowo
-	\item \textbf{modułowość} --- wykorzystanie m.in.~AIDE i~OpenSSL
 	\item \textbf{elastyczność} --- możliwość synchronizacji części konfiguracji
 \end{itemize}
 
@@ -265,7 +271,7 @@ Cechy rozwiązania:
 \begin{frame}{Implementacja}
 
 \begin{itemize}
-	\item początkowo w~języku~\texttt{C}, ostatecznie w~\texttt{Python~3},
+	\item początkowo w~języku~\texttt{C}, ostatecznie w~\texttt{Python~3}
 	\item przetestowana obsługa dystrybucji \texttt{Arch Linux} i~\texttt{Debian}
 	\item wykorzystanie m.in.~\texttt{AIDE}, \texttt{OpenSSL}
 \end{itemize}
