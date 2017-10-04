@@ -8,9 +8,10 @@ EXPORTED_DOCS=\
  $(SOURCE_DOCS:.md=.html) \
  $(SOURCE_DOCS:.md=.docx) \
  $(SOURCE_DOCS:.md=.odt) \
- $(SOURCE_DOCS:.md=.tex)
+ $(SOURCE_DOCS:.md=.tex) \
+ $(SOURCE_DOCS:.md=.gz)
 
-RM=rm
+RM=rm -f
 PANDOC=pandoc
 PANDOC_OPTIONS=--smart --standalone
 PANDOC_MAN_OPTIONS=--to man
@@ -22,6 +23,7 @@ PANDOC_LATEX_OPTIONS=--to latex
 
 % : %.md
 	$(PANDOC) $(PANDOC_OPTIONS) $(PANDOC_MAN_OPTIONS) -o $@ $<
+	gzip -k $@
 
 %.html : %.md
 	$(PANDOC) $(PANDOC_OPTIONS) $(PANDOC_HTML_OPTIONS) -o $@ $<

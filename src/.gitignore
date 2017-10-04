@@ -98,3 +98,5 @@ log[s]/
 
 # .swp vim files
 *.swp
+
+deb_dist
