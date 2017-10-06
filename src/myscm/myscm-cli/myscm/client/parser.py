@@ -131,7 +131,7 @@ class SSLCertConfigOption(GeneralConfigOption):
        certificate file path to verify system image created by myscm-srv."""
 
     # default if not provided in config file
-    DEFAULT_SSL_CERT_PATH = "/etc/myscm-cli/ssl.sig"
+    DEFAULT_SSL_CERT_PATH = "/etc/ssl/private/myscm-cli.sig"
 
     def __init__(self, ssl_cert_path=None):
         super().__init__(

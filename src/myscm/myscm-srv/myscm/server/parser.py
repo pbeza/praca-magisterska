@@ -34,7 +34,7 @@ class SSLCertConfigOption(GeneralConfigOption):
     """Configuration option read from file and/or CLI specifying SSL
        certificate file path."""
 
-    DEFAULT_SSL_CERT_PATH = "/etc/myscm-srv/ssl.sig"
+    DEFAULT_SSL_CERT_PATH = "/etc/ssl/private/myscm-srv.sig"
 
     def __init__(self, ssl_cert_path=None):
         super().__init__(
@@ -62,7 +62,7 @@ class SSLCertPrivKeyConfigOption(GeneralConfigOption):
     """Configuration option read from file and/or CLI specifying SSL private
        key of the x509 certificate saved in PEM format."""
 
-    DEFAULT_SSL_CERT_PRIV_KEY_PATH = "/etc/myscm-srv/ssl.sig.priv"
+    DEFAULT_SSL_CERT_PRIV_KEY_PATH = "/etc/ssl/private/myscm-srv.sig.priv"
 
     def __init__(self, ssl_priv_key_path=None):
         super().__init__(

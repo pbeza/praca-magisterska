@@ -9,7 +9,7 @@ setup(
                      "(SCM) tool"),
         long_description="Base library of the Simple Software Configuration "
                          "Management (SCM) tool, specifically myscm-cli and "
-                         "myscm-srv applications"
+                         "myscm-srv applications",
         keywords="scm packaging software distribution",
         author="Patryk Bęza",
         author_email="patryk.beza@gmail.com",
@@ -29,4 +29,9 @@ setup(
         ],
         platforms="POSIX",
         license="GPLv3",
+        install_requires=[
+            "myscm-common", "argcomplete", "colorlog", "argparse",
+            "configparser", "distro", "progressbar2", "pysftp", "pyyaml",
+            "termcolor", "diff-match-patch", "lockfile"
+        ]
 )

@@ -19,7 +19,7 @@ import myscm.common.main
 
 logger = logging.getLogger("myscm.client")
 
-CLI_CONFIG_PATH = "myscm/client/config/config.ini"
+CLI_CONFIG_PATH = "/etc/myscm-cli/config.ini"
 CLI_SECTION_NAME = "myscm-cli"
 
 

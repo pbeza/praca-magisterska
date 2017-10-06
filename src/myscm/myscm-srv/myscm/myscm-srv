@@ -21,7 +21,7 @@ import myscm.common.main
 
 logger = logging.getLogger("myscm.server")
 
-SRV_CONFIG_PATH = "myscm/server/config/config.ini"
+SRV_CONFIG_PATH = "/etc/myscm-srv/config.ini"
 SRV_SECTION_NAME = "myscm-srv"
 
 
