@@ -30,8 +30,8 @@ setup(
         platforms="POSIX",
         license="GPLv3",
         install_requires=[
-            "myscm-common", "argcomplete", "colorlog", "argparse",
-            "configparser", "distro", "progressbar2", "pysftp", "pyyaml",
-            "termcolor", "diff-match-patch", "lockfile"
+            "myscm-common", "aide", "openssl", "argcomplete", "colorlog",
+            "argparse", "configparser", "distro", "progressbar2", "pysftp",
+            "pyyaml", "termcolor", "diff-match-patch", "lockfile"
         ]
 )

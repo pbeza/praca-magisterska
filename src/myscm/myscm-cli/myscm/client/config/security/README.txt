@@ -9,9 +9,8 @@ SFTP.
 
 Files in this directory:
 
-  * certificate.pem        - x509 certificate in PEM format,
-  * client-rsa.key         - RSA private key for connecting to the client via SFTP,
-  * client-rsa.key.pub     - RSA public key for connecting to the client via SFTP.
+  * myscm-srv.cert.pem         - RSA private key for connecting to the client via SFTP,
+  * myscm-srv.cert.pub.pem     - RSA public key for connecting to the client via SFTP.
 
 See also:
 

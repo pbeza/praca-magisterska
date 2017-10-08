@@ -9,12 +9,12 @@ sign mySCM system images. All mySCM system images should be singed with SSL
 
 Files in this directory:
 
-  * request.cnf            - Certificate Signing Request (CSR) configuration,
-  * request.csr            - Certificate Signing Request (CSR) in PEM format,
-  * certificate.pem        - x509 certificate in PEM format,
-  * certificate.key        - certificate's encrypted private key in PEM format,
-  * certificate.key.pkcs12 - certificate's encrypted private key in PKCS format,
-  * certificate.key.pub    - certificate's encrypted public key in PEM format.
+  * request.cnf                - Certificate Signing Request (CSR) configuration,
+  * request.csr                - Certificate Signing Request (CSR) in PEM format,
+  * myscm-srv.cert.pem         - x509 certificate in PEM format,
+  * myscm-srv.cert.priv.pem    - certificate's encrypted private key in PEM format,
+  * myscm-srv.cert.priv.pkcs12 - certificate's encrypted private key in PKCS format,
+  * myscm-srv.cert.pub.pem     - certificate's encrypted public key in PEM format.
 
 See also:
 

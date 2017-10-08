@@ -30,9 +30,9 @@ myscm-cli counterpart.""",
         license="GPLv3+",
         scripts=["myscm/myscm-cli"],
         install_requires=[
-            "myscm-common", "openssl", "argcomplete", "colorlog", "argparse",
-            "configparser", "distro", "progressbar2", "pysftp", "pyyaml",
-            "termcolor", "diff-match-patch", "lockfile", "paramiko"
+            "myscm-common", "aide", "openssl", "argcomplete", "colorlog",
+            "argparse", "configparser", "distro", "progressbar2", "pysftp",
+            "pyyaml", "termcolor", "diff-match-patch", "lockfile", "paramiko"
         ],
         data_files=[
             ("/etc/myscm-cli", ["myscm/client/config/config.ini"]),

@@ -30,9 +30,9 @@ myscm-srv counterpart.""",
         license="GPLv3+",
         scripts=["myscm/myscm-srv"],
         install_requires=[
-            "myscm-common", "openssl", "argcomplete", "colorlog", "argparse",
-            "configparser", "distro", "progressbar2", "pysftp", "pyyaml",
-            "termcolor", "diff-match-patch", "lockfile"
+            "myscm-common", "aide", "openssl", "argcomplete", "colorlog",
+            "argparse", "configparser", "distro", "progressbar2", "pysftp",
+            "pyyaml", "termcolor", "diff-match-patch", "lockfile", "apt-file"
         ],
         data_files=[
             ("/etc/myscm-srv", ["myscm/server/config/aide.conf"]),

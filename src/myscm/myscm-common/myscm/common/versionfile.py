@@ -31,7 +31,7 @@ class NotIntegerVersionFileError(DetailedVersionFileError):
     pass
 
 
-class NegativeIntegerInFileVersionFileError(DetailedVersionFileError):
+class OutOfAllowedRangeIntegerInFileVersionFileError(DetailedVersionFileError):
     pass
 
 
@@ -77,9 +77,10 @@ class VersionFile:
         except:
             raise NotIntegerVersionFileError("Integer was expected", ver)
 
-        if ver < 0:
-            raise NegativeIntegerInFileVersionFileError(
-                                           "Positive number was expected", ver)
+        if ver < self.starting_value:
+            raise OutOfAllowedRangeIntegerInFileVersionFileError(
+               "Number greater than {} was expected".format(
+                    self.starting_value), ver)
 
         self.version = ver
 

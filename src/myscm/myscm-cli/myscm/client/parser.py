@@ -188,7 +188,8 @@ class PeersListConfigOption(ValidatedFileConfigOption):
         self.config_path = config_path  # to check referred hostnames' sections
 
     def _assert_peers_list_valid(self, peers_str):
-        peers_list = peers_str.lstrip("[").rstrip("]").split(",")
+        peers_str = peers_str.lstrip("[").rstrip("]")
+        peers_list = peers_str.split(",") if peers_str else []
 
         for i in range(len(peers_list)):
             host = peers_list[i].strip()
