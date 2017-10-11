@@ -27,11 +27,14 @@ class SysImgExtractorError(ClientError):
 
 
 class SysImgExtractor:
+    """mySCM system image extractor."""
 
     def __init__(self, client_config):
         self.client_config = client_config
         self.sys_img_manager = SysImgManager(client_config)
-        self.sys_img_validator = SysImgValidator(self.client_config.distro_name)
+        self.sys_img_validator = SysImgValidator(
+                                        self.client_config.distro_name,
+                                        self.client_config.options.force_apply)
 
     def apply_sys_img(self):
         """Extract, validate and apply mySCM system image."""

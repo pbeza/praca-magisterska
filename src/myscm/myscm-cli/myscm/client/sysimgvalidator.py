@@ -19,12 +19,14 @@ class SysImgValidatorError(ClientError):
 
 
 class SysImgValidator:
+    """mySCM system image validator."""
 
     MD5SUM_LEN = 32
     SHA1SUM_LEN = 40
 
-    def __init__(self, distro_name):
+    def __init__(self, distro_name, force_apply=False):
         self.distro_name = distro_name
+        self.force_apply = force_apply
 
     def assert_sys_img_valid(self, sys_img_f):
         try:
@@ -88,7 +90,10 @@ class SysImgValidator:
         except KeyError:
             m = "Missing '{}' file in '{}' mySCM system image".format(
                     path, sys_img_f.name)
-            raise SysImgValidatorError(m)
+            if self.force_apply:
+                logger.warning("{} (ignoring)".format(m))
+            else:
+                raise SysImgValidatorError(m)
 
     def _run_assert_fun_for_each_line(self, path, sys_img_f, fun, n):
         all_lines = None
@@ -119,7 +124,10 @@ class SysImgValidator:
             m = "'{}' was about to be added during applying '{}' myscm-img "\
                 "but it already exists in the local filesystem.".format(
                     path, sys_img_f.name)
-            raise SysImgValidatorError(m)
+            if self.force_apply:
+                logger.warning("{} (ignoring)".format(m))
+            else:
+                raise SysImgValidatorError(m)
         else:
             m = "'{}' reported in added.txt doesn't exist yet in the local "\
                 "filesystem - it's OK since we want to add it to the system."\
@@ -294,7 +302,10 @@ class SysImgValidator:
             m = "File '{}' was declared in system's mySCM image changed "\
                 "files report as a '{}' but it isn't".format(
                     path, FileType(ftype_char).name)
-            raise SysImgValidatorError(m)
+            if self.force_apply:
+                logger.warning("{} (ignoring)".format(m))
+            else:
+                raise SysImgValidatorError(m)
 
     def _assert_file_checksums_valid(self, path, md5sum_str, sha1sum_str):
         self._assert_file_md5sum_valid(path, md5sum_str)
@@ -320,7 +331,10 @@ class SysImgValidator:
             m = "{} checksum of the '{}' file is '{}' instead of expected "\
                 "'{}' (read from mySCM system's image file)".format(
                     hash_name, path, computed_checksum, expected_checksum)
-            raise SysImgValidatorError(m)
+            if self.force_apply:
+                logger.warning("{} (ignoring)".format(m))
+            else:
+                raise SysImgValidatorError(m)
 
     def _get_hash_from_property_string(self, hash_str, path, checksum_len):
         checksum = self._get_expected_val_from_property_string(hash_str, path)
@@ -369,7 +383,10 @@ class SysImgValidator:
             m = "File size of the '{}' file is '{}' instead of expected '{}' "\
                 "(read from mySCM system's image file)".format(
                     path, local_file_size, expected_file_size)
-            raise SysImgValidatorError(m)
+            if self.force_apply:
+                logger.warning("{} (ignoring)".format(m))
+            else:
+                raise SysImgValidatorError(m)
 
     def _assert_changed_perm_valid(self, path, perm_str, file_stat):
         local_perm = oct(file_stat.st_mode)[2:]
@@ -379,15 +396,20 @@ class SysImgValidator:
             m = "Permissions of the '{}' file are {} instead of {} as they "\
                 "supposed to be (read from mySCM system's image file)".format(
                     path, local_perm, expected_perm)
-            raise SysImgValidatorError(m)
+            if self.force_apply:
+                logger.warning("{} (ignoring)".format(m))
+            else:
+                raise SysImgValidatorError(m)
 
     def _assert_changed_uid_valid(self, path, uid_str, file_stat):
         local_file_uid = file_stat.st_uid
-        self._assert_changed_int_valid(path, local_file_uid, uid_str, "UID")
+        self._assert_changed_int_valid(path, local_file_uid, uid_str, "UID",
+                                       self.force_apply)
 
     def _assert_changed_gid_valid(self, path, gid_str, file_stat):
         local_file_gid = file_stat.st_gid
-        self._assert_changed_int_valid(path, local_file_gid, gid_str, "GID")
+        self._assert_changed_int_valid(path, local_file_gid, gid_str, "GID",
+                                       self.force_apply)
 
     def _assert_changed_mtime_valid(self, path, mtime_str, file_stat):
         local_mtime = int(file_stat.st_mtime)  # from float
@@ -402,7 +424,7 @@ class SysImgValidator:
     def _assert_changed_lcount_valid(self, path, lcount_str, file_stat):
         local_lcount = file_stat.st_nlink
         self._assert_changed_int_valid(path, local_lcount, lcount_str,
-                                       "lcount")
+                                       "lcount", self.force_apply)
 
     def _assert_changed_int_valid(self, path, local_val, val_str, name,
                                   noexcept=False):
@@ -413,7 +435,10 @@ class SysImgValidator:
         except ValueError:
             m = "{} of the '{}' file is not integer as it supposed to be "\
                 "(is: '{}')".format(name, path, expected_val)
-            raise SysImgValidatorError(m)
+            if self.force_apply:
+                logger.warning("{} (ignoring)".format(m))
+            else:
+                raise SysImgValidatorError(m)
 
         if local_val != expected_val:
             m = "{} of the '{}' file is '{}' instead of expected '{}' (read "\
