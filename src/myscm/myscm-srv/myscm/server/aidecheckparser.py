@@ -155,7 +155,7 @@ class AIDECheckParser:
     def _get_simple_aide_entry(self, line):
         """Get AIDE summarize string and file path."""
 
-        regex_str = r"\s*(.*):\s*(.*)\s*"
+        regex_str = r"\s*(.*?):\s*(.*)\s*"
         regex = re.compile(regex_str)
         match = regex.fullmatch(line)
 
