@@ -2,6 +2,7 @@
 import logging
 import os
 import shutil
+import binaryornot.check
 
 from myscm.common.cmd import long_run_cmd, run_check_cmd, CommandLineError
 from myscm.server.aidedbmanager import AIDEDatabasesManager
@@ -120,10 +121,10 @@ class Scanner:
             os.makedirs(os.path.dirname(dst_file_path), exist_ok=True)
 
             if os.path.isdir(src):
-                shutil.copytree(src, dst_file_path)
+                shutil.copytree(src, dst_file_path, ignore=self.ignore_handler)
                 logger.debug("'{}' directory copied recursively successfully "
                              "to '{}' directory.".format(src, dst_file_path))
-            else:
+            elif check_if_copy_file(src):
                 shutil.copy2(src, dst_file_path)
                 logger.debug("'{}' file copied successfully.".format(
                              dst_file_path))
@@ -135,6 +136,29 @@ class Scanner:
             m = "Unable to create temporary directory '{}' for storing "\
                 "result of the AIDE --init call"
             raise ScannerError(m, e) from e
+
+    def check_if_copy_file(self, path):
+        if_copy = None
+        details = None
+
+        try:
+            if_copy = not binaryornot.check.is_binary(path)
+        except Exception as e:
+            if_copy = False
+            details = e
+
+        m = "'{}' is not copied since it's non-text file".format(path)
+
+        if details:
+            m += ". Details: {}".format(details)
+
+        if not if_copy:
+            logger.debug(m)
+
+        return if_copy
+
+    def ignore_handler(self, dir_path, dir_content):
+        return [f for f in dir_content if not self.check_if_copy_file(os.path.join(dir_path, f))]
 
 
 def is_reference_aide_db_outdated(server_config):

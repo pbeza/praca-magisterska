@@ -32,7 +32,8 @@ myscm-srv counterpart.""",
         install_requires=[
             "myscm-common", "aide", "openssl", "argcomplete", "colorlog",
             "argparse", "configparser", "distro", "progressbar2", "pysftp",
-            "pyyaml", "termcolor", "diff-match-patch", "lockfile", "apt-file"
+            "pyyaml", "termcolor", "diff-match-patch", "lockfile", "apt-file",
+            "binaryornot"
         ],
         data_files=[
             ("/etc/myscm-srv", ["myscm/server/config/aide.conf"]),

@@ -8,7 +8,7 @@ MYSCM_CONFIG_TMP_DIR=$(MYSCM_TMP_DIR)/config
 
 .PHONY: all build dist list clean copy2tmp
 
-all: build
+all: build copy2tmp
 
 build:
 	$(MAKE) -C $(MYSCM-COMMON_DIR) build
