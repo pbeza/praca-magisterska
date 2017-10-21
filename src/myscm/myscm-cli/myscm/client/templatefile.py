@@ -13,7 +13,7 @@ class TemplateFileError(ClientError):
 
 class TemplateFile:
 
-    VAR_NAME_PLACEHOLDER = "$[{}]$"
+    VAR_NAME_PLACEHOLDER = "<MYSCM:{}/>"
 
     def __init__(self, template_path):
         self.template_path = template_path

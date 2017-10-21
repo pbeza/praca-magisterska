@@ -140,9 +140,11 @@ class Scanner:
     def check_if_copy_file(self, path):
         if_copy = None
         details = None
+        is_dir = None
 
         try:
             if_copy = not binaryornot.check.is_binary(path)
+            is_dir = os.path.isdir(path)
         except Exception as e:
             if_copy = False
             details = e
@@ -152,7 +154,7 @@ class Scanner:
         if details:
             m += ". Details: {}".format(details)
 
-        if not if_copy:
+        if not if_copy and not is_dir:
             logger.debug(m)
 
         return if_copy

@@ -430,37 +430,35 @@ Każdy z~wierszy \ref{line:aidedbnew-first-from-range}--\ref{line:aidedbnew-last
 \chapter{Płyta CD}
 \label{ch:cd-appendix}
 
-Do~pracy dołączono płytę z~zawartością części aplikacyjnej niniejszej pracy magisterskiej. Drzewo najważniejszych\footnote{Zaprezentowane drzewo katalogów nie prezentuje całej zawartości płyty~CD, a~jedynie wybrane, najistotniejsze katalogi i~pliki do~głębokości drzewa równej~4. Drzewo powstało przez wybranie najważniejszych plików z~wyjścia wywołania komendy \mbox{\texttt{tree~-L~4}}~\cite{tree-manual}.} katalogów i~plików zapisanych na~płycie~CD: % TODO
+Do~pracy dołączono płytę z~zawartością części aplikacyjnej niniejszej pracy magisterskiej. Drzewo najważniejszych katalogów i~plików zapisanych na~płycie~CD\footnote{Zaprezentowane drzewo katalogów nie prezentuje całej zawartości płyty~CD, a~jedynie wybrane, najistotniejsze katalogi (katalogi kończą się znakiem ukośnika \texttt{/}) i~pliki do~głębokości drzewa równej~4. Drzewo powstało przez wybranie najważniejszych katalogów i~plików z~wyjścia wywołania komendy \mbox{\texttt{tree~-L~4}}~\cite{tree-manual}.}:
 
 {\footnotesize
 \dirtree{%
 .1 /.
-.2 bin.
-.3 packages.
-.4 debian.
-.5 myscm-srv.deb.
+.2 bin/.
+.3 packages/.
+.4 debian/.
+.5 myscm-common.deb.
 .5 myscm-cli.deb.
-.4 arch.
-.5 myscm-srv.tar.xz.
-.5 myscm-cli.tar.xz.
-.2 config.
-.3 server.
-.4 certificate.pem.
-.4 request.cnf.
-.4 request.csr.
-.4 rsa\_aes256\_4096.key.
-.4 rsa\_aes256\_4096.key.pkcs12.
-.2 data.
-.2 doc.
-.3 python.
-.3 latex.
-.4 chapters.
-.4 img.
-.3 poster.
-.2 lib.
-.2 src.
-.3 client.
-.3 server.
+.5 myscm-srv.deb.
+.4 arch/.
+.5 myscm-common.pkg.tar.xz.
+.5 myscm-cli.pkg.tar.xz.
+.5 myscm-srv.pkg.tar.xz.
+.2 doc/.
+.3 doxygen/.
+.3 latex/.
+.4 chapters/.
+.4 img/.
+.3 man/.
+.3 poster/.
+.3 prezentacja/.
+.2 src/.
+.3 myscm/.
+.4 myscm-cli/.
+.4 myscm-common/.
+.4 myscm-srv/.
+.3 scripts/.
 }
 }
 
@@ -480,8 +478,11 @@ Zgodnie z~wytycznymi Wydziału MiNI, dotyczącymi procedury związanej z~obroną
 Poster został wykonany w~grafice wektorowej w~programie~\texttt{Inkscape} i~został załączony w~dwóch formach, w~postaci:
 \begin{enumerate}
 	\item wydruku na~arkuszu formatu~A3,
-	\item pliku \mbox{\texttt{poster.svg}}~(patrz załącznik~\ref{ch:cd-appendix}), nagranym na~załączonej płycie~CD.
+	\item pliku \mbox{\texttt{poster.pdf}}~(patrz załącznik~\ref{ch:cd-appendix}), nagranym na~załączonej płycie~CD.
 \end{enumerate}
+
+\vspace*{1.5em}
+\centerline{\setlength{\fboxsep}{0pt}\fbox{\includegraphics[height=0.72\textwidth]{img/poster}}}
 
 \addtocontents{toc}{\endgroup}
 
