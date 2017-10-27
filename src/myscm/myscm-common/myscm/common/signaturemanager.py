@@ -41,7 +41,7 @@ class SignatureManager:
 
         # To manually verify validity of the signature run:
         # openssl dgst -sha256 -verify cert_public_key_file.pub -signature cert_file.crt signed_file_path
-        # TODO try: gpg --keyserver-options auto-key-retrieve --verify signed_file_path
+        # try: gpg --keyserver-options auto-key-retrieve --verify signed_file_path
 
         return output_path
 

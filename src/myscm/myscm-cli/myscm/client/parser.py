@@ -89,7 +89,7 @@ class UpdateSysImgConfigOption(ValidatedCommandLineConfigOption):
         return host
 
     def _assert_respective_config_section_exist(self, host):
-        # TODO Below parser can be passed as param instead of creating new one
+        # Below parser can be passed as param instead of creating new one
         parser = configparser.ConfigParser()
         parser.optionxform = str  # case sensitive
         parser.read(self.config_path)
@@ -206,7 +206,7 @@ class PeersListConfigOption(ValidatedFileConfigOption):
 
     def _peers_list_to_extended_dict(self, peers_list):
         # Every hostname has its own section, thus need ConfigParser
-        # TODO Below parser can be passed as param instead of creating new one
+        # Below parser can be passed as param instead of creating new one
         parser = configparser.ConfigParser()
         parser.optionxform = str  # case sensitive
         parser.read(self.config_path)
@@ -420,6 +420,17 @@ class RecentlyAppliedSysImgVerPathConfigOption(ValidatedFileConfigOption):
         return recent_img_ver_path
 
 
+class DryRunConfigOption(CommandLineFlagConfigOption):
+    """Configuration option read from CLI specifying to not make any real
+       changes (--noop or no-operation mode)."""
+
+    def __init__(self):
+        super().__init__(
+            "DryRun", "--dry-run",
+            help="don't make any actions; print which actions would be taken "
+                 "if dry run was turned off")
+
+
 class PrintSysImgVerConfigOption(CommandLineFlagConfigOption):
 
     def __init__(self):
@@ -463,6 +474,7 @@ class ClientConfigParser(ConfigParser):
             SysImgExtractDirConfigOption(),
             SysImgDownloadDirConfigOption(),
             RecentlyAppliedSysImgVerPathConfigOption(),
+            DryRunConfigOption(),
             PrintSysImgVerConfigOption()
         ]
         super().__init__(config_path, config_section_name,

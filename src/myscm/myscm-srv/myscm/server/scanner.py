@@ -143,8 +143,8 @@ class Scanner:
         is_dir = None
 
         try:
-            if_copy = not binaryornot.check.is_binary(path)
             is_dir = os.path.isdir(path)
+            if_copy = not binaryornot.check.is_binary(path)
         except Exception as e:
             if_copy = False
             details = e

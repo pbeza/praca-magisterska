@@ -1,0 +1,44 @@
+# Maintainer: Patryk Bęza <patryk.beza@gmail.com>
+pkgname=('myscm-srv' 'myscm-cli' 'myscm-common')
+pkgver=1.0.0
+pkgrel=1
+arch=('any')
+license=('GPL3')
+#groups=('myscm-cli' 'myscm-common')
+pkgbase='myscm'
+
+package_myscm-srv() {
+	pkgdesc='Server side of the Simple Software Configuration Management (SCM) tool that is intended to create system images that will be applied by the myscm-cli which is myscm-srv counterpart'
+	provides=('myscm-common')
+	depends=(
+		'myscm-common' 'aide' 'openssl' 'argcomplete' 'colorlog'
+		'argparse' 'configparser' 'distro' 'progressbar2' 'pysftp'
+		'pyyaml' 'termcolor' 'diff-match-patch' 'lockfile' 'apt-file'
+		'binaryornot'
+	)
+	cd "$srcdir/$pkgname"
+	python setup.py install --root="$pkgdir/" --optimize=1
+}
+
+package_myscm-cli() {
+	pkgdesc='Client side of the Simple Software Configuration Management (SCM) tool that is intended to apply system images created with myscm-srv application which is myscm-cli counterpart'
+	provides=('myscm-common')
+	depends=(
+		'myscm-common' 'aide' 'openssl' 'argcomplete' 'colorlog'
+		'argparse' 'configparser' 'distro' 'progressbar2' 'pysftp'
+		'pyyaml' 'termcolor' 'diff-match-patch' 'lockfile' 'paramiko'
+	)
+	cd "$srcdir/$pkgname"
+	python setup.py install --root="$pkgdir/" --optimize=1
+}
+
+package_myscm-common() {
+	pkgdesc='Common source code for myscm-srv and myscm-cli'
+	depends=(
+		'aide' 'openssl' 'argcomplete' 'colorlog' 'argparse'
+		'configparser' 'distro' 'progressbar2' 'pysftp' 'pyyaml'
+		'termcolor' 'diff-match-patch' 'lockfile'
+	)
+	cd "$srcdir/$pkgname"
+	python setup.py install --root="$pkgdir/" --optimize=1
+}

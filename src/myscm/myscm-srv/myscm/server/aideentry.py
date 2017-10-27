@@ -234,7 +234,7 @@ class AIDEEntry:
         self.aide_info_str = aide_info_str
         self.ftype = FileType(self.aide_info_str[0])
         self.entry_type = entry_type
-        # TODO properties before change (loaded elsewhere)
+        # properties before change (loaded elsewhere)
         self.aide_prev_properties = None
 
     def get_full_path(self):

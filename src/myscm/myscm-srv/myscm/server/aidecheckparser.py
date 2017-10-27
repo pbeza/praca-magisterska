@@ -115,7 +115,7 @@ class AIDECheckParser:
                                 len(entries.changed_entries)))
 
     def _set_changed_properties_prev_values(self, changed_entries):
-        # TODO this method shouldn't be here
+        # This method doesn't fit here
 
         s = set(changed_entries.keys())
         old_properties = self.aide_cli_db_parser.get_files_properties(s)

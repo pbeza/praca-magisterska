@@ -63,7 +63,9 @@ class SysImgExtractor:
                     sys_img_f.name)
             raise SysImgExtractorError(m, e) from e
 
-        self.sys_img_manager.update_current_system_state_version(sys_img_ver)
+        if not self.client_config.options.dry_run:
+            self.sys_img_manager.update_current_system_state_version(sys_img_ver)
+
         self._remove_extracted_sys_img_dir()
 
         logger.info("Applying changes from '{}' mySCM system image ended "
@@ -186,10 +188,11 @@ class SysImgExtractor:
 
             if not os.path.exists(dst_dir):
                 logger.debug("Creating '{}'.".format(dst_dir))
-                os.makedirs(dst_dir, exist_ok=True)
-                fstat = os.stat(src_dir)
-                shutil.chown(dst_dir, user=fstat.st_uid, group=fstat.st_gid)
-                shutil.copystat(src_dir, dst_dir, follow_symlinks=False)
+                if not self.client_config.options.dry_run:
+                    os.makedirs(dst_dir, exist_ok=True)
+                    fstat = os.stat(src_dir)
+                    shutil.chown(dst_dir, user=fstat.st_uid, group=fstat.st_gid)
+                    shutil.copystat(src_dir, dst_dir, follow_symlinks=False)
 
             # Move all symlinks to directories
 
@@ -211,7 +214,8 @@ class SysImgExtractor:
                         logger.warning(m)
 
                     if move_symlink:
-                        shutil.move(src_symdir, dst_symdir)
+                        if not self.client_config.options.dry_run:
+                            shutil.move(src_symdir, dst_symdir)
                         m = "Moving symlink '{}' to '{}'.".format(src_symdir,
                                                                   dst_symdir)
                         logger.debug(m)
@@ -251,15 +255,20 @@ class SysImgExtractor:
             logger.debug("Replacing template file '{}' with values and "
                          "saving the result in '{}'.".format(src_file,
                                                              dst_file))
-            templater.replace_placeholders_with_values(dst_file)
-            os.remove(src_file)
+            if not self.client_config.options.dry_run:
+                templater.replace_placeholders_with_values(dst_file)
+                os.remove(src_file)
         else:
-            shutil.move(src_file, dst_file, copy_function=self._mycopy2)
+            if not self.client_config.options.dry_run:
+                shutil.move(src_file, dst_file, copy_function=self._mycopy2)
             m = "Moving '{}' to '{}'.".format(src_file, dst_file)
             logger.debug(m)
 
     def _remove_empty_dirs(self, src):
         logger.debug("Removing empty directories from '{}'.".format(src))
+
+        if self.client_config.options.dry_run:
+            return
 
         for path, _, _ in os.walk(src, topdown=False, followlinks=False):
             try:
@@ -335,8 +344,6 @@ class SysImgExtractor:
         new_gid, old_gid = get_new_old_property_from_string(values[10], path)
         self._change_file_uid_gid(new_uid, old_uid, new_gid, old_gid, path)
 
-        # TODO TODO TODO Run apt-get or pacman if file is part of the package
-
         # Update progressbar
 
         bar = args[0]
@@ -348,7 +355,8 @@ class SysImgExtractor:
             m = "Changing permissions of the '{}' to {}.".format(
                     path, oct(new_hex_perm))
             logger.debug(m)
-            os.chmod(path, new_hex_perm)  # follow_symlinks=False ?
+            if not self.client_config.options.dry_run:
+                os.chmod(path, new_hex_perm)  # follow_symlinks=False ?
 
     def _change_file_uid_gid(self, new_uid, old_uid, new_gid, old_gid, path):
         uid = new_uid if old_uid != "." else -1
@@ -365,7 +373,8 @@ class SysImgExtractor:
                 m = "Changing UID, GID of the '{}' from {}, {} to {}, {}."\
                     .format(path, old_uid, old_gid, new_uid, new_gid)
                 # shutil.chown(path, uid, gid) doesn't have follow_symlinks arg
-                os.chown(path, int(uid), int(gid), follow_symlinks=False)
+                if not self.client_config.options.dry_run:
+                    os.chown(path, int(uid), int(gid), follow_symlinks=False)
             except Exception as e:
                 m = "Failed to change UID, GID of the '{}' from {}, {} to "\
                     "{}, {}. Details: '{}'.".format(
@@ -382,8 +391,8 @@ class SysImgExtractor:
         if os.path.isfile(diff_path):
             self._apply_patch_for_file(path, diff_path)
             os.remove(diff_path)
-        elif os.path.isfile(orig_path):
-            self._move_changed_file(path, orig_path)
+        elif os.path.isfile(path):
+            self._move_changed_file(orig_path, path)
         else:
             m = "Neither '{}' nor '{}' was found for '{}' which is marked as "\
                 "changed. It is acceptable if myscm-cli applied changes "\
@@ -398,10 +407,14 @@ class SysImgExtractor:
 
         logger.debug("Moving '{}' to '{}'.".format(src, dst))
 
-        shutil.move(src, dst, copy_function=self._mycopy2)  # overwrite file
+        if not self.client_config.options.dry_run:
+            shutil.move(src, dst, copy_function=self._mycopy2)  # overwrite file
 
     def _apply_patch_for_file(self, path, patch_path):
         logger.debug("Applying patch '{}' for '{}'.".format(patch_path, path))
+
+        if self.client_config.options.dry_run:
+            return
 
         patch_text = None
 
@@ -451,9 +464,8 @@ class SysImgExtractor:
         m = "Removing '{}'{}".format(path, pkg_msg)
         logger.debug(m)
 
-        os.remove(path)
+        if not self.client_config.options.dry_run:
+            os.remove(path)
 
         bar = args[0]
         bar.update(bar.value + 1)
-
-        # TODO TODO TODO run apt-get or pacman

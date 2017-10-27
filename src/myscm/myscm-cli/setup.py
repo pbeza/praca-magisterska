@@ -4,7 +4,7 @@ __author__ = "Patryk Bęza"
 
 setup(
         name="myscm-cli",
-        version="0.9.0",
+        version="1.0.0",
         description="Client side of the My Simple Software Configuration Management (SCM) tool",
         long_description="""Client side of the Simple Software Configuration Management (SCM) tool that is
 intended to apply system images created with myscm-srv applicationwhich is

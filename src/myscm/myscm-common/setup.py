@@ -4,7 +4,7 @@ __author__ = "Patryk Bęza"
 
 setup(
         name="myscm-common",
-        version="0.9.0",
+        version="1.0.0",
         description=("Base of the Simple Software Configuration Management "
                      "(SCM) tool"),
         long_description="Base library of the Simple Software Configuration "
@@ -30,8 +30,8 @@ setup(
         platforms="POSIX",
         license="GPLv3",
         install_requires=[
-            "myscm-common", "aide", "openssl", "argcomplete", "colorlog",
-            "argparse", "configparser", "distro", "progressbar2", "pysftp",
-            "pyyaml", "termcolor", "diff-match-patch", "lockfile"
+            "aide", "openssl", "argcomplete", "colorlog", "argparse",
+            "configparser", "distro", "progressbar2", "pysftp", "pyyaml",
+            "termcolor", "diff-match-patch", "lockfile"
         ]
 )

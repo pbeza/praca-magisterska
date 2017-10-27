@@ -153,6 +153,10 @@ command line option.
     assumed to be present in the same directory as *PATH* and have the same
     filename as *PATH* with '.sig' suffix appended.
 
+\--dry-run
+:   Simulate applying changes.  This option makes sense only with
+    `--apply-img` and `--upgrade` options.
+
 -v, \--verbose
 :   Increase output and log verbosity.  Default value is `0`.
 
