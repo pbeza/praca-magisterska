@@ -2,6 +2,7 @@
 
 
 class MySCMError(Exception):
+    """Representation of the mySCM error."""
 
     def __init__(self, message, internal_error=None, verbose=True):
         super().__init__(message)

@@ -266,17 +266,40 @@ Cechy rozwiązania:
 
 %------------------------------------------------------------------------------
 
+\begin{frame}{Testy}
+
+\begin{itemize}
+	\item trudność automatyzacji testów
+	\item ,,małe'' testy --- częsciowo automatyczne
+	\item ,,duże'' testy --- manualne
+\end{itemize}
+
+\end{frame}
+
+\note[itemize]{
+	\item zwrócenie uwagi na to, że~w~trakcie implementacji działanie programu było testowane na~stosunkowo niewielkim drzewie plików (,,małe'' testy)
+	\item powiedzenie, że~,,duże'' testy odbyły się na~koniec projektu na~dwóch systemach i~zakończyły się wykryciem kilku drobnych błędów, które zosały naprawione (a~testy z~cukcesem powtórzone)
+}
+
+
+%------------------------------------------------------------------------------
+
 \section{Implementacja}
 
 \begin{frame}{Implementacja}
 
 \begin{itemize}
-	\item początkowo w~języku~\texttt{C}, ostatecznie w~\texttt{Python~3}
-	\item przetestowana obsługa dystrybucji \texttt{Arch Linux} i~\texttt{Debian}
-	\item wykorzystanie m.in.~\texttt{AIDE}, \texttt{OpenSSL}
+	\item początkowo w~języku~\texttt{C}, ostatecznie w~\textbf{\texttt{Python~3}}
+	\item przetestowana obsługa dystrybucjach \textbf{\texttt{Arch Linux}} i~\textbf{\texttt{Debian}}
+	\item wykorzystanie m.in.~bibliotek \textbf{\texttt{AIDE}} i~\textbf{texttt{OpenSSL}}
 \end{itemize}
 
 \end{frame}
+
+\note[itemize]{
+	\item napomknienie o~tym, że~na~początku planowałem zaimplementować całe rozwiązanie w~języku \texttt{C}, ale~okazało się, że~dużo łatwiej było wykorzystać język wysokopoziomowy (jakim jest np.~\texttt{Python})
+	\item wszystkie wspomniane \textbf{istniejące rozwiązania są~w~językach wysokopoziomowych} (poza \emph{CFEngine} wspomnianym w~pracy)
+}
 
 %------------------------------------------------------------------------------
 
@@ -285,9 +308,10 @@ Cechy rozwiązania:
 \begin{frame}{Dalsze możliwe kierunki rozwoju}
 
 \begin{itemize}
-	\item dodanie obsługi innych protokołów wymiany plików lub~zastąpienie \texttt{SFTP} protokołem \emph{multicastowym}
-	\item obsługa kłopotliwych sytuacji np.~podczas aktualizacji jądra systemu (\texttt{GRUB})
-	\item dodanie możliwości tworzenia obrazów zmian na~podstawie dowolnych dwóch wyników skanowań systemu wzorcowego
+	\item \textbf{dodanie obsługi innych protokołów wymiany plików} lub~zastąpienie \texttt{SFTP} protokołem \emph{multicastowym}
+	\item \textbf{obsługa kłopotliwych sytuacji} np.~podczas aktualizacji jądra systemu (\texttt{GRUB})
+	\item dodanie możliwości tworzenia obrazów zmian na~podstawie \textbf{dowolnych dwóch wyników skanowań} systemu wzorcowego
+	\item \textbf{lepsza obsługa sytuacji awaryjnych} --- np.~nagłe przerwanie procesu zastosowania obrazu zmian powinno być tranzakcyjne (wszystko albo nic)
 \end{itemize}
 
 \end{frame}
@@ -299,8 +323,10 @@ Cechy rozwiązania:
 \begin{frame}{Podsumowanie}
 
 \begin{itemize}
-	\item zaimplementowano aplikację przeznaczoną do~\textbf{tworzenia, dostosowywania i~zastosowania obrazów} zmian konfiguracji systemu wzorcowego
-	\item autentyczność (uwierzytelnienie) wygenerowanego obrazu zmian jest zapewniona przez \textbf{podpis cyfrowy~SSL}
+	\item \textbf{zaimplementowano aplikację} przeznaczoną do~\textbf{tworzenia, dostosowywania i~zastosowania obrazów} zmian konfiguracji systemu wzorcowego dla~systemów \texttt{GNU/Linux}
+	\item \textbf{opisano 4~najpopularniejsze istniejące rozwiązania} i~wspomniano o~innych
+	\item udokumentowano sposób działania zaimplementowanej aplikacji (\LaTeX + dokumentacja w~kodzie źródłowym)
+	\item \textbf{autentyczność} (uwierzytelnienie) wygenerowanego obrazu zmian jest \textbf{zapewniona przez podpis cyfrowy~SSL}
 	\item \textbf{klienci mogą pobrać obraz zmian przez \texttt{SFTP}} od~innego klienta lub~od~stacji wzorcowej
 \end{itemize}
 

@@ -17,6 +17,7 @@ class SFTPSysImgDownloaderError(ClientError):
 
 
 class SFTPSysImgDownloader:
+    """SFTP system image downloader."""
 
     def __init__(self, client_config):
         super().__init__()

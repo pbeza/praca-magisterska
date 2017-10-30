@@ -14,6 +14,8 @@ class TemplateFileError(ClientError):
 
 
 class TemplateFile:
+    """Representation of the configuration template file holding
+       client-specific variable placeholders."""
 
     VAR_NAME_PLACEHOLDER = "<MYSCM:{}/>"
     ENV_VAR_NAME_REGEX_STR = "(<MYSCM:ENV:(.*?)/>)"

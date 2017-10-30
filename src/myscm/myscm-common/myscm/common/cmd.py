@@ -21,6 +21,8 @@ def run_check_cmd(aide_config_path, check_exitcode=True,
 def long_run_cmd(cmd, check_exitcode=True, stdout_opt=subprocess.PIPE,
                  stderr_opt=subprocess.STDOUT, suffix_msg=None,
                  debug_log=False):
+    """Run long-lasting command."""
+
     suffix_msg = " {}".format(suffix_msg) if suffix_msg else ""
     suffix_msg += ". It may take some time to finish..."
     return run_cmd(cmd, check_exitcode, stdout_opt, stderr_opt, suffix_msg,
