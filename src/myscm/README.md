@@ -7,11 +7,11 @@ This project is a part of the master thesis that implements simple [Software Con
 This is main directory that contains source code of the whole project. Application consists of 2 parts:
 
 * **Server** – that is reference software and configuration model for clients. Server is responsible for:
-	* scanning and detecting server's software and configuration changes using [AIDE][10],
+    * scanning and detecting server's software and configuration changes using [AIDE][10],
     * generating [GNU/Linux][11] system image that will be applied by the clients.
 * **Client** – that is machine that software and configuration will be modified to match server's system image. Client is responsible for:
-    * appling system image prepared by the server,
-	* downloading system image that will be applied on client's machine,
+    * applying system image prepared by the server,
+    * downloading system image that will be applied on client's machine,
     * sharing the system image with other clients.
 
 ### Implementation ###
