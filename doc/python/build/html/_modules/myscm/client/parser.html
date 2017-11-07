@@ -1,0 +1,569 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>myscm.client.parser &#8212; MySCM 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for myscm.client.parser</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">configparser</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+
+<span class="kn">import</span> <span class="nn">myscm.client.config</span>
+<span class="kn">import</span> <span class="nn">myscm.common.constants</span>
+<span class="kn">import</span> <span class="nn">myscm.common.parser</span>
+
+<span class="kn">from</span> <span class="nn">myscm.client.myscmimgverfile</span> <span class="k">import</span> <span class="n">MySCMImgVersionFile</span>
+<span class="kn">from</span> <span class="nn">myscm.client.sysimgupdater</span> <span class="k">import</span> <span class="n">SysImgUpdater</span>
+<span class="kn">from</span> <span class="nn">myscm.common.parser</span> <span class="k">import</span> <span class="n">CommandLineFlagConfigOption</span>
+<span class="kn">from</span> <span class="nn">myscm.common.parser</span> <span class="k">import</span> <span class="n">ConfigParser</span>
+<span class="kn">from</span> <span class="nn">myscm.common.parser</span> <span class="k">import</span> <span class="n">GeneralChoiceConfigOption</span>
+<span class="kn">from</span> <span class="nn">myscm.common.parser</span> <span class="k">import</span> <span class="n">GeneralConfigOption</span>
+<span class="kn">from</span> <span class="nn">myscm.common.parser</span> <span class="k">import</span> <span class="n">ParserError</span>
+<span class="kn">from</span> <span class="nn">myscm.common.parser</span> <span class="k">import</span> <span class="n">ValidatedCommandLineConfigOption</span>
+<span class="kn">from</span> <span class="nn">myscm.common.parser</span> <span class="k">import</span> <span class="n">ValidatedFileConfigOption</span>
+<span class="kn">from</span> <span class="nn">myscm.common.signaturemanager</span> <span class="k">import</span> <span class="n">SignatureManager</span>
+<span class="kn">from</span> <span class="nn">myscm.server.sysimggenerator</span> <span class="k">import</span> <span class="n">SystemImageGenerator</span>
+
+<span class="n">_APP_VERSION</span> <span class="o">=</span> <span class="n">myscm</span><span class="o">.</span><span class="n">common</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">get_app_version</span><span class="p">(</span><span class="s2">&quot;myscm-cli&quot;</span><span class="p">)</span>
+<span class="n">_HELP_DESC</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;This is client side of the mySCM application – simple Software</span>
+<span class="s1">Configuration Management (SCM) tool for managing software and configuration of</span>
+<span class="s1">the clients running GNU/Linux distributions. This application is intended to</span>
+<span class="s1">apply GNU/Linux system image created with myscm-srv application.&#39;&#39;&#39;</span>
+
+
+<div class="viewcode-block" id="ClientParserError"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.ClientParserError">[docs]</a><span class="k">class</span> <span class="nc">ClientParserError</span><span class="p">(</span><span class="n">ParserError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<span class="c1">##################################</span>
+<span class="c1"># Client&#39;s configuration options #</span>
+<span class="c1">##################################</span>
+
+
+<div class="viewcode-block" id="ApplySysImgConfigOption"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.ApplySysImgConfigOption">[docs]</a><span class="k">class</span> <span class="nc">ApplySysImgConfigOption</span><span class="p">(</span><span class="n">ValidatedCommandLineConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from CLI specifying to apply changes read</span>
+<span class="sd">       from given system image (which is tar.gz archive).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;ApplyImg&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_sys_img_version_valid</span><span class="p">,</span>
+            <span class="s2">&quot;--apply-img&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;SYS_IMG_VER&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assert_sys_img_version_valid</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;apply changes to the system updating it to the system state &quot;</span>
+                 <span class="s2">&quot;identified by unique SYS_IMG_VER integer (which is Y &quot;</span>
+                 <span class="s2">&quot;integer in </span><span class="si">{}</span><span class="s2">; X is integer representing current state of &quot;</span>
+                 <span class="s2">&quot;the system)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">MYSCM_IMG_FILE_NAME</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">_assert_sys_img_version_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_ver</span><span class="p">):</span>
+        <span class="c1"># After parsing RecentlyAppliedSysImgVerPathConfigOption we need to</span>
+        <span class="c1"># check if system image myscm-img.X.Y.tar.gz exist (X is recently</span>
+        <span class="c1"># applied mySCM system image version and Y is sys_img_ver).</span>
+        <span class="k">return</span> <span class="n">myscm</span><span class="o">.</span><span class="n">common</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">assert_sys_img_ver_valid</span><span class="p">(</span><span class="n">sys_img_ver</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="UpdateSysImgConfigOption"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.UpdateSysImgConfigOption">[docs]</a><span class="k">class</span> <span class="nc">UpdateSysImgConfigOption</span><span class="p">(</span><span class="n">ValidatedCommandLineConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from CLI specifying to update system image</span>
+<span class="sd">       by downloading it from other client or server.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;UpdateSysImg&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_host_valid</span><span class="p">,</span> <span class="s2">&quot;--update&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;HOST&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assert_host_valid</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;?&quot;</span><span class="p">,</span>
+            <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;update system image by downloading it from one of the &quot;</span>
+                 <span class="s2">&quot;clients (chosen randomly) predefined in configuration file &quot;</span>
+                 <span class="s2">&quot;or by HOST if given; protocol that is used for connection &quot;</span>
+                 <span class="s2">&quot;is defined by --protocol option or by configuration file if &quot;</span>
+                 <span class="s2">&quot;--protocol option is not present&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_path</span> <span class="o">=</span> <span class="n">config_path</span>
+
+    <span class="k">def</span> <span class="nf">_assert_host_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">):</span>
+        <span class="n">is_bool_var</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_bool_var</span><span class="p">:</span>  <span class="c1"># take random if --update HOST not specified</span>
+            <span class="k">return</span> <span class="n">host</span>
+
+        <span class="n">valid_host</span> <span class="o">=</span> <span class="n">check_if_host_valid</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_respective_config_section_exist</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_host</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Not valid hostname &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">host</span>
+
+    <span class="k">def</span> <span class="nf">_assert_respective_config_section_exist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">):</span>
+        <span class="c1"># Below parser can be passed as param instead of creating new one</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">optionxform</span> <span class="o">=</span> <span class="nb">str</span>  <span class="c1"># case sensitive</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="p">)</span>
+        <span class="n">config_sections</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">sections</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">host</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config_sections</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Connection details of the host &#39;</span><span class="si">{}</span><span class="s2">&#39; are not specified in &quot;</span>\
+                <span class="s2">&quot;configuration file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="n">peers_list</span> <span class="o">=</span> <span class="n">parser</span><span class="p">[</span><span class="s2">&quot;myscm-cli&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PeersList&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">host</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">peers_list</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Specified host &#39;</span><span class="si">{}</span><span class="s2">&#39; needs to be in &#39;PeersList&#39; &quot;</span>\
+                <span class="s2">&quot;configuration file list to be able to use it&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="UpgradeSysImgConfigOption"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.UpgradeSysImgConfigOption">[docs]</a><span class="k">class</span> <span class="nc">UpgradeSysImgConfigOption</span><span class="p">(</span><span class="n">ValidatedCommandLineConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from CLI specifying to update system image</span>
+<span class="sd">       by downloading it from other client or server and then to apply</span>
+<span class="sd">       downloaded system image.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;UpgradeSysImg&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_sys_img_version_valid</span><span class="p">,</span>
+            <span class="s2">&quot;--upgrade&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;SYS_IMG_VER&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;?&quot;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assert_sys_img_version_valid</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;equivalent of running --update and --apply-img SYS_IMG_VER &quot;</span>
+                 <span class="s2">&quot;option; if SYS_IMG_VER is not given, then downloaded mySCM &quot;</span>
+                 <span class="s2">&quot;will be applied&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_sys_img_version_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_ver</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">myscm</span><span class="o">.</span><span class="n">common</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">assert_sys_img_ver_valid</span><span class="p">(</span><span class="n">sys_img_ver</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SSLCertConfigOption"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.SSLCertConfigOption">[docs]</a><span class="k">class</span> <span class="nc">SSLCertConfigOption</span><span class="p">(</span><span class="n">GeneralConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from file and/or CLI specifying SSL</span>
+<span class="sd">       certificate file path to verify system image created by myscm-srv.&quot;&quot;&quot;</span>
+
+    <span class="c1"># default if not provided in config file</span>
+    <span class="n">DEFAULT_SSL_CERT_PATH</span> <span class="o">=</span> <span class="s2">&quot;/etc/ssl/private/myscm-cli.sig&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ssl_cert_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;SSLCertPath&quot;</span><span class="p">,</span>
+            <span class="n">ssl_cert_path</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_SSL_CERT_PATH</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assert_ssl_cert_path_valid</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;--ssl-cert&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;PATH&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assert_ssl_cert_path_valid</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;full path to the server&#39;s SSL certificate that is being &quot;</span>
+                 <span class="s2">&quot;used to verify signature of the system image generated by &quot;</span>
+                 <span class="s2">&quot;the myscm-srv (default value: &#39;</span><span class="si">{}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_SSL_CERT_PATH</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_assert_ssl_cert_path_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cert_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;SSL certificate path option validator.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cert_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Given SSL certificate file &#39;</span><span class="si">{}</span><span class="s2">&#39; probably doesn&#39;t exist&quot;</span>\
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cert_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cert_path</span></div>
+
+
+<div class="viewcode-block" id="UpdateProtocolConfigOption"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.UpdateProtocolConfigOption">[docs]</a><span class="k">class</span> <span class="nc">UpdateProtocolConfigOption</span><span class="p">(</span><span class="n">GeneralChoiceConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from file and/or CLI specifying which protocol</span>
+<span class="sd">       should be preferred to download new system image from one of the</span>
+<span class="sd">       predefined client. This option makes sense only with --update and</span>
+<span class="sd">       --upgrade options.&quot;&quot;&quot;</span>
+
+    <span class="n">DEFAULT_PROTOCOL</span> <span class="o">=</span> <span class="s2">&quot;SFTP&quot;</span>  <span class="c1"># default if not provided in config file</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;SysImgUpdateProtocol&quot;</span><span class="p">,</span> <span class="n">protocol</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span>
+            <span class="n">SysImgUpdater</span><span class="o">.</span><span class="n">SUPPORTED_PROTOCOLS</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;-p&quot;</span><span class="p">,</span> <span class="s2">&quot;--protocol&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;PROTO&quot;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;select protocol that will be used to download newest system &quot;</span>
+                 <span class="s2">&quot;image generated by myscm-srv (default is &#39;</span><span class="si">{}</span><span class="s2">&#39;, allowed &quot;</span>
+                 <span class="s2">&quot;options are: &#39;</span><span class="si">{}</span><span class="s2">&#39;); this option makes sense only with &quot;</span>
+                 <span class="s2">&quot;--update and --upgrade options&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span>
+                    <span class="s2">&quot;&#39;, &#39;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SysImgUpdater</span><span class="o">.</span><span class="n">SUPPORTED_PROTOCOLS</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="PeersListConfigOption"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.PeersListConfigOption">[docs]</a><span class="k">class</span> <span class="nc">PeersListConfigOption</span><span class="p">(</span><span class="n">ValidatedFileConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from file specifying hostnames of the peers</span>
+<span class="sd">       that share mySCM system images. --update and --upgrade options use this</span>
+<span class="sd">       list to randomly select client that will be used to download mySCM</span>
+<span class="sd">       system image (unless host is explicitly specified for those options).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;PeersList&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_peers_list_valid</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_path</span> <span class="o">=</span> <span class="n">config_path</span>  <span class="c1"># to check referred hostnames&#39; sections</span>
+
+    <span class="k">def</span> <span class="nf">_assert_peers_list_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peers_str</span><span class="p">):</span>
+        <span class="n">peers_str</span> <span class="o">=</span> <span class="n">peers_str</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">)</span>
+        <span class="n">peers_list</span> <span class="o">=</span> <span class="n">peers_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">peers_str</span> <span class="k">else</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peers_list</span><span class="p">)):</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="n">peers_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">valid_host</span> <span class="o">=</span> <span class="n">check_if_host_valid</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_host</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;One of the hostnames assigned to variable PeersList is &quot;</span>\
+                    <span class="s2">&quot;not valid (has value: &#39;</span><span class="si">{}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+            <span class="n">peers_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">host</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_peers_list_to_extended_dict</span><span class="p">(</span><span class="n">peers_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_peers_list_to_extended_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peers_list</span><span class="p">):</span>
+        <span class="c1"># Every hostname has its own section, thus need ConfigParser</span>
+        <span class="c1"># Below parser can be passed as param instead of creating new one</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">optionxform</span> <span class="o">=</span> <span class="nb">str</span>  <span class="c1"># case sensitive</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="p">)</span>
+        <span class="n">config_sections</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">sections</span><span class="p">()</span>
+
+        <span class="n">peers_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">peers_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">host</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config_sections</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Host &#39;</span><span class="si">{}</span><span class="s2">&#39; referred in PeersList variable doesn&#39;t have &quot;</span>\
+                    <span class="s2">&quot;respective configuration section with connection details&quot;</span>\
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+            <span class="n">peers_dict</span><span class="p">[</span><span class="n">host</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_connection_details</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">peers_dict</span>
+
+    <span class="k">def</span> <span class="nf">_get_host_connection_details</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+        <span class="n">host_conn_details</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="n">host</span><span class="p">,</span>
+            <span class="s2">&quot;protocol&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_protocol</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">),</span>
+            <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_port</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">),</span>
+            <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_variable_value</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="s2">&quot;Username&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_variable_value</span><span class="p">(</span>
+                            <span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="s2">&quot;Password&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="s2">&quot;private_key&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_variable_fpath</span><span class="p">(</span>
+                            <span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="s2">&quot;PrivateKey&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="s2">&quot;private_key_pass&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_variable_value</span><span class="p">(</span>
+                            <span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="s2">&quot;PrivateKeyPasswd&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="s2">&quot;remote_dir&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_variable_value</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="s2">&quot;RemoteDir&quot;</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">host_conn_details</span><span class="p">[</span><span class="s2">&quot;password&quot;</span><span class="p">]</span> <span class="ow">and</span>\
+           <span class="ow">not</span> <span class="n">host_conn_details</span><span class="p">[</span><span class="s2">&quot;private_key&quot;</span><span class="p">]:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;At least one of the &#39;Password&#39;, &#39;PrivateKey&#39; variables must&quot;</span>\
+                <span class="s2">&quot;be set in &#39;</span><span class="si">{}</span><span class="s2">&#39; section&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">host_conn_details</span>
+
+    <span class="k">def</span> <span class="nf">_get_host_protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_variable_value</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="s2">&quot;Protocol&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">protocol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SysImgUpdater</span><span class="o">.</span><span class="n">SUPPORTED_PROTOCOLS</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Protocol &#39;</span><span class="si">{}</span><span class="s2">&#39; is not supported&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">protocol</span>
+
+    <span class="k">def</span> <span class="nf">_get_host_port</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+        <span class="n">MIN_PORT</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">MAX_PORT</span> <span class="o">=</span> <span class="mi">65535</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_variable_value</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="s2">&quot;Port&quot;</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Value assigned to &#39;Port&#39; variable needs to be integer from &quot;</span>\
+            <span class="s2">&quot;range </span><span class="si">{}</span><span class="s2"> - </span><span class="si">{}</span><span class="s2"> (current value: &#39;</span><span class="si">{}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">MIN_PORT</span><span class="p">,</span> <span class="n">MAX_PORT</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">MIN_PORT</span> <span class="o">&lt;=</span> <span class="n">port</span> <span class="o">&lt;=</span> <span class="n">MAX_PORT</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">port</span>
+
+    <span class="k">def</span> <span class="nf">_get_variable_fpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_variable_value</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">,</span> <span class="n">required</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">path</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;File path &#39;</span><span class="si">{}</span><span class="s2">&#39; referred in configuration file section &#39;</span><span class="si">{}</span><span class="s2">&#39; &quot;</span>\
+                <span class="s2">&quot;in &#39;</span><span class="si">{}</span><span class="s2">&#39; variable doesn&#39;t exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">path</span>
+
+    <span class="k">def</span> <span class="nf">_get_variable_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">parser</span><span class="p">[</span><span class="n">host</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">variable_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">required</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Section &#39;</span><span class="si">{}</span><span class="s2">&#39; doesn&#39;t have required &#39;</span><span class="si">{}</span><span class="s2">&#39; variable&quot;</span>\
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="VerifySysImgConfigOption"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.VerifySysImgConfigOption">[docs]</a><span class="k">class</span> <span class="nc">VerifySysImgConfigOption</span><span class="p">(</span><span class="n">ValidatedCommandLineConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from CLI specifying to verify signature of</span>
+<span class="sd">       the given system image.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;VerifySysImg&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_sys_img_to_verify_valid</span><span class="p">,</span>
+            <span class="s2">&quot;--verify-img&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;PATH&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assert_sys_img_to_verify_valid</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;verify signature of the given system image&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_sys_img_to_verify_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;System image path option validator.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">sys_img_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Given mySCM system image file &#39;</span><span class="si">{}</span><span class="s2">&#39; probably doesn&#39;t exist&quot;</span>\
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys_img_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="n">signature_path</span> <span class="o">=</span> <span class="n">sys_img_path</span> <span class="o">+</span> <span class="n">SignatureManager</span><span class="o">.</span><span class="n">SIGNATURE_EXT</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">signature_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Given mySCM system image file &#39;</span><span class="si">{}</span><span class="s2">&#39; doesn&#39;t have expected &quot;</span>\
+                <span class="s2">&quot;corresponding &#39;</span><span class="si">{}</span><span class="s2">&#39; certificate&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys_img_path</span><span class="p">,</span>
+                                                        <span class="n">signature_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sys_img_path</span></div>
+
+
+<div class="viewcode-block" id="ForceApplyConfigOption"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.ForceApplyConfigOption">[docs]</a><span class="k">class</span> <span class="nc">ForceApplyConfigOption</span><span class="p">(</span><span class="n">CommandLineFlagConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from CLI specifying do not bother user with</span>
+<span class="sd">       interactive questions.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;ForceApply&quot;</span><span class="p">,</span> <span class="s2">&quot;--force&quot;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;take default actions and do not ask interactive questions &quot;</span>
+                 <span class="s2">&quot;while --apply-img&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListSysImgConfigOption"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.ListSysImgConfigOption">[docs]</a><span class="k">class</span> <span class="nc">ListSysImgConfigOption</span><span class="p">(</span><span class="n">CommandLineFlagConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from CLI specifying to list all available</span>
+<span class="sd">       system images created by myscm-srv.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;ListSysImg&quot;</span><span class="p">,</span> <span class="s2">&quot;-l&quot;</span><span class="p">,</span> <span class="s2">&quot;--list&quot;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;list all locally available system images created by &quot;</span>
+                 <span class="s2">&quot;myscm-srv&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SysImgExtractDirConfigOption"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.SysImgExtractDirConfigOption">[docs]</a><span class="k">class</span> <span class="nc">SysImgExtractDirConfigOption</span><span class="p">(</span><span class="n">ValidatedFileConfigOption</span><span class="p">):</span>
+
+    <span class="n">DEFAULT_SYS_IMG_EXTRACT_DIR</span> <span class="o">=</span> <span class="s2">&quot;/tmp&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_extract_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;SysImgExtractDir&quot;</span><span class="p">,</span>
+            <span class="n">sys_img_extract_dir</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_SYS_IMG_EXTRACT_DIR</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assert_sys_img_extract_dir_valid</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_sys_img_extract_dir_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_extract_dir</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">sys_img_extract_dir</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Value &#39;</span><span class="si">{}</span><span class="s2">&#39; assigned to variable &#39;</span><span class="si">{}</span><span class="s2">&#39; doesn&#39;t refer to &quot;</span>\
+                <span class="s2">&quot;directory&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys_img_extract_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sys_img_extract_dir</span></div>
+
+
+<div class="viewcode-block" id="SysImgDownloadDirConfigOption"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.SysImgDownloadDirConfigOption">[docs]</a><span class="k">class</span> <span class="nc">SysImgDownloadDirConfigOption</span><span class="p">(</span><span class="n">ValidatedFileConfigOption</span><span class="p">):</span>
+
+    <span class="n">DEFAULT_SYS_IMG_DOWNLOAD_DIR</span> <span class="o">=</span> <span class="s2">&quot;/var/lib/myscm-cli/downloaded&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_download_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;SysImgDownloadDir&quot;</span><span class="p">,</span>
+            <span class="n">sys_img_download_dir</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_SYS_IMG_DOWNLOAD_DIR</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assert_sys_img_download_dir_valid</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_sys_img_download_dir_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_download_dir</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">sys_img_download_dir</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Value &#39;</span><span class="si">{}</span><span class="s2">&#39; assigned to variable &#39;</span><span class="si">{}</span><span class="s2">&#39; doesn&#39;t refer to &quot;</span>\
+                <span class="s2">&quot;directory&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys_img_download_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sys_img_download_dir</span></div>
+
+
+<div class="viewcode-block" id="RecentlyAppliedSysImgVerPathConfigOption"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.RecentlyAppliedSysImgVerPathConfigOption">[docs]</a><span class="k">class</span> <span class="nc">RecentlyAppliedSysImgVerPathConfigOption</span><span class="p">(</span><span class="n">ValidatedFileConfigOption</span><span class="p">):</span>
+
+    <span class="n">DEFAULT_RECENT_IMG_VER_PATH</span> <span class="o">=</span> <span class="s2">&quot;/var/myscm-cli/img_ver.myscm-cli&quot;</span>
+    <span class="n">OPTION_NAME</span> <span class="o">=</span> <span class="s2">&quot;RecentSysImgVerPath&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recent_img_ver_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">OPTION_NAME</span><span class="p">,</span>
+            <span class="n">recent_img_ver_path</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_RECENT_IMG_VER_PATH</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assert_recent_img_ver_path_valid</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_recent_img_ver_path_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recent_img_ver_path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">recent_img_ver_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Given path &#39;</span><span class="si">{}</span><span class="s2">&#39; of file holding version of recently &quot;</span>\
+                <span class="s2">&quot;applied mySCM system image doesn&#39;t exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">recent_img_ver_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="n">img_ver_file</span> <span class="o">=</span> <span class="n">MySCMImgVersionFile</span><span class="p">(</span><span class="n">recent_img_ver_path</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">img_ver_file</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Parsing file &#39;</span><span class="si">{}</span><span class="s2">&#39; assigned to variable &#39;</span><span class="si">{}</span><span class="s2">&#39; has failed&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">recent_img_ver_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">OPTION_NAME</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ClientParserError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="k">return</span> <span class="n">recent_img_ver_path</span></div>
+
+
+<div class="viewcode-block" id="DryRunConfigOption"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.DryRunConfigOption">[docs]</a><span class="k">class</span> <span class="nc">DryRunConfigOption</span><span class="p">(</span><span class="n">CommandLineFlagConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from CLI specifying to not make any real</span>
+<span class="sd">       changes (--noop or no-operation mode).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;DryRun&quot;</span><span class="p">,</span> <span class="s2">&quot;--dry-run&quot;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;don&#39;t make any actions; print which actions would be taken &quot;</span>
+                 <span class="s2">&quot;if dry run was turned off&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PrintSysImgVerConfigOption"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.PrintSysImgVerConfigOption">[docs]</a><span class="k">class</span> <span class="nc">PrintSysImgVerConfigOption</span><span class="p">(</span><span class="n">CommandLineFlagConfigOption</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;PrintSysImgVer&quot;</span><span class="p">,</span> <span class="s2">&quot;--print-ver&quot;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;print recently applied mySCM system image version (if no &quot;</span>
+                 <span class="s2">&quot;image was applied yet, then -1 is printed)&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="check_if_host_valid"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.check_if_host_valid">[docs]</a><span class="k">def</span> <span class="nf">check_if_host_valid</span><span class="p">(</span><span class="n">host</span><span class="p">):</span>
+    <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">socket</span><span class="o">.</span><span class="n">getaddrinfo</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">is_valid</span></div>
+
+
+<span class="c1">#############################################</span>
+<span class="c1"># Core of the client&#39;s configuration parser #</span>
+<span class="c1">#############################################</span>
+
+
+<div class="viewcode-block" id="ClientConfigParser"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.ClientConfigParser">[docs]</a><span class="k">class</span> <span class="nc">ClientConfigParser</span><span class="p">(</span><span class="n">ConfigParser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Application configuration parser for configuration read from both</span>
+<span class="sd">       configuration file and command line (CLI).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">config_section_name</span><span class="p">):</span>
+        <span class="n">_CLIENT_DEFAULT_CONFIG</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ApplySysImgConfigOption</span><span class="p">(),</span>
+            <span class="n">UpdateSysImgConfigOption</span><span class="p">(</span><span class="n">config_path</span><span class="p">),</span>
+            <span class="n">UpgradeSysImgConfigOption</span><span class="p">(),</span>
+            <span class="n">SSLCertConfigOption</span><span class="p">(),</span>
+            <span class="n">UpdateProtocolConfigOption</span><span class="p">(),</span>
+            <span class="n">PeersListConfigOption</span><span class="p">(</span><span class="n">config_path</span><span class="p">),</span>
+            <span class="n">VerifySysImgConfigOption</span><span class="p">(),</span>
+            <span class="n">ForceApplyConfigOption</span><span class="p">(),</span>
+            <span class="n">ListSysImgConfigOption</span><span class="p">(),</span>
+            <span class="n">SysImgExtractDirConfigOption</span><span class="p">(),</span>
+            <span class="n">SysImgDownloadDirConfigOption</span><span class="p">(),</span>
+            <span class="n">RecentlyAppliedSysImgVerPathConfigOption</span><span class="p">(),</span>
+            <span class="n">DryRunConfigOption</span><span class="p">(),</span>
+            <span class="n">PrintSysImgVerConfigOption</span><span class="p">()</span>
+        <span class="p">]</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span> <span class="n">config_section_name</span><span class="p">,</span>
+                         <span class="n">_CLIENT_DEFAULT_CONFIG</span><span class="p">,</span> <span class="n">_HELP_DESC</span><span class="p">,</span> <span class="n">_APP_VERSION</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ClientConfigParser.parse"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.parser.ClientConfigParser.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">()</span>
+        <span class="n">client_config</span> <span class="o">=</span> <span class="n">myscm</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ClientConfig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">client_config</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Patryk Bęza.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,402 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>myscm.server.aideentry &#8212; MySCM 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for myscm.server.aideentry</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">enum</span> <span class="k">import</span> <span class="n">Enum</span>
+
+<span class="kn">from</span> <span class="nn">myscm.server.error</span> <span class="k">import</span> <span class="n">ServerError</span>
+<span class="kn">import</span> <span class="nn">myscm.server.pkgmanager</span> <span class="k">as</span> <span class="nn">pkgmgr</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="EntryType"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.EntryType">[docs]</a><span class="k">class</span> <span class="nc">EntryType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;All types of AIDE entries.&quot;&quot;&quot;</span>
+
+    <span class="n">ADDED</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">REMOVED</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">CHANGED</span> <span class="o">=</span> <span class="mi">3</span></div>
+
+
+<div class="viewcode-block" id="FileType"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.FileType">[docs]</a><span class="k">class</span> <span class="nc">FileType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;All types of files supported by AIDE.&quot;&quot;&quot;</span>
+
+    <span class="n">REGULAR_FILE</span> <span class="o">=</span> <span class="s2">&quot;f&quot;</span>
+    <span class="n">DIRECTORY</span> <span class="o">=</span> <span class="s2">&quot;d&quot;</span>
+    <span class="n">SYMBOLIC_LINK</span> <span class="o">=</span> <span class="s2">&quot;l&quot;</span>
+    <span class="n">CHARACTER_DEVICE</span> <span class="o">=</span> <span class="s2">&quot;c&quot;</span>
+    <span class="n">BLOCK_DEVICE</span> <span class="o">=</span> <span class="s2">&quot;b&quot;</span>
+    <span class="n">FIFO</span> <span class="o">=</span> <span class="s2">&quot;p&quot;</span>
+    <span class="n">UNIX_SOCKET</span> <span class="o">=</span> <span class="s2">&quot;s&quot;</span>
+    <span class="n">SOLARIS_DOOR</span> <span class="o">=</span> <span class="s2">&quot;D&quot;</span>
+    <span class="n">SOLARIS_EVENT_PORT</span> <span class="o">=</span> <span class="s2">&quot;P&quot;</span>
+    <span class="n">FTYPE_CHANGED</span> <span class="o">=</span> <span class="s2">&quot;!&quot;</span>
+    <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="s2">&quot;?&quot;</span></div>
+
+
+<div class="viewcode-block" id="AIDEEntries"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.AIDEEntries">[docs]</a><span class="k">class</span> <span class="nc">AIDEEntries</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Container for all the types of AIDE entries, ie. added, removed and</span>
+<span class="sd">       changed one.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">added_entries</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removed_entries</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">changed_entries</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="PropertyType"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.PropertyType">[docs]</a><span class="k">class</span> <span class="nc">PropertyType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Selected, required types of properties supported by AIDE.&quot;&quot;&quot;</span>
+
+    <span class="n">NAME</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span>                <span class="c1"># file name</span>
+    <span class="n">LNAME</span> <span class="o">=</span> <span class="s2">&quot;lname&quot;</span>              <span class="c1"># link name</span>
+    <span class="n">ATTR</span> <span class="o">=</span> <span class="s2">&quot;attr&quot;</span>                <span class="c1"># attributes</span>
+    <span class="n">PERM</span> <span class="o">=</span> <span class="s2">&quot;perm&quot;</span>                <span class="c1"># permissions</span>
+    <span class="n">INODE</span> <span class="o">=</span> <span class="s2">&quot;inode&quot;</span>              <span class="c1"># i-node</span>
+    <span class="n">BCOUNT</span> <span class="o">=</span> <span class="s2">&quot;bcount&quot;</span>            <span class="c1"># block count</span>
+    <span class="n">UID</span> <span class="o">=</span> <span class="s2">&quot;uid&quot;</span>                  <span class="c1"># user ID</span>
+    <span class="n">GID</span> <span class="o">=</span> <span class="s2">&quot;gid&quot;</span>                  <span class="c1"># group ID</span>
+    <span class="n">SIZE</span> <span class="o">=</span> <span class="s2">&quot;size&quot;</span>                <span class="c1"># file size in bytes</span>
+    <span class="n">MTIME</span> <span class="o">=</span> <span class="s2">&quot;mtime&quot;</span>              <span class="c1"># modification time</span>
+    <span class="n">CTIME</span> <span class="o">=</span> <span class="s2">&quot;ctime&quot;</span>              <span class="c1"># change time</span>
+    <span class="n">LCOUNT</span> <span class="o">=</span> <span class="s2">&quot;lcount&quot;</span>            <span class="c1"># number of hard links</span>
+    <span class="n">MD5</span> <span class="o">=</span> <span class="s2">&quot;md5&quot;</span>                  <span class="c1"># base64 encoded MD5 (or 0 if eg. directory)</span>
+    <span class="n">SHA1</span> <span class="o">=</span> <span class="s2">&quot;sha1&quot;</span>                <span class="c1"># base64 encoded SHA1 (or 0 if eg. directory)</span></div>
+
+
+<div class="viewcode-block" id="AIDEPropertiesError"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.AIDEPropertiesError">[docs]</a><span class="k">class</span> <span class="nc">AIDEPropertiesError</span><span class="p">(</span><span class="n">ServerError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AIDEProperties"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.AIDEProperties">[docs]</a><span class="k">class</span> <span class="nc">AIDEProperties</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Properties of files tracked by AIDE.&quot;&quot;&quot;</span>
+
+    <span class="n">REQUIRED_PROPERTIES</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">PropertyType</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="n">AIDEProperties</span><span class="o">.</span><span class="n">assert_required_properties_present_in_dict</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="p">{}</span>        <span class="c1"># required properties only</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extra_properties</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># not required properties only</span>
+        <span class="n">properties_converter</span> <span class="o">=</span> <span class="p">{</span>    <span class="c1"># not listed properties are integers</span>
+            <span class="n">PropertyType</span><span class="o">.</span><span class="n">NAME</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">PropertyType</span><span class="o">.</span><span class="n">LNAME</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_to_none_if_zero</span><span class="p">,</span>
+            <span class="n">PropertyType</span><span class="o">.</span><span class="n">MTIME</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_to_int_from_base64</span><span class="p">,</span>
+            <span class="n">PropertyType</span><span class="o">.</span><span class="n">CTIME</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_to_int_from_base64</span><span class="p">,</span>
+            <span class="n">PropertyType</span><span class="o">.</span><span class="n">MD5</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_to_hex_from_base64</span><span class="p">,</span>
+            <span class="n">PropertyType</span><span class="o">.</span><span class="n">SHA1</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_to_hex_from_base64</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">prop_name</span><span class="p">,</span> <span class="n">prop_val</span> <span class="ow">in</span> <span class="n">properties</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">prop_enum</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">prop_enum</span> <span class="o">=</span> <span class="n">PropertyType</span><span class="p">(</span><span class="n">prop_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">extra_properties</span><span class="p">[</span><span class="n">prop_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop_val</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">prop_conv</span> <span class="o">=</span> <span class="n">properties_converter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prop_enum</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">prop_enum</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop_conv</span><span class="p">(</span><span class="n">prop_val</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_save_encoded_in_extras_if_hash</span><span class="p">(</span><span class="n">prop_enum</span><span class="p">,</span> <span class="n">prop_val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_save_encoded_in_extras_if_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop_enum</span><span class="p">,</span> <span class="n">prop_val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;AIDE encodes hashes (eg. MD5). Save encoded hash for debugging.&quot;&quot;&quot;</span>
+
+        <span class="n">hashes_set</span> <span class="o">=</span> <span class="p">{</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">MD5</span><span class="p">,</span> <span class="n">PropertyType</span><span class="o">.</span><span class="n">SHA1</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">prop_enum</span> <span class="ow">in</span> <span class="n">hashes_set</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">encoded&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prop_enum</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extra_properties</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop_val</span>
+
+    <span class="k">def</span> <span class="nf">_convert_to_hex_from_base64</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="c1"># Reverse of below is: base64.b64encode(bytes.fromhex(md5))</span>
+        <span class="c1"># There are 2 versions of CRC-32 (AIDE uses 1st one)</span>
+        <span class="c1">#   (1) http://hash.online-convert.com/crc32-generator</span>
+        <span class="c1">#   (2) http://hash.online-convert.com/crc32b-generator</span>
+        <span class="k">return</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span> <span class="k">if</span> <span class="n">val</span> <span class="o">!=</span> <span class="s2">&quot;0&quot;</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_convert_to_none_if_zero</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">val</span> <span class="k">if</span> <span class="n">val</span> <span class="o">!=</span> <span class="s2">&quot;0&quot;</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_convert_to_int_from_base64</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+
+<div class="viewcode-block" id="AIDEProperties.assert_required_properties_present_in_dict"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.AIDEProperties.assert_required_properties_present_in_dict">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">assert_required_properties_present_in_dict</span><span class="p">(</span><span class="n">properties_dict</span><span class="p">):</span>
+        <span class="n">properties_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">properties_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">AIDEProperties</span><span class="o">.</span><span class="n">assert_required_properties_present</span><span class="p">(</span><span class="n">properties_set</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AIDEProperties.assert_required_properties_present"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.AIDEProperties.assert_required_properties_present">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">assert_required_properties_present</span><span class="p">(</span><span class="n">properties_set</span><span class="p">):</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">AIDEProperties</span><span class="o">.</span><span class="n">REQUIRED_PROPERTIES</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="n">properties_set</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">A</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">B</span><span class="p">):</span>
+            <span class="n">A_str</span> <span class="o">=</span> <span class="s2">&quot;&#39;, &#39;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+            <span class="n">B_str</span> <span class="o">=</span> <span class="s2">&quot;&#39;, &#39;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Some of the required file&#39;s AIDE properties were not found &quot;</span>\
+                <span class="s2">&quot;- list of fetched properties: &#39;</span><span class="si">{}</span><span class="s2">&#39;, list of required &quot;</span>\
+                <span class="s2">&quot;properties: &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">B_str</span><span class="p">,</span> <span class="n">A_str</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">AIDEPropertiesError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra_properties</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">val</span></div>
+
+
+<div class="viewcode-block" id="AIDESimpleEntry"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.AIDESimpleEntry">[docs]</a><span class="k">class</span> <span class="nc">AIDESimpleEntry</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Representation of one line of the added, removed or changed file from</span>
+<span class="sd">       AIDE --check output. Every line consists of informative string if AIDE&#39;s</span>
+<span class="sd">       &#39;summarize_changes&#39; option is set (which is guaranteed by this</span>
+<span class="sd">       application) and full file path of the file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aide_info_str</span><span class="p">,</span> <span class="n">file_path</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_info_str</span> <span class="o">=</span> <span class="n">aide_info_str</span>  <span class="c1"># AIDE&#39;s &#39;summarize_changes&#39; info</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">=</span> <span class="n">file_path</span></div>
+
+
+<div class="viewcode-block" id="PropertyHeader"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.PropertyHeader">[docs]</a><span class="k">class</span> <span class="nc">PropertyHeader</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">formatter</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{:&lt;25}</span><span class="s2">&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">formatter</span>
+
+<div class="viewcode-block" id="PropertyHeader.get_name"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.PropertyHeader.get_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="AIDEEntryError"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.AIDEEntryError">[docs]</a><span class="k">class</span> <span class="nc">AIDEEntryError</span><span class="p">(</span><span class="n">ServerError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AIDEEntry"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.AIDEEntry">[docs]</a><span class="k">class</span> <span class="nc">AIDEEntry</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Representation of added, removed and changed AIDE entry. This is</span>
+<span class="sd">       structured, extended version of `AIDESimpleEntry`.&quot;&quot;&quot;</span>
+
+    <span class="n">AIDE_INFO_STR_PATTERN</span> <span class="o">=</span> <span class="s2">&quot;YlZbpugamcinCAXSE&quot;</span>
+    <span class="n">AIDE_INFO_STR_FULL_LEN</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">AIDE_INFO_STR_PATTERN</span><span class="p">)</span>
+    <span class="n">AIDE_INFO_SUBSTR_LEN</span> <span class="o">=</span> <span class="n">AIDE_INFO_STR_FULL_LEN</span> <span class="o">-</span> <span class="mi">4</span>  <span class="c1"># ignore last 4 chars</span>
+    <span class="n">AIDE_INFO_STR_TO_PROP_TYPES_MAPPING</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">NAME</span><span class="p">],</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">BCOUNT</span><span class="p">],</span>
+        <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">PERM</span><span class="p">],</span>
+        <span class="s2">&quot;u&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">UID</span><span class="p">],</span>
+        <span class="s2">&quot;g&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">GID</span><span class="p">],</span>
+        <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">MTIME</span><span class="p">],</span>
+        <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">CTIME</span><span class="p">],</span>
+        <span class="s2">&quot;i&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">INODE</span><span class="p">],</span>
+        <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">LCOUNT</span><span class="p">],</span>
+        <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">MD5</span><span class="p">,</span> <span class="n">PropertyType</span><span class="o">.</span><span class="n">SHA1</span><span class="p">]</span>
+    <span class="p">}</span>
+    <span class="n">COMMENT_CHAR</span> <span class="o">=</span> <span class="s2">&quot;#&quot;</span>
+    <span class="n">NO_CHANGE_CHAR</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span>
+    <span class="n">ATTR_ADDED_CHAR</span> <span class="o">=</span> <span class="s2">&quot;+&quot;</span>
+    <span class="n">ATTR_REMOVED_CHAR</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span>
+    <span class="n">ATTR_IGNORED_CHAR</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span>
+    <span class="n">ATTR_NOT_CHECKED_CHAR</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span>
+    <span class="n">AIDE_ALLOWED_INFO_STR_CHARS</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">NO_CHANGE_CHAR</span><span class="p">,</span>
+        <span class="n">ATTR_IGNORED_CHAR</span><span class="p">,</span>
+        <span class="n">ATTR_NOT_CHECKED_CHAR</span><span class="p">,</span>
+        <span class="n">ATTR_ADDED_CHAR</span><span class="p">,</span>
+        <span class="n">ATTR_REMOVED_CHAR</span>
+    <span class="p">}</span>
+    <span class="n">CHANGED_FILES_HEADER_NAMES</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="s2">&quot;# &quot;</span> <span class="o">+</span> <span class="n">PropertyType</span><span class="o">.</span><span class="n">NAME</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{:&lt;50}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">LNAME</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{:&lt;50}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="s2">&quot;aide_info_str&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{:&lt;24}</span><span class="s2"> &quot;</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="s2">&quot;attr&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{:&lt;18}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="s2">&quot;ftype&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{:&lt;10}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="s2">&quot;size_change&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{:&lt;16}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="s2">&quot;size&quot;</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">BCOUNT</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">PERM</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">UID</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">GID</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">MTIME</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{:&lt;30}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">CTIME</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{:&lt;30}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">INODE</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">LCOUNT</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{:&lt;12}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">MD5</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{:&lt;73}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">SHA1</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{:&lt;100}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">PropertyHeader</span><span class="p">(</span><span class="s2">&quot;package&quot;</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">PROPERTIES_COUNT</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">CHANGED_FILES_HEADER_NAMES</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aide_properties</span><span class="p">,</span> <span class="n">aide_info_str</span><span class="p">,</span> <span class="n">entry_type</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_properties</span> <span class="o">=</span> <span class="n">aide_properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_aide_info_str</span><span class="p">(</span><span class="n">aide_info_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_info_str</span> <span class="o">=</span> <span class="n">aide_info_str</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ftype</span> <span class="o">=</span> <span class="n">FileType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aide_info_str</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entry_type</span> <span class="o">=</span> <span class="n">entry_type</span>
+        <span class="c1"># properties before change (loaded elsewhere)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_prev_properties</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="AIDEEntry.get_full_path"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.AIDEEntry.get_full_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_full_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aide_properties</span><span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">NAME</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="AIDEEntry.was_file_content_changed"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.AIDEEntry.was_file_content_changed">[docs]</a>    <span class="k">def</span> <span class="nf">was_file_content_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aide_info_str</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;C&#39;</span></div>
+
+    <span class="k">def</span> <span class="nf">_assert_valid_aide_info_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aide_info_str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aide_info_str</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AIDE_INFO_STR_FULL_LEN</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Unexpected length of the AIDE changed properties info string&quot;</span>
+            <span class="k">raise</span> <span class="n">AIDEEntryError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AIDEEntry.get_aide_changed_properties"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.aideentry.AIDEEntry.get_aide_changed_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_aide_changed_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_config</span><span class="p">):</span>
+        <span class="c1"># The general format of the AIDE info string is like the string</span>
+        <span class="c1"># YlZbpugamcinCAXSE (see AIDE manual).</span>
+
+        <span class="n">cur_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aide_properties</span><span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">SIZE</span><span class="p">]</span>
+        <span class="n">prev_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aide_prev_properties</span><span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">SIZE</span><span class="p">]</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">aide_properties</span><span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">NAME</span><span class="p">],</span>
+            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aide_properties</span><span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">LNAME</span><span class="p">]),</span>  <span class="c1"># str() for None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">aide_info_str</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aide_properties</span><span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">ATTR</span><span class="p">]),</span>  <span class="c1"># https://unix.stackexchange.com/a/343020/28115</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ftype</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">aide_info_str</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cur_size</span><span class="p">,</span>
+                             <span class="s2">&quot;=&quot;</span> <span class="k">if</span> <span class="n">cur_size</span> <span class="o">==</span> <span class="n">prev_size</span> <span class="k">else</span> <span class="n">prev_size</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="n">comment_entry</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AIDE_INFO_SUBSTR_LEN</span><span class="p">):</span>
+            <span class="n">cur_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aide_info_str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">ref_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AIDE_INFO_STR_PATTERN</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">entry_changed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_append_property_based_on_current_info_char</span><span class="p">(</span>
+                                                               <span class="n">cur_c</span><span class="p">,</span> <span class="n">ref_c</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">comment_entry</span> <span class="ow">and</span> <span class="n">entry_changed</span><span class="p">:</span>
+                <span class="n">comment_entry</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">fpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aide_properties</span><span class="p">[</span><span class="n">PropertyType</span><span class="o">.</span><span class="n">NAME</span><span class="p">]</span>
+        <span class="n">pkg_name</span> <span class="o">=</span> <span class="n">pkgmgr</span><span class="o">.</span><span class="n">get_file_package_name</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span> <span class="n">server_config</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pkg_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">comment_entry</span><span class="p">:</span>
+            <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;# </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">s</span></div>
+
+    <span class="k">def</span> <span class="nf">_append_property_based_on_current_info_char</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur_c</span><span class="p">,</span> <span class="n">ref_c</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="n">prop_types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AIDE_INFO_STR_TO_PROP_TYPES_MAPPING</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ref_c</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">prop_types</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Ignore additional, unnecessary properties defined in AIDE config</span>
+            <span class="k">return</span>
+
+        <span class="n">entry_changed</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">cur_c</span> <span class="o">==</span> <span class="n">ref_c</span><span class="p">:</span>
+            <span class="n">entry_changed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">cur_c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">AIDE_ALLOWED_INFO_STR_CHARS</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Unrecognized AIDE info string character &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cur_c</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">AIDEEntryError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="c1"># str() below is needed to convert None to &#39;None&#39;</span>
+        <span class="n">prop_vals</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aide_properties</span><span class="p">[</span><span class="n">t</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">prop_types</span><span class="p">]</span>
+        <span class="n">prev_prop_vals</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aide_prev_properties</span><span class="p">[</span><span class="n">t</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">prop_types</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prop_vals</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">entry_changed</span> <span class="ow">and</span> <span class="n">prop_vals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">prev_prop_vals</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Current and previous value for property &#39;</span><span class="si">{}</span><span class="s2">&#39; are not &quot;</span>\
+                    <span class="s2">&quot;equal despite AIDE reported they are not different&quot;</span>\
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ref_c</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">AIDEEntryError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+            <span class="n">prop_val_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">prop_vals</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">prev_prop_val_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">prev_prop_vals</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">if</span> <span class="n">entry_changed</span> <span class="k">else</span> <span class="n">cur_c</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prop_val_str</span><span class="p">,</span> <span class="n">prev_prop_val_str</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">entry_changed</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Patryk Bęza.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

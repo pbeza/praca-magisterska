@@ -1,0 +1,518 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>myscm.common package &#8212; MySCM 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="myscm.server package" href="myscm.server.html" />
+    <link rel="prev" title="myscm.client package" href="myscm.client.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="myscm-common-package">
+<h1>myscm.common package<a class="headerlink" href="#myscm-common-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-myscm.common.cmd">
+<span id="myscm-common-cmd-module"></span><h2>myscm.common.cmd module<a class="headerlink" href="#module-myscm.common.cmd" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="myscm.common.cmd.CommandLineError">
+<em class="property">exception </em><code class="descclassname">myscm.common.cmd.</code><code class="descname">CommandLineError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/cmd.html#CommandLineError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.cmd.CommandLineError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.error.MySCMError" title="myscm.common.error.MySCMError"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.error.MySCMError</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="myscm.common.cmd.long_run_cmd">
+<code class="descclassname">myscm.common.cmd.</code><code class="descname">long_run_cmd</code><span class="sig-paren">(</span><em>cmd</em>, <em>check_exitcode=True</em>, <em>stdout_opt=-1</em>, <em>stderr_opt=-2</em>, <em>suffix_msg=None</em>, <em>debug_log=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/cmd.html#long_run_cmd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.cmd.long_run_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run long-lasting command.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="myscm.common.cmd.run_check_cmd">
+<code class="descclassname">myscm.common.cmd.</code><code class="descname">run_check_cmd</code><span class="sig-paren">(</span><em>aide_config_path</em>, <em>check_exitcode=True</em>, <em>stdout_opt=-1</em>, <em>stderr_opt=-2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/cmd.html#run_check_cmd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.cmd.run_check_cmd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="myscm.common.cmd.run_cmd">
+<code class="descclassname">myscm.common.cmd.</code><code class="descname">run_cmd</code><span class="sig-paren">(</span><em>cmd</em>, <em>check_exitcode=True</em>, <em>stdout_opt=-1</em>, <em>stderr_opt=-2</em>, <em>suffix_msg=None</em>, <em>debug_log=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/cmd.html#run_cmd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.cmd.run_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run specified command and optionally check exit code for error.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.common.config">
+<span id="myscm-common-config-module"></span><h2>myscm.common.config module<a class="headerlink" href="#module-myscm.common.config" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.common.config.BaseConfig">
+<em class="property">class </em><code class="descclassname">myscm.common.config.</code><code class="descname">BaseConfig</code><span class="sig-paren">(</span><em>*options</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/config.html#BaseConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.config.BaseConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Base class for application configuration.</p>
+<dl class="attribute">
+<dt id="myscm.common.config.BaseConfig.SUPPORTED_LINUX_DISTROS">
+<code class="descname">SUPPORTED_LINUX_DISTROS</code><em class="property"> = {'arch', 'debian'}</em><a class="headerlink" href="#myscm.common.config.BaseConfig.SUPPORTED_LINUX_DISTROS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.common.config.BaseConfig.set_log_level">
+<code class="descname">set_log_level</code><span class="sig-paren">(</span><em>logger</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/config.html#BaseConfig.set_log_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.config.BaseConfig.set_log_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set logging level with respect to loaded configuration.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.common.config.ConfigError">
+<em class="property">exception </em><code class="descclassname">myscm.common.config.</code><code class="descname">ConfigError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/config.html#ConfigError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.config.ConfigError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.error.MySCMError" title="myscm.common.error.MySCMError"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.error.MySCMError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.config.ConfigOptions">
+<em class="property">class </em><code class="descclassname">myscm.common.config.</code><code class="descname">ConfigOptions</code><span class="sig-paren">(</span><em>*options</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/config.html#ConfigOptions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.config.ConfigOptions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Representation of all the options read from configuration file and
+command line (CLI).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.common.constants">
+<span id="myscm-common-constants-module"></span><h2>myscm.common.constants module<a class="headerlink" href="#module-myscm.common.constants" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="myscm.common.constants.get_app_version">
+<code class="descclassname">myscm.common.constants.</code><code class="descname">get_app_version</code><span class="sig-paren">(</span><em>app_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/constants.html#get_app_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.constants.get_app_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="myscm.common.constants.print_version">
+<code class="descclassname">myscm.common.constants.</code><code class="descname">print_version</code><span class="sig-paren">(</span><em>app_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/constants.html#print_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.constants.print_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-myscm.common.error">
+<span id="myscm-common-error-module"></span><h2>myscm.common.error module<a class="headerlink" href="#module-myscm.common.error" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="myscm.common.error.MySCMError">
+<em class="property">exception </em><code class="descclassname">myscm.common.error.</code><code class="descname">MySCMError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/error.html#MySCMError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.error.MySCMError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<p>Representation of the mySCM error.</p>
+<dl class="method">
+<dt id="myscm.common.error.MySCMError.get_details">
+<code class="descname">get_details</code><span class="sig-paren">(</span><em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/error.html#MySCMError.get_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.error.MySCMError.get_details" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.common.main">
+<span id="myscm-common-main-module"></span><h2>myscm.common.main module<a class="headerlink" href="#module-myscm.common.main" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="myscm.common.main.run_main">
+<code class="descclassname">myscm.common.main.</code><code class="descname">run_main</code><span class="sig-paren">(</span><em>main_fun</em>, <em>config_parser_class</em>, <em>config_path</em>, <em>config_section_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/main.html#run_main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.main.run_main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-myscm.common.parser">
+<span id="myscm-common-parser-module"></span><h2>myscm.common.parser module<a class="headerlink" href="#module-myscm.common.parser" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.common.parser.CommandLineConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">CommandLineConfigOption</code><span class="sig-paren">(</span><em>name</em>, <em>value</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#CommandLineConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.CommandLineConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.parser.ConfigOption" title="myscm.common.parser.ConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ConfigOption</span></code></a></p>
+<p>Base class for both command line (CLI) key-value options and boolean
+command line options (a.k.a. ‘flags’).</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.CommandLineFlagConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">CommandLineFlagConfigOption</code><span class="sig-paren">(</span><em>name</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#CommandLineFlagConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.CommandLineFlagConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.parser.CommandLineConfigOption" title="myscm.common.parser.CommandLineConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.CommandLineConfigOption</span></code></a></p>
+<p>Boolean configuration option (a.k.a. ‘flag’) specified as a command line
+(CLI) option.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.ConfigCheckConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">ConfigCheckConfigOption</code><a class="reference internal" href="_modules/myscm/common/parser.html#ConfigCheckConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.ConfigCheckConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.parser.CommandLineFlagConfigOption" title="myscm.common.parser.CommandLineFlagConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.CommandLineFlagConfigOption</span></code></a></p>
+<p>Configuration option read from CLI specifying to check application
+configuration and exit.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.ConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">ConfigOption</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#ConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.ConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Base class for configuration options read from command line (CLI) and/or
+configuration file.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.ConfigParser">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">ConfigParser</code><span class="sig-paren">(</span><em>config_path</em>, <em>config_section_name</em>, <em>default_config</em>, <em>help_desc</em>, <em>version_full</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#ConfigParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.ConfigParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Base class for CLI and file based configuration parser.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.FileConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">FileConfigOption</code><span class="sig-paren">(</span><em>name</em>, <em>value</em>, <em>required_in_file=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#FileConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.FileConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.parser.ConfigOption" title="myscm.common.parser.ConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ConfigOption</span></code></a></p>
+<p>Not validated key-value configuration option read from application’s
+configuration file.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.GeneralChoiceConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">GeneralChoiceConfigOption</code><span class="sig-paren">(</span><em>name</em>, <em>value</em>, <em>allowed_values</em>, <em>required_in_file</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#GeneralChoiceConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.GeneralChoiceConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.parser.ValidatedFileConfigOption" title="myscm.common.parser.ValidatedFileConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedFileConfigOption</span></code></a>, <a class="reference internal" href="#myscm.common.parser.CommandLineConfigOption" title="myscm.common.parser.CommandLineConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.CommandLineConfigOption</span></code></a></p>
+<p>Key-value configuration option read from file and/or CLI. Option must be
+one of the items from defined set. CLI option overrides respective
+option read from configuration file.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.GeneralConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">GeneralConfigOption</code><span class="sig-paren">(</span><em>name</em>, <em>value</em>, <em>validator</em>, <em>required_in_file</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#GeneralConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.GeneralConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.parser.ValidatedCommandLineConfigOption" title="myscm.common.parser.ValidatedCommandLineConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedCommandLineConfigOption</span></code></a>, <a class="reference internal" href="#myscm.common.parser.ValidatedFileConfigOption" title="myscm.common.parser.ValidatedFileConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedFileConfigOption</span></code></a></p>
+<p>Validated key-value configuration option read from file and/or CLI.
+CLI option overrides respective option read from configuration file.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.LogFileConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">LogFileConfigOption</code><span class="sig-paren">(</span><em>log_config_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#LogFileConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.LogFileConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.parser.ValidatedFileConfigOption" title="myscm.common.parser.ValidatedFileConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedFileConfigOption</span></code></a></p>
+<p>Configuration option read from configuration file specifying full path
+to logging configuration file.</p>
+<dl class="attribute">
+<dt id="myscm.common.parser.LogFileConfigOption.DEFAULT_LOG_CONFIG_PATH">
+<code class="descname">DEFAULT_LOG_CONFIG_PATH</code><em class="property"> = '/etc/myscm/log_config.yaml'</em><a class="headerlink" href="#myscm.common.parser.LogFileConfigOption.DEFAULT_LOG_CONFIG_PATH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.PIDFileConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">PIDFileConfigOption</code><span class="sig-paren">(</span><em>lock_file_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#PIDFileConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.PIDFileConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.parser.ValidatedFileConfigOption" title="myscm.common.parser.ValidatedFileConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedFileConfigOption</span></code></a></p>
+<p>Configuration option read from configuration file specifying full path
+to lock file with process ID (PID).</p>
+<dl class="attribute">
+<dt id="myscm.common.parser.PIDFileConfigOption.DEFAULT_LOCK_FILE_PATH">
+<code class="descname">DEFAULT_LOCK_FILE_PATH</code><em class="property"> = '/var/run/lock/myscm.pid'</em><a class="headerlink" href="#myscm.common.parser.PIDFileConfigOption.DEFAULT_LOCK_FILE_PATH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.common.parser.ParserError">
+<em class="property">exception </em><code class="descclassname">myscm.common.parser.</code><code class="descname">ParserError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#ParserError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.ParserError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.error.MySCMError" title="myscm.common.error.MySCMError"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.error.MySCMError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.SSLCertPublicKeyConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">SSLCertPublicKeyConfigOption</code><a class="reference internal" href="_modules/myscm/common/parser.html#SSLCertPublicKeyConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.SSLCertPublicKeyConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.parser.GeneralConfigOption" title="myscm.common.parser.GeneralConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.GeneralConfigOption</span></code></a></p>
+<p>Configuration option read from file and/or CLI specifying file path of
+the SSL certificate public key to verify system image created with
+–gen-img option.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.SortingHelpFormatter">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">SortingHelpFormatter</code><span class="sig-paren">(</span><em>prog</em>, <em>indent_increment=2</em>, <em>max_help_position=24</em>, <em>width=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#SortingHelpFormatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.SortingHelpFormatter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">argparse.HelpFormatter</span></code></p>
+<p>Helper class to keep –help options ordered alphabetically.</p>
+<dl class="method">
+<dt id="myscm.common.parser.SortingHelpFormatter.add_arguments">
+<code class="descname">add_arguments</code><span class="sig-paren">(</span><em>actions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#SortingHelpFormatter.add_arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.SortingHelpFormatter.add_arguments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.ValidatedCommandLineConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">ValidatedCommandLineConfigOption</code><span class="sig-paren">(</span><em>name</em>, <em>value</em>, <em>validator</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#ValidatedCommandLineConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.ValidatedCommandLineConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.parser.ValidatedConfigOption" title="myscm.common.parser.ValidatedConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedConfigOption</span></code></a>, <a class="reference internal" href="#myscm.common.parser.CommandLineConfigOption" title="myscm.common.parser.CommandLineConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.CommandLineConfigOption</span></code></a></p>
+<p>Validated key-value configuration option specified as a command line
+(CLI) argument.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.ValidatedConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">ValidatedConfigOption</code><span class="sig-paren">(</span><em>name</em>, <em>value</em>, <em>validator</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#ValidatedConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.ValidatedConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.parser.ConfigOption" title="myscm.common.parser.ConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ConfigOption</span></code></a></p>
+<p>Base class for validated key-value configuration option read from
+command line (CLI) and/or configuration file.</p>
+<dl class="method">
+<dt id="myscm.common.parser.ValidatedConfigOption.assert_valid">
+<code class="descname">assert_valid</code><span class="sig-paren">(</span><em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#ValidatedConfigOption.assert_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.ValidatedConfigOption.assert_valid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.ValidatedFileConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">ValidatedFileConfigOption</code><span class="sig-paren">(</span><em>name</em>, <em>value</em>, <em>validator</em>, <em>required_in_file=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#ValidatedFileConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.ValidatedFileConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.parser.ValidatedConfigOption" title="myscm.common.parser.ValidatedConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedConfigOption</span></code></a>, <a class="reference internal" href="#myscm.common.parser.FileConfigOption" title="myscm.common.parser.FileConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.FileConfigOption</span></code></a></p>
+<p>Validated key-value configuration option read from application’s
+configuration file.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.VerbosityConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">VerbosityConfigOption</code><span class="sig-paren">(</span><em>verbosity_lvl=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#VerbosityConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.VerbosityConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.parser.GeneralConfigOption" title="myscm.common.parser.GeneralConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.GeneralConfigOption</span></code></a></p>
+<p>Configuration option read from configuration file and/or CLI specifying
+application logging verbosity.</p>
+<dl class="attribute">
+<dt id="myscm.common.parser.VerbosityConfigOption.DEFAULT_VERBOSITY_LVL">
+<code class="descname">DEFAULT_VERBOSITY_LVL</code><em class="property"> = 0</em><a class="headerlink" href="#myscm.common.parser.VerbosityConfigOption.DEFAULT_VERBOSITY_LVL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.common.parser.VerbosityConfigOption.MAX_VERBOSITY_LVL">
+<code class="descname">MAX_VERBOSITY_LVL</code><em class="property"> = 3</em><a class="headerlink" href="#myscm.common.parser.VerbosityConfigOption.MAX_VERBOSITY_LVL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.common.parser.VerbosityConfigOption.MIN_VERBOSITY_LVL">
+<code class="descname">MIN_VERBOSITY_LVL</code><em class="property"> = 0</em><a class="headerlink" href="#myscm.common.parser.VerbosityConfigOption.MIN_VERBOSITY_LVL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.parser.VerifyFileConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.common.parser.</code><code class="descname">VerifyFileConfigOption</code><a class="reference internal" href="_modules/myscm/common/parser.html#VerifyFileConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.VerifyFileConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.parser.ValidatedCommandLineConfigOption" title="myscm.common.parser.ValidatedCommandLineConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedCommandLineConfigOption</span></code></a></p>
+<p>Configuration option read from CLI specifying to verify authenticity of
+the given SSL signature.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="myscm.common.parser.assert_sys_img_ver_valid">
+<code class="descclassname">myscm.common.parser.</code><code class="descname">assert_sys_img_ver_valid</code><span class="sig-paren">(</span><em>sys_img_ver</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/parser.html#assert_sys_img_ver_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.parser.assert_sys_img_ver_valid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-myscm.common.signaturemanager">
+<span id="myscm-common-signaturemanager-module"></span><h2>myscm.common.signaturemanager module<a class="headerlink" href="#module-myscm.common.signaturemanager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.common.signaturemanager.SignatureManager">
+<em class="property">class </em><code class="descclassname">myscm.common.signaturemanager.</code><code class="descname">SignatureManager</code><a class="reference internal" href="_modules/myscm/common/signaturemanager.html#SignatureManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.signaturemanager.SignatureManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Manager of the SSL signatures created to confirm mySCM system images’
+authenticity.</p>
+<dl class="attribute">
+<dt id="myscm.common.signaturemanager.SignatureManager.SIGNATURE_EXT">
+<code class="descname">SIGNATURE_EXT</code><em class="property"> = '.sig'</em><a class="headerlink" href="#myscm.common.signaturemanager.SignatureManager.SIGNATURE_EXT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.common.signaturemanager.SignatureManager.SSL_CERT_DIGEST_TYPE">
+<code class="descname">SSL_CERT_DIGEST_TYPE</code><em class="property"> = 'sha256'</em><a class="headerlink" href="#myscm.common.signaturemanager.SignatureManager.SSL_CERT_DIGEST_TYPE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.common.signaturemanager.SignatureManager.ssl_sign">
+<code class="descname">ssl_sign</code><span class="sig-paren">(</span><em>input_path</em>, <em>output_path</em>, <em>priv_key_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/signaturemanager.html#SignatureManager.ssl_sign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.signaturemanager.SignatureManager.ssl_sign" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.common.signaturemanager.SignatureManager.ssl_verify">
+<code class="descname">ssl_verify</code><span class="sig-paren">(</span><em>path_to_verify</em>, <em>signature_path</em>, <em>ssl_pub_key_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/signaturemanager.html#SignatureManager.ssl_verify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.signaturemanager.SignatureManager.ssl_verify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if SLL signature is valid (otherwise False).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.common.signaturemanager.SignatureManagerError">
+<em class="property">exception </em><code class="descclassname">myscm.common.signaturemanager.</code><code class="descname">SignatureManagerError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/signaturemanager.html#SignatureManagerError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.signaturemanager.SignatureManagerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.server.html#myscm.server.error.ServerError" title="myscm.server.error.ServerError"><code class="xref py py-class docutils literal"><span class="pre">myscm.server.error.ServerError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.common.sysimgmanager">
+<span id="myscm-common-sysimgmanager-module"></span><h2>myscm.common.sysimgmanager module<a class="headerlink" href="#module-myscm.common.sysimgmanager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.common.sysimgmanager.SysImgManagerBase">
+<em class="property">class </em><code class="descclassname">myscm.common.sysimgmanager.</code><code class="descname">SysImgManagerBase</code><a class="reference internal" href="_modules/myscm/common/sysimgmanager.html#SysImgManagerBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.sysimgmanager.SysImgManagerBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Manager of the system images myscm-img.X.Y.tar.gz (X, Y are integers)
+created by myscm-srv.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.common.sysimgmanager.SysImgManagerError">
+<em class="property">exception </em><code class="descclassname">myscm.common.sysimgmanager.</code><code class="descname">SysImgManagerError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/sysimgmanager.html#SysImgManagerError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.sysimgmanager.SysImgManagerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.error.MySCMError" title="myscm.common.error.MySCMError"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.error.MySCMError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.common.versionfile">
+<span id="myscm-common-versionfile-module"></span><h2>myscm.common.versionfile module<a class="headerlink" href="#module-myscm.common.versionfile" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="myscm.common.versionfile.DetailedVersionFileError">
+<em class="property">exception </em><code class="descclassname">myscm.common.versionfile.</code><code class="descname">DetailedVersionFileError</code><span class="sig-paren">(</span><em>msg</em>, <em>value</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/versionfile.html#DetailedVersionFileError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.versionfile.DetailedVersionFileError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.versionfile.VersionFileError" title="myscm.common.versionfile.VersionFileError"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.versionfile.VersionFileError</span></code></a></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.common.versionfile.EmptyFileVersionFileError">
+<em class="property">exception </em><code class="descclassname">myscm.common.versionfile.</code><code class="descname">EmptyFileVersionFileError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/versionfile.html#EmptyFileVersionFileError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.versionfile.EmptyFileVersionFileError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.versionfile.VersionFileError" title="myscm.common.versionfile.VersionFileError"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.versionfile.VersionFileError</span></code></a></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.common.versionfile.NotIntegerVersionFileError">
+<em class="property">exception </em><code class="descclassname">myscm.common.versionfile.</code><code class="descname">NotIntegerVersionFileError</code><span class="sig-paren">(</span><em>msg</em>, <em>value</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/versionfile.html#NotIntegerVersionFileError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.versionfile.NotIntegerVersionFileError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.versionfile.DetailedVersionFileError" title="myscm.common.versionfile.DetailedVersionFileError"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.versionfile.DetailedVersionFileError</span></code></a></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.common.versionfile.OutOfAllowedRangeIntegerInFileVersionFileError">
+<em class="property">exception </em><code class="descclassname">myscm.common.versionfile.</code><code class="descname">OutOfAllowedRangeIntegerInFileVersionFileError</code><span class="sig-paren">(</span><em>msg</em>, <em>value</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/versionfile.html#OutOfAllowedRangeIntegerInFileVersionFileError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.versionfile.OutOfAllowedRangeIntegerInFileVersionFileError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.versionfile.DetailedVersionFileError" title="myscm.common.versionfile.DetailedVersionFileError"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.versionfile.DetailedVersionFileError</span></code></a></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.common.versionfile.TooManyLinesVersionFileError">
+<em class="property">exception </em><code class="descclassname">myscm.common.versionfile.</code><code class="descname">TooManyLinesVersionFileError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/versionfile.html#TooManyLinesVersionFileError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.versionfile.TooManyLinesVersionFileError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.versionfile.VersionFileError" title="myscm.common.versionfile.VersionFileError"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.versionfile.VersionFileError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.common.versionfile.VersionFile">
+<em class="property">class </em><code class="descclassname">myscm.common.versionfile.</code><code class="descname">VersionFile</code><span class="sig-paren">(</span><em>path</em>, <em>starting_value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/versionfile.html#VersionFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.versionfile.VersionFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Representation of the file holding single integer in single line.</p>
+<dl class="attribute">
+<dt id="myscm.common.versionfile.VersionFile.DEFAULT_STARTING_VALUE">
+<code class="descname">DEFAULT_STARTING_VALUE</code><em class="property"> = 0</em><a class="headerlink" href="#myscm.common.versionfile.VersionFile.DEFAULT_STARTING_VALUE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.common.versionfile.VersionFile.create">
+<code class="descname">create</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/versionfile.html#VersionFile.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.versionfile.VersionFile.create" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.common.versionfile.VersionFile.exist">
+<code class="descname">exist</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/versionfile.html#VersionFile.exist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.versionfile.VersionFile.exist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.common.versionfile.VersionFile.get_version">
+<code class="descname">get_version</code><span class="sig-paren">(</span><em>create=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/versionfile.html#VersionFile.get_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.versionfile.VersionFile.get_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.common.versionfile.VersionFile.increment">
+<code class="descname">increment</code><span class="sig-paren">(</span><em>create=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/versionfile.html#VersionFile.increment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.versionfile.VersionFile.increment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.common.versionfile.VersionFile.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><em>create=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/versionfile.html#VersionFile.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.versionfile.VersionFile.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.common.versionfile.VersionFile.set_value">
+<code class="descname">set_value</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/versionfile.html#VersionFile.set_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.versionfile.VersionFile.set_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.common.versionfile.VersionFileError">
+<em class="property">exception </em><code class="descclassname">myscm.common.versionfile.</code><code class="descname">VersionFileError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/common/versionfile.html#VersionFileError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.common.versionfile.VersionFileError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.common.error.MySCMError" title="myscm.common.error.MySCMError"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.error.MySCMError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.common">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-myscm.common" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">myscm</a><ul>
+  <li><a href="myscm.html">myscm package</a><ul>
+      <li>Previous: <a href="myscm.client.html" title="previous chapter">myscm.client package</a></li>
+      <li>Next: <a href="myscm.server.html" title="next chapter">myscm.server package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Patryk Bęza.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/myscm.common.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

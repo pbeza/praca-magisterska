@@ -1,0 +1,579 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>myscm.common.parser &#8212; MySCM 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for myscm.common.parser</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">configparser</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+
+<span class="kn">from</span> <span class="nn">myscm.common.error</span> <span class="k">import</span> <span class="n">MySCMError</span>
+
+
+<div class="viewcode-block" id="ParserError"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.ParserError">[docs]</a><span class="k">class</span> <span class="nc">ParserError</span><span class="p">(</span><span class="n">MySCMError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<span class="c1">###################################################</span>
+<span class="c1"># Base classes for concrete configuration options #</span>
+<span class="c1">###################################################</span>
+
+
+<div class="viewcode-block" id="ConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.ConfigOption">[docs]</a><span class="k">class</span> <span class="nc">ConfigOption</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Base class for configuration options read from command line (CLI) and/or</span>
+<span class="sd">       configuration file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="ValidatedConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.ValidatedConfigOption">[docs]</a><span class="k">class</span> <span class="nc">ValidatedConfigOption</span><span class="p">(</span><span class="n">ConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for validated key-value configuration option read from</span>
+<span class="sd">       command line (CLI) and/or configuration file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">validator</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="n">validator</span>
+
+<div class="viewcode-block" id="ValidatedConfigOption.assert_valid"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.ValidatedConfigOption.assert_valid">[docs]</a>    <span class="k">def</span> <span class="nf">assert_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">value</span></div></div>
+
+
+<div class="viewcode-block" id="CommandLineConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.CommandLineConfigOption">[docs]</a><span class="k">class</span> <span class="nc">CommandLineConfigOption</span><span class="p">(</span><span class="n">ConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for both command line (CLI) key-value options and boolean</span>
+<span class="sd">       command line options (a.k.a. &#39;flags&#39;).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dest</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ValidatedCommandLineConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.ValidatedCommandLineConfigOption">[docs]</a><span class="k">class</span> <span class="nc">ValidatedCommandLineConfigOption</span><span class="p">(</span><span class="n">ValidatedConfigOption</span><span class="p">,</span>
+                                       <span class="n">CommandLineConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validated key-value configuration option specified as a command line</span>
+<span class="sd">       (CLI) argument.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">validator</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">CommandLineConfigOption</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="n">validator</span></div>
+
+
+<div class="viewcode-block" id="CommandLineFlagConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.CommandLineFlagConfigOption">[docs]</a><span class="k">class</span> <span class="nc">CommandLineFlagConfigOption</span><span class="p">(</span><span class="n">CommandLineConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Boolean configuration option (a.k.a. &#39;flag&#39;) specified as a command line</span>
+<span class="sd">       (CLI) option.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FileConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.FileConfigOption">[docs]</a><span class="k">class</span> <span class="nc">FileConfigOption</span><span class="p">(</span><span class="n">ConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Not validated key-value configuration option read from application&#39;s</span>
+<span class="sd">       configuration file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">required_in_file</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">required_in_file</span> <span class="o">=</span> <span class="n">required_in_file</span></div>
+
+
+<div class="viewcode-block" id="ValidatedFileConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.ValidatedFileConfigOption">[docs]</a><span class="k">class</span> <span class="nc">ValidatedFileConfigOption</span><span class="p">(</span><span class="n">ValidatedConfigOption</span><span class="p">,</span> <span class="n">FileConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validated key-value configuration option read from application&#39;s</span>
+<span class="sd">       configuration file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">validator</span><span class="p">,</span> <span class="n">required_in_file</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">FileConfigOption</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">required_in_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="n">validator</span></div>
+
+
+<div class="viewcode-block" id="GeneralConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.GeneralConfigOption">[docs]</a><span class="k">class</span> <span class="nc">GeneralConfigOption</span><span class="p">(</span><span class="n">ValidatedCommandLineConfigOption</span><span class="p">,</span>
+                          <span class="n">ValidatedFileConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validated key-value configuration option read from file and/or CLI.</span>
+<span class="sd">       CLI option overrides respective option read from configuration file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">validator</span><span class="p">,</span> <span class="n">required_in_file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">ValidatedCommandLineConfigOption</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">validator</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">required_in_file</span> <span class="o">=</span> <span class="n">required_in_file</span></div>
+
+
+<div class="viewcode-block" id="GeneralChoiceConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.GeneralChoiceConfigOption">[docs]</a><span class="k">class</span> <span class="nc">GeneralChoiceConfigOption</span><span class="p">(</span><span class="n">ValidatedFileConfigOption</span><span class="p">,</span>
+                                <span class="n">CommandLineConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Key-value configuration option read from file and/or CLI. Option must be</span>
+<span class="sd">       one of the items from defined set. CLI option overrides respective</span>
+<span class="sd">       option read from configuration file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">allowed_values</span><span class="p">,</span> <span class="n">required_in_file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">CommandLineConfigOption</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                                         <span class="n">choices</span><span class="o">=</span><span class="n">allowed_values</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">required_in_file</span> <span class="o">=</span> <span class="n">required_in_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_choices_valid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowed_values</span> <span class="o">=</span> <span class="n">allowed_values</span>
+
+    <span class="k">def</span> <span class="nf">_assert_choices_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if given value is from allowed values set.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_values</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; is not acceptabe for &#39;</span><span class="si">{}</span><span class="s2">&#39; option in configuration &quot;</span>\
+                <span class="s2">&quot;file. It must be one of the following values: &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;&#39;, &#39;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allowed_values</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">val</span></div>
+
+
+<span class="c1">###############################################################</span>
+<span class="c1"># Concrete configuration options common for client and server #</span>
+<span class="c1">###############################################################</span>
+
+
+<div class="viewcode-block" id="PIDFileConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.PIDFileConfigOption">[docs]</a><span class="k">class</span> <span class="nc">PIDFileConfigOption</span><span class="p">(</span><span class="n">ValidatedFileConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from configuration file specifying full path</span>
+<span class="sd">       to lock file with process ID (PID).&quot;&quot;&quot;</span>
+
+    <span class="n">DEFAULT_LOCK_FILE_PATH</span> <span class="o">=</span> <span class="s2">&quot;/var/run/lock/myscm.pid&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lock_file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+                <span class="s2">&quot;PIDLockFilePath&quot;</span><span class="p">,</span>
+                <span class="n">lock_file_path</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_LOCK_FILE_PATH</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_assert_pid_path_valid</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_pid_path_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid_file_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;PID file path validator.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">pid_file_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;File path &#39;</span><span class="si">{}</span><span class="s2">&#39; can&#39;t be used for PID lock file - file &quot;</span>\
+                <span class="s2">&quot;already exists&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pid_file_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pid_file_path</span></div>
+
+
+<div class="viewcode-block" id="LogFileConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.LogFileConfigOption">[docs]</a><span class="k">class</span> <span class="nc">LogFileConfigOption</span><span class="p">(</span><span class="n">ValidatedFileConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from configuration file specifying full path</span>
+<span class="sd">       to logging configuration file.&quot;&quot;&quot;</span>
+
+    <span class="n">DEFAULT_LOG_CONFIG_PATH</span> <span class="o">=</span> <span class="s2">&quot;/etc/myscm/log_config.yaml&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_config_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+                <span class="s2">&quot;LogConfigPath&quot;</span><span class="p">,</span>
+                <span class="n">log_config_path</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_LOG_CONFIG_PATH</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_assert_log_config_path_valid</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_log_config_path_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_file_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Log file path validator.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">log_file_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Specified logging configuration &#39;</span><span class="si">{}</span><span class="s2">&#39; doesn&#39;t exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">log_file_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">log_file_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="s1">&#39;problem_mark&#39;</span><span class="p">):</span>
+                <span class="n">mark</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">problem_mark</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Invalid logging configuration YAML file &#39;</span><span class="si">{}</span><span class="s2">&#39;. Error &quot;</span>\
+                    <span class="s2">&quot;position line: </span><span class="si">{}</span><span class="s2">, column: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">log_file_path</span><span class="p">,</span> <span class="n">mark</span><span class="o">.</span><span class="n">line</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mark</span><span class="o">.</span><span class="n">column</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="k">return</span> <span class="n">log_file_path</span></div>
+
+
+<div class="viewcode-block" id="VerbosityConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.VerbosityConfigOption">[docs]</a><span class="k">class</span> <span class="nc">VerbosityConfigOption</span><span class="p">(</span><span class="n">GeneralConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from configuration file and/or CLI specifying</span>
+<span class="sd">       application logging verbosity.&quot;&quot;&quot;</span>
+
+    <span class="n">DEFAULT_VERBOSITY_LVL</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">MIN_VERBOSITY_LVL</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">MAX_VERBOSITY_LVL</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbosity_lvl</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+                <span class="s2">&quot;Verbose&quot;</span><span class="p">,</span>
+                <span class="n">verbosity_lvl</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_VERBOSITY_LVL</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_assert_verbosity_valid</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;-v&quot;</span><span class="p">,</span> <span class="s2">&quot;--verbose&quot;</span><span class="p">,</span>
+                <span class="n">action</span><span class="o">=</span><span class="s2">&quot;count&quot;</span><span class="p">,</span>
+                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;increase output and log verbosity (default &quot;</span>
+                     <span class="s2">&quot;value: </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_VERBOSITY_LVL</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_assert_verbosity_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbosity_string</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Verbosity option validator.&quot;&quot;&quot;</span>
+
+        <span class="n">lvl</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">lvl</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">verbosity_string</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Given verbosity is not integer (given value: &#39;</span><span class="si">{}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">verbosity_string</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">MIN_VERBOSITY_LVL</span> <span class="o">&lt;=</span> <span class="n">lvl</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MAX_VERBOSITY_LVL</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Verbosity must be an integer from range [</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">] (given &quot;</span>\
+                <span class="s2">&quot;value: </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MIN_VERBOSITY_LVL</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">MAX_VERBOSITY_LVL</span><span class="p">,</span>
+                                    <span class="n">lvl</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lvl</span></div>
+
+
+<div class="viewcode-block" id="ConfigCheckConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.ConfigCheckConfigOption">[docs]</a><span class="k">class</span> <span class="nc">ConfigCheckConfigOption</span><span class="p">(</span><span class="n">CommandLineFlagConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from CLI specifying to check application</span>
+<span class="sd">       configuration and exit.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+                <span class="s2">&quot;ConfigCheck&quot;</span><span class="p">,</span> <span class="s2">&quot;-k&quot;</span><span class="p">,</span> <span class="s2">&quot;--config-check&quot;</span><span class="p">,</span>
+                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;check if application configuration is valid and exit; &quot;</span>
+                     <span class="s2">&quot;0 and 1 indicates respectively: configuration validity &quot;</span>
+                     <span class="s2">&quot;and invalidity&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SSLCertPublicKeyConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.SSLCertPublicKeyConfigOption">[docs]</a><span class="k">class</span> <span class="nc">SSLCertPublicKeyConfigOption</span><span class="p">(</span><span class="n">GeneralConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from file and/or CLI specifying file path of</span>
+<span class="sd">       the SSL certificate public key to verify system image created with</span>
+<span class="sd">       --gen-img option.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;SSLCertPublicKeyPath&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_cert_pub_key_path_valid</span><span class="p">,</span>
+            <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;--ssl-pubkey&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;PATH&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assert_cert_pub_key_path_valid</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;full path to the PEM formatted server&#39;s public key of the &quot;</span>
+                 <span class="s2">&quot;SSL certificate that is being used to verify signature of &quot;</span>
+                 <span class="s2">&quot;the mySCM system image generated with the myscm-srv &quot;</span>
+                 <span class="s2">&quot;--gen-img option&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_cert_pub_key_path_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cert_pub_key_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;File path to the public key of the SSL certificate validator.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cert_pub_key_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Given SSL certificate public key file &#39;</span><span class="si">{}</span><span class="s2">&#39; probably doesn&#39;t &quot;</span>\
+                <span class="s2">&quot;exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cert_pub_key_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cert_pub_key_path</span></div>
+
+
+<div class="viewcode-block" id="VerifyFileConfigOption"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.VerifyFileConfigOption">[docs]</a><span class="k">class</span> <span class="nc">VerifyFileConfigOption</span><span class="p">(</span><span class="n">ValidatedCommandLineConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from CLI specifying to verify authenticity of</span>
+<span class="sd">       the given SSL signature.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;VerifyFile&quot;</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_signature_file_valid</span><span class="p">,</span>
+            <span class="s2">&quot;--verify&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;SIGNATURE_PATH&quot;</span><span class="p">,</span> <span class="s2">&quot;SIGNED_PATH&quot;</span><span class="p">),</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assert_signature_file_valid</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;verify given SSL signature of the given file&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_signature_file_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Validator of the signed file and SSL signature file that will be</span>
+<span class="sd">           validated.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Given file &#39;</span><span class="si">{}</span><span class="s2">&#39; probably doesn&#39;t exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">path</span></div>
+
+
+<span class="c1">#############################################################################</span>
+<span class="c1"># Options&#39; validators (a.k.a. assertions) common for both server and client #</span>
+<span class="c1">#############################################################################</span>
+
+
+<div class="viewcode-block" id="assert_sys_img_ver_valid"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.assert_sys_img_ver_valid">[docs]</a><span class="k">def</span> <span class="nf">assert_sys_img_ver_valid</span><span class="p">(</span><span class="n">sys_img_ver</span><span class="p">):</span>
+    <span class="n">ver</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">valid</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ver</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys_img_ver</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">ver</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">valid</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Specified system image version &#39;</span><span class="si">{}</span><span class="s2">&#39; cannot be negative integer&quot;</span>\
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys_img_ver</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ver</span></div>
+
+
+<span class="c1">####################################</span>
+<span class="c1"># Core of the configuration parser #</span>
+<span class="c1">####################################</span>
+
+
+<div class="viewcode-block" id="ConfigParser"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.ConfigParser">[docs]</a><span class="k">class</span> <span class="nc">ConfigParser</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Base class for CLI and file based configuration parser.&quot;&quot;&quot;</span>
+
+    <span class="n">_HELP_EPILOG</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;This software is part of the author&#39;s master thesis</span>
+<span class="s1">                      project at the Faculty of Mathematics and Information</span>
+<span class="s1">                      Science at the Warsaw University of Technology. To learn</span>
+<span class="s1">                      more about the project refer to project white paper and</span>
+<span class="s1">                      application manual (`man myscm-srv`).&#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">config_section_name</span><span class="p">,</span> <span class="n">default_config</span><span class="p">,</span>
+                 <span class="n">help_desc</span><span class="p">,</span> <span class="n">version_full</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_path</span> <span class="o">=</span> <span class="n">config_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_section_name</span> <span class="o">=</span> <span class="n">config_section_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">help_desc</span> <span class="o">=</span> <span class="n">help_desc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version_full</span> <span class="o">=</span> <span class="n">version_full</span>
+
+        <span class="n">_COMMON_CONFIG</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">PIDFileConfigOption</span><span class="p">(),</span>
+            <span class="n">LogFileConfigOption</span><span class="p">(),</span>
+            <span class="n">VerbosityConfigOption</span><span class="p">(),</span>
+            <span class="n">ConfigCheckConfigOption</span><span class="p">(),</span>
+            <span class="n">SSLCertPublicKeyConfigOption</span><span class="p">(),</span>
+            <span class="n">VerifyFileConfigOption</span><span class="p">()</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowed_options</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">_COMMON_CONFIG</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowed_options</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">default_config</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_options</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="k">def</span> <span class="nf">_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__parse</span><span class="p">()</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">configparser</span><span class="o">.</span><span class="n">Error</span><span class="p">,</span> <span class="ne">FileNotFoundError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Loading configuration &#39;</span><span class="si">{}</span><span class="s2">&#39; failed&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+    <span class="k">def</span> <span class="nf">__parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">root_parser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_root_parser</span><span class="p">()</span>
+        <span class="n">wrapper_parser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_wrapper_parser</span><span class="p">(</span><span class="n">root_parser</span><span class="p">)</span>
+        <span class="n">args</span><span class="p">,</span> <span class="n">remaining_argv</span> <span class="o">=</span> <span class="n">root_parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_path</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span>
+
+        <span class="c1"># Parsing invalid config file may cause error before printing --help</span>
+        <span class="k">if</span> <span class="s2">&quot;--help&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">remaining_argv</span> <span class="ow">and</span> <span class="s2">&quot;-h&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">remaining_argv</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_config_from_file</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">ParserError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Failed to parse &#39;</span><span class="si">{}</span><span class="s2">&#39; configuration file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_config_from_argv</span><span class="p">(</span><span class="n">root_parser</span><span class="p">,</span> <span class="n">wrapper_parser</span><span class="p">,</span>
+                                          <span class="n">remaining_argv</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ParserError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="s2">&quot;Failed to parse command line options&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+    <span class="k">def</span> <span class="nf">_init_root_parser</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Options common for all subclasses inheriting from this class</span>
+        <span class="c1"># See: http://stackoverflow.com/q/3609852/1321680</span>
+        <span class="n">root_parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+                <span class="n">description</span><span class="o">=</span><span class="vm">__doc__</span><span class="p">,</span>
+                <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span>
+                <span class="n">add_help</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">root_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+                <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="s2">&quot;--config&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;FILE&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assert_conf_file_valid</span><span class="p">,</span>
+                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;read configuration from specified FILE instead of &quot;</span>
+                     <span class="s2">&quot;default &#39;</span><span class="si">{}</span><span class="s2">&#39; file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="p">))</span>
+        <span class="n">root_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+                <span class="s2">&quot;--version&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version_full</span><span class="p">,</span>
+                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;output version information and exit&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">root_parser</span>
+
+    <span class="k">def</span> <span class="nf">_init_wrapper_parser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_parser</span><span class="p">):</span>
+        <span class="n">wrapper_parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+                <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="n">root_parser</span><span class="p">],</span>
+                <span class="n">description</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">help_desc</span><span class="p">,</span>
+                <span class="n">epilog</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_HELP_EPILOG</span><span class="p">,</span>
+                <span class="n">formatter_class</span><span class="o">=</span><span class="n">SortingHelpFormatter</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">CommandLineConfigOption</span><span class="p">):</span>
+                <span class="n">wrapper_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="o">*</span><span class="n">val</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">val</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">argcomplete</span>
+            <span class="n">argcomplete</span><span class="o">.</span><span class="n">autocomplete</span><span class="p">(</span><span class="n">wrapper_parser</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">pass</span>  <span class="c1"># commands autocompletion is not obligatory</span>
+
+        <span class="k">return</span> <span class="n">wrapper_parser</span>
+
+    <span class="k">def</span> <span class="nf">_update_config_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">optionxform</span> <span class="o">=</span> <span class="nb">str</span>  <span class="c1"># case sensitive</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="p">)</span>
+        <span class="n">file_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_section_name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_no_unrecognized_file_options</span><span class="p">(</span><span class="n">file_options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_all_required_options_present</span><span class="p">(</span><span class="n">file_options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_convert_string_values_to_types</span><span class="p">(</span><span class="n">file_options</span><span class="p">)</span>
+        <span class="n">file_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_file_options_valid</span><span class="p">(</span><span class="n">file_options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">file_options</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_config_from_argv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_parser</span><span class="p">,</span> <span class="n">wrapper_parser</span><span class="p">,</span>
+                                 <span class="n">remaining_argv</span><span class="p">):</span>
+        <span class="n">wrapper_parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">argv_options</span> <span class="o">=</span> <span class="n">wrapper_parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">remaining_argv</span><span class="p">)</span>
+        <span class="c1"># Validity of CLI options is assured by argparse</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">argv_options</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_convert_string_values_to_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_options</span><span class="p">):</span>
+        <span class="c1"># Without this function there is problem (among others) with -v option</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">file_options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                <span class="n">file_options</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;on&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+                <span class="n">file_options</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;false&quot;</span><span class="p">,</span> <span class="s2">&quot;off&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">]:</span>
+                <span class="n">file_options</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">file_options</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="k">def</span> <span class="nf">_assert_conf_file_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file_path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">config_file_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Specified configuration file &#39;</span><span class="si">{}</span><span class="s2">&#39; doesn&#39;t exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">config_file_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">config_file_path</span>
+
+    <span class="k">def</span> <span class="nf">_assert_no_unrecognized_file_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_options</span><span class="p">):</span>
+        <span class="n">allowed_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">file_options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_keys</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="s2">&quot;Unrecognized option &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_assert_all_required_options_present</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_options</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">FileConfigOption</span><span class="p">)</span>\
+               <span class="ow">and</span> <span class="n">val</span><span class="o">.</span><span class="n">required_in_file</span>         \
+               <span class="ow">and</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">file_options</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Required option &#39;</span><span class="si">{}</span><span class="s2">&#39; is not specified in &quot;</span>\
+                    <span class="s2">&quot;configuration file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_file_options_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_options</span><span class="p">):</span>
+        <span class="n">converted_file_options</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">file_options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">option</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_options</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">new_val</span> <span class="o">=</span> <span class="n">val</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">ValidatedConfigOption</span><span class="p">):</span>
+                <span class="n">new_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">assert_valid</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+            <span class="n">converted_file_options</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_val</span>
+
+        <span class="k">return</span> <span class="n">converted_file_options</span></div>
+
+
+<div class="viewcode-block" id="SortingHelpFormatter"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.SortingHelpFormatter">[docs]</a><span class="k">class</span> <span class="nc">SortingHelpFormatter</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">HelpFormatter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper class to keep --help options ordered alphabetically.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SortingHelpFormatter.add_arguments"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.parser.SortingHelpFormatter.add_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+        <span class="n">actions</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">_actions_key</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SortingHelpFormatter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_arguments</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_actions_key</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+    <span class="n">new_key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">option_strings</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">new_key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">,</span> <span class="s2">&quot;--version&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="s2">&quot;-Z&quot;</span>  <span class="c1"># trick to always display --help and --version last</span>
+    <span class="k">return</span> <span class="n">new_key</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Patryk Bęza.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

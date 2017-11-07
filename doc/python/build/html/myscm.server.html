@@ -1,0 +1,954 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>myscm.server package &#8212; MySCM 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="myscm.common package" href="myscm.common.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="myscm-server-package">
+<h1>myscm.server package<a class="headerlink" href="#myscm-server-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-myscm.server.aidecheckparser">
+<span id="myscm-server-aidecheckparser-module"></span><h2>myscm.server.aidecheckparser module<a class="headerlink" href="#module-myscm.server.aidecheckparser" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.server.aidecheckparser.AIDECheckParser">
+<em class="property">class </em><code class="descclassname">myscm.server.aidecheckparser.</code><code class="descname">AIDECheckParser</code><span class="sig-paren">(</span><em>client_aide_db_path</em>, <em>server_aide_db_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aidecheckparser.html#AIDECheckParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aidecheckparser.AIDECheckParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Parser of the AIDE –check output. It’s primary role is to generate
+structured information which files were added, removed and changed.</p>
+<dl class="attribute">
+<dt id="myscm.server.aidecheckparser.AIDECheckParser.ADDED_ENTRIES">
+<code class="descname">ADDED_ENTRIES</code><em class="property"> = 'Added entries:\n'</em><a class="headerlink" href="#myscm.server.aidecheckparser.AIDECheckParser.ADDED_ENTRIES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aidecheckparser.AIDECheckParser.AIDE_SEPARATOR">
+<code class="descname">AIDE_SEPARATOR</code><em class="property"> = '---------------------------------------------------\n'</em><a class="headerlink" href="#myscm.server.aidecheckparser.AIDECheckParser.AIDE_SEPARATOR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aidecheckparser.AIDECheckParser.CHANGED_ENTRIES">
+<code class="descname">CHANGED_ENTRIES</code><em class="property"> = 'Changed entries:\n'</em><a class="headerlink" href="#myscm.server.aidecheckparser.AIDECheckParser.CHANGED_ENTRIES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aidecheckparser.AIDECheckParser.DETAILED_INFO">
+<code class="descname">DETAILED_INFO</code><em class="property"> = 'Detailed information about changes:\n'</em><a class="headerlink" href="#myscm.server.aidecheckparser.AIDECheckParser.DETAILED_INFO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aidecheckparser.AIDECheckParser.FILES_ATTRS">
+<code class="descname">FILES_ATTRS</code><em class="property"> = 'The attributes of the (uncompressed) database(s):\n'</em><a class="headerlink" href="#myscm.server.aidecheckparser.AIDECheckParser.FILES_ATTRS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aidecheckparser.AIDECheckParser.REMOVED_ENTRIES">
+<code class="descname">REMOVED_ENTRIES</code><em class="property"> = 'Removed entries:\n'</em><a class="headerlink" href="#myscm.server.aidecheckparser.AIDECheckParser.REMOVED_ENTRIES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.server.aidecheckparser.AIDECheckParser.read_all_entries">
+<code class="descname">read_all_entries</code><span class="sig-paren">(</span><em>aidediff_f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aidecheckparser.html#AIDECheckParser.read_all_entries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aidecheckparser.AIDECheckParser.read_all_entries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read added, removed and changed entries from AIDE –check output.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.server.aidecheckparser.AIDECheckParserError">
+<em class="property">exception </em><code class="descclassname">myscm.server.aidecheckparser.</code><code class="descname">AIDECheckParserError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aidecheckparser.html#AIDECheckParserError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aidecheckparser.AIDECheckParserError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.server.error.ServerError" title="myscm.server.error.ServerError"><code class="xref py py-class docutils literal"><span class="pre">myscm.server.error.ServerError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.server.aidedbmanager">
+<span id="myscm-server-aidedbmanager-module"></span><h2>myscm.server.aidedbmanager module<a class="headerlink" href="#module-myscm.server.aidedbmanager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.server.aidedbmanager.AIDEDatabasesManager">
+<em class="property">class </em><code class="descclassname">myscm.server.aidedbmanager.</code><code class="descname">AIDEDatabasesManager</code><span class="sig-paren">(</span><em>server_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aidedbmanager.html#AIDEDatabasesManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aidedbmanager.AIDEDatabasesManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Manager of the AIDE aide.db[.X] databases directories (X is integer).</p>
+<p>This manager is not AIDE’s database parser (see AIDECheckParser class).
+This class is responsible only for renaming AIDE’s databases after
+myscm-srv –scan to keep old databases saved (they are needed to run
+myscm-srv with –gen-img option).</p>
+<dl class="method">
+<dt id="myscm.server.aidedbmanager.AIDEDatabasesManager.get_recent_aide_db_version">
+<code class="descname">get_recent_aide_db_version</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aidedbmanager.html#AIDEDatabasesManager.get_recent_aide_db_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aidedbmanager.AIDEDatabasesManager.get_recent_aide_db_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return integer X which corresponds to aide.db.X directory that
+newest aide.db will be moved to after next myscm-srv –scan.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="myscm.server.aidedbmanager.AIDEDatabasesManager.print_all_aide_db_paths_sorted">
+<code class="descname">print_all_aide_db_paths_sorted</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aidedbmanager.html#AIDEDatabasesManager.print_all_aide_db_paths_sorted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aidedbmanager.AIDEDatabasesManager.print_all_aide_db_paths_sorted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print on stdout all found AIDE databases created with myscm-srv
+–scan option.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="myscm.server.aidedbmanager.AIDEDatabasesManager.replace_old_aide_db_with_new_one">
+<code class="descname">replace_old_aide_db_with_new_one</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aidedbmanager.html#AIDEDatabasesManager.replace_old_aide_db_with_new_one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aidedbmanager.AIDEDatabasesManager.replace_old_aide_db_with_new_one" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace old aide.db.current directory with new aide.db.new and
+rename old aide.db.current to aide.db.X directory (X is integer).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.server.aidedbmanager.AIDEDatabasesManagerError">
+<em class="property">exception </em><code class="descclassname">myscm.server.aidedbmanager.</code><code class="descname">AIDEDatabasesManagerError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aidedbmanager.html#AIDEDatabasesManagerError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aidedbmanager.AIDEDatabasesManagerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.server.error.ServerError" title="myscm.server.error.ServerError"><code class="xref py py-class docutils literal"><span class="pre">myscm.server.error.ServerError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.server.aidedbparser">
+<span id="myscm-server-aidedbparser-module"></span><h2>myscm.server.aidedbparser module<a class="headerlink" href="#module-myscm.server.aidedbparser" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.server.aidedbparser.AIDEDatabaseFileParser">
+<em class="property">class </em><code class="descclassname">myscm.server.aidedbparser.</code><code class="descname">AIDEDatabaseFileParser</code><span class="sig-paren">(</span><em>aide_db_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aidedbparser.html#AIDEDatabaseFileParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aidedbparser.AIDEDatabaseFileParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Parser of the aide.db[.X] AIDE databases (X is integer).</p>
+<dl class="attribute">
+<dt id="myscm.server.aidedbparser.AIDEDatabaseFileParser.AIDE_DB_FILE_CLOSING">
+<code class="descname">AIDE_DB_FILE_CLOSING</code><em class="property"> = '&#64;&#64;end_db\n'</em><a class="headerlink" href="#myscm.server.aidedbparser.AIDEDatabaseFileParser.AIDE_DB_FILE_CLOSING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aidedbparser.AIDEDatabaseFileParser.AIDE_DB_FILE_OPENING">
+<code class="descname">AIDE_DB_FILE_OPENING</code><em class="property"> = '&#64;&#64;begin_db\n'</em><a class="headerlink" href="#myscm.server.aidedbparser.AIDEDatabaseFileParser.AIDE_DB_FILE_OPENING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aidedbparser.AIDEDatabaseFileParser.AIDE_DB_PROPERTIES_OPENING">
+<code class="descname">AIDE_DB_PROPERTIES_OPENING</code><em class="property"> = '&#64;&#64;db_spec'</em><a class="headerlink" href="#myscm.server.aidedbparser.AIDEDatabaseFileParser.AIDE_DB_PROPERTIES_OPENING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.server.aidedbparser.AIDEDatabaseFileParser.get_files_entries">
+<code class="descname">get_files_entries</code><span class="sig-paren">(</span><em>entry_type</em>, <em>aide_simple_entries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aidedbparser.html#AIDEDatabaseFileParser.get_files_entries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aidedbparser.AIDEDatabaseFileParser.get_files_entries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get details of given AIDESimpleEntry entries from aide.db[.X]
+database file and return them in a set.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="myscm.server.aidedbparser.AIDEDatabaseFileParser.get_files_properties">
+<code class="descname">get_files_properties</code><span class="sig-paren">(</span><em>requested_paths</em>, <em>requested_properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aidedbparser.html#AIDEDatabaseFileParser.get_files_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aidedbparser.AIDEDatabaseFileParser.get_files_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper handling errors for the the actual <cite>_get_files_properties()</cite>
+function.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.server.aidedbparser.AIDEDatabaseFileParserError">
+<em class="property">exception </em><code class="descclassname">myscm.server.aidedbparser.</code><code class="descname">AIDEDatabaseFileParserError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aidedbparser.html#AIDEDatabaseFileParserError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aidedbparser.AIDEDatabaseFileParserError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.server.error.ServerError" title="myscm.server.error.ServerError"><code class="xref py py-class docutils literal"><span class="pre">myscm.server.error.ServerError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.server.aidedbverfile">
+<span id="myscm-server-aidedbverfile-module"></span><h2>myscm.server.aidedbverfile module<a class="headerlink" href="#module-myscm.server.aidedbverfile" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.server.aidedbverfile.MySCMDatabaseVersionFile">
+<em class="property">class </em><code class="descclassname">myscm.server.aidedbverfile.</code><code class="descname">MySCMDatabaseVersionFile</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aidedbverfile.html#MySCMDatabaseVersionFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aidedbverfile.MySCMDatabaseVersionFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.versionfile.VersionFile" title="myscm.common.versionfile.VersionFile"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.versionfile.VersionFile</span></code></a></p>
+<p>Representation of file holding recently created mySCM AIDE database by
+running myscm-srv with –scan option.</p>
+<dl class="attribute">
+<dt id="myscm.server.aidedbverfile.MySCMDatabaseVersionFile.DB_VER_STARTING_VALUE">
+<code class="descname">DB_VER_STARTING_VALUE</code><em class="property"> = -1</em><a class="headerlink" href="#myscm.server.aidedbverfile.MySCMDatabaseVersionFile.DB_VER_STARTING_VALUE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.server.aidedbverfile.MySCMDatabaseVersionFile.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><em>create=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aidedbverfile.html#MySCMDatabaseVersionFile.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aidedbverfile.MySCMDatabaseVersionFile.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.server.aideentry">
+<span id="myscm-server-aideentry-module"></span><h2>myscm.server.aideentry module<a class="headerlink" href="#module-myscm.server.aideentry" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.server.aideentry.AIDEEntries">
+<em class="property">class </em><code class="descclassname">myscm.server.aideentry.</code><code class="descname">AIDEEntries</code><a class="reference internal" href="_modules/myscm/server/aideentry.html#AIDEEntries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.AIDEEntries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Container for all the types of AIDE entries, ie. added, removed and
+changed one.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.aideentry.AIDEEntry">
+<em class="property">class </em><code class="descclassname">myscm.server.aideentry.</code><code class="descname">AIDEEntry</code><span class="sig-paren">(</span><em>aide_properties</em>, <em>aide_info_str</em>, <em>entry_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aideentry.html#AIDEEntry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Representation of added, removed and changed AIDE entry. This is
+structured, extended version of <cite>AIDESimpleEntry</cite>.</p>
+<dl class="attribute">
+<dt id="myscm.server.aideentry.AIDEEntry.AIDE_ALLOWED_INFO_STR_CHARS">
+<code class="descname">AIDE_ALLOWED_INFO_STR_CHARS</code><em class="property"> = {':', ' ', '+', '.', '-'}</em><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.AIDE_ALLOWED_INFO_STR_CHARS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.AIDEEntry.AIDE_INFO_STR_FULL_LEN">
+<code class="descname">AIDE_INFO_STR_FULL_LEN</code><em class="property"> = 17</em><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.AIDE_INFO_STR_FULL_LEN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.AIDEEntry.AIDE_INFO_STR_PATTERN">
+<code class="descname">AIDE_INFO_STR_PATTERN</code><em class="property"> = 'YlZbpugamcinCAXSE'</em><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.AIDE_INFO_STR_PATTERN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.AIDEEntry.AIDE_INFO_STR_TO_PROP_TYPES_MAPPING">
+<code class="descname">AIDE_INFO_STR_TO_PROP_TYPES_MAPPING</code><em class="property"> = {'C': [&lt;PropertyType.MD5: 'md5'&gt;, &lt;PropertyType.SHA1: 'sha1'&gt;], 'b': [&lt;PropertyType.BCOUNT: 'bcount'&gt;], 'c': [&lt;PropertyType.CTIME: 'ctime'&gt;], 'g': [&lt;PropertyType.GID: 'gid'&gt;], 'i': [&lt;PropertyType.INODE: 'inode'&gt;], 'l': [&lt;PropertyType.NAME: 'name'&gt;], 'm': [&lt;PropertyType.MTIME: 'mtime'&gt;], 'n': [&lt;PropertyType.LCOUNT: 'lcount'&gt;], 'p': [&lt;PropertyType.PERM: 'perm'&gt;], 'u': [&lt;PropertyType.UID: 'uid'&gt;]}</em><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.AIDE_INFO_STR_TO_PROP_TYPES_MAPPING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.AIDEEntry.AIDE_INFO_SUBSTR_LEN">
+<code class="descname">AIDE_INFO_SUBSTR_LEN</code><em class="property"> = 13</em><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.AIDE_INFO_SUBSTR_LEN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.AIDEEntry.ATTR_ADDED_CHAR">
+<code class="descname">ATTR_ADDED_CHAR</code><em class="property"> = '+'</em><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.ATTR_ADDED_CHAR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.AIDEEntry.ATTR_IGNORED_CHAR">
+<code class="descname">ATTR_IGNORED_CHAR</code><em class="property"> = ':'</em><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.ATTR_IGNORED_CHAR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.AIDEEntry.ATTR_NOT_CHECKED_CHAR">
+<code class="descname">ATTR_NOT_CHECKED_CHAR</code><em class="property"> = ' '</em><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.ATTR_NOT_CHECKED_CHAR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.AIDEEntry.ATTR_REMOVED_CHAR">
+<code class="descname">ATTR_REMOVED_CHAR</code><em class="property"> = '-'</em><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.ATTR_REMOVED_CHAR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.AIDEEntry.CHANGED_FILES_HEADER_NAMES">
+<code class="descname">CHANGED_FILES_HEADER_NAMES</code><em class="property"> = [&lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;, &lt;myscm.server.aideentry.PropertyHeader object&gt;]</em><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.CHANGED_FILES_HEADER_NAMES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.AIDEEntry.COMMENT_CHAR">
+<code class="descname">COMMENT_CHAR</code><em class="property"> = '#'</em><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.COMMENT_CHAR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.AIDEEntry.NO_CHANGE_CHAR">
+<code class="descname">NO_CHANGE_CHAR</code><em class="property"> = '.'</em><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.NO_CHANGE_CHAR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.AIDEEntry.PROPERTIES_COUNT">
+<code class="descname">PROPERTIES_COUNT</code><em class="property"> = 18</em><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.PROPERTIES_COUNT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.server.aideentry.AIDEEntry.get_aide_changed_properties">
+<code class="descname">get_aide_changed_properties</code><span class="sig-paren">(</span><em>server_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aideentry.html#AIDEEntry.get_aide_changed_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.get_aide_changed_properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.server.aideentry.AIDEEntry.get_full_path">
+<code class="descname">get_full_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aideentry.html#AIDEEntry.get_full_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.get_full_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.server.aideentry.AIDEEntry.was_file_content_changed">
+<code class="descname">was_file_content_changed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aideentry.html#AIDEEntry.was_file_content_changed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.AIDEEntry.was_file_content_changed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.server.aideentry.AIDEEntryError">
+<em class="property">exception </em><code class="descclassname">myscm.server.aideentry.</code><code class="descname">AIDEEntryError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aideentry.html#AIDEEntryError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.AIDEEntryError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.server.error.ServerError" title="myscm.server.error.ServerError"><code class="xref py py-class docutils literal"><span class="pre">myscm.server.error.ServerError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.aideentry.AIDEProperties">
+<em class="property">class </em><code class="descclassname">myscm.server.aideentry.</code><code class="descname">AIDEProperties</code><span class="sig-paren">(</span><em>properties</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aideentry.html#AIDEProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.AIDEProperties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Properties of files tracked by AIDE.</p>
+<dl class="attribute">
+<dt id="myscm.server.aideentry.AIDEProperties.REQUIRED_PROPERTIES">
+<code class="descname">REQUIRED_PROPERTIES</code><em class="property"> = {'gid', 'ctime', 'size', 'inode', 'uid', 'bcount', 'md5', 'sha1', 'name', 'attr', 'perm', 'mtime', 'lcount', 'lname'}</em><a class="headerlink" href="#myscm.server.aideentry.AIDEProperties.REQUIRED_PROPERTIES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="myscm.server.aideentry.AIDEProperties.assert_required_properties_present">
+<em class="property">static </em><code class="descname">assert_required_properties_present</code><span class="sig-paren">(</span><em>properties_set</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aideentry.html#AIDEProperties.assert_required_properties_present"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.AIDEProperties.assert_required_properties_present" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="myscm.server.aideentry.AIDEProperties.assert_required_properties_present_in_dict">
+<em class="property">static </em><code class="descname">assert_required_properties_present_in_dict</code><span class="sig-paren">(</span><em>properties_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aideentry.html#AIDEProperties.assert_required_properties_present_in_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.AIDEProperties.assert_required_properties_present_in_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.server.aideentry.AIDEPropertiesError">
+<em class="property">exception </em><code class="descclassname">myscm.server.aideentry.</code><code class="descname">AIDEPropertiesError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aideentry.html#AIDEPropertiesError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.AIDEPropertiesError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.server.error.ServerError" title="myscm.server.error.ServerError"><code class="xref py py-class docutils literal"><span class="pre">myscm.server.error.ServerError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.aideentry.AIDESimpleEntry">
+<em class="property">class </em><code class="descclassname">myscm.server.aideentry.</code><code class="descname">AIDESimpleEntry</code><span class="sig-paren">(</span><em>aide_info_str</em>, <em>file_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aideentry.html#AIDESimpleEntry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.AIDESimpleEntry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Representation of one line of the added, removed or changed file from
+AIDE –check output. Every line consists of informative string if AIDE’s
+‘summarize_changes’ option is set (which is guaranteed by this
+application) and full file path of the file.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.aideentry.EntryType">
+<em class="property">class </em><code class="descclassname">myscm.server.aideentry.</code><code class="descname">EntryType</code><a class="reference internal" href="_modules/myscm/server/aideentry.html#EntryType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.EntryType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">enum.Enum</span></code></p>
+<p>All types of AIDE entries.</p>
+<dl class="attribute">
+<dt id="myscm.server.aideentry.EntryType.ADDED">
+<code class="descname">ADDED</code><em class="property"> = 1</em><a class="headerlink" href="#myscm.server.aideentry.EntryType.ADDED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.EntryType.CHANGED">
+<code class="descname">CHANGED</code><em class="property"> = 3</em><a class="headerlink" href="#myscm.server.aideentry.EntryType.CHANGED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.EntryType.REMOVED">
+<code class="descname">REMOVED</code><em class="property"> = 2</em><a class="headerlink" href="#myscm.server.aideentry.EntryType.REMOVED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.aideentry.FileType">
+<em class="property">class </em><code class="descclassname">myscm.server.aideentry.</code><code class="descname">FileType</code><a class="reference internal" href="_modules/myscm/server/aideentry.html#FileType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.FileType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">enum.Enum</span></code></p>
+<p>All types of files supported by AIDE.</p>
+<dl class="attribute">
+<dt id="myscm.server.aideentry.FileType.BLOCK_DEVICE">
+<code class="descname">BLOCK_DEVICE</code><em class="property"> = 'b'</em><a class="headerlink" href="#myscm.server.aideentry.FileType.BLOCK_DEVICE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.FileType.CHARACTER_DEVICE">
+<code class="descname">CHARACTER_DEVICE</code><em class="property"> = 'c'</em><a class="headerlink" href="#myscm.server.aideentry.FileType.CHARACTER_DEVICE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.FileType.DIRECTORY">
+<code class="descname">DIRECTORY</code><em class="property"> = 'd'</em><a class="headerlink" href="#myscm.server.aideentry.FileType.DIRECTORY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.FileType.FIFO">
+<code class="descname">FIFO</code><em class="property"> = 'p'</em><a class="headerlink" href="#myscm.server.aideentry.FileType.FIFO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.FileType.FTYPE_CHANGED">
+<code class="descname">FTYPE_CHANGED</code><em class="property"> = '!'</em><a class="headerlink" href="#myscm.server.aideentry.FileType.FTYPE_CHANGED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.FileType.REGULAR_FILE">
+<code class="descname">REGULAR_FILE</code><em class="property"> = 'f'</em><a class="headerlink" href="#myscm.server.aideentry.FileType.REGULAR_FILE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.FileType.SOLARIS_DOOR">
+<code class="descname">SOLARIS_DOOR</code><em class="property"> = 'D'</em><a class="headerlink" href="#myscm.server.aideentry.FileType.SOLARIS_DOOR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.FileType.SOLARIS_EVENT_PORT">
+<code class="descname">SOLARIS_EVENT_PORT</code><em class="property"> = 'P'</em><a class="headerlink" href="#myscm.server.aideentry.FileType.SOLARIS_EVENT_PORT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.FileType.SYMBOLIC_LINK">
+<code class="descname">SYMBOLIC_LINK</code><em class="property"> = 'l'</em><a class="headerlink" href="#myscm.server.aideentry.FileType.SYMBOLIC_LINK" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.FileType.UNIX_SOCKET">
+<code class="descname">UNIX_SOCKET</code><em class="property"> = 's'</em><a class="headerlink" href="#myscm.server.aideentry.FileType.UNIX_SOCKET" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.FileType.UNKNOWN">
+<code class="descname">UNKNOWN</code><em class="property"> = '?'</em><a class="headerlink" href="#myscm.server.aideentry.FileType.UNKNOWN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.aideentry.PropertyHeader">
+<em class="property">class </em><code class="descclassname">myscm.server.aideentry.</code><code class="descname">PropertyHeader</code><span class="sig-paren">(</span><em>name</em>, <em>formatter='{:&lt;25}'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aideentry.html#PropertyHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.PropertyHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="myscm.server.aideentry.PropertyHeader.get_name">
+<code class="descname">get_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/aideentry.html#PropertyHeader.get_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.PropertyHeader.get_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.aideentry.PropertyType">
+<em class="property">class </em><code class="descclassname">myscm.server.aideentry.</code><code class="descname">PropertyType</code><a class="reference internal" href="_modules/myscm/server/aideentry.html#PropertyType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.aideentry.PropertyType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">enum.Enum</span></code></p>
+<p>Selected, required types of properties supported by AIDE.</p>
+<dl class="attribute">
+<dt id="myscm.server.aideentry.PropertyType.ATTR">
+<code class="descname">ATTR</code><em class="property"> = 'attr'</em><a class="headerlink" href="#myscm.server.aideentry.PropertyType.ATTR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.PropertyType.BCOUNT">
+<code class="descname">BCOUNT</code><em class="property"> = 'bcount'</em><a class="headerlink" href="#myscm.server.aideentry.PropertyType.BCOUNT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.PropertyType.CTIME">
+<code class="descname">CTIME</code><em class="property"> = 'ctime'</em><a class="headerlink" href="#myscm.server.aideentry.PropertyType.CTIME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.PropertyType.GID">
+<code class="descname">GID</code><em class="property"> = 'gid'</em><a class="headerlink" href="#myscm.server.aideentry.PropertyType.GID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.PropertyType.INODE">
+<code class="descname">INODE</code><em class="property"> = 'inode'</em><a class="headerlink" href="#myscm.server.aideentry.PropertyType.INODE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.PropertyType.LCOUNT">
+<code class="descname">LCOUNT</code><em class="property"> = 'lcount'</em><a class="headerlink" href="#myscm.server.aideentry.PropertyType.LCOUNT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.PropertyType.LNAME">
+<code class="descname">LNAME</code><em class="property"> = 'lname'</em><a class="headerlink" href="#myscm.server.aideentry.PropertyType.LNAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.PropertyType.MD5">
+<code class="descname">MD5</code><em class="property"> = 'md5'</em><a class="headerlink" href="#myscm.server.aideentry.PropertyType.MD5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.PropertyType.MTIME">
+<code class="descname">MTIME</code><em class="property"> = 'mtime'</em><a class="headerlink" href="#myscm.server.aideentry.PropertyType.MTIME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.PropertyType.NAME">
+<code class="descname">NAME</code><em class="property"> = 'name'</em><a class="headerlink" href="#myscm.server.aideentry.PropertyType.NAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.PropertyType.PERM">
+<code class="descname">PERM</code><em class="property"> = 'perm'</em><a class="headerlink" href="#myscm.server.aideentry.PropertyType.PERM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.PropertyType.SHA1">
+<code class="descname">SHA1</code><em class="property"> = 'sha1'</em><a class="headerlink" href="#myscm.server.aideentry.PropertyType.SHA1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.PropertyType.SIZE">
+<code class="descname">SIZE</code><em class="property"> = 'size'</em><a class="headerlink" href="#myscm.server.aideentry.PropertyType.SIZE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.aideentry.PropertyType.UID">
+<code class="descname">UID</code><em class="property"> = 'uid'</em><a class="headerlink" href="#myscm.server.aideentry.PropertyType.UID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.server.config">
+<span id="myscm-server-config-module"></span><h2>myscm.server.config module<a class="headerlink" href="#module-myscm.server.config" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.server.config.ServerConfig">
+<em class="property">class </em><code class="descclassname">myscm.server.config.</code><code class="descname">ServerConfig</code><span class="sig-paren">(</span><em>*options</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/config.html#ServerConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.config.ServerConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.config.BaseConfig" title="myscm.common.config.BaseConfig"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.config.BaseConfig</span></code></a></p>
+<p>Server-specific configuration manager.</p>
+<dl class="attribute">
+<dt id="myscm.server.config.ServerConfig.EXTENDED_AIDE_CONFIG_PREFIX">
+<code class="descname">EXTENDED_AIDE_CONFIG_PREFIX</code><em class="property"> = '#&#64;'</em><a class="headerlink" href="#myscm.server.config.ServerConfig.EXTENDED_AIDE_CONFIG_PREFIX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.server.config.ServerConfig.get_all_realpaths_of_files_to_copy">
+<code class="descname">get_all_realpaths_of_files_to_copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/config.html#ServerConfig.get_all_realpaths_of_files_to_copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.config.ServerConfig.get_all_realpaths_of_files_to_copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of the files and directories that are defined in
+aide.conf to be copied after myscm-srv –scan to be able to make
+diffs (patches) instead of copying whole files to the system image
+created with –gen-img option.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.server.config.ServerConfigError">
+<em class="property">exception </em><code class="descclassname">myscm.server.config.</code><code class="descname">ServerConfigError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/config.html#ServerConfigError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.config.ServerConfigError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.server.error.ServerError" title="myscm.server.error.ServerError"><code class="xref py py-class docutils literal"><span class="pre">myscm.server.error.ServerError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.server.error">
+<span id="myscm-server-error-module"></span><h2>myscm.server.error module<a class="headerlink" href="#module-myscm.server.error" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="myscm.server.error.ServerError">
+<em class="property">exception </em><code class="descclassname">myscm.server.error.</code><code class="descname">ServerError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/error.html#ServerError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.error.ServerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.error.MySCMError" title="myscm.common.error.MySCMError"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.error.MySCMError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.server.parser">
+<span id="myscm-server-parser-module"></span><h2>myscm.server.parser module<a class="headerlink" href="#module-myscm.server.parser" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.server.parser.AIDEConfigFileConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.server.parser.</code><code class="descname">AIDEConfigFileConfigOption</code><span class="sig-paren">(</span><em>aide_config_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/parser.html#AIDEConfigFileConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.parser.AIDEConfigFileConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.GeneralConfigOption" title="myscm.common.parser.GeneralConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.GeneralConfigOption</span></code></a></p>
+<p>Configuration option read from file and/or CLI specifying AIDE
+configuration file path.</p>
+<dl class="attribute">
+<dt id="myscm.server.parser.AIDEConfigFileConfigOption.DEFAULT_AIDE_CONFIG_PATH">
+<code class="descname">DEFAULT_AIDE_CONFIG_PATH</code><em class="property"> = '/etc/myscm-srv/aide.conf'</em><a class="headerlink" href="#myscm.server.parser.AIDEConfigFileConfigOption.DEFAULT_AIDE_CONFIG_PATH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.parser.AIDEScanArgConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.server.parser.</code><code class="descname">AIDEScanArgConfigOption</code><a class="reference internal" href="_modules/myscm/server/parser.html#AIDEScanArgConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.parser.AIDEScanArgConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.CommandLineFlagConfigOption" title="myscm.common.parser.CommandLineFlagConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.CommandLineFlagConfigOption</span></code></a></p>
+<p>Configuration option read from CLI specifying whether server’s scanning
+using AIDE should be ran or not.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.parser.GenerateSystemImageConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.server.parser.</code><code class="descname">GenerateSystemImageConfigOption</code><a class="reference internal" href="_modules/myscm/server/parser.html#GenerateSystemImageConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.parser.GenerateSystemImageConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ValidatedCommandLineConfigOption" title="myscm.common.parser.ValidatedCommandLineConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedCommandLineConfigOption</span></code></a></p>
+<p>Configuration option read from CLI specifying to generate system image
+from the specified client’s cersion to the current newest system
+version. List of all available client’s databases can be checked using
+–list-db option.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.parser.ListAvailableAIDEDatabasesConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.server.parser.</code><code class="descname">ListAvailableAIDEDatabasesConfigOption</code><a class="reference internal" href="_modules/myscm/server/parser.html#ListAvailableAIDEDatabasesConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.parser.ListAvailableAIDEDatabasesConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.CommandLineFlagConfigOption" title="myscm.common.parser.CommandLineFlagConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.CommandLineFlagConfigOption</span></code></a></p>
+<p>Configuration option read from CLI specifying to list all available
+AIDE databases that describe expected state of the client that want to
+upgrade its configuration.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.parser.ListGeneratedMyscmSysImgConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.server.parser.</code><code class="descname">ListGeneratedMyscmSysImgConfigOption</code><a class="reference internal" href="_modules/myscm/server/parser.html#ListGeneratedMyscmSysImgConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.parser.ListGeneratedMyscmSysImgConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.CommandLineFlagConfigOption" title="myscm.common.parser.CommandLineFlagConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.CommandLineFlagConfigOption</span></code></a></p>
+<p>Configuration option read from CLI specifying to list all mySCM system
+images generated with –gen-img option.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.parser.RecentlyGeneratedDbVerPathConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.server.parser.</code><code class="descname">RecentlyGeneratedDbVerPathConfigOption</code><span class="sig-paren">(</span><em>recent_db_ver_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/parser.html#RecentlyGeneratedDbVerPathConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.parser.RecentlyGeneratedDbVerPathConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ValidatedFileConfigOption" title="myscm.common.parser.ValidatedFileConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedFileConfigOption</span></code></a></p>
+<dl class="attribute">
+<dt id="myscm.server.parser.RecentlyGeneratedDbVerPathConfigOption.DEFAULT_RECENT_DB_VER_PATH">
+<code class="descname">DEFAULT_RECENT_DB_VER_PATH</code><em class="property"> = '/var/myscm-srv/db_ver.myscm-srv'</em><a class="headerlink" href="#myscm.server.parser.RecentlyGeneratedDbVerPathConfigOption.DEFAULT_RECENT_DB_VER_PATH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.parser.RecentlyGeneratedDbVerPathConfigOption.OPTION_NAME">
+<code class="descname">OPTION_NAME</code><em class="property"> = 'RecentlyGenDbVerPath'</em><a class="headerlink" href="#myscm.server.parser.RecentlyGeneratedDbVerPathConfigOption.OPTION_NAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.parser.SSLCertConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.server.parser.</code><code class="descname">SSLCertConfigOption</code><span class="sig-paren">(</span><em>ssl_cert_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/parser.html#SSLCertConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.parser.SSLCertConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.GeneralConfigOption" title="myscm.common.parser.GeneralConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.GeneralConfigOption</span></code></a></p>
+<p>Configuration option read from file and/or CLI specifying SSL
+certificate file path.</p>
+<dl class="attribute">
+<dt id="myscm.server.parser.SSLCertConfigOption.DEFAULT_SSL_CERT_PATH">
+<code class="descname">DEFAULT_SSL_CERT_PATH</code><em class="property"> = '/etc/ssl/private/myscm-srv.sig'</em><a class="headerlink" href="#myscm.server.parser.SSLCertConfigOption.DEFAULT_SSL_CERT_PATH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.parser.SSLCertPrivKeyConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.server.parser.</code><code class="descname">SSLCertPrivKeyConfigOption</code><span class="sig-paren">(</span><em>ssl_priv_key_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/parser.html#SSLCertPrivKeyConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.parser.SSLCertPrivKeyConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.GeneralConfigOption" title="myscm.common.parser.GeneralConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.GeneralConfigOption</span></code></a></p>
+<p>Configuration option read from file and/or CLI specifying SSL private
+key of the x509 certificate saved in PEM format.</p>
+<dl class="attribute">
+<dt id="myscm.server.parser.SSLCertPrivKeyConfigOption.DEFAULT_SSL_CERT_PRIV_KEY_PATH">
+<code class="descname">DEFAULT_SSL_CERT_PRIV_KEY_PATH</code><em class="property"> = '/etc/ssl/private/myscm-srv.sig.priv'</em><a class="headerlink" href="#myscm.server.parser.SSLCertPrivKeyConfigOption.DEFAULT_SSL_CERT_PRIV_KEY_PATH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.parser.ServerConfigParser">
+<em class="property">class </em><code class="descclassname">myscm.server.parser.</code><code class="descname">ServerConfigParser</code><span class="sig-paren">(</span><em>config_path</em>, <em>config_section_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/parser.html#ServerConfigParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.parser.ServerConfigParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ConfigParser" title="myscm.common.parser.ConfigParser"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ConfigParser</span></code></a></p>
+<p>Application configuration parser for configuration read from both
+configuration file and command line (CLI).</p>
+<dl class="method">
+<dt id="myscm.server.parser.ServerConfigParser.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/parser.html#ServerConfigParser.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.parser.ServerConfigParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.server.parser.ServerParserError">
+<em class="property">exception </em><code class="descclassname">myscm.server.parser.</code><code class="descname">ServerParserError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/parser.html#ServerParserError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.parser.ServerParserError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ParserError" title="myscm.common.parser.ParserError"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ParserError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.parser.SignFileConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.server.parser.</code><code class="descname">SignFileConfigOption</code><a class="reference internal" href="_modules/myscm/server/parser.html#SignFileConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.parser.SignFileConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ValidatedCommandLineConfigOption" title="myscm.common.parser.ValidatedCommandLineConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedCommandLineConfigOption</span></code></a></p>
+<p>Configuration option read from CLI specifying to digitally sign given
+file.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.parser.SystemImgOutDirConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.server.parser.</code><code class="descname">SystemImgOutDirConfigOption</code><span class="sig-paren">(</span><em>sys_img_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/parser.html#SystemImgOutDirConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.parser.SystemImgOutDirConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ValidatedFileConfigOption" title="myscm.common.parser.ValidatedFileConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedFileConfigOption</span></code></a></p>
+<p>Configuration option read from file specifying directory where
+all generated reference system images are saved.</p>
+<dl class="attribute">
+<dt id="myscm.server.parser.SystemImgOutDirConfigOption.DEFAULT_SYS_IMG_DIR">
+<code class="descname">DEFAULT_SYS_IMG_DIR</code><em class="property"> = '/var/lib/myscm-srv'</em><a class="headerlink" href="#myscm.server.parser.SystemImgOutDirConfigOption.DEFAULT_SYS_IMG_DIR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.server.parser.UpgradeConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.server.parser.</code><code class="descname">UpgradeConfigOption</code><a class="reference internal" href="_modules/myscm/server/parser.html#UpgradeConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.parser.UpgradeConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ValidatedCommandLineConfigOption" title="myscm.common.parser.ValidatedCommandLineConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedCommandLineConfigOption</span></code></a></p>
+<p>Run –scan and –gen-img option with specified system image version.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.server.pkgmanager">
+<span id="myscm-server-pkgmanager-module"></span><h2>myscm.server.pkgmanager module<a class="headerlink" href="#module-myscm.server.pkgmanager" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="myscm.server.pkgmanager.PackageManagerError">
+<em class="property">exception </em><code class="descclassname">myscm.server.pkgmanager.</code><code class="descname">PackageManagerError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/pkgmanager.html#PackageManagerError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.pkgmanager.PackageManagerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.server.error.ServerError" title="myscm.server.error.ServerError"><code class="xref py py-class docutils literal"><span class="pre">myscm.server.error.ServerError</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="myscm.server.pkgmanager.get_file_arch_package_name">
+<code class="descclassname">myscm.server.pkgmanager.</code><code class="descname">get_file_arch_package_name</code><span class="sig-paren">(</span><em>file_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/pkgmanager.html#get_file_arch_package_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.pkgmanager.get_file_arch_package_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Arch Linux package name of the given file path.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="myscm.server.pkgmanager.get_file_debian_package_name">
+<code class="descclassname">myscm.server.pkgmanager.</code><code class="descname">get_file_debian_package_name</code><span class="sig-paren">(</span><em>file_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/pkgmanager.html#get_file_debian_package_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.pkgmanager.get_file_debian_package_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Debian package name of the given file path.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="myscm.server.pkgmanager.get_file_debian_package_name_fallback">
+<code class="descclassname">myscm.server.pkgmanager.</code><code class="descname">get_file_debian_package_name_fallback</code><span class="sig-paren">(</span><em>file_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/pkgmanager.html#get_file_debian_package_name_fallback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.pkgmanager.get_file_debian_package_name_fallback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get package name of the given file path.</p>
+<p>dpkg-query is not able to find package name of uninstalled packages in
+opposite to apt-file (which is not installed by default). apt-file is
+much slower than dpkg-query -S.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="myscm.server.pkgmanager.get_file_package_name">
+<code class="descclassname">myscm.server.pkgmanager.</code><code class="descname">get_file_package_name</code><span class="sig-paren">(</span><em>file_path</em>, <em>server_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/pkgmanager.html#get_file_package_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.pkgmanager.get_file_package_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-myscm.server.scanner">
+<span id="myscm-server-scanner-module"></span><h2>myscm.server.scanner module<a class="headerlink" href="#module-myscm.server.scanner" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.server.scanner.Scanner">
+<em class="property">class </em><code class="descclassname">myscm.server.scanner.</code><code class="descname">Scanner</code><span class="sig-paren">(</span><em>server_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/scanner.html#Scanner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.scanner.Scanner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Wrapper of the AIDE scanner.</p>
+<dl class="attribute">
+<dt id="myscm.server.scanner.Scanner.COPIED_FILES_DIRNAME">
+<code class="descname">COPIED_FILES_DIRNAME</code><em class="property"> = 'COPIED'</em><a class="headerlink" href="#myscm.server.scanner.Scanner.COPIED_FILES_DIRNAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.server.scanner.Scanner.check_if_copy_file">
+<code class="descname">check_if_copy_file</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/scanner.html#Scanner.check_if_copy_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.scanner.Scanner.check_if_copy_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.server.scanner.Scanner.ignore_handler">
+<code class="descname">ignore_handler</code><span class="sig-paren">(</span><em>dir_path</em>, <em>dir_content</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/scanner.html#Scanner.ignore_handler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.scanner.Scanner.ignore_handler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.server.scanner.Scanner.scan">
+<code class="descname">scan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/scanner.html#Scanner.scan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.scanner.Scanner.scan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scan system software and configuration using AIDE’s –init option
+creating new reference AIDE database and renaming old one.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.server.scanner.ScannerError">
+<em class="property">exception </em><code class="descclassname">myscm.server.scanner.</code><code class="descname">ScannerError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/scanner.html#ScannerError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.scanner.ScannerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.server.error.ServerError" title="myscm.server.error.ServerError"><code class="xref py py-class docutils literal"><span class="pre">myscm.server.error.ServerError</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="myscm.server.scanner.is_reference_aide_db_outdated">
+<code class="descclassname">myscm.server.scanner.</code><code class="descname">is_reference_aide_db_outdated</code><span class="sig-paren">(</span><em>server_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/scanner.html#is_reference_aide_db_outdated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.scanner.is_reference_aide_db_outdated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if reference AIDE database aide.db is outdated.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.server.sysimggenerator">
+<span id="myscm-server-sysimggenerator-module"></span><h2>myscm.server.sysimggenerator module<a class="headerlink" href="#module-myscm.server.sysimggenerator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator">
+<em class="property">class </em><code class="descclassname">myscm.server.sysimggenerator.</code><code class="descname">SystemImageGenerator</code><span class="sig-paren">(</span><em>server_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/sysimggenerator.html#SystemImageGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Generator of the reference system image that will be applied by the
+client’s myscm-cli application.</p>
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.ADDED_FILES_FNAME">
+<code class="descname">ADDED_FILES_FNAME</code><em class="property"> = 'added.txt'</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.ADDED_FILES_FNAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.AIDE_MIN_EXITCODE">
+<code class="descname">AIDE_MIN_EXITCODE</code><em class="property"> = 14</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.AIDE_MIN_EXITCODE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.CHANGED_FILES_FNAME">
+<code class="descname">CHANGED_FILES_FNAME</code><em class="property"> = 'changed.txt'</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.CHANGED_FILES_FNAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.CPU_ARCHITECTURE_STR">
+<code class="descname">CPU_ARCHITECTURE_STR</code><em class="property"> = 'CPU architecture'</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.CPU_ARCHITECTURE_STR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.IN_ARCHIVE_ADDED_DIR_NAME">
+<code class="descname">IN_ARCHIVE_ADDED_DIR_NAME</code><em class="property"> = 'ADDED'</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.IN_ARCHIVE_ADDED_DIR_NAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.IN_ARCHIVE_CHANGED_DIR_NAME">
+<code class="descname">IN_ARCHIVE_CHANGED_DIR_NAME</code><em class="property"> = 'CHANGED'</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.IN_ARCHIVE_CHANGED_DIR_NAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.LINUX_DISTRO_STR">
+<code class="descname">LINUX_DISTRO_STR</code><em class="property"> = 'GNU/Linux distribution'</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.LINUX_DISTRO_STR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.MYSCM_IMG_EXT">
+<code class="descname">MYSCM_IMG_EXT</code><em class="property"> = '.tar.gz'</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.MYSCM_IMG_EXT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.MYSCM_IMG_FILE_NAME">
+<code class="descname">MYSCM_IMG_FILE_NAME</code><em class="property"> = 'myscm-img.{}.{}.tar.gz'</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.MYSCM_IMG_FILE_NAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.MYSCM_IMG_FILE_NAME_REGEX">
+<code class="descname">MYSCM_IMG_FILE_NAME_REGEX</code><em class="property"> = 'myscm-img.(\\d+).(\\d+).tar.gz'</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.MYSCM_IMG_FILE_NAME_REGEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.PATCH_EXT">
+<code class="descname">PATCH_EXT</code><em class="property"> = '.myscmsrv-patch'</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.PATCH_EXT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.REMOVED_FILES_FNAME">
+<code class="descname">REMOVED_FILES_FNAME</code><em class="property"> = 'removed.txt'</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.REMOVED_FILES_FNAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.SYSTEM_STR">
+<code class="descname">SYSTEM_STR</code><em class="property"> = 'System'</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.SYSTEM_STR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.TARFILE_COMPRESSION">
+<code class="descname">TARFILE_COMPRESSION</code><em class="property"> = 'w:gz'</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.TARFILE_COMPRESSION" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.TEMPLATE_PATH_EXT">
+<code class="descname">TEMPLATE_PATH_EXT</code><em class="property"> = '.myscm-template'</em><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.TEMPLATE_PATH_EXT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.server.sysimggenerator.SystemImageGenerator.generate_img">
+<code class="descname">generate_img</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/sysimggenerator.html#SystemImageGenerator.generate_img"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGenerator.generate_img" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate system image file for client whose AIDE configuration is
+identified by unique client’s ID <cite>server_config.options.gen_img</cite>
+(which is integer number) and return full path to the created system
+image.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.server.sysimggenerator.SystemImageGeneratorError">
+<em class="property">exception </em><code class="descclassname">myscm.server.sysimggenerator.</code><code class="descname">SystemImageGeneratorError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/sysimggenerator.html#SystemImageGeneratorError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.sysimggenerator.SystemImageGeneratorError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.server.error.ServerError" title="myscm.server.error.ServerError"><code class="xref py py-class docutils literal"><span class="pre">myscm.server.error.ServerError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.server.sysimgmanager">
+<span id="myscm-server-sysimgmanager-module"></span><h2>myscm.server.sysimgmanager module<a class="headerlink" href="#module-myscm.server.sysimgmanager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.server.sysimgmanager.SysImgManager">
+<em class="property">class </em><code class="descclassname">myscm.server.sysimgmanager.</code><code class="descname">SysImgManager</code><span class="sig-paren">(</span><em>server_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/sysimgmanager.html#SysImgManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.sysimgmanager.SysImgManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.sysimgmanager.SysImgManagerBase" title="myscm.common.sysimgmanager.SysImgManagerBase"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.sysimgmanager.SysImgManagerBase</span></code></a></p>
+<p>Manager of the system images myscm-img.X.Y.tar.gz (X, Y are integers)
+created by myscm-srv.</p>
+<dl class="method">
+<dt id="myscm.server.sysimgmanager.SysImgManager.print_all_verified_img_paths_sorted">
+<code class="descname">print_all_verified_img_paths_sorted</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/sysimgmanager.html#SysImgManager.print_all_verified_img_paths_sorted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.sysimgmanager.SysImgManager.print_all_verified_img_paths_sorted" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.server.sysimgmanager.SysImgManagerError">
+<em class="property">exception </em><code class="descclassname">myscm.server.sysimgmanager.</code><code class="descname">SysImgManagerError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/server/sysimgmanager.html#SysImgManagerError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.server.sysimgmanager.SysImgManagerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.server.error.ServerError" title="myscm.server.error.ServerError"><code class="xref py py-class docutils literal"><span class="pre">myscm.server.error.ServerError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.server">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-myscm.server" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">myscm</a><ul>
+  <li><a href="myscm.html">myscm package</a><ul>
+      <li>Previous: <a href="myscm.common.html" title="previous chapter">myscm.common package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Patryk Bęza.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/myscm.server.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

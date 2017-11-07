@@ -1,0 +1,525 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>myscm.client package &#8212; MySCM 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="myscm.common package" href="myscm.common.html" />
+    <link rel="prev" title="myscm package" href="myscm.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="myscm-client-package">
+<h1>myscm.client package<a class="headerlink" href="#myscm-client-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-myscm.client.config">
+<span id="myscm-client-config-module"></span><h2>myscm.client.config module<a class="headerlink" href="#module-myscm.client.config" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.client.config.ClientConfig">
+<em class="property">class </em><code class="descclassname">myscm.client.config.</code><code class="descname">ClientConfig</code><span class="sig-paren">(</span><em>*options</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/config.html#ClientConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.config.ClientConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.config.BaseConfig" title="myscm.common.config.BaseConfig"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.config.BaseConfig</span></code></a></p>
+<p>Client-specific configuration manager.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.client.config.ClientConfigError">
+<em class="property">exception </em><code class="descclassname">myscm.client.config.</code><code class="descname">ClientConfigError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/config.html#ClientConfigError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.config.ClientConfigError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.client.error.ClientError" title="myscm.client.error.ClientError"><code class="xref py py-class docutils literal"><span class="pre">myscm.client.error.ClientError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.client.error">
+<span id="myscm-client-error-module"></span><h2>myscm.client.error module<a class="headerlink" href="#module-myscm.client.error" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="myscm.client.error.ClientError">
+<em class="property">exception </em><code class="descclassname">myscm.client.error.</code><code class="descname">ClientError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/error.html#ClientError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.error.ClientError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.error.MySCMError" title="myscm.common.error.MySCMError"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.error.MySCMError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.client.myscmimgverfile">
+<span id="myscm-client-myscmimgverfile-module"></span><h2>myscm.client.myscmimgverfile module<a class="headerlink" href="#module-myscm.client.myscmimgverfile" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.client.myscmimgverfile.MySCMImgVersionFile">
+<em class="property">class </em><code class="descclassname">myscm.client.myscmimgverfile.</code><code class="descname">MySCMImgVersionFile</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/myscmimgverfile.html#MySCMImgVersionFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.myscmimgverfile.MySCMImgVersionFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.versionfile.VersionFile" title="myscm.common.versionfile.VersionFile"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.versionfile.VersionFile</span></code></a></p>
+<p>Representation of file holding recently applied mySCM system image by
+running myscm-srv with –apply-img option.</p>
+<dl class="attribute">
+<dt id="myscm.client.myscmimgverfile.MySCMImgVersionFile.IMG_VER_STARTING_VALUE">
+<code class="descname">IMG_VER_STARTING_VALUE</code><em class="property"> = 0</em><a class="headerlink" href="#myscm.client.myscmimgverfile.MySCMImgVersionFile.IMG_VER_STARTING_VALUE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.client.myscmimgverfile.MySCMImgVersionFile.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><em>create=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/myscmimgverfile.html#MySCMImgVersionFile.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.myscmimgverfile.MySCMImgVersionFile.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.client.parser">
+<span id="myscm-client-parser-module"></span><h2>myscm.client.parser module<a class="headerlink" href="#module-myscm.client.parser" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.client.parser.ApplySysImgConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">ApplySysImgConfigOption</code><a class="reference internal" href="_modules/myscm/client/parser.html#ApplySysImgConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.ApplySysImgConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ValidatedCommandLineConfigOption" title="myscm.common.parser.ValidatedCommandLineConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedCommandLineConfigOption</span></code></a></p>
+<p>Configuration option read from CLI specifying to apply changes read
+from given system image (which is tar.gz archive).</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.parser.ClientConfigParser">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">ClientConfigParser</code><span class="sig-paren">(</span><em>config_path</em>, <em>config_section_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/parser.html#ClientConfigParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.ClientConfigParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ConfigParser" title="myscm.common.parser.ConfigParser"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ConfigParser</span></code></a></p>
+<p>Application configuration parser for configuration read from both
+configuration file and command line (CLI).</p>
+<dl class="method">
+<dt id="myscm.client.parser.ClientConfigParser.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/parser.html#ClientConfigParser.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.ClientConfigParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.client.parser.ClientParserError">
+<em class="property">exception </em><code class="descclassname">myscm.client.parser.</code><code class="descname">ClientParserError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/parser.html#ClientParserError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.ClientParserError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ParserError" title="myscm.common.parser.ParserError"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ParserError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.parser.DryRunConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">DryRunConfigOption</code><a class="reference internal" href="_modules/myscm/client/parser.html#DryRunConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.DryRunConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.CommandLineFlagConfigOption" title="myscm.common.parser.CommandLineFlagConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.CommandLineFlagConfigOption</span></code></a></p>
+<p>Configuration option read from CLI specifying to not make any real
+changes (–noop or no-operation mode).</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.parser.ForceApplyConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">ForceApplyConfigOption</code><a class="reference internal" href="_modules/myscm/client/parser.html#ForceApplyConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.ForceApplyConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.CommandLineFlagConfigOption" title="myscm.common.parser.CommandLineFlagConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.CommandLineFlagConfigOption</span></code></a></p>
+<p>Configuration option read from CLI specifying do not bother user with
+interactive questions.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.parser.ListSysImgConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">ListSysImgConfigOption</code><a class="reference internal" href="_modules/myscm/client/parser.html#ListSysImgConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.ListSysImgConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.CommandLineFlagConfigOption" title="myscm.common.parser.CommandLineFlagConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.CommandLineFlagConfigOption</span></code></a></p>
+<p>Configuration option read from CLI specifying to list all available
+system images created by myscm-srv.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.parser.PeersListConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">PeersListConfigOption</code><span class="sig-paren">(</span><em>config_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/parser.html#PeersListConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.PeersListConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ValidatedFileConfigOption" title="myscm.common.parser.ValidatedFileConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedFileConfigOption</span></code></a></p>
+<p>Configuration option read from file specifying hostnames of the peers
+that share mySCM system images. –update and –upgrade options use this
+list to randomly select client that will be used to download mySCM
+system image (unless host is explicitly specified for those options).</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.parser.PrintSysImgVerConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">PrintSysImgVerConfigOption</code><a class="reference internal" href="_modules/myscm/client/parser.html#PrintSysImgVerConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.PrintSysImgVerConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.CommandLineFlagConfigOption" title="myscm.common.parser.CommandLineFlagConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.CommandLineFlagConfigOption</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.parser.RecentlyAppliedSysImgVerPathConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">RecentlyAppliedSysImgVerPathConfigOption</code><span class="sig-paren">(</span><em>recent_img_ver_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/parser.html#RecentlyAppliedSysImgVerPathConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.RecentlyAppliedSysImgVerPathConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ValidatedFileConfigOption" title="myscm.common.parser.ValidatedFileConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedFileConfigOption</span></code></a></p>
+<dl class="attribute">
+<dt id="myscm.client.parser.RecentlyAppliedSysImgVerPathConfigOption.DEFAULT_RECENT_IMG_VER_PATH">
+<code class="descname">DEFAULT_RECENT_IMG_VER_PATH</code><em class="property"> = '/var/myscm-cli/img_ver.myscm-cli'</em><a class="headerlink" href="#myscm.client.parser.RecentlyAppliedSysImgVerPathConfigOption.DEFAULT_RECENT_IMG_VER_PATH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.client.parser.RecentlyAppliedSysImgVerPathConfigOption.OPTION_NAME">
+<code class="descname">OPTION_NAME</code><em class="property"> = 'RecentSysImgVerPath'</em><a class="headerlink" href="#myscm.client.parser.RecentlyAppliedSysImgVerPathConfigOption.OPTION_NAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.parser.SSLCertConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">SSLCertConfigOption</code><span class="sig-paren">(</span><em>ssl_cert_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/parser.html#SSLCertConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.SSLCertConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.GeneralConfigOption" title="myscm.common.parser.GeneralConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.GeneralConfigOption</span></code></a></p>
+<p>Configuration option read from file and/or CLI specifying SSL
+certificate file path to verify system image created by myscm-srv.</p>
+<dl class="attribute">
+<dt id="myscm.client.parser.SSLCertConfigOption.DEFAULT_SSL_CERT_PATH">
+<code class="descname">DEFAULT_SSL_CERT_PATH</code><em class="property"> = '/etc/ssl/private/myscm-cli.sig'</em><a class="headerlink" href="#myscm.client.parser.SSLCertConfigOption.DEFAULT_SSL_CERT_PATH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.parser.SysImgDownloadDirConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">SysImgDownloadDirConfigOption</code><span class="sig-paren">(</span><em>sys_img_download_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/parser.html#SysImgDownloadDirConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.SysImgDownloadDirConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ValidatedFileConfigOption" title="myscm.common.parser.ValidatedFileConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedFileConfigOption</span></code></a></p>
+<dl class="attribute">
+<dt id="myscm.client.parser.SysImgDownloadDirConfigOption.DEFAULT_SYS_IMG_DOWNLOAD_DIR">
+<code class="descname">DEFAULT_SYS_IMG_DOWNLOAD_DIR</code><em class="property"> = '/var/lib/myscm-cli/downloaded'</em><a class="headerlink" href="#myscm.client.parser.SysImgDownloadDirConfigOption.DEFAULT_SYS_IMG_DOWNLOAD_DIR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.parser.SysImgExtractDirConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">SysImgExtractDirConfigOption</code><span class="sig-paren">(</span><em>sys_img_extract_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/parser.html#SysImgExtractDirConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.SysImgExtractDirConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ValidatedFileConfigOption" title="myscm.common.parser.ValidatedFileConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedFileConfigOption</span></code></a></p>
+<dl class="attribute">
+<dt id="myscm.client.parser.SysImgExtractDirConfigOption.DEFAULT_SYS_IMG_EXTRACT_DIR">
+<code class="descname">DEFAULT_SYS_IMG_EXTRACT_DIR</code><em class="property"> = '/tmp'</em><a class="headerlink" href="#myscm.client.parser.SysImgExtractDirConfigOption.DEFAULT_SYS_IMG_EXTRACT_DIR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.parser.UpdateProtocolConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">UpdateProtocolConfigOption</code><span class="sig-paren">(</span><em>protocol=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/parser.html#UpdateProtocolConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.UpdateProtocolConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.GeneralChoiceConfigOption" title="myscm.common.parser.GeneralChoiceConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.GeneralChoiceConfigOption</span></code></a></p>
+<p>Configuration option read from file and/or CLI specifying which protocol
+should be preferred to download new system image from one of the
+predefined client. This option makes sense only with –update and
+–upgrade options.</p>
+<dl class="attribute">
+<dt id="myscm.client.parser.UpdateProtocolConfigOption.DEFAULT_PROTOCOL">
+<code class="descname">DEFAULT_PROTOCOL</code><em class="property"> = 'SFTP'</em><a class="headerlink" href="#myscm.client.parser.UpdateProtocolConfigOption.DEFAULT_PROTOCOL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.parser.UpdateSysImgConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">UpdateSysImgConfigOption</code><span class="sig-paren">(</span><em>config_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/parser.html#UpdateSysImgConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.UpdateSysImgConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ValidatedCommandLineConfigOption" title="myscm.common.parser.ValidatedCommandLineConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedCommandLineConfigOption</span></code></a></p>
+<p>Configuration option read from CLI specifying to update system image
+by downloading it from other client or server.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.parser.UpgradeSysImgConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">UpgradeSysImgConfigOption</code><a class="reference internal" href="_modules/myscm/client/parser.html#UpgradeSysImgConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.UpgradeSysImgConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ValidatedCommandLineConfigOption" title="myscm.common.parser.ValidatedCommandLineConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedCommandLineConfigOption</span></code></a></p>
+<p>Configuration option read from CLI specifying to update system image
+by downloading it from other client or server and then to apply
+downloaded system image.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.parser.VerifySysImgConfigOption">
+<em class="property">class </em><code class="descclassname">myscm.client.parser.</code><code class="descname">VerifySysImgConfigOption</code><a class="reference internal" href="_modules/myscm/client/parser.html#VerifySysImgConfigOption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.VerifySysImgConfigOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.parser.ValidatedCommandLineConfigOption" title="myscm.common.parser.ValidatedCommandLineConfigOption"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.parser.ValidatedCommandLineConfigOption</span></code></a></p>
+<p>Configuration option read from CLI specifying to verify signature of
+the given system image.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="myscm.client.parser.check_if_host_valid">
+<code class="descclassname">myscm.client.parser.</code><code class="descname">check_if_host_valid</code><span class="sig-paren">(</span><em>host</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/parser.html#check_if_host_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.parser.check_if_host_valid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-myscm.client.sftpdownloader">
+<span id="myscm-client-sftpdownloader-module"></span><h2>myscm.client.sftpdownloader module<a class="headerlink" href="#module-myscm.client.sftpdownloader" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.client.sftpdownloader.SFTPSysImgDownloader">
+<em class="property">class </em><code class="descclassname">myscm.client.sftpdownloader.</code><code class="descname">SFTPSysImgDownloader</code><span class="sig-paren">(</span><em>client_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sftpdownloader.html#SFTPSysImgDownloader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sftpdownloader.SFTPSysImgDownloader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>SFTP system image downloader.</p>
+<dl class="method">
+<dt id="myscm.client.sftpdownloader.SFTPSysImgDownloader.download">
+<code class="descname">download</code><span class="sig-paren">(</span><em>host_details</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sftpdownloader.html#SFTPSysImgDownloader.download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sftpdownloader.SFTPSysImgDownloader.download" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.client.sftpdownloader.SFTPSysImgDownloaderError">
+<em class="property">exception </em><code class="descclassname">myscm.client.sftpdownloader.</code><code class="descname">SFTPSysImgDownloaderError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sftpdownloader.html#SFTPSysImgDownloaderError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sftpdownloader.SFTPSysImgDownloaderError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.client.error.ClientError" title="myscm.client.error.ClientError"><code class="xref py py-class docutils literal"><span class="pre">myscm.client.error.ClientError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.client.sysimgextractor">
+<span id="myscm-client-sysimgextractor-module"></span><h2>myscm.client.sysimgextractor module<a class="headerlink" href="#module-myscm.client.sysimgextractor" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.client.sysimgextractor.SysImgExtractor">
+<em class="property">class </em><code class="descclassname">myscm.client.sysimgextractor.</code><code class="descname">SysImgExtractor</code><span class="sig-paren">(</span><em>client_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgextractor.html#SysImgExtractor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgextractor.SysImgExtractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>mySCM system image extractor.</p>
+<dl class="method">
+<dt id="myscm.client.sysimgextractor.SysImgExtractor.apply_sys_img">
+<code class="descname">apply_sys_img</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgextractor.html#SysImgExtractor.apply_sys_img"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgextractor.SysImgExtractor.apply_sys_img" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract, validate and apply mySCM system image.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.client.sysimgextractor.SysImgExtractorError">
+<em class="property">exception </em><code class="descclassname">myscm.client.sysimgextractor.</code><code class="descname">SysImgExtractorError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgextractor.html#SysImgExtractorError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgextractor.SysImgExtractorError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.client.error.ClientError" title="myscm.client.error.ClientError"><code class="xref py py-class docutils literal"><span class="pre">myscm.client.error.ClientError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.client.sysimgmanager">
+<span id="myscm-client-sysimgmanager-module"></span><h2>myscm.client.sysimgmanager module<a class="headerlink" href="#module-myscm.client.sysimgmanager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.client.sysimgmanager.SysImgManager">
+<em class="property">class </em><code class="descclassname">myscm.client.sysimgmanager.</code><code class="descname">SysImgManager</code><span class="sig-paren">(</span><em>client_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgmanager.html#SysImgManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgmanager.SysImgManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="myscm.common.html#myscm.common.sysimgmanager.SysImgManagerBase" title="myscm.common.sysimgmanager.SysImgManagerBase"><code class="xref py py-class docutils literal"><span class="pre">myscm.common.sysimgmanager.SysImgManagerBase</span></code></a></p>
+<p>Manager of the myscm-img.X.Y.tar.gz system images (X, Y are integers)
+created by myscm-srv and downloaded from peer.</p>
+<dl class="method">
+<dt id="myscm.client.sysimgmanager.SysImgManager.get_sys_img_path">
+<code class="descname">get_sys_img_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgmanager.html#SysImgManager.get_sys_img_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgmanager.SysImgManager.get_sys_img_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.client.sysimgmanager.SysImgManager.get_target_sys_img_ver_from_fname">
+<code class="descname">get_target_sys_img_ver_from_fname</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgmanager.html#SysImgManager.get_target_sys_img_ver_from_fname"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgmanager.SysImgManager.get_target_sys_img_ver_from_fname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.client.sysimgmanager.SysImgManager.print_all_verified_img_paths_sorted">
+<code class="descname">print_all_verified_img_paths_sorted</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgmanager.html#SysImgManager.print_all_verified_img_paths_sorted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgmanager.SysImgManager.print_all_verified_img_paths_sorted" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.client.sysimgmanager.SysImgManager.print_current_system_state_version">
+<code class="descname">print_current_system_state_version</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgmanager.html#SysImgManager.print_current_system_state_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgmanager.SysImgManager.print_current_system_state_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.client.sysimgmanager.SysImgManager.update_current_system_state_version">
+<code class="descname">update_current_system_state_version</code><span class="sig-paren">(</span><em>sys_img_ver</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgmanager.html#SysImgManager.update_current_system_state_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgmanager.SysImgManager.update_current_system_state_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.client.sysimgmanager.SysImgManager.verify_sys_img">
+<code class="descname">verify_sys_img</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgmanager.html#SysImgManager.verify_sys_img"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgmanager.SysImgManager.verify_sys_img" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.client.sysimgmanager.SysImgManagerError">
+<em class="property">exception </em><code class="descclassname">myscm.client.sysimgmanager.</code><code class="descname">SysImgManagerError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgmanager.html#SysImgManagerError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgmanager.SysImgManagerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.client.error.ClientError" title="myscm.client.error.ClientError"><code class="xref py py-class docutils literal"><span class="pre">myscm.client.error.ClientError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.client.sysimgupdater">
+<span id="myscm-client-sysimgupdater-module"></span><h2>myscm.client.sysimgupdater module<a class="headerlink" href="#module-myscm.client.sysimgupdater" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="myscm.client.sysimgupdater.SysImgDownloaderNoImageFoundError">
+<em class="property">exception </em><code class="descclassname">myscm.client.sysimgupdater.</code><code class="descname">SysImgDownloaderNoImageFoundError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgupdater.html#SysImgDownloaderNoImageFoundError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgupdater.SysImgDownloaderNoImageFoundError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.client.sysimgupdater.SysImgUpdaterError" title="myscm.client.sysimgupdater.SysImgUpdaterError"><code class="xref py py-class docutils literal"><span class="pre">myscm.client.sysimgupdater.SysImgUpdaterError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="myscm.client.sysimgupdater.SysImgUpdater">
+<em class="property">class </em><code class="descclassname">myscm.client.sysimgupdater.</code><code class="descname">SysImgUpdater</code><span class="sig-paren">(</span><em>client_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgupdater.html#SysImgUpdater"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgupdater.SysImgUpdater" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Downloader of the mySCM system images.</p>
+<dl class="attribute">
+<dt id="myscm.client.sysimgupdater.SysImgUpdater.SUPPORTED_PROTOCOLS">
+<code class="descname">SUPPORTED_PROTOCOLS</code><em class="property"> = ['SFTP']</em><a class="headerlink" href="#myscm.client.sysimgupdater.SysImgUpdater.SUPPORTED_PROTOCOLS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.client.sysimgupdater.SysImgUpdater.SUPPORTED_PROTOCOLS_MAPPING">
+<code class="descname">SUPPORTED_PROTOCOLS_MAPPING</code><em class="property"> = {'SFTP': &lt;class 'myscm.client.sftpdownloader.SFTPSysImgDownloader'&gt;}</em><a class="headerlink" href="#myscm.client.sysimgupdater.SysImgUpdater.SUPPORTED_PROTOCOLS_MAPPING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.client.sysimgupdater.SysImgUpdater.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgupdater.html#SysImgUpdater.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgupdater.SysImgUpdater.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.client.sysimgupdater.SysImgUpdaterError">
+<em class="property">exception </em><code class="descclassname">myscm.client.sysimgupdater.</code><code class="descname">SysImgUpdaterError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgupdater.html#SysImgUpdaterError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgupdater.SysImgUpdaterError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.client.error.ClientError" title="myscm.client.error.ClientError"><code class="xref py py-class docutils literal"><span class="pre">myscm.client.error.ClientError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.client.sysimgvalidator">
+<span id="myscm-client-sysimgvalidator-module"></span><h2>myscm.client.sysimgvalidator module<a class="headerlink" href="#module-myscm.client.sysimgvalidator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.client.sysimgvalidator.SysImgValidator">
+<em class="property">class </em><code class="descclassname">myscm.client.sysimgvalidator.</code><code class="descname">SysImgValidator</code><span class="sig-paren">(</span><em>distro_name</em>, <em>force_apply=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgvalidator.html#SysImgValidator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgvalidator.SysImgValidator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>mySCM system image validator.</p>
+<dl class="attribute">
+<dt id="myscm.client.sysimgvalidator.SysImgValidator.MD5SUM_LEN">
+<code class="descname">MD5SUM_LEN</code><em class="property"> = 32</em><a class="headerlink" href="#myscm.client.sysimgvalidator.SysImgValidator.MD5SUM_LEN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.client.sysimgvalidator.SysImgValidator.SHA1SUM_LEN">
+<code class="descname">SHA1SUM_LEN</code><em class="property"> = 40</em><a class="headerlink" href="#myscm.client.sysimgvalidator.SysImgValidator.SHA1SUM_LEN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.client.sysimgvalidator.SysImgValidator.assert_sys_img_valid">
+<code class="descname">assert_sys_img_valid</code><span class="sig-paren">(</span><em>sys_img_f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgvalidator.html#SysImgValidator.assert_sys_img_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgvalidator.SysImgValidator.assert_sys_img_valid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.client.sysimgvalidator.SysImgValidatorError">
+<em class="property">exception </em><code class="descclassname">myscm.client.sysimgvalidator.</code><code class="descname">SysImgValidatorError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgvalidator.html#SysImgValidatorError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgvalidator.SysImgValidatorError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.client.error.ClientError" title="myscm.client.error.ClientError"><code class="xref py py-class docutils literal"><span class="pre">myscm.client.error.ClientError</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="myscm.client.sysimgvalidator.get_new_old_property_from_string">
+<code class="descclassname">myscm.client.sysimgvalidator.</code><code class="descname">get_new_old_property_from_string</code><span class="sig-paren">(</span><em>property_str</em>, <em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgvalidator.html#get_new_old_property_from_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgvalidator.get_new_old_property_from_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="myscm.client.sysimgvalidator.run_fun_for_each_report_line">
+<code class="descclassname">myscm.client.sysimgvalidator.</code><code class="descname">run_fun_for_each_report_line</code><span class="sig-paren">(</span><em>report_f</em>, <em>sys_img_f</em>, <em>fun</em>, <em>n</em>, <em>distro_name</em>, <em>decode=True</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/sysimgvalidator.html#run_fun_for_each_report_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.sysimgvalidator.run_fun_for_each_report_line" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-myscm.client.templatefile">
+<span id="myscm-client-templatefile-module"></span><h2>myscm.client.templatefile module<a class="headerlink" href="#module-myscm.client.templatefile" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="myscm.client.templatefile.TemplateFile">
+<em class="property">class </em><code class="descclassname">myscm.client.templatefile.</code><code class="descname">TemplateFile</code><span class="sig-paren">(</span><em>template_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/templatefile.html#TemplateFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.templatefile.TemplateFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Representation of the configuration template file holding
+client-specific variable placeholders.</p>
+<dl class="attribute">
+<dt id="myscm.client.templatefile.TemplateFile.ENV_VAR_NAME_REGEX_STR">
+<code class="descname">ENV_VAR_NAME_REGEX_STR</code><em class="property"> = '(&lt;MYSCM:ENV:(.*?)/&gt;)'</em><a class="headerlink" href="#myscm.client.templatefile.TemplateFile.ENV_VAR_NAME_REGEX_STR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="myscm.client.templatefile.TemplateFile.VAR_NAME_PLACEHOLDER">
+<code class="descname">VAR_NAME_PLACEHOLDER</code><em class="property"> = '&lt;MYSCM:{}/&gt;'</em><a class="headerlink" href="#myscm.client.templatefile.TemplateFile.VAR_NAME_PLACEHOLDER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.client.templatefile.TemplateFile.get_env_value">
+<code class="descname">get_env_value</code><span class="sig-paren">(</span><em>var_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/templatefile.html#TemplateFile.get_env_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.templatefile.TemplateFile.get_env_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="myscm.client.templatefile.TemplateFile.replace_placeholders_with_values">
+<code class="descname">replace_placeholders_with_values</code><span class="sig-paren">(</span><em>output_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/templatefile.html#TemplateFile.replace_placeholders_with_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.templatefile.TemplateFile.replace_placeholders_with_values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="myscm.client.templatefile.TemplateFileError">
+<em class="property">exception </em><code class="descclassname">myscm.client.templatefile.</code><code class="descname">TemplateFileError</code><span class="sig-paren">(</span><em>message</em>, <em>internal_error=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/templatefile.html#TemplateFileError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.templatefile.TemplateFileError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#myscm.client.error.ClientError" title="myscm.client.error.ClientError"><code class="xref py py-class docutils literal"><span class="pre">myscm.client.error.ClientError</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-myscm.client.templatefilevars">
+<span id="myscm-client-templatefilevars-module"></span><h2>myscm.client.templatefilevars module<a class="headerlink" href="#module-myscm.client.templatefilevars" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="myscm.client.templatefilevars.get_templates_vars">
+<code class="descclassname">myscm.client.templatefilevars.</code><code class="descname">get_templates_vars</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/myscm/client/templatefilevars.html#get_templates_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#myscm.client.templatefilevars.get_templates_vars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-myscm.client">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-myscm.client" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">myscm</a><ul>
+  <li><a href="myscm.html">myscm package</a><ul>
+      <li>Previous: <a href="myscm.html" title="previous chapter">myscm package</a></li>
+      <li>Next: <a href="myscm.common.html" title="next chapter">myscm.common package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Patryk Bęza.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/myscm.client.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

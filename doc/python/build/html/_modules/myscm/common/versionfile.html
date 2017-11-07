@@ -1,0 +1,197 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>myscm.common.versionfile &#8212; MySCM 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for myscm.common.versionfile</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">myscm.common.error</span> <span class="k">import</span> <span class="n">MySCMError</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="VersionFileError"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.versionfile.VersionFileError">[docs]</a><span class="k">class</span> <span class="nc">VersionFileError</span><span class="p">(</span><span class="n">MySCMError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="DetailedVersionFileError"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.versionfile.DetailedVersionFileError">[docs]</a><span class="k">class</span> <span class="nc">DetailedVersionFileError</span><span class="p">(</span><span class="n">VersionFileError</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="EmptyFileVersionFileError"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.versionfile.EmptyFileVersionFileError">[docs]</a><span class="k">class</span> <span class="nc">EmptyFileVersionFileError</span><span class="p">(</span><span class="n">VersionFileError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="TooManyLinesVersionFileError"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.versionfile.TooManyLinesVersionFileError">[docs]</a><span class="k">class</span> <span class="nc">TooManyLinesVersionFileError</span><span class="p">(</span><span class="n">VersionFileError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NotIntegerVersionFileError"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.versionfile.NotIntegerVersionFileError">[docs]</a><span class="k">class</span> <span class="nc">NotIntegerVersionFileError</span><span class="p">(</span><span class="n">DetailedVersionFileError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="OutOfAllowedRangeIntegerInFileVersionFileError"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.versionfile.OutOfAllowedRangeIntegerInFileVersionFileError">[docs]</a><span class="k">class</span> <span class="nc">OutOfAllowedRangeIntegerInFileVersionFileError</span><span class="p">(</span><span class="n">DetailedVersionFileError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VersionFile"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.versionfile.VersionFile">[docs]</a><span class="k">class</span> <span class="nc">VersionFile</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Representation of the file holding single integer in single line.&quot;&quot;&quot;</span>
+
+    <span class="n">DEFAULT_STARTING_VALUE</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">starting_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">starting_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">starting_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_STARTING_VALUE</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">starting_value</span> <span class="o">=</span> <span class="n">starting_value</span>
+
+<div class="viewcode-block" id="VersionFile.get_version"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.versionfile.VersionFile.get_version">[docs]</a>    <span class="k">def</span> <span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">create</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VersionFile.parse"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.versionfile.VersionFile.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">create</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exist</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+
+        <span class="n">first_line</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">second_line</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">first_line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">second_line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">VersionFileError</span><span class="p">(</span><span class="s2">&quot;Failed to open file&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">first_line</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">EmptyFileVersionFileError</span><span class="p">(</span><span class="s2">&quot;Empty file&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">second_line</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TooManyLinesVersionFileError</span><span class="p">(</span><span class="s2">&quot;Too many lines in file&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ver</span> <span class="o">=</span> <span class="n">first_line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">ver</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">first_line</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NotIntegerVersionFileError</span><span class="p">(</span><span class="s2">&quot;Integer was expected&quot;</span><span class="p">,</span> <span class="n">ver</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ver</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">starting_value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OutOfAllowedRangeIntegerInFileVersionFileError</span><span class="p">(</span>
+               <span class="s2">&quot;Number greater than </span><span class="si">{}</span><span class="s2"> was expected&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">starting_value</span><span class="p">),</span> <span class="n">ver</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">ver</span>
+
+        <span class="k">return</span> <span class="n">ver</span></div>
+
+<div class="viewcode-block" id="VersionFile.increment"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.versionfile.VersionFile.increment">[docs]</a>    <span class="k">def</span> <span class="nf">increment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">create</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exist</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+
+        <span class="n">old_ver</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+        <span class="n">new_ver</span> <span class="o">=</span> <span class="n">old_ver</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">new_ver</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_ver</span></div>
+
+<div class="viewcode-block" id="VersionFile.set_value"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.versionfile.VersionFile.set_value">[docs]</a>    <span class="k">def</span> <span class="nf">set_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">VersionFileError</span><span class="p">(</span><span class="s2">&quot;Failed to open file for writing&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">val</span>
+
+        <span class="k">return</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="VersionFile.exist"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.versionfile.VersionFile.exist">[docs]</a>    <span class="k">def</span> <span class="nf">exist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VersionFile.create"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.versionfile.VersionFile.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">starting_value</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Patryk Bęza.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,651 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>myscm.client.sysimgvalidator &#8212; MySCM 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for myscm.client.sysimgvalidator</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">stat</span>
+
+<span class="kn">from</span> <span class="nn">myscm.client.error</span> <span class="k">import</span> <span class="n">ClientError</span>
+<span class="kn">from</span> <span class="nn">myscm.server.aideentry</span> <span class="k">import</span> <span class="n">AIDEEntry</span>
+<span class="kn">from</span> <span class="nn">myscm.server.aideentry</span> <span class="k">import</span> <span class="n">FileType</span>
+<span class="kn">from</span> <span class="nn">myscm.server.sysimggenerator</span> <span class="k">import</span> <span class="n">SystemImageGenerator</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SysImgValidatorError"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgvalidator.SysImgValidatorError">[docs]</a><span class="k">class</span> <span class="nc">SysImgValidatorError</span><span class="p">(</span><span class="n">ClientError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="SysImgValidator"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgvalidator.SysImgValidator">[docs]</a><span class="k">class</span> <span class="nc">SysImgValidator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;mySCM system image validator.&quot;&quot;&quot;</span>
+
+    <span class="n">MD5SUM_LEN</span> <span class="o">=</span> <span class="mi">32</span>
+    <span class="n">SHA1SUM_LEN</span> <span class="o">=</span> <span class="mi">40</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distro_name</span><span class="p">,</span> <span class="n">force_apply</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distro_name</span> <span class="o">=</span> <span class="n">distro_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">force_apply</span> <span class="o">=</span> <span class="n">force_apply</span>
+
+<div class="viewcode-block" id="SysImgValidator.assert_sys_img_valid"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgvalidator.SysImgValidator.assert_sys_img_valid">[docs]</a>    <span class="k">def</span> <span class="nf">assert_sys_img_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_sys_img</span><span class="p">(</span><span class="n">sys_img_f</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Failed to validate &#39;</span><span class="si">{}</span><span class="s2">&#39; system image&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span></div>
+
+    <span class="k">def</span> <span class="nf">_assert_valid_sys_img</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Checking whether mySCM system image file &#39;</span><span class="si">{}</span><span class="s2">&#39; is valid.&quot;</span>
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_added_summary_valid</span><span class="p">(</span><span class="n">sys_img_f</span><span class="p">)</span>
+        <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_summary_valid</span><span class="p">(</span><span class="n">sys_img_f</span><span class="p">)</span>
+        <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_removed_summary_valid</span><span class="p">(</span><span class="n">sys_img_f</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;mySCM system image file &#39;</span><span class="si">{}</span><span class="s2">&#39; seems to be valid. </span><span class="si">{}</span><span class="s2"> added files &quot;</span>\
+            <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2"> lines in report), </span><span class="si">{}</span><span class="s2"> changed files (</span><span class="si">{}</span><span class="s2"> lines in report), </span><span class="si">{}</span><span class="s2"> &quot;</span>\
+            <span class="s2">&quot;removed files (</span><span class="si">{}</span><span class="s2"> lines in report).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">r1</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="c1"># Variables needed for sysimgextractor&#39;s module progressbar</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">added_entries</span> <span class="o">=</span> <span class="n">a2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">changed_entries</span> <span class="o">=</span> <span class="n">c2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removed_entries</span> <span class="o">=</span> <span class="n">r2</span>
+
+    <span class="k">def</span> <span class="nf">_assert_added_summary_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+        <span class="n">expected_added_count</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_summary_valid</span><span class="p">(</span>
+                                <span class="n">sys_img_f</span><span class="p">,</span>
+                                <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">ADDED_FILES_FNAME</span><span class="p">,</span>
+                                <span class="n">expected_added_count</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_assert_added_line_valid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_changed_summary_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+        <span class="n">expected_changed_count</span> <span class="o">=</span> <span class="n">AIDEEntry</span><span class="o">.</span><span class="n">PROPERTIES_COUNT</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_summary_valid</span><span class="p">(</span>
+                                <span class="n">sys_img_f</span><span class="p">,</span>
+                                <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">CHANGED_FILES_FNAME</span><span class="p">,</span>
+                                <span class="n">expected_changed_count</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_line_valid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_removed_summary_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+        <span class="n">expected_removed_count</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_summary_valid</span><span class="p">(</span>
+                                <span class="n">sys_img_f</span><span class="p">,</span>
+                                <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">REMOVED_FILES_FNAME</span><span class="p">,</span>
+                                <span class="n">expected_removed_count</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_assert_removed_line_valid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_summary_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">val_count</span><span class="p">,</span> <span class="n">fun</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_file_present_in_sys_img</span><span class="p">(</span><span class="n">sys_img_f</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_assert_fun_for_each_line</span><span class="p">(</span>
+                                <span class="n">path</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">val_count</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_file_present_in_sys_img</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sys_img_f</span><span class="o">.</span><span class="n">getmember</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Missing &#39;</span><span class="si">{}</span><span class="s2">&#39; file in &#39;</span><span class="si">{}</span><span class="s2">&#39; mySCM system image&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_apply</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> (ignoring)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_run_assert_fun_for_each_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="n">all_lines</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">valid_lines</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">with</span> <span class="n">sys_img_f</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">all_lines</span><span class="p">,</span> <span class="n">valid_lines</span> <span class="o">=</span> <span class="n">run_fun_for_each_report_line</span><span class="p">(</span>
+                        <span class="n">f</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distro_name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">all_lines</span><span class="p">,</span> <span class="n">valid_lines</span>
+
+    <span class="c1">##############################################</span>
+    <span class="c1"># Assert line from added.txt report is valid #</span>
+    <span class="c1">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">_assert_added_line_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+        <span class="n">added_file_path</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_added_file_not_on_local_system</span><span class="p">(</span><span class="n">added_file_path</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_added_file_in_sys_img_added_files</span><span class="p">(</span><span class="n">added_file_path</span><span class="p">,</span>
+                                                       <span class="n">sys_img_f</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_added_file_not_on_local_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make sure that file that is about to be added to the local</span>
+<span class="sd">          filesystem doesn&#39;t exist on the local system yet.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; was about to be added during applying &#39;</span><span class="si">{}</span><span class="s2">&#39; myscm-img &quot;</span>\
+                <span class="s2">&quot;but it already exists in the local filesystem.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_apply</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> (ignoring)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; reported in added.txt doesn&#39;t exist yet in the local &quot;</span>\
+                <span class="s2">&quot;filesystem - it&#39;s OK since we want to add it to the system.&quot;</span>\
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_added_file_in_sys_img_added_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">myscm_img_f</span><span class="p">):</span>
+        <span class="n">intar_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+              <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">IN_ARCHIVE_ADDED_DIR_NAME</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myscm_img_f</span><span class="o">.</span><span class="n">getmember</span><span class="p">(</span><span class="n">intar_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;File &#39;</span><span class="si">{}</span><span class="s2">&#39; is supposed to be present in mySCM system image &quot;</span>\
+                <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; in &#39;</span><span class="si">{}</span><span class="s2">&#39; directory but was not found (info read from &quot;</span>\
+                <span class="s2">&quot;added files report)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">intar_path</span><span class="p">,</span> <span class="n">myscm_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">IN_ARCHIVE_ADDED_DIR_NAME</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;File &#39;</span><span class="si">{}</span><span class="s2">&#39; found in &#39;</span><span class="si">{}</span><span class="s2">&#39; in &#39;</span><span class="si">{}</span><span class="s2">&#39; directory.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">myscm_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">IN_ARCHIVE_ADDED_DIR_NAME</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="c1">################################################</span>
+    <span class="c1"># Assert line from changed.txt report is valid #</span>
+    <span class="c1">################################################</span>
+
+    <span class="k">def</span> <span class="nf">_assert_changed_line_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+
+        <span class="c1"># Check whether changed file exists on local filesystem</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_file_exists_on_local_filesystem</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">)</span>
+
+        <span class="c1"># Get stat for file for further assertions</span>
+
+        <span class="n">file_stat</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="c1"># Check if file type is as declared in changed.txt report</span>
+
+        <span class="n">ftype_char</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_ftype_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">ftype_char</span><span class="p">,</span> <span class="n">file_stat</span><span class="p">)</span>
+
+        <span class="c1"># Check if hash sums are as declared</span>
+
+        <span class="k">if</span> <span class="n">ftype_char</span> <span class="o">==</span> <span class="n">FileType</span><span class="o">.</span><span class="n">REGULAR_FILE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">md5sum_str</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span>
+            <span class="n">sha1sum_str</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assert_file_checksums_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">md5sum_str</span><span class="p">,</span> <span class="n">sha1sum_str</span><span class="p">)</span>
+
+            <span class="c1"># Check file size</span>
+
+            <span class="n">file_size_str</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_file_size_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">file_size_str</span><span class="p">,</span>
+                                                 <span class="n">file_stat</span><span class="p">)</span>
+
+            <span class="c1"># Check if changed file or its patch (diff) exists in myscm-img</span>
+
+            <span class="n">new_sha1sum</span><span class="p">,</span> <span class="n">old_sha1sum</span> <span class="o">=</span> <span class="n">get_new_old_property_from_string</span><span class="p">(</span>
+                                                            <span class="n">sha1sum_str</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="n">file_content_changed</span> <span class="o">=</span> <span class="p">(</span><span class="n">old_sha1sum</span> <span class="o">!=</span> <span class="n">new_sha1sum</span> <span class="ow">and</span>
+                                    <span class="n">old_sha1sum</span> <span class="o">!=</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">file_content_changed</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_file_in_sys_img_changed_files</span><span class="p">(</span><span class="n">path</span><span class="p">,</span>
+                                                                   <span class="n">sys_img_f</span><span class="p">)</span>
+
+        <span class="c1"># Check file permissions</span>
+
+        <span class="n">perm_str</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_perm_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">perm_str</span><span class="p">,</span> <span class="n">file_stat</span><span class="p">)</span>
+
+        <span class="c1"># Check file UID</span>
+
+        <span class="n">uid_str</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_uid_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">uid_str</span><span class="p">,</span> <span class="n">file_stat</span><span class="p">)</span>
+
+        <span class="c1"># Check file GID</span>
+
+        <span class="n">gid_str</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_gid_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">gid_str</span><span class="p">,</span> <span class="n">file_stat</span><span class="p">)</span>
+
+        <span class="c1"># Check file mtime</span>
+
+        <span class="c1"># mtime_str = values[11]</span>
+        <span class="c1"># self._assert_changed_mtime_valid(path, mtime_str, file_stat)</span>
+
+        <span class="c1"># Check file ctime</span>
+
+        <span class="c1"># ctime_str = values[12]</span>
+        <span class="c1"># self._assert_changed_ctime_valid(path, ctime_str, file_stat)</span>
+
+        <span class="c1"># Check file link count</span>
+
+        <span class="n">lcount_str</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">14</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_lcount_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">lcount_str</span><span class="p">,</span> <span class="n">file_stat</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_changed_file_exists_on_local_filesystem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; was about to be changed during applying &#39;</span><span class="si">{}</span><span class="s2">&#39; myscm-img &quot;</span>\
+                <span class="s2">&quot;but it doesn&#39;t exist in the local filesystem.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; reported in changed.txt already exist - it&#39;s &quot;</span>
+                         <span class="s2">&quot;OK since we want to change it.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_assert_changed_file_in_sys_img_changed_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make sure that file that is about to be changed is present in the</span>
+<span class="sd">           mySCM system image (or its patch a.k.a. diff).&quot;&quot;&quot;</span>
+
+        <span class="n">intar_orig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">IN_ARCHIVE_CHANGED_DIR_NAME</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">))</span>
+
+        <span class="n">found_path</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sys_img_f</span><span class="o">.</span><span class="n">getmember</span><span class="p">(</span><span class="n">intar_orig_path</span><span class="p">)</span>
+            <span class="n">found_path</span> <span class="o">=</span> <span class="n">intar_orig_path</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">intar_diff_path</span> <span class="o">=</span> <span class="n">intar_orig_path</span> <span class="o">+</span> <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">PATCH_EXT</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">sys_img_f</span><span class="o">.</span><span class="n">getmember</span><span class="p">(</span><span class="n">intar_diff_path</span><span class="p">)</span>
+                <span class="n">found_path</span> <span class="o">=</span> <span class="n">intar_diff_path</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;File &#39;</span><span class="si">{}</span><span class="s2">&#39; or its patch &#39;</span><span class="si">{}</span><span class="s2">&#39; is supposed to be present &quot;</span>\
+                    <span class="s2">&quot;in mySCM system image &#39;</span><span class="si">{}</span><span class="s2">&#39; in &#39;</span><span class="si">{}</span><span class="s2">&#39; directory but was &quot;</span>\
+                    <span class="s2">&quot;not found (info read from added files report)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">intar_orig_path</span><span class="p">,</span> <span class="n">intar_diff_path</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">IN_ARCHIVE_CHANGED_DIR_NAME</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;File &#39;</span><span class="si">{}</span><span class="s2">&#39; found in &#39;</span><span class="si">{}</span><span class="s2">&#39; in &#39;</span><span class="si">{}</span><span class="s2">&#39; directory.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">found_path</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">IN_ARCHIVE_CHANGED_DIR_NAME</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_changed_ftype_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">ftype_char</span><span class="p">,</span> <span class="n">file_stat</span><span class="p">):</span>
+        <span class="n">validator_mapping</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">FileType</span><span class="o">.</span><span class="n">REGULAR_FILE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">,</span>
+            <span class="n">FileType</span><span class="o">.</span><span class="n">DIRECTORY</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">,</span>
+            <span class="n">FileType</span><span class="o">.</span><span class="n">SYMBOLIC_LINK</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">,</span>
+            <span class="n">FileType</span><span class="o">.</span><span class="n">CHARACTER_DEVICE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_ISCHR</span><span class="p">(</span><span class="n">file_stat</span><span class="o">.</span><span class="n">st_mode</span><span class="p">),</span>
+            <span class="n">FileType</span><span class="o">.</span><span class="n">BLOCK_DEVICE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_ISBLK</span><span class="p">(</span><span class="n">file_stat</span><span class="o">.</span><span class="n">st_mode</span><span class="p">),</span>
+            <span class="n">FileType</span><span class="o">.</span><span class="n">FIFO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_ISFIFO</span><span class="p">(</span><span class="n">file_stat</span><span class="o">.</span><span class="n">st_mode</span><span class="p">),</span>
+            <span class="n">FileType</span><span class="o">.</span><span class="n">UNIX_SOCKET</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_ISSOCK</span><span class="p">(</span><span class="n">file_stat</span><span class="o">.</span><span class="n">st_mode</span><span class="p">),</span>
+            <span class="n">FileType</span><span class="o">.</span><span class="n">SOLARIS_DOOR</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_ISDOOR</span><span class="p">(</span><span class="n">file_stat</span><span class="o">.</span><span class="n">st_mode</span><span class="p">),</span>
+            <span class="n">FileType</span><span class="o">.</span><span class="n">SOLARIS_EVENT_PORT</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_ISPORT</span><span class="p">(</span><span class="n">file_stat</span><span class="o">.</span><span class="n">st_mode</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">validator_fun</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">validator_fun</span> <span class="o">=</span> <span class="n">validator_mapping</span><span class="p">[</span><span class="n">ftype_char</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Unknown file type of &#39;</span><span class="si">{}</span><span class="s2">&#39; indentified by &#39;</span><span class="si">{}</span><span class="s2">&#39; character &quot;</span>\
+                <span class="s2">&quot;read from mySCM system&#39;s image changed files report&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">ftype_char</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">validator_fun</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;File &#39;</span><span class="si">{}</span><span class="s2">&#39; was declared in system&#39;s mySCM image changed &quot;</span>\
+                <span class="s2">&quot;files report as a &#39;</span><span class="si">{}</span><span class="s2">&#39; but it isn&#39;t&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">FileType</span><span class="p">(</span><span class="n">ftype_char</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_apply</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> (ignoring)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_file_checksums_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">md5sum_str</span><span class="p">,</span> <span class="n">sha1sum_str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_file_md5sum_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">md5sum_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_file_sha1sum_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sha1sum_str</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_file_md5sum_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">md5sum_str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_file_checksum_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;MD5&quot;</span><span class="p">,</span> <span class="n">md5sum_str</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">MD5SUM_LEN</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">_compute_file_md5sum</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_file_sha1sum_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">sha1sum_str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_file_checksum_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;SHA1&quot;</span><span class="p">,</span> <span class="n">sha1sum_str</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">SHA1SUM_LEN</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">_compute_file_sha1sum</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_file_checksum_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">hash_name</span><span class="p">,</span> <span class="n">hash_str</span><span class="p">,</span> <span class="n">hash_len</span><span class="p">,</span>
+                                    <span class="n">checksum_fun</span><span class="p">):</span>
+        <span class="n">expected_checksum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_hash_from_property_string</span><span class="p">(</span><span class="n">hash_str</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span>
+                                                                <span class="n">hash_len</span><span class="p">)</span>
+        <span class="n">computed_checksum</span> <span class="o">=</span> <span class="n">checksum_fun</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">computed_checksum</span> <span class="o">!=</span> <span class="n">expected_checksum</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> checksum of the &#39;</span><span class="si">{}</span><span class="s2">&#39; file is &#39;</span><span class="si">{}</span><span class="s2">&#39; instead of expected &quot;</span>\
+                <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; (read from mySCM system&#39;s image file)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">hash_name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">computed_checksum</span><span class="p">,</span> <span class="n">expected_checksum</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_apply</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> (ignoring)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_hash_from_property_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hash_str</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">checksum_len</span><span class="p">):</span>
+        <span class="n">checksum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_expected_val_from_property_string</span><span class="p">(</span><span class="n">hash_str</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">checksum</span><span class="p">)</span> <span class="o">!=</span> <span class="n">checksum_len</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Hash string &#39;</span><span class="si">{}</span><span class="s2">&#39; read from changed report for &#39;</span><span class="si">{}</span><span class="s2">&#39; is &quot;</span>\
+                <span class="s2">&quot;malformed&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">hash_str</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">checksum</span>
+
+    <span class="k">def</span> <span class="nf">_get_expected_val_from_property_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val_str</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="n">new_val</span><span class="p">,</span> <span class="n">old_val</span> <span class="o">=</span> <span class="n">get_new_old_property_from_string</span><span class="p">(</span><span class="n">val_str</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="c1"># &#39;=&#39; for size check, &#39;.&#39; for others</span>
+        <span class="k">return</span> <span class="n">new_val</span> <span class="k">if</span> <span class="n">old_val</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;=&quot;</span><span class="p">}</span> <span class="k">else</span> <span class="n">old_val</span>
+
+    <span class="k">def</span> <span class="nf">_compute_file_md5sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_file_hash</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">_compute_file_sha1sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_file_hash</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">_compute_file_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">hash_type</span><span class="p">):</span>
+        <span class="n">hash_sum</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hash_sum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_file_hash</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">hash_type</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Failed to compute hash of the &#39;</span><span class="si">{}</span><span class="s2">&#39; file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">hash_sum</span>
+
+    <span class="k">def</span> <span class="nf">_assert_changed_file_size_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">file_size_str</span><span class="p">,</span> <span class="n">file_stat</span><span class="p">):</span>
+        <span class="n">local_file_size</span> <span class="o">=</span> <span class="n">file_stat</span><span class="o">.</span><span class="n">st_size</span>
+        <span class="n">expected_file_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_expected_val_from_property_string</span><span class="p">(</span>
+                                                           <span class="n">file_size_str</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">expected_file_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">expected_file_size</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Previous &#39;</span><span class="si">{}</span><span class="s2">&#39; file size is not integer as it supposed to be &quot;</span>\
+                <span class="s2">&quot;(has value: &#39;</span><span class="si">{}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">expected_file_size</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">local_file_size</span> <span class="o">!=</span> <span class="n">expected_file_size</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;File size of the &#39;</span><span class="si">{}</span><span class="s2">&#39; file is &#39;</span><span class="si">{}</span><span class="s2">&#39; instead of expected &#39;</span><span class="si">{}</span><span class="s2">&#39; &quot;</span>\
+                <span class="s2">&quot;(read from mySCM system&#39;s image file)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">local_file_size</span><span class="p">,</span> <span class="n">expected_file_size</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_apply</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> (ignoring)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_changed_perm_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">perm_str</span><span class="p">,</span> <span class="n">file_stat</span><span class="p">):</span>
+        <span class="n">local_perm</span> <span class="o">=</span> <span class="nb">oct</span><span class="p">(</span><span class="n">file_stat</span><span class="o">.</span><span class="n">st_mode</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="n">expected_perm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_expected_val_from_property_string</span><span class="p">(</span><span class="n">perm_str</span><span class="p">,</span>
+                                                                    <span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">local_perm</span> <span class="o">!=</span> <span class="n">expected_perm</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Permissions of the &#39;</span><span class="si">{}</span><span class="s2">&#39; file are </span><span class="si">{}</span><span class="s2"> instead of </span><span class="si">{}</span><span class="s2"> as they &quot;</span>\
+                <span class="s2">&quot;supposed to be (read from mySCM system&#39;s image file)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">local_perm</span><span class="p">,</span> <span class="n">expected_perm</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_apply</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> (ignoring)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_changed_uid_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">uid_str</span><span class="p">,</span> <span class="n">file_stat</span><span class="p">):</span>
+        <span class="n">local_file_uid</span> <span class="o">=</span> <span class="n">file_stat</span><span class="o">.</span><span class="n">st_uid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_int_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">local_file_uid</span><span class="p">,</span> <span class="n">uid_str</span><span class="p">,</span> <span class="s2">&quot;UID&quot;</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">force_apply</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_changed_gid_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">gid_str</span><span class="p">,</span> <span class="n">file_stat</span><span class="p">):</span>
+        <span class="n">local_file_gid</span> <span class="o">=</span> <span class="n">file_stat</span><span class="o">.</span><span class="n">st_gid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_int_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">local_file_gid</span><span class="p">,</span> <span class="n">gid_str</span><span class="p">,</span> <span class="s2">&quot;GID&quot;</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">force_apply</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_changed_mtime_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">mtime_str</span><span class="p">,</span> <span class="n">file_stat</span><span class="p">):</span>
+        <span class="n">local_mtime</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">file_stat</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">)</span>  <span class="c1"># from float</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_int_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">local_mtime</span><span class="p">,</span> <span class="n">mtime_str</span><span class="p">,</span> <span class="s2">&quot;mtime&quot;</span><span class="p">,</span>
+                                       <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_changed_ctime_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">ctime_str</span><span class="p">,</span> <span class="n">file_stat</span><span class="p">):</span>
+        <span class="n">local_ctime</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">file_stat</span><span class="o">.</span><span class="n">st_ctime</span><span class="p">)</span>  <span class="c1"># from float</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_int_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">local_ctime</span><span class="p">,</span> <span class="n">ctime_str</span><span class="p">,</span> <span class="s2">&quot;ctime&quot;</span><span class="p">,</span>
+                                       <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_changed_lcount_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">lcount_str</span><span class="p">,</span> <span class="n">file_stat</span><span class="p">):</span>
+        <span class="n">local_lcount</span> <span class="o">=</span> <span class="n">file_stat</span><span class="o">.</span><span class="n">st_nlink</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_changed_int_valid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">local_lcount</span><span class="p">,</span> <span class="n">lcount_str</span><span class="p">,</span>
+                                       <span class="s2">&quot;lcount&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_apply</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_changed_int_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">local_val</span><span class="p">,</span> <span class="n">val_str</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
+                                  <span class="n">noexcept</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">expected_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_expected_val_from_property_string</span><span class="p">(</span><span class="n">val_str</span><span class="p">,</span>
+                                                                   <span class="n">path</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">expected_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">expected_val</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> of the &#39;</span><span class="si">{}</span><span class="s2">&#39; file is not integer as it supposed to be &quot;</span>\
+                <span class="s2">&quot;(is: &#39;</span><span class="si">{}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">expected_val</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_apply</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> (ignoring)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">local_val</span> <span class="o">!=</span> <span class="n">expected_val</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> of the &#39;</span><span class="si">{}</span><span class="s2">&#39; file is &#39;</span><span class="si">{}</span><span class="s2">&#39; instead of expected &#39;</span><span class="si">{}</span><span class="s2">&#39; (read &quot;</span>\
+                <span class="s2">&quot;from mySCM system&#39;s image file)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">local_val</span><span class="p">,</span>
+                                                         <span class="n">expected_val</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">noexcept</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__get_file_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">hash_type</span><span class="p">):</span>
+        <span class="n">BUF_SIZE</span> <span class="o">=</span> <span class="mi">65536</span>  <span class="c1"># read in 64kb chunks</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">BUF_SIZE</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">hash_type</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">hash_type</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+    <span class="c1">################################################</span>
+    <span class="c1"># Assert line from removed.txt report is valid #</span>
+    <span class="c1">################################################</span>
+
+    <span class="k">def</span> <span class="nf">_assert_removed_line_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+        <span class="n">removed_file_path</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">removed_file_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; was about to be removed during applying &#39;</span><span class="si">{}</span><span class="s2">&#39; myscm-img &quot;</span>\
+                <span class="s2">&quot;but it doesn&#39;t exist on the local filesystem.&quot;</span>\
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">removed_file_path</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>  <span class="c1"># raise SysImgValidatorError(m)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; reported in removed.txt exist it&#39;s OK since we &quot;</span>
+                         <span class="s2">&quot;want to remove it from the system.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">removed_file_path</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="run_fun_for_each_report_line"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgvalidator.run_fun_for_each_report_line">[docs]</a><span class="k">def</span> <span class="nf">run_fun_for_each_report_line</span><span class="p">(</span><span class="n">report_f</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">distro_name</span><span class="p">,</span>
+                                 <span class="n">decode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="n">line_no</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">valid_lines</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">report_f</span><span class="p">:</span>
+        <span class="n">line_no</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">decode</span> <span class="k">else</span> <span class="n">l</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">):</span>
+            <span class="n">_assert_valid_system_version</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">distro_name</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">valid_lines</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\0</span><span class="s2">&quot;</span><span class="p">)]</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Corrupted line &#39;</span><span class="si">{}</span><span class="s2">&#39; in &#39;</span><span class="si">{}</span><span class="s2">&#39; within &#39;</span><span class="si">{}</span><span class="s2">&#39; (expected </span><span class="si">{}</span><span class="s2"> &quot;</span>\
+                    <span class="s2">&quot;value</span><span class="si">{}</span><span class="s2"> in line, but </span><span class="si">{}</span><span class="s2"> found: </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">line_no</span><span class="p">,</span> <span class="n">report_f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span>
+                        <span class="s2">&quot;s&quot;</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">line</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+            <span class="n">fun</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">line_no</span><span class="p">,</span> <span class="n">valid_lines</span></div>
+
+
+<div class="viewcode-block" id="get_new_old_property_from_string"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgvalidator.get_new_old_property_from_string">[docs]</a><span class="k">def</span> <span class="nf">get_new_old_property_from_string</span><span class="p">(</span><span class="n">property_str</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">new_old_properties</span> <span class="o">=</span> <span class="n">property_str</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_old_properties</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Property string &#39;</span><span class="si">{}</span><span class="s2">&#39; for file &#39;</span><span class="si">{}</span><span class="s2">&#39; is malformed&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">property_str</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="n">new_val</span> <span class="o">=</span> <span class="n">new_old_properties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">old_val</span> <span class="o">=</span> <span class="n">new_old_properties</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">new_val</span><span class="p">,</span> <span class="n">old_val</span></div>
+
+
+<span class="k">def</span> <span class="nf">_assert_valid_system_version</span><span class="p">(</span><span class="n">comment</span><span class="p">,</span> <span class="n">local_distro</span><span class="p">):</span>
+    <span class="n">expected_system</span> <span class="o">=</span> <span class="n">_get_system_from_comment</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+    <span class="n">expected_distro</span> <span class="o">=</span> <span class="n">_get_distro_from_comment</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+    <span class="n">expected_cpu_arch</span> <span class="o">=</span> <span class="n">_get_cpu_arch_from_comment</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">local</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">expected</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Expected </span><span class="si">{}</span><span class="s2"> for given mySCM system image is &#39;</span><span class="si">{}</span><span class="s2">&#39; (local is &#39;</span><span class="si">{}</span><span class="s2">&#39;)&quot;</span>
+
+    <span class="k">if</span> <span class="n">expected_system</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;system&quot;</span>
+        <span class="n">local</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span>
+        <span class="n">expected</span> <span class="o">=</span> <span class="n">expected_system</span>
+    <span class="k">elif</span> <span class="n">expected_distro</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;GNU/Linux distribution&quot;</span>
+        <span class="n">local</span> <span class="o">=</span> <span class="n">local_distro</span>
+        <span class="n">expected</span> <span class="o">=</span> <span class="n">expected_distro</span>
+    <span class="k">elif</span> <span class="n">expected_cpu_arch</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;CPU architecture&quot;</span>
+        <span class="n">local</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">machine</span><span class="p">()</span>
+        <span class="n">expected</span> <span class="o">=</span> <span class="n">expected_cpu_arch</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">local</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">expected</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="n">SysImgValidatorError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">expected</span><span class="p">,</span> <span class="n">local</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_get_system_from_comment</span><span class="p">(</span><span class="n">comment</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">_get_value_from_comment</span><span class="p">(</span><span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">SYSTEM_STR</span><span class="p">,</span> <span class="n">comment</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_get_distro_from_comment</span><span class="p">(</span><span class="n">comment</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">_get_value_from_comment</span><span class="p">(</span><span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">LINUX_DISTRO_STR</span><span class="p">,</span>
+                                   <span class="n">comment</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_get_cpu_arch_from_comment</span><span class="p">(</span><span class="n">comment</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">_get_value_from_comment</span><span class="p">(</span><span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">CPU_ARCHITECTURE_STR</span><span class="p">,</span>
+                                   <span class="n">comment</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_get_value_from_comment</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">comment</span><span class="p">):</span>
+    <span class="n">regex_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\s*#\s*</span><span class="si">{}</span><span class="s2">\s*:\s*(.*)\s*&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regex_str</span><span class="p">)</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">regex</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">match</span> <span class="k">else</span> <span class="kc">None</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Patryk Bęza.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,381 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>myscm.server.parser &#8212; MySCM 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for myscm.server.parser</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">myscm.common.constants</span>
+<span class="kn">import</span> <span class="nn">myscm.common.parser</span>
+<span class="kn">import</span> <span class="nn">myscm.server.config</span>
+
+<span class="kn">from</span> <span class="nn">myscm.common.parser</span> <span class="k">import</span> <span class="n">CommandLineFlagConfigOption</span>
+<span class="kn">from</span> <span class="nn">myscm.common.parser</span> <span class="k">import</span> <span class="n">ConfigParser</span>
+<span class="kn">from</span> <span class="nn">myscm.common.parser</span> <span class="k">import</span> <span class="n">GeneralConfigOption</span>
+<span class="kn">from</span> <span class="nn">myscm.common.parser</span> <span class="k">import</span> <span class="n">ParserError</span>
+<span class="kn">from</span> <span class="nn">myscm.common.parser</span> <span class="k">import</span> <span class="n">ValidatedCommandLineConfigOption</span>
+<span class="kn">from</span> <span class="nn">myscm.common.parser</span> <span class="k">import</span> <span class="n">ValidatedFileConfigOption</span>
+<span class="kn">from</span> <span class="nn">myscm.server.aidedbverfile</span> <span class="k">import</span> <span class="n">MySCMDatabaseVersionFile</span>
+
+<span class="n">_APP_VERSION</span> <span class="o">=</span> <span class="n">myscm</span><span class="o">.</span><span class="n">common</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">get_app_version</span><span class="p">(</span><span class="s2">&quot;myscm-srv&quot;</span><span class="p">)</span>
+<span class="n">_HELP_DESC</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;This is server side of the mySCM application – simple Software</span>
+<span class="s1">Configuration Management (SCM) tool for managing software and configuration of</span>
+<span class="s1">the clients running GNU/Linux distributions. This application is intended to</span>
+<span class="s1">create and customize GNU/Linux system image that can be applied by the clients</span>
+<span class="s1">using myscm-cli application.&#39;&#39;&#39;</span>
+
+
+<div class="viewcode-block" id="ServerParserError"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.parser.ServerParserError">[docs]</a><span class="k">class</span> <span class="nc">ServerParserError</span><span class="p">(</span><span class="n">ParserError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<span class="c1">##################################</span>
+<span class="c1"># Server&#39;s configuration options #</span>
+<span class="c1">##################################</span>
+
+
+<div class="viewcode-block" id="SSLCertConfigOption"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.parser.SSLCertConfigOption">[docs]</a><span class="k">class</span> <span class="nc">SSLCertConfigOption</span><span class="p">(</span><span class="n">GeneralConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from file and/or CLI specifying SSL</span>
+<span class="sd">       certificate file path.&quot;&quot;&quot;</span>
+
+    <span class="n">DEFAULT_SSL_CERT_PATH</span> <span class="o">=</span> <span class="s2">&quot;/etc/ssl/private/myscm-srv.sig&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ssl_cert_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;SSLCertPath&quot;</span><span class="p">,</span>
+            <span class="n">ssl_cert_path</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_SSL_CERT_PATH</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assert_ssl_cert_path_valid</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;--ssl-cert&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;PATH&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assert_ssl_cert_path_valid</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;full path to the server&#39;s SSL certificate that is being &quot;</span>
+                 <span class="s2">&quot;used to digitally sign system image generated with &quot;</span>
+                 <span class="s2">&quot;--gen-img option (default value: &#39;</span><span class="si">{}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_SSL_CERT_PATH</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_assert_ssl_cert_path_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cert_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;SSL certificate path option validator.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cert_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Given SSL certificate file &#39;</span><span class="si">{}</span><span class="s2">&#39; probably doesn&#39;t exist&quot;</span>\
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cert_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ServerParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cert_path</span></div>
+
+
+<div class="viewcode-block" id="SSLCertPrivKeyConfigOption"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.parser.SSLCertPrivKeyConfigOption">[docs]</a><span class="k">class</span> <span class="nc">SSLCertPrivKeyConfigOption</span><span class="p">(</span><span class="n">GeneralConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from file and/or CLI specifying SSL private</span>
+<span class="sd">       key of the x509 certificate saved in PEM format.&quot;&quot;&quot;</span>
+
+    <span class="n">DEFAULT_SSL_CERT_PRIV_KEY_PATH</span> <span class="o">=</span> <span class="s2">&quot;/etc/ssl/private/myscm-srv.sig.priv&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ssl_priv_key_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;SSLCertPrivKeyPath&quot;</span><span class="p">,</span>
+            <span class="n">ssl_priv_key_path</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_SSL_CERT_PRIV_KEY_PATH</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assert_ssl_cert_priv_key_path_valid</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;--ssl-cert-priv&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;PATH&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assert_ssl_cert_priv_key_path_valid</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;full path to the server&#39;s SSL private key of the SSL &quot;</span>
+                 <span class="s2">&quot;certificate saved in PEM format; this key is being used to &quot;</span>
+                 <span class="s2">&quot;digitally sign system image generated with --gen-img &quot;</span>
+                 <span class="s2">&quot;option (default value: &#39;</span><span class="si">{}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_SSL_CERT_PRIV_KEY_PATH</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_assert_ssl_cert_priv_key_path_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cert_priv_key_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;SSL private key path option validator.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cert_priv_key_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Given private key path &#39;</span><span class="si">{}</span><span class="s2">&#39; for SSL certificate file &quot;</span>\
+                <span class="s2">&quot;probably doesn&#39;t exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cert_priv_key_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ServerParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cert_priv_key_path</span></div>
+
+
+<div class="viewcode-block" id="SignFileConfigOption"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.parser.SignFileConfigOption">[docs]</a><span class="k">class</span> <span class="nc">SignFileConfigOption</span><span class="p">(</span><span class="n">ValidatedCommandLineConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from CLI specifying to digitally sign given</span>
+<span class="sd">       file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;SignFile&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_file_to_sign_valid</span><span class="p">,</span> <span class="s2">&quot;--sign&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;PATH&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assert_file_to_sign_valid</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;sign given file with SSL digital certificate specified in &quot;</span>
+                 <span class="s2">&quot;configuration file and save the result within the same &quot;</span>
+                 <span class="s2">&quot;directory as PATH file (appending &#39;.sig&#39; extension to the &quot;</span>
+                 <span class="s2">&quot;filename)&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_file_to_sign_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Validator of the file that will be signed.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Given file &#39;</span><span class="si">{}</span><span class="s2">&#39; probably doesn&#39;t exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ServerParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">path</span></div>
+
+
+<div class="viewcode-block" id="AIDEConfigFileConfigOption"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.parser.AIDEConfigFileConfigOption">[docs]</a><span class="k">class</span> <span class="nc">AIDEConfigFileConfigOption</span><span class="p">(</span><span class="n">GeneralConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from file and/or CLI specifying AIDE</span>
+<span class="sd">       configuration file path.&quot;&quot;&quot;</span>
+
+    <span class="n">DEFAULT_AIDE_CONFIG_PATH</span> <span class="o">=</span> <span class="s2">&quot;/etc/myscm-srv/aide.conf&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aide_config_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;AIDEConfigPath&quot;</span><span class="p">,</span> <span class="n">aide_config_path</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_AIDE_CONFIG_PATH</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assert_AIDE_config_path_valid</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;-a&quot;</span><span class="p">,</span> <span class="s2">&quot;--aide-config&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;PATH&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assert_AIDE_config_path_valid</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;AIDE configuration file path that specifies which &quot;</span>
+                 <span class="s2">&quot;directories of the server system are scanned and &quot;</span>
+                 <span class="s2">&quot;synchronized with the client&#39;s system (default is: &#39;</span><span class="si">{}</span><span class="s2">&#39;)&quot;</span>
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_AIDE_CONFIG_PATH</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_assert_AIDE_config_path_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aide_config_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;AIDE configuration file path option validator.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">aide_config_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Given AIDE configuration file &#39;</span><span class="si">{}</span><span class="s2">&#39; doesn&#39;t exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">aide_config_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ServerParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">aide_config_path</span></div>
+
+
+<div class="viewcode-block" id="AIDEScanArgConfigOption"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.parser.AIDEScanArgConfigOption">[docs]</a><span class="k">class</span> <span class="nc">AIDEScanArgConfigOption</span><span class="p">(</span><span class="n">CommandLineFlagConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from CLI specifying whether server&#39;s scanning</span>
+<span class="sd">       using AIDE should be ran or not.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;Scan&quot;</span><span class="p">,</span> <span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="s2">&quot;--scan&quot;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;scan system using AIDE, create AIDE&#39;s new aide.db reference &quot;</span>
+                 <span class="s2">&quot;database and rename old one to aide.db.X where X is &quot;</span>
+                 <span class="s2">&quot;incremented integer&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListAvailableAIDEDatabasesConfigOption"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.parser.ListAvailableAIDEDatabasesConfigOption">[docs]</a><span class="k">class</span> <span class="nc">ListAvailableAIDEDatabasesConfigOption</span><span class="p">(</span><span class="n">CommandLineFlagConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from CLI specifying to list all available</span>
+<span class="sd">       AIDE databases that describe expected state of the client that want to</span>
+<span class="sd">       upgrade its configuration.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;ListDatabases&quot;</span><span class="p">,</span> <span class="s2">&quot;--list-db&quot;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;list all available AIDE databases created with --scan &quot;</span>
+                 <span class="s2">&quot;option&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListGeneratedMyscmSysImgConfigOption"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.parser.ListGeneratedMyscmSysImgConfigOption">[docs]</a><span class="k">class</span> <span class="nc">ListGeneratedMyscmSysImgConfigOption</span><span class="p">(</span><span class="n">CommandLineFlagConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from CLI specifying to list all mySCM system</span>
+<span class="sd">       images generated with --gen-img option.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;ListSysImg&quot;</span><span class="p">,</span> <span class="s2">&quot;--list-img&quot;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;list all mySCM system images created with --gen-img option&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GenerateSystemImageConfigOption"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.parser.GenerateSystemImageConfigOption">[docs]</a><span class="k">class</span> <span class="nc">GenerateSystemImageConfigOption</span><span class="p">(</span><span class="n">ValidatedCommandLineConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from CLI specifying to generate system image</span>
+<span class="sd">       from the specified client&#39;s cersion to the current newest system</span>
+<span class="sd">       version. List of all available client&#39;s databases can be checked using</span>
+<span class="sd">       --list-db option.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;GenImg&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_client_aide_db_version_valid</span><span class="p">,</span> <span class="s2">&quot;-g&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;--gen-img&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;SYS_IMG_VER&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assert_client_aide_db_version_valid</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;generate system image that can be applied by any client &quot;</span>
+                 <span class="s2">&quot;whose system configuration is represented by existing AIDE &quot;</span>
+                 <span class="s2">&quot;database identified by non-negative integer number &quot;</span>
+                 <span class="s2">&quot;SYS_IMG_VER (which corresponds to X in aide.db.X file &quot;</span>
+                 <span class="s2">&quot;created with --scan flag)&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_client_aide_db_version_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_ver</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">myscm</span><span class="o">.</span><span class="n">common</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">assert_sys_img_ver_valid</span><span class="p">(</span><span class="n">sys_img_ver</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SystemImgOutDirConfigOption"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.parser.SystemImgOutDirConfigOption">[docs]</a><span class="k">class</span> <span class="nc">SystemImgOutDirConfigOption</span><span class="p">(</span><span class="n">ValidatedFileConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Configuration option read from file specifying directory where</span>
+<span class="sd">       all generated reference system images are saved.&quot;&quot;&quot;</span>
+
+    <span class="n">DEFAULT_SYS_IMG_DIR</span> <span class="o">=</span> <span class="s2">&quot;/var/lib/myscm-srv&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+                <span class="s2">&quot;SystemImgOutDir&quot;</span><span class="p">,</span>
+                <span class="n">sys_img_dir</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_SYS_IMG_DIR</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_assert_sys_img_dir_valid</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_sys_img_dir_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_dir_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reference system image directory validator.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">img_dir_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Value &#39;</span><span class="si">{}</span><span class="s2">&#39; assigned to variable &#39;</span><span class="si">{}</span><span class="s2">&#39; doesn&#39;t refer to &quot;</span>\
+                <span class="s2">&quot;directory&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">img_dir_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ServerParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">img_dir_path</span></div>
+
+
+<div class="viewcode-block" id="UpgradeConfigOption"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.parser.UpgradeConfigOption">[docs]</a><span class="k">class</span> <span class="nc">UpgradeConfigOption</span><span class="p">(</span><span class="n">ValidatedCommandLineConfigOption</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Run --scan and --gen-img option with specified system image version.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;Upgrade&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assert_client_aide_db_version_valid</span><span class="p">,</span>
+            <span class="s2">&quot;--upgrade&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;SYS_IMG_VER&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assert_client_aide_db_version_valid</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;run --scan option and --gen-img option to both scan and &quot;</span>
+                 <span class="s2">&quot;generate system image&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_client_aide_db_version_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_ver</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">myscm</span><span class="o">.</span><span class="n">common</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">assert_sys_img_ver_valid</span><span class="p">(</span><span class="n">sys_img_ver</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RecentlyGeneratedDbVerPathConfigOption"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.parser.RecentlyGeneratedDbVerPathConfigOption">[docs]</a><span class="k">class</span> <span class="nc">RecentlyGeneratedDbVerPathConfigOption</span><span class="p">(</span><span class="n">ValidatedFileConfigOption</span><span class="p">):</span>
+
+    <span class="n">DEFAULT_RECENT_DB_VER_PATH</span> <span class="o">=</span> <span class="s2">&quot;/var/myscm-srv/db_ver.myscm-srv&quot;</span>
+    <span class="n">OPTION_NAME</span> <span class="o">=</span> <span class="s2">&quot;RecentlyGenDbVerPath&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recent_db_ver_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">OPTION_NAME</span><span class="p">,</span>
+            <span class="n">recent_db_ver_path</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_RECENT_DB_VER_PATH</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assert_recent_db_ver_path_valid</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_recent_db_ver_path_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recent_db_ver_path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">recent_db_ver_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Given path &#39;</span><span class="si">{}</span><span class="s2">&#39; of file holding version of recently &quot;</span>\
+                <span class="s2">&quot;generated mySCM database file doesn&#39;t exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">recent_db_ver_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ServerParserError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_recent_db_ver_file_content_valid</span><span class="p">(</span><span class="n">recent_db_ver_path</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">recent_db_ver_path</span>
+
+    <span class="k">def</span> <span class="nf">_assert_recent_db_ver_file_content_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recent_db_ver_path</span><span class="p">):</span>
+        <span class="n">db_ver_file</span> <span class="o">=</span> <span class="n">MySCMDatabaseVersionFile</span><span class="p">(</span><span class="n">recent_db_ver_path</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">db_ver_file</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Parsing file &#39;</span><span class="si">{}</span><span class="s2">&#39; assigned to variable &#39;</span><span class="si">{}</span><span class="s2">&#39; has failed&quot;</span>\
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">recent_db_ver_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">OPTION_NAME</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ServerParserError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="k">return</span> <span class="n">recent_db_ver_path</span></div>
+
+
+<span class="c1">#############################################</span>
+<span class="c1"># Core of the server&#39;s configuration parser #</span>
+<span class="c1">#############################################</span>
+
+
+<div class="viewcode-block" id="ServerConfigParser"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.parser.ServerConfigParser">[docs]</a><span class="k">class</span> <span class="nc">ServerConfigParser</span><span class="p">(</span><span class="n">ConfigParser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Application configuration parser for configuration read from both</span>
+<span class="sd">       configuration file and command line (CLI).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">config_section_name</span><span class="p">):</span>
+        <span class="n">_SERVER_DEFAULT_CONFIG</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">SSLCertConfigOption</span><span class="p">(),</span>
+            <span class="n">SSLCertPrivKeyConfigOption</span><span class="p">(),</span>
+            <span class="n">SignFileConfigOption</span><span class="p">(),</span>
+            <span class="n">AIDEConfigFileConfigOption</span><span class="p">(),</span>
+            <span class="n">AIDEScanArgConfigOption</span><span class="p">(),</span>
+            <span class="n">ListAvailableAIDEDatabasesConfigOption</span><span class="p">(),</span>
+            <span class="n">ListGeneratedMyscmSysImgConfigOption</span><span class="p">(),</span>
+            <span class="n">GenerateSystemImageConfigOption</span><span class="p">(),</span>
+            <span class="n">SystemImgOutDirConfigOption</span><span class="p">(),</span>
+            <span class="n">UpgradeConfigOption</span><span class="p">(),</span>
+            <span class="n">RecentlyGeneratedDbVerPathConfigOption</span><span class="p">()</span>
+        <span class="p">]</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span> <span class="n">config_section_name</span><span class="p">,</span>
+                         <span class="n">_SERVER_DEFAULT_CONFIG</span><span class="p">,</span> <span class="n">_HELP_DESC</span><span class="p">,</span> <span class="n">_APP_VERSION</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ServerConfigParser.parse"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.parser.ServerConfigParser.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">()</span>
+        <span class="n">server_config</span> <span class="o">=</span> <span class="n">myscm</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ServerConfig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">server_config</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Patryk Bęza.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

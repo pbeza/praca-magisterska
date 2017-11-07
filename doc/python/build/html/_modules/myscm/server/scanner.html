@@ -1,0 +1,256 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>myscm.server.scanner &#8212; MySCM 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for myscm.server.scanner</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">binaryornot.check</span>
+
+<span class="kn">from</span> <span class="nn">myscm.common.cmd</span> <span class="k">import</span> <span class="n">long_run_cmd</span><span class="p">,</span> <span class="n">run_check_cmd</span><span class="p">,</span> <span class="n">CommandLineError</span>
+<span class="kn">from</span> <span class="nn">myscm.server.aidedbmanager</span> <span class="k">import</span> <span class="n">AIDEDatabasesManager</span>
+<span class="kn">from</span> <span class="nn">myscm.server.aidedbmanager</span> <span class="k">import</span> <span class="n">AIDEDatabasesManagerError</span>
+<span class="kn">from</span> <span class="nn">myscm.server.error</span> <span class="k">import</span> <span class="n">ServerError</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ScannerError"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.scanner.ScannerError">[docs]</a><span class="k">class</span> <span class="nc">ScannerError</span><span class="p">(</span><span class="n">ServerError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Scanner"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.scanner.Scanner">[docs]</a><span class="k">class</span> <span class="nc">Scanner</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Wrapper of the AIDE scanner.&quot;&quot;&quot;</span>
+
+    <span class="n">COPIED_FILES_DIRNAME</span> <span class="o">=</span> <span class="s2">&quot;COPIED&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_config</span> <span class="o">=</span> <span class="n">server_config</span>
+
+<div class="viewcode-block" id="Scanner.scan"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.scanner.Scanner.scan">[docs]</a>    <span class="k">def</span> <span class="nf">scan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Scan system software and configuration using AIDE&#39;s --init option</span>
+<span class="sd">           creating new reference AIDE database and renaming old one.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">is_reference_aide_db_outdated</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_config</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_scan</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">CommandLineError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;AIDE --init wrapper error while executing AIDE&#39;s command&quot;</span>
+                <span class="k">raise</span> <span class="n">ScannerError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+            <span class="k">except</span> <span class="n">AIDEDatabasesManagerError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;AIDE --init wrapper error. AIDE&#39;s databases manager error&quot;</span>
+                <span class="k">raise</span> <span class="n">ScannerError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Current reference AIDE database &#39;</span><span class="si">{}</span><span class="s2">&#39; is up-to-date. No need &quot;</span>\
+                <span class="s2">&quot;to create new database. Nothing to do. Exiting.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">server_config</span><span class="o">.</span><span class="n">aide_reference_db_path</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_scan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Scan system looking for changes, replace old aide.db with new one</span>
+<span class="sd">           and move old aide.db to aide.db.X (X is incremented integer).&quot;&quot;&quot;</span>
+
+        <span class="n">aide_db_manager</span> <span class="o">=</span> <span class="n">AIDEDatabasesManager</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_tmp_out_dir_if_doesnt_exist</span><span class="p">()</span>
+
+        <span class="n">aide_config_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">AIDE_config_path</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;aide&quot;</span><span class="p">,</span> <span class="s2">&quot;--init&quot;</span><span class="p">,</span> <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="n">aide_config_path</span><span class="p">]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">long_run_cmd</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">suffix_msg</span><span class="o">=</span><span class="s2">&quot;to create new </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">server_config</span><span class="o">.</span><span class="n">aide_reference_db_fname</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">CommandLineError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Make sure that `database[_out|_new]` variables provided in &quot;</span>\
+                <span class="s2">&quot;AIDE configuration &#39;</span><span class="si">{}</span><span class="s2">&#39; are valid&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">aide_config_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ScannerError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="n">aide_db_manager</span><span class="o">.</span><span class="n">replace_old_aide_db_with_new_one</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_copy_selected_tracked_dirs</span><span class="p">()</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;New reference AIDE database &#39;</span><span class="si">{}</span><span class="s2">&#39; setup successful. Run &quot;</span>\
+            <span class="s2">&quot;--list-db option to list all available AIDE databases created &quot;</span>\
+            <span class="s2">&quot;so far.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_config</span><span class="o">.</span><span class="n">aide_reference_db_path</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_copy_selected_tracked_dirs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dst_dir_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_copied_files_dir</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__copy_selected_tracked_dirs_to_scan_dir</span><span class="p">(</span><span class="n">dst_dir_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Failed to copy files that were specified in AIDE &#39;</span><span class="si">{}</span><span class="s2">&#39; &quot;</span>\
+                <span class="s2">&quot;configuration to be copied to myscm-srv --scan result&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">server_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">AIDE_config_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ScannerError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+    <span class="k">def</span> <span class="nf">_create_copied_files_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dst_dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_config</span><span class="o">.</span><span class="n">aide_reference_db_dir</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">COPIED_FILES_DIRNAME</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dst_dir_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dst_dir_path</span>
+
+    <span class="k">def</span> <span class="nf">__copy_selected_tracked_dirs_to_scan_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_dir_path</span><span class="p">):</span>
+        <span class="n">src_paths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_config</span><span class="o">.</span><span class="n">get_all_realpaths_of_files_to_copy</span><span class="p">()</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">src_paths</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Copying </span><span class="si">{}</span><span class="s2"> file</span><span class="si">{}</span><span class="s2"> and/or director</span><span class="si">{}</span><span class="s2"> selected in AIDE &quot;</span>\
+                <span class="s2">&quot;configuration &#39;</span><span class="si">{}</span><span class="s2">&#39; to &#39;</span><span class="si">{}</span><span class="s2">&#39; directory. Please wait, it may &quot;</span>\
+                <span class="s2">&quot;take some time to finish...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">n</span><span class="p">,</span>
+                    <span class="s2">&quot;s&quot;</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;y&quot;</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;ies&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">server_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">AIDE_config_path</span><span class="p">,</span>
+                    <span class="n">dst_dir_path</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;No files needs to be copied to &#39;</span><span class="si">{}</span><span class="s2">&#39; directory. See &#39;</span><span class="si">{}</span><span class="s2">&#39; &quot;</span>\
+                <span class="s2">&quot;AIDE configuration file to investigate why.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">dst_dir_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">AIDE_config_path</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="c1"># Sort paths to skip e.g. /x/y/z if /x/y was already copied.</span>
+
+        <span class="n">src_paths</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">common_path</span> <span class="o">=</span> <span class="s2">&quot;/non-existing-path-to-initialize-loop&quot;</span>
+
+        <span class="k">for</span> <span class="n">src</span> <span class="ow">in</span> <span class="n">src_paths</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonpath</span><span class="p">([</span><span class="n">src</span><span class="p">,</span> <span class="n">common_path</span><span class="p">])</span> <span class="o">==</span> <span class="n">common_path</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Skipping copying &#39;</span><span class="si">{}</span><span class="s2">&#39; since it was copied while &quot;</span>
+                             <span class="s2">&quot;copying &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">common_path</span><span class="p">))</span>
+                <span class="k">continue</span>
+
+            <span class="n">common_path</span> <span class="o">=</span> <span class="n">src</span>
+            <span class="n">dst_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dst_dir_path</span><span class="p">,</span> <span class="n">src</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">))</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">dst_file_path</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">src</span><span class="p">):</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst_file_path</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ignore_handler</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; directory copied recursively successfully &quot;</span>
+                             <span class="s2">&quot;to &#39;</span><span class="si">{}</span><span class="s2">&#39; directory.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst_file_path</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">check_if_copy_file</span><span class="p">(</span><span class="n">src</span><span class="p">):</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst_file_path</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; file copied successfully.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                             <span class="n">dst_file_path</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_create_tmp_out_dir_if_doesnt_exist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_config</span><span class="o">.</span><span class="n">aide_out_db_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Unable to create temporary directory &#39;</span><span class="si">{}</span><span class="s2">&#39; for storing &quot;</span>\
+                <span class="s2">&quot;result of the AIDE --init call&quot;</span>
+            <span class="k">raise</span> <span class="n">ScannerError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+<div class="viewcode-block" id="Scanner.check_if_copy_file"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.scanner.Scanner.check_if_copy_file">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_copy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="n">if_copy</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">details</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">is_dir</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">is_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">if_copy</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">binaryornot</span><span class="o">.</span><span class="n">check</span><span class="o">.</span><span class="n">is_binary</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">if_copy</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">details</span> <span class="o">=</span> <span class="n">e</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; is not copied since it&#39;s non-text file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">details</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">+=</span> <span class="s2">&quot;. Details: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">details</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">if_copy</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_dir</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">if_copy</span></div>
+
+<div class="viewcode-block" id="Scanner.ignore_handler"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.scanner.Scanner.ignore_handler">[docs]</a>    <span class="k">def</span> <span class="nf">ignore_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dir_path</span><span class="p">,</span> <span class="n">dir_content</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dir_content</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_if_copy_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span></div></div>
+
+
+<div class="viewcode-block" id="is_reference_aide_db_outdated"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.scanner.is_reference_aide_db_outdated">[docs]</a><span class="k">def</span> <span class="nf">is_reference_aide_db_outdated</span><span class="p">(</span><span class="n">server_config</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return True if reference AIDE database aide.db is outdated.&quot;&quot;&quot;</span>
+
+    <span class="n">aide_config_path</span> <span class="o">=</span> <span class="n">server_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">AIDE_config_path</span>
+    <span class="n">completed_proc</span> <span class="o">=</span> <span class="n">run_check_cmd</span><span class="p">(</span><span class="n">aide_config_path</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">uptodate_msg</span> <span class="o">=</span> <span class="s2">&quot;AIDE found NO differences between database and &quot;</span>\
+                   <span class="s2">&quot;filesystem. Looks okay!!&quot;</span>
+    <span class="k">return</span> <span class="n">uptodate_msg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">completed_proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Patryk Bęza.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

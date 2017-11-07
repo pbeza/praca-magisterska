@@ -1,0 +1,250 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>myscm.server.config &#8212; MySCM 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for myscm.server.config</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">import</span> <span class="nn">myscm.common.config</span>
+
+<span class="kn">from</span> <span class="nn">myscm.server.aidedbverfile</span> <span class="k">import</span> <span class="n">MySCMDatabaseVersionFile</span>
+<span class="kn">from</span> <span class="nn">myscm.server.error</span> <span class="k">import</span> <span class="n">ServerError</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ServerConfigError"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.config.ServerConfigError">[docs]</a><span class="k">class</span> <span class="nc">ServerConfigError</span><span class="p">(</span><span class="n">ServerError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ServerConfig"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.config.ServerConfig">[docs]</a><span class="k">class</span> <span class="nc">ServerConfig</span><span class="p">(</span><span class="n">myscm</span><span class="o">.</span><span class="n">common</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">BaseConfig</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Server-specific configuration manager.&quot;&quot;&quot;</span>
+
+    <span class="n">EXTENDED_AIDE_CONFIG_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;#@&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">options</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">options</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1">###</span>
+        <span class="c1"># AIDE &#39;database&#39; related configuration option variables. &#39;database&#39; is</span>
+        <span class="c1"># path from which database is read.</span>
+        <span class="c1">###</span>
+
+        <span class="c1"># &#39;/var/myscm-srv/aide.db.current/aide.db&#39; by default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_reference_db_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_aide_reference_db_path</span><span class="p">()</span>
+
+        <span class="c1"># &#39;/var/myscm-srv/aide.db.current&#39; by default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_reference_db_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">aide_reference_db_path</span><span class="p">)</span>
+
+        <span class="c1"># &#39;aide.db&#39; by default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_reference_db_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">aide_reference_db_path</span><span class="p">)</span>
+
+        <span class="c1">###</span>
+        <span class="c1"># AIDE &#39;database_out&#39; related configuration option related variables.</span>
+        <span class="c1"># &#39;database_out&#39; is path to which the new database is written to.</span>
+        <span class="c1">###</span>
+
+        <span class="c1"># &#39;/var/myscm-srv/aide.db.new/aide.db.new&#39; by default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_out_db_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_aide_out_db_path</span><span class="p">()</span>
+
+        <span class="c1"># &#39;/var/myscm-srv/aide.db.new&#39; by default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_out_db_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aide_out_db_path</span><span class="p">)</span>
+
+        <span class="c1"># &#39;aide.db.new&#39; by default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_out_db_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aide_out_db_path</span><span class="p">)</span>
+
+        <span class="c1">###</span>
+        <span class="c1"># Variables related to old AIDE databases paths.</span>
+        <span class="c1">###</span>
+
+        <span class="c1"># &#39;/var/myscm-srv/&#39; by default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_old_db_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aide_reference_db_dir</span><span class="p">)</span>
+
+        <span class="c1"># &#39;/var/myscm-srv/aide.db&#39; by default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_old_db_subdir_base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">aide_old_db_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">aide_reference_db_fname</span><span class="p">)</span>
+
+        <span class="c1"># &#39;aide.db.{}&#39; by default (placeholder for integer)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_old_db_fname_pattern</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aide_reference_db_fname</span> <span class="o">+</span> <span class="s2">&quot;.</span><span class="si">{}</span><span class="s2">&quot;</span>
+
+        <span class="c1"># &#39;/var/myscm-srv/aide.db.{}&#39; by default (placeholder for integer)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_old_db_subdir_pattern</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">aide_old_db_dir</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">aide_old_db_fname_pattern</span><span class="p">)</span>
+
+        <span class="c1"># &#39;/var/myscm-srv/aide.db.{}/aide.db.{}&#39; by default (placeholder for</span>
+        <span class="c1"># integer)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aide_old_db_path_pattern</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">aide_old_db_subdir_pattern</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">aide_old_db_fname_pattern</span><span class="p">)</span>
+
+        <span class="c1">###</span>
+        <span class="c1"># Variables holding current versions of AIDE database and generated</span>
+        <span class="c1"># mySCM system image</span>
+        <span class="c1">###</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_ver_file</span> <span class="o">=</span> <span class="n">MySCMDatabaseVersionFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">recently_gen_db_ver_path</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_aide_reference_db_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return value of &#39;database&#39; variable from AIDE configuration.&quot;&quot;&quot;</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_aide_value_for_key</span><span class="p">(</span><span class="s2">&quot;database&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_aide_out_db_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return value of &#39;database_out&#39; variable from AIDE configuration.&quot;&quot;&quot;</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_aide_value_for_key</span><span class="p">(</span><span class="s2">&quot;database_out&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_aide_value_for_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return value for given key from AIDE configuration file.&quot;&quot;&quot;</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_value_for_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="n">e</span>
+
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">err</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;AIDE configuration file &#39;</span><span class="si">{}</span><span class="s2">&#39; probably doesn&#39;t have &quot;</span> \
+                <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; variable assigned&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">AIDE_config_path</span><span class="p">,</span>
+                                                <span class="n">key</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ServerConfigError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">__get_value_for_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return value for given key from AIDE configuration file using</span>
+<span class="sd">           regular expression.&quot;&quot;&quot;</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">regex_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\s*</span><span class="si">{}</span><span class="s2">\s*=\s*(?:file:)?(.*)\s*&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regex_str</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">AIDE_config_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="n">regex</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">break</span>
+
+        <span class="k">return</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="ServerConfig.get_all_realpaths_of_files_to_copy"><a class="viewcode-back" href="../../../myscm.server.html#myscm.server.config.ServerConfig.get_all_realpaths_of_files_to_copy">[docs]</a>    <span class="k">def</span> <span class="nf">get_all_realpaths_of_files_to_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return list of the files and directories that are defined in</span>
+<span class="sd">           aide.conf to be copied after myscm-srv --scan to be able to make</span>
+<span class="sd">           diffs (patches) instead of copying whole files to the system image</span>
+<span class="sd">           created with --gen-img option.&quot;&quot;&quot;</span>
+
+        <span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">regex_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">\s*(.*)\n&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">EXTENDED_AIDE_CONFIG_PREFIX</span><span class="p">)</span>
+        <span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regex_str</span><span class="p">)</span>
+        <span class="n">line_no</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">AIDE_config_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">line_no</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="n">regex</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">path</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>  <span class="c1"># expand symlink if symlink</span>
+
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                    <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;File &#39;</span><span class="si">{}</span><span class="s2">&#39; specified in &#39;</span><span class="si">{}</span><span class="s2">&#39; (line </span><span class="si">{}</span><span class="s2">) doesn&#39;t exist &quot;</span>\
+                        <span class="s2">&quot;- skipping.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">,</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">AIDE_config_path</span><span class="p">,</span>
+                                             <span class="n">line_no</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">paths</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Patryk Bęza.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

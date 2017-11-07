@@ -1,0 +1,203 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>myscm.client.sysimgmanager &#8212; MySCM 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for myscm.client.sysimgmanager</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">myscm.client.error</span> <span class="k">import</span> <span class="n">ClientError</span>
+<span class="kn">from</span> <span class="nn">myscm.common.signaturemanager</span> <span class="k">import</span> <span class="n">SignatureManager</span><span class="p">,</span> <span class="n">SignatureManagerError</span>
+<span class="kn">from</span> <span class="nn">myscm.common.sysimgmanager</span> <span class="k">import</span> <span class="n">SysImgManagerBase</span>
+<span class="kn">from</span> <span class="nn">myscm.server.sysimggenerator</span> <span class="k">import</span> <span class="n">SystemImageGenerator</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SysImgManagerError"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgmanager.SysImgManagerError">[docs]</a><span class="k">class</span> <span class="nc">SysImgManagerError</span><span class="p">(</span><span class="n">ClientError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="SysImgManager"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgmanager.SysImgManager">[docs]</a><span class="k">class</span> <span class="nc">SysImgManager</span><span class="p">(</span><span class="n">SysImgManagerBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Manager of the myscm-img.X.Y.tar.gz system images (X, Y are integers)</span>
+<span class="sd">       created by myscm-srv and downloaded from peer.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_config</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span> <span class="o">=</span> <span class="n">client_config</span>
+
+<div class="viewcode-block" id="SysImgManager.get_sys_img_path"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgmanager.SysImgManager.get_sys_img_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_sys_img_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">current_state_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">img_ver_file</span><span class="o">.</span><span class="n">get_version</span><span class="p">(</span><span class="n">create</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">sys_img_ver</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">apply_img</span>
+
+        <span class="k">if</span> <span class="n">current_state_id</span> <span class="o">&gt;=</span> <span class="n">sys_img_ver</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="s2">&quot;newer than&quot;</span> <span class="k">if</span> <span class="n">current_state_id</span> <span class="o">&gt;</span> <span class="n">sys_img_ver</span> <span class="k">else</span> <span class="s2">&quot;same as&quot;</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Current state of the system (version </span><span class="si">{}</span><span class="s2">) is </span><span class="si">{}</span><span class="s2"> and &quot;</span>\
+                <span class="s2">&quot;requested version of the system image (version </span><span class="si">{}</span><span class="s2">) thus no &quot;</span>\
+                <span class="s2">&quot;need to apply image.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">current_state_id</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">sys_img_ver</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SysImgManagerError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="n">sys_img_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">sys_img_download_dir</span>
+        <span class="n">sys_img_name_pattern</span> <span class="o">=</span> <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">MYSCM_IMG_FILE_NAME</span>
+        <span class="n">sys_img_name</span> <span class="o">=</span> <span class="n">sys_img_name_pattern</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">current_state_id</span><span class="p">,</span>
+                                                   <span class="n">sys_img_ver</span><span class="p">)</span>
+        <span class="n">sys_img_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys_img_dir</span><span class="p">,</span> <span class="n">sys_img_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">sys_img_path</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; probably doesn&#39;t exist. Specify different target &quot;</span>\
+                <span class="s2">&quot;system image version (specified version: </span><span class="si">{}</span><span class="s2">).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">sys_img_path</span><span class="p">,</span> <span class="n">sys_img_ver</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SysImgManagerError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sys_img_path</span></div>
+
+<div class="viewcode-block" id="SysImgManager.update_current_system_state_version"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgmanager.SysImgManager.update_current_system_state_version">[docs]</a>    <span class="k">def</span> <span class="nf">update_current_system_state_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_ver</span><span class="p">):</span>
+        <span class="n">new_ver</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">new_ver</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">img_ver_file</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">sys_img_ver</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Failed to update &#39;</span><span class="si">{}</span><span class="s2">&#39; file holding version of the recently &quot;</span>\
+                <span class="s2">&quot;applied mySCM system image&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">img_ver_file</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SysImgManagerError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="k">return</span> <span class="n">new_ver</span></div>
+
+<div class="viewcode-block" id="SysImgManager.print_current_system_state_version"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgmanager.SysImgManager.print_current_system_state_version">[docs]</a>    <span class="k">def</span> <span class="nf">print_current_system_state_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ver</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">img_ver_file</span><span class="o">.</span><span class="n">exist</span><span class="p">():</span>
+            <span class="n">ver</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">img_ver_file</span><span class="o">.</span><span class="n">get_version</span><span class="p">(</span><span class="n">create</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">ver</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SysImgManager.print_all_verified_img_paths_sorted"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgmanager.SysImgManager.print_all_verified_img_paths_sorted">[docs]</a>    <span class="k">def</span> <span class="nf">print_all_verified_img_paths_sorted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_all_verified_img_paths_sorted</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">sys_img_download_dir</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">SSL_cert_public_key_path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SysImgManager.verify_sys_img"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgmanager.SysImgManager.verify_sys_img">[docs]</a>    <span class="k">def</span> <span class="nf">verify_sys_img</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">SignatureManager</span><span class="p">()</span>
+        <span class="n">sys_img_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">verify_sys_img</span>
+        <span class="n">signature_path</span> <span class="o">=</span> <span class="n">sys_img_path</span> <span class="o">+</span> <span class="n">SignatureManager</span><span class="o">.</span><span class="n">SIGNATURE_EXT</span>
+        <span class="n">ssl_pub_key_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">SSL_cert_public_key_path</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">valid</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">ssl_verify</span><span class="p">(</span><span class="n">sys_img_path</span><span class="p">,</span> <span class="n">signature_path</span><span class="p">,</span> <span class="n">ssl_pub_key_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">SignatureManagerError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Failed to verify &#39;</span><span class="si">{}</span><span class="s2">&#39; mySCM system image certificate&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">signature_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SysImgManagerError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="n">info</span> <span class="o">=</span> <span class="s2">&quot;SSL signature </span><span class="si">{}</span><span class="s2">valid&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">valid</span> <span class="k">else</span> <span class="s2">&quot;in&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">info</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SysImgManager.get_target_sys_img_ver_from_fname"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgmanager.SysImgManager.get_target_sys_img_ver_from_fname">[docs]</a>    <span class="k">def</span> <span class="nf">get_target_sys_img_ver_from_fname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="n">regex_str</span> <span class="o">=</span> <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">MYSCM_IMG_FILE_NAME_REGEX</span>
+        <span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regex_str</span><span class="p">)</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+        <span class="n">corrupted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Given system image &#39;</span><span class="si">{}</span><span class="s2">&#39; has unexpected format. mySCM system &quot;</span>\
+            <span class="s2">&quot;images need to have &#39;</span><span class="si">{}</span><span class="s2">&#39; format (X, Y are non negative &quot;</span>\
+            <span class="s2">&quot;integers).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">fname</span><span class="p">,</span>
+                <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">MYSCM_IMG_FILE_NAME</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">))</span>
+        <span class="n">ver</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="n">match</span> <span class="o">=</span> <span class="n">regex</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">corrupted</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">ver</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">corrupted</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">corrupted</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SysImgManagerError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ver</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Patryk Bęza.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,238 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>myscm.common.signaturemanager &#8212; MySCM 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for myscm.common.signaturemanager</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">getpass</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+
+<span class="kn">import</span> <span class="nn">OpenSSL</span>
+
+<span class="kn">from</span> <span class="nn">myscm.server.error</span> <span class="k">import</span> <span class="n">ServerError</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SignatureManagerError"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.signaturemanager.SignatureManagerError">[docs]</a><span class="k">class</span> <span class="nc">SignatureManagerError</span><span class="p">(</span><span class="n">ServerError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="SignatureManager"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.signaturemanager.SignatureManager">[docs]</a><span class="k">class</span> <span class="nc">SignatureManager</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Manager of the SSL signatures created to confirm mySCM system images&#39;</span>
+<span class="sd">       authenticity.&quot;&quot;&quot;</span>
+
+    <span class="n">SSL_CERT_DIGEST_TYPE</span> <span class="o">=</span> <span class="s2">&quot;sha256&quot;</span>
+    <span class="n">SIGNATURE_EXT</span> <span class="o">=</span> <span class="s2">&quot;.sig&quot;</span>
+
+<div class="viewcode-block" id="SignatureManager.ssl_sign"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.signaturemanager.SignatureManager.ssl_sign">[docs]</a>    <span class="k">def</span> <span class="nf">ssl_sign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_path</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">priv_key_path</span><span class="p">):</span>
+        <span class="n">priv_key_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_priv_key_openssl_obj</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span>
+                                                         <span class="n">priv_key_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">priv_key_obj</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">signature</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">img_f</span><span class="p">:</span>
+            <span class="c1"># See: https://stackoverflow.com/q/45141917/1321680</span>
+            <span class="n">bytes_to_sign</span> <span class="o">=</span> <span class="n">img_f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">signature</span> <span class="o">=</span> <span class="n">OpenSSL</span><span class="o">.</span><span class="n">crypto</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">priv_key_obj</span><span class="p">,</span> <span class="n">bytes_to_sign</span><span class="p">,</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">SSL_CERT_DIGEST_TYPE</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sig_f</span><span class="p">:</span>
+            <span class="n">sig_f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">signature</span><span class="p">)</span>
+
+        <span class="c1"># To manually verify validity of the signature run:</span>
+        <span class="c1"># openssl dgst -sha256 -verify cert_public_key_file.pub -signature cert_file.crt signed_file_path</span>
+        <span class="c1"># try: gpg --keyserver-options auto-key-retrieve --verify signed_file_path</span>
+
+        <span class="k">return</span> <span class="n">output_path</span></div>
+
+    <span class="k">def</span> <span class="nf">_create_priv_key_openssl_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_path</span><span class="p">,</span> <span class="n">priv_key_path</span><span class="p">):</span>
+        <span class="n">pem_cert_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_priv_key_str</span><span class="p">(</span><span class="n">priv_key_path</span><span class="p">)</span>
+        <span class="n">priv_key</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">priv_key</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">passwd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_cert_password</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="n">priv_key_path</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyboardInterrupt</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generating SSL signature for &#39;</span><span class="si">{}</span><span class="s2">&#39; skipped by &quot;</span>
+                            <span class="s2">&quot;user (keyboard interrupt).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_path</span><span class="p">))</span>
+                <span class="k">break</span>
+
+            <span class="n">priv_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_cert_priv_key</span><span class="p">(</span><span class="n">pem_cert_str</span><span class="p">,</span> <span class="n">passwd</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">priv_key</span>
+
+    <span class="k">def</span> <span class="nf">_get_priv_key_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priv_key_path</span><span class="p">):</span>
+        <span class="n">pem_cert_str</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">priv_key_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">pem_cert_str</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Unable to open &#39;</span><span class="si">{}</span><span class="s2">&#39; SSL private key for certificate for &quot;</span>\
+                <span class="s2">&quot;signing system image&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">priv_key_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SignatureManagerError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="k">return</span> <span class="n">pem_cert_str</span>
+
+    <span class="k">def</span> <span class="nf">_get_cert_password</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_path</span><span class="p">,</span> <span class="n">priv_key_path</span><span class="p">):</span>
+        <span class="n">passwd</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Enter password protecting &#39;</span><span class="si">{}</span><span class="s2">&#39; private key of the SSL &quot;</span>\
+            <span class="s2">&quot;certificate to digitally sign &#39;</span><span class="si">{}</span><span class="s2">&#39;. If you want to skip &quot;</span>\
+            <span class="s2">&quot;generating SSL signature press CTRL+C (or send SIGINT signal in &quot;</span>\
+            <span class="s2">&quot;any other way).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">priv_key_path</span><span class="p">),</span>
+                                     <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">input_path</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="mi">80</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">passwd</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">getpass</span><span class="o">.</span><span class="n">GetPassWarning</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;SSL certificate password input may be echoed!&quot;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">passwd</span>
+
+    <span class="k">def</span> <span class="nf">_get_cert_priv_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pem_cert_str</span><span class="p">,</span> <span class="n">passwd</span><span class="p">):</span>
+        <span class="n">CERT_FORMAT_TYPE</span> <span class="o">=</span> <span class="n">OpenSSL</span><span class="o">.</span><span class="n">crypto</span><span class="o">.</span><span class="n">FILETYPE_PEM</span>
+        <span class="n">priv_key</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">priv_key</span> <span class="o">=</span> <span class="n">OpenSSL</span><span class="o">.</span><span class="n">crypto</span><span class="o">.</span><span class="n">load_privatekey</span><span class="p">(</span><span class="n">CERT_FORMAT_TYPE</span><span class="p">,</span>
+                                                      <span class="n">pem_cert_str</span><span class="p">,</span>
+                                                      <span class="n">passwd</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">OpenSSL</span><span class="o">.</span><span class="n">crypto</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Failed to load SSL certificate private key - &quot;</span>
+                           <span class="s2">&quot;check if you entered correct password&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">priv_key</span>
+
+<div class="viewcode-block" id="SignatureManager.ssl_verify"><a class="viewcode-back" href="../../../myscm.common.html#myscm.common.signaturemanager.SignatureManager.ssl_verify">[docs]</a>    <span class="k">def</span> <span class="nf">ssl_verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_verify</span><span class="p">,</span> <span class="n">signature_path</span><span class="p">,</span> <span class="n">ssl_pub_key_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return True if SLL signature is valid (otherwise False).&quot;&quot;&quot;</span>
+
+        <span class="n">signed_file_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">signature</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">pem_pkey</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">SSL_DIGEST_TYPE</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SSL_CERT_DIGEST_TYPE</span>
+        <span class="n">CERT_FORMAT_TYPE</span> <span class="o">=</span> <span class="n">OpenSSL</span><span class="o">.</span><span class="n">crypto</span><span class="o">.</span><span class="n">FILETYPE_PEM</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path_to_verify</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">signed_file_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">signature_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">signature</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ssl_pub_key_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pem_pkey</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="c1"># See: https://stackoverflow.com/a/41043382/1321680</span>
+        <span class="n">x509_obj</span> <span class="o">=</span> <span class="n">OpenSSL</span><span class="o">.</span><span class="n">crypto</span><span class="o">.</span><span class="n">X509</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pkey</span> <span class="o">=</span> <span class="n">OpenSSL</span><span class="o">.</span><span class="n">crypto</span><span class="o">.</span><span class="n">load_publickey</span><span class="p">(</span><span class="n">CERT_FORMAT_TYPE</span><span class="p">,</span> <span class="n">pem_pkey</span><span class="p">)</span>
+            <span class="n">x509_obj</span><span class="o">.</span><span class="n">set_pubkey</span><span class="p">(</span><span class="n">pkey</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">OpenSSL</span><span class="o">.</span><span class="n">crypto</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Loading PEM formatted SSL &#39;</span><span class="si">{}</span><span class="s2">&#39; certificate&#39;s public key &quot;</span>\
+                <span class="s2">&quot;failed&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ssl_pub_key_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SignatureManagerError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="n">verify_result</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">verify_result</span> <span class="o">=</span> <span class="n">OpenSSL</span><span class="o">.</span><span class="n">crypto</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span>  <span class="c1"># returns None if success</span>
+                                    <span class="n">x509_obj</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">signed_file_data</span><span class="p">,</span>
+                                    <span class="n">SSL_DIGEST_TYPE</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">OpenSSL</span><span class="o">.</span><span class="n">crypto</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Verification of &#39;</span><span class="si">{}</span><span class="s2">&#39; signature failed.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">signature_path</span><span class="p">))</span>
+            <span class="n">verify_result</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">verify_result</span> <span class="o">=</span> <span class="n">verify_result</span> <span class="ow">is</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">verify_result</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Patryk Bęza.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

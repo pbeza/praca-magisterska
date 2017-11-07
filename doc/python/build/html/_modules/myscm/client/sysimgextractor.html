@@ -1,0 +1,554 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>myscm.client.sysimgextractor &#8212; MySCM 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for myscm.client.sysimgextractor</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">progressbar</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">stat</span>
+<span class="kn">import</span> <span class="nn">tarfile</span>
+
+<span class="kn">import</span> <span class="nn">diff_match_patch</span> <span class="k">as</span> <span class="nn">patcher</span>
+
+<span class="kn">from</span> <span class="nn">myscm.client.error</span> <span class="k">import</span> <span class="n">ClientError</span>
+<span class="kn">from</span> <span class="nn">myscm.client.sysimgmanager</span> <span class="k">import</span> <span class="n">SysImgManager</span>
+<span class="kn">from</span> <span class="nn">myscm.client.sysimgvalidator</span> <span class="k">import</span> <span class="n">SysImgValidator</span>
+<span class="kn">from</span> <span class="nn">myscm.client.sysimgvalidator</span> <span class="k">import</span> <span class="n">get_new_old_property_from_string</span>
+<span class="kn">from</span> <span class="nn">myscm.client.sysimgvalidator</span> <span class="k">import</span> <span class="n">run_fun_for_each_report_line</span>
+<span class="kn">from</span> <span class="nn">myscm.client.templatefile</span> <span class="k">import</span> <span class="n">TemplateFile</span>
+<span class="kn">from</span> <span class="nn">myscm.server.aideentry</span> <span class="k">import</span> <span class="n">AIDEEntry</span>
+<span class="kn">from</span> <span class="nn">myscm.server.aideentry</span> <span class="k">import</span> <span class="n">FileType</span>
+<span class="kn">from</span> <span class="nn">myscm.server.sysimggenerator</span> <span class="k">import</span> <span class="n">SystemImageGenerator</span>
+
+<span class="n">progressbar</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">wrap_stderr</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SysImgExtractorError"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgextractor.SysImgExtractorError">[docs]</a><span class="k">class</span> <span class="nc">SysImgExtractorError</span><span class="p">(</span><span class="n">ClientError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="SysImgExtractor"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgextractor.SysImgExtractor">[docs]</a><span class="k">class</span> <span class="nc">SysImgExtractor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;mySCM system image extractor.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span> <span class="o">=</span> <span class="n">client_config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_img_manager</span> <span class="o">=</span> <span class="n">SysImgManager</span><span class="p">(</span><span class="n">client_config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_img_validator</span> <span class="o">=</span> <span class="n">SysImgValidator</span><span class="p">(</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">distro_name</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">force_apply</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SysImgExtractor.apply_sys_img"><a class="viewcode-back" href="../../../myscm.client.html#myscm.client.sysimgextractor.SysImgExtractor.apply_sys_img">[docs]</a>    <span class="k">def</span> <span class="nf">apply_sys_img</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extract, validate and apply mySCM system image.&quot;&quot;&quot;</span>
+
+        <span class="n">sys_img_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_img_manager</span><span class="o">.</span><span class="n">get_sys_img_path</span><span class="p">()</span>
+        <span class="n">sys_img_ver</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_img_manager</span><span class="o">.</span><span class="n">get_target_sys_img_ver_from_fname</span><span class="p">(</span>
+                                                                  <span class="n">sys_img_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extracted_sys_img_dir</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">sys_img_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">sys_img_f</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sys_img_validator</span><span class="o">.</span><span class="n">assert_sys_img_valid</span><span class="p">(</span><span class="n">sys_img_f</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">extracted_sys_img_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_sys_img</span><span class="p">(</span><span class="n">sys_img_f</span><span class="p">)</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Applying changes from &#39;</span><span class="si">{}</span><span class="s2">&#39; directory extracted from &quot;</span>
+                        <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; mySCM system image.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">extracted_sys_img_dir</span><span class="p">,</span> <span class="n">sys_img_path</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_added_files</span><span class="p">(</span><span class="n">sys_img_f</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_changed_files</span><span class="p">(</span><span class="n">sys_img_f</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_removed_files</span><span class="p">(</span><span class="n">sys_img_f</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">SysImgExtractorError</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Failed to apply &#39;</span><span class="si">{}</span><span class="s2">&#39; mySCM system image&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SysImgExtractorError</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sys_img_manager</span><span class="o">.</span><span class="n">update_current_system_state_version</span><span class="p">(</span><span class="n">sys_img_ver</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_extracted_sys_img_dir</span><span class="p">()</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Applying changes from &#39;</span><span class="si">{}</span><span class="s2">&#39; mySCM system image ended &quot;</span>
+                    <span class="s2">&quot;successfully.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">_remove_extracted_sys_img_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Removing temporarily extracted system image &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span>
+                     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extracted_sys_img_dir</span><span class="p">))</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extracted_sys_img_dir</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_extract_sys_img</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+        <span class="n">sys_img_ext</span> <span class="o">=</span> <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">MYSCM_IMG_EXT</span>
+        <span class="n">extract_maindir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">sys_img_extract_dir</span>
+        <span class="n">extract_subdir</span> <span class="o">=</span> <span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="n">sys_img_ext</span><span class="p">)</span>
+        <span class="n">extract_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">extract_maindir</span><span class="p">,</span> <span class="n">extract_subdir</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Extracting &#39;</span><span class="si">{}</span><span class="s2">&#39; system image to temporary &#39;</span><span class="si">{}</span><span class="s2">&#39; &quot;</span>
+                    <span class="s2">&quot;directory...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">extract_dir</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">extract_dir</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Directory &#39;</span><span class="si">{}</span><span class="s2">&#39; already exists - it may be caused if last &quot;</span>\
+                <span class="s2">&quot;system upgrade has failed or was interrupred.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">extract_dir</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">force_apply</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">+=</span> <span class="s2">&quot; --force-apply flag detected - removing &#39;</span><span class="si">{}</span><span class="s2">&#39; and &quot;</span>\
+                    <span class="s2">&quot;extracting &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">extract_dir</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">extract_dir</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SysImgExtractorError</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="n">sys_img_f</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">extract_dir</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Extracting &#39;</span><span class="si">{}</span><span class="s2">&#39; system image to temporary &#39;</span><span class="si">{}</span><span class="s2">&#39; &quot;</span>
+                    <span class="s2">&quot;directory ended successfully.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys_img_f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                                           <span class="n">extract_dir</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">extract_dir</span>
+
+    <span class="c1">#####################</span>
+    <span class="c1"># Apply added files #</span>
+    <span class="c1">#####################</span>
+
+    <span class="k">def</span> <span class="nf">_apply_added_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+
+        <span class="n">src</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extracted_sys_img_dir</span><span class="p">,</span>
+                           <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">IN_ARCHIVE_ADDED_DIR_NAME</span><span class="p">)</span>
+        <span class="n">dst</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Applying newly added files from &#39;</span><span class="si">{}</span><span class="s2">&#39; directory...&quot;</span>
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">src</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_movetree</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>
+        <span class="n">added_packages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_packages_of_added_files</span><span class="p">(</span><span class="n">sys_img_f</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">added_packages</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Applying newly added files from &#39;</span><span class="si">{}</span><span class="s2">&#39; directory ended &quot;</span>
+                    <span class="s2">&quot;successfully (files from </span><span class="si">{}</span><span class="s2"> package</span><span class="si">{}</span><span class="s2">).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">src</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span> <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Packages of the added files: &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                     <span class="s2">&quot;&#39;, &#39;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">added_packages</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">_get_packages_of_added_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+        <span class="n">added_report_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">extracted_sys_img_dir</span><span class="p">,</span>
+                                      <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">ADDED_FILES_FNAME</span><span class="p">)</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_img_validator</span><span class="o">.</span><span class="n">added_entries</span>
+        <span class="n">bar</span> <span class="o">=</span> <span class="n">progressbar</span><span class="o">.</span><span class="n">ProgressBar</span><span class="p">(</span><span class="n">max_value</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Collecting packages&#39; names of </span><span class="si">{}</span><span class="s2"> added file</span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">n</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span> <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+
+        <span class="n">pkg_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">added_report_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">expected_added_count</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">run_fun_for_each_report_line</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_added_files_per_line_fun</span><span class="p">,</span>
+                <span class="n">expected_added_count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">distro_name</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span> <span class="n">bar</span><span class="p">,</span> <span class="n">pkg_set</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pkg_set</span>
+
+    <span class="k">def</span> <span class="nf">_added_files_per_line_fun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">bar</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">pkg_set</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">pkg_name</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">pkg_name</span> <span class="o">!=</span> <span class="s2">&quot;?&quot;</span><span class="p">:</span>
+            <span class="n">pkg_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pkg_name</span><span class="p">)</span>
+        <span class="n">bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bar</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_movetree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Move recursively source directory to destination directory</span>
+<span class="sd">           efectively merging two directory trees.</span>
+
+<span class="sd">           There is a problem with universal function that is able to copy all</span>
+<span class="sd">           types of files. See: https://stackoverflow.com/a/7420617/1321680</span>
+<span class="sd">           Note that neither shutil.copytree nor distutils.dir_util.copy_tree</span>
+<span class="sd">           is able to handle copying special files (e.g. named pipes).&quot;&quot;&quot;</span>
+
+        <span class="c1"># Count all files first to introduce progress bar</span>
+
+        <span class="n">total_to_move</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">followlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <span class="n">total_to_move</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dirs</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+
+        <span class="n">bar</span> <span class="o">=</span> <span class="n">progressbar</span><span class="o">.</span><span class="n">ProgressBar</span><span class="p">(</span><span class="n">max_value</span><span class="o">=</span><span class="n">total_to_move</span><span class="p">)</span>
+
+        <span class="c1"># Move recursively all types of files including pipes, symlinks and</span>
+        <span class="c1"># others possibly from one filesystem to the another (which can&#39;t be</span>
+        <span class="c1"># handled using move() call).</span>
+
+        <span class="k">for</span> <span class="n">src_dir</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">followlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <span class="n">dst_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">src_dir</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+            <span class="c1"># Create directory with the same stats</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dst_dir</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dst_dir</span><span class="p">))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dst_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">fstat</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">src_dir</span><span class="p">)</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">chown</span><span class="p">(</span><span class="n">dst_dir</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">fstat</span><span class="o">.</span><span class="n">st_uid</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">fstat</span><span class="o">.</span><span class="n">st_gid</span><span class="p">)</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">copystat</span><span class="p">(</span><span class="n">src_dir</span><span class="p">,</span> <span class="n">dst_dir</span><span class="p">,</span> <span class="n">follow_symlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="c1"># Move all symlinks to directories</span>
+
+            <span class="k">for</span> <span class="n">dir_name</span> <span class="ow">in</span> <span class="n">dirs</span><span class="p">:</span>
+                <span class="n">src_symdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">src_dir</span><span class="p">,</span> <span class="n">dir_name</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">src_symdir</span><span class="p">):</span>
+                    <span class="n">move_symlink</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">dst_symdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dst_dir</span><span class="p">,</span> <span class="n">dir_name</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">dst_symdir</span><span class="p">):</span>
+                        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Directory symlink &#39;</span><span class="si">{}</span><span class="s2">&#39; already exists - &quot;</span>\
+                            <span class="s2">&quot;overwriting.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dst_symdir</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dst_symdir</span><span class="p">):</span>
+                        <span class="n">move_symlink</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;File &#39;</span><span class="si">{}</span><span class="s2">&#39; already exists and is not symlink - &quot;</span>\
+                            <span class="s2">&quot;skipping copying.&quot;</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">move_symlink</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+                            <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">src_symdir</span><span class="p">,</span> <span class="n">dst_symdir</span><span class="p">)</span>
+                        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Moving symlink &#39;</span><span class="si">{}</span><span class="s2">&#39; to &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">src_symdir</span><span class="p">,</span>
+                                                                  <span class="n">dst_symdir</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+                <span class="n">bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bar</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Move all files (including special files)</span>
+
+            <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="n">dst_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dst_dir</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dst_file</span><span class="p">):</span>
+                    <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;File &#39;</span><span class="si">{}</span><span class="s2">&#39; already exist - overwritting.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">dst_file</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+                <span class="n">src_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">src_dir</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+
+                <span class="c1"># shutil.move() copies symlinks and fifos unless copy to</span>
+                <span class="c1"># different filesystem</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_move_and_replace_template</span><span class="p">(</span><span class="n">src_file</span><span class="p">,</span> <span class="n">dst_file</span><span class="p">)</span>
+
+                <span class="n">bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bar</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Remove empty directories</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_empty_dirs</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">sync</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_move_and_replace_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_file</span><span class="p">,</span> <span class="n">dst_file</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">src_file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">TEMPLATE_PATH_EXT</span><span class="p">):</span>
+            <span class="n">templater</span> <span class="o">=</span> <span class="n">TemplateFile</span><span class="p">(</span><span class="n">src_file</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">TEMPLATE_PATH_EXT</span><span class="p">)</span>
+            <span class="n">dst_file</span> <span class="o">=</span> <span class="n">dst_file</span><span class="p">[:</span><span class="n">n</span><span class="p">]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Replacing template file &#39;</span><span class="si">{}</span><span class="s2">&#39; with values and &quot;</span>
+                         <span class="s2">&quot;saving the result in &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">src_file</span><span class="p">,</span>
+                                                             <span class="n">dst_file</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+                <span class="n">templater</span><span class="o">.</span><span class="n">replace_placeholders_with_values</span><span class="p">(</span><span class="n">dst_file</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">src_file</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">src_file</span><span class="p">,</span> <span class="n">dst_file</span><span class="p">,</span> <span class="n">copy_function</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mycopy2</span><span class="p">)</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Moving &#39;</span><span class="si">{}</span><span class="s2">&#39; to &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">src_file</span><span class="p">,</span> <span class="n">dst_file</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_remove_empty_dirs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Removing empty directories from &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">src</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">topdown</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">followlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">removedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_mycopy2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">shutil</span><span class="o">.</span><span class="n">SpecialFileError</span><span class="p">:</span>
+            <span class="c1"># Special file copy from one filesystem to the another is not</span>
+            <span class="c1"># handled by standard function. ;-( For now only named pipes (FIFO)</span>
+            <span class="c1"># are handled.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isfifo</span><span class="p">(</span><span class="n">src</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkfifo</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copystat</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span>
+
+    <span class="k">def</span> <span class="nf">_isfifo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="n">file_stat</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_ISFIFO</span><span class="p">(</span><span class="n">file_stat</span><span class="o">.</span><span class="n">st_mode</span><span class="p">)</span>
+
+    <span class="c1">#######################</span>
+    <span class="c1"># Apply changed files #</span>
+    <span class="c1">#######################</span>
+
+    <span class="k">def</span> <span class="nf">_apply_changed_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+        <span class="n">changed_report_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">extracted_sys_img_dir</span><span class="p">,</span>
+                                      <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">CHANGED_FILES_FNAME</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Applying changed files listed in &#39;</span><span class="si">{}</span><span class="s2">&#39; report...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">changed_report_path</span><span class="p">))</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_img_validator</span><span class="o">.</span><span class="n">changed_entries</span>
+        <span class="n">bar</span> <span class="o">=</span> <span class="n">progressbar</span><span class="o">.</span><span class="n">ProgressBar</span><span class="p">(</span><span class="n">max_value</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">changed_report_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">run_fun_for_each_report_line</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_changed_files_per_line_fun</span><span class="p">,</span>
+                <span class="n">AIDEEntry</span><span class="o">.</span><span class="n">PROPERTIES_COUNT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">distro_name</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span> <span class="n">bar</span><span class="p">)</span>
+
+        <span class="n">changed_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extracted_sys_img_dir</span><span class="p">,</span>
+            <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">IN_ARCHIVE_CHANGED_DIR_NAME</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_empty_dirs</span><span class="p">(</span><span class="n">changed_dir</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Applying changed files listed in &#39;</span><span class="si">{}</span><span class="s2">&#39; report ended &quot;</span>
+                    <span class="s2">&quot;successfully.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">changed_report_path</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_changed_files_per_line_fun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ftype</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">size_was_changed</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span><span class="p">}</span>
+
+        <span class="c1"># Modify file&#39;s content if content was modified</span>
+
+        <span class="k">if</span> <span class="n">ftype</span> <span class="o">==</span> <span class="n">FileType</span><span class="o">.</span><span class="n">REGULAR_FILE</span><span class="o">.</span><span class="n">value</span> <span class="ow">and</span> <span class="n">size_was_changed</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_changed_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="c1"># Modify permissions to file if permissions were modified</span>
+
+        <span class="n">new_perm</span><span class="p">,</span> <span class="n">old_perm</span> <span class="o">=</span> <span class="n">get_new_old_property_from_string</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_change_file_permissions</span><span class="p">(</span><span class="n">new_perm</span><span class="p">,</span> <span class="n">old_perm</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+        <span class="c1"># Modify owner and group of the file (owner/group must already exist!)</span>
+
+        <span class="n">new_uid</span><span class="p">,</span> <span class="n">old_uid</span> <span class="o">=</span> <span class="n">get_new_old_property_from_string</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="n">path</span><span class="p">)</span>
+        <span class="n">new_gid</span><span class="p">,</span> <span class="n">old_gid</span> <span class="o">=</span> <span class="n">get_new_old_property_from_string</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_change_file_uid_gid</span><span class="p">(</span><span class="n">new_uid</span><span class="p">,</span> <span class="n">old_uid</span><span class="p">,</span> <span class="n">new_gid</span><span class="p">,</span> <span class="n">old_gid</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+        <span class="c1"># Update progressbar</span>
+
+        <span class="n">bar</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bar</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_change_file_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_perm</span><span class="p">,</span> <span class="n">old_perm</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">old_perm</span> <span class="o">!=</span> <span class="s2">&quot;.&quot;</span><span class="p">:</span>  <span class="c1"># If permissions should be changed</span>
+            <span class="n">new_hex_perm</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">new_perm</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Changing permissions of the &#39;</span><span class="si">{}</span><span class="s2">&#39; to </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="nb">oct</span><span class="p">(</span><span class="n">new_hex_perm</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">new_hex_perm</span><span class="p">)</span>  <span class="c1"># follow_symlinks=False ?</span>
+
+    <span class="k">def</span> <span class="nf">_change_file_uid_gid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_uid</span><span class="p">,</span> <span class="n">old_uid</span><span class="p">,</span> <span class="n">new_gid</span><span class="p">,</span> <span class="n">old_gid</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="n">uid</span> <span class="o">=</span> <span class="n">new_uid</span> <span class="k">if</span> <span class="n">old_uid</span> <span class="o">!=</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">gid</span> <span class="o">=</span> <span class="n">new_gid</span> <span class="k">if</span> <span class="n">old_gid</span> <span class="o">!=</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">uid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">gid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">old_uid</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span><span class="p">:</span>
+                <span class="n">old_uid</span> <span class="o">=</span> <span class="n">new_uid</span>
+
+            <span class="k">if</span> <span class="n">old_gid</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span><span class="p">:</span>
+                <span class="n">old_gid</span> <span class="o">=</span> <span class="n">new_gid</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Changing UID, GID of the &#39;</span><span class="si">{}</span><span class="s2">&#39; from </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2"> to </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">.&quot;</span>\
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">old_uid</span><span class="p">,</span> <span class="n">old_gid</span><span class="p">,</span> <span class="n">new_uid</span><span class="p">,</span> <span class="n">new_gid</span><span class="p">)</span>
+                <span class="c1"># shutil.chown(path, uid, gid) doesn&#39;t have follow_symlinks arg</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chown</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">uid</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">gid</span><span class="p">),</span> <span class="n">follow_symlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Failed to change UID, GID of the &#39;</span><span class="si">{}</span><span class="s2">&#39; from </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2"> to &quot;</span>\
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">. Details: &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">path</span><span class="p">,</span> <span class="n">old_uid</span><span class="p">,</span> <span class="n">old_gid</span><span class="p">,</span> <span class="n">new_uid</span><span class="p">,</span> <span class="n">new_gid</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_changed_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="n">orig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extracted_sys_img_dir</span><span class="p">,</span>
+            <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">IN_ARCHIVE_CHANGED_DIR_NAME</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">))</span>
+        <span class="n">diff_path</span> <span class="o">=</span> <span class="n">orig_path</span> <span class="o">+</span> <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">PATCH_EXT</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">diff_path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_patch_for_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">diff_path</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">diff_path</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_move_changed_file</span><span class="p">(</span><span class="n">orig_path</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Neither &#39;</span><span class="si">{}</span><span class="s2">&#39; nor &#39;</span><span class="si">{}</span><span class="s2">&#39; was found for &#39;</span><span class="si">{}</span><span class="s2">&#39; which is marked as &quot;</span>\
+                <span class="s2">&quot;changed. It is acceptable if myscm-cli applied changes &quot;</span>\
+                <span class="s2">&quot;during last run.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">diff_path</span><span class="p">,</span> <span class="n">orig_path</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_move_changed_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">dst</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; was expected to exist during applying changes but &quot;</span>\
+                <span class="s2">&quot;doesn&#39;t exist.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Moving &#39;</span><span class="si">{}</span><span class="s2">&#39; to &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">copy_function</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mycopy2</span><span class="p">)</span>  <span class="c1"># overwrite file</span>
+
+    <span class="k">def</span> <span class="nf">_apply_patch_for_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">patch_path</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Applying patch &#39;</span><span class="si">{}</span><span class="s2">&#39; for &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">patch_path</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">patch_text</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">patch_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">patch_text</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">text_to_patch</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">patcher</span><span class="o">.</span><span class="n">diff_match_patch</span><span class="p">()</span>
+            <span class="n">patches</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">patch_fromText</span><span class="p">(</span><span class="n">patch_text</span><span class="p">)</span>
+            <span class="n">patched_text</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">patch_apply</span><span class="p">(</span><span class="n">patches</span><span class="p">,</span> <span class="n">text_to_patch</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">patched_text</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">truncate</span><span class="p">()</span>
+
+    <span class="c1">#######################</span>
+    <span class="c1"># Apply removed files #</span>
+    <span class="c1">#######################</span>
+
+    <span class="k">def</span> <span class="nf">_apply_removed_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">):</span>
+        <span class="n">removed_report_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">extracted_sys_img_dir</span><span class="p">,</span>
+                                      <span class="n">SystemImageGenerator</span><span class="o">.</span><span class="n">REMOVED_FILES_FNAME</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Removing removed files listed in &#39;</span><span class="si">{}</span><span class="s2">&#39; report...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">removed_report_path</span><span class="p">))</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_img_validator</span><span class="o">.</span><span class="n">removed_entries</span>
+        <span class="n">bar</span> <span class="o">=</span> <span class="n">progressbar</span><span class="o">.</span><span class="n">ProgressBar</span><span class="p">(</span><span class="n">max_value</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">removed_report_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">expected_removed_count</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">run_fun_for_each_report_line</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">_removed_files_per_line_fun</span><span class="p">,</span>
+                                         <span class="n">expected_removed_count</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">distro_name</span><span class="p">,</span>
+                                         <span class="kc">False</span><span class="p">,</span> <span class="n">bar</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Removing removed files listed in &#39;</span><span class="si">{}</span><span class="s2">&#39; report ended &quot;</span>
+                    <span class="s2">&quot;successfully...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">removed_report_path</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_removed_files_per_line_fun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">sys_img_f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">pkg</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">pkg_msg</span> <span class="o">=</span> <span class="s2">&quot; from package &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pkg</span><span class="p">)</span> <span class="k">if</span> <span class="n">pkg</span> <span class="o">!=</span> <span class="s2">&quot;?&quot;</span> <span class="k">else</span> <span class="s2">&quot;.&quot;</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;Removing &#39;</span><span class="si">{}</span><span class="s2">&#39;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">pkg_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="n">bar</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bar</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Patryk Bęza.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
