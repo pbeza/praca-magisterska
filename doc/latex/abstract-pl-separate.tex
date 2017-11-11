@@ -3,12 +3,11 @@
 \usepackage{graphicx}
 \usepackage[hidelinks]{hyperref}
 \usepackage[parfill]{parskip}[2001/04/09]
-
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{mathptmx}
 
-\linespread{1.25}
+\linespread{1.15}
 \setlength{\parindent}{0cm}
 
 \pagestyle{empty} % no page numbers!
@@ -16,16 +15,35 @@
 
 \begin{document}
 
+\begin{titlepage}
+	\let\endtitlepage\relax
+	\center
+	\begin{minipage}{2.6cm}
+		\hspace*{-1.1cm}\includegraphics[width=2.6cm]{img/mini}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{2.6cm}
+		\hspace*{1.1cm}\includegraphics[width=2.6cm]{img/pw}
+	\end{minipage}\par
+	\global\let\newpagegood\newpage
+	\global\let\newpage\relax
+\end{titlepage}
+
 \thispagestyle{empty}
 \title{\textbf{Protokół zarządzania stacjami komputerowymi pod~kontrolą systemu Linux}}
 \author{Patryk Bęza\\[-8pt]
-\small \texttt{\href{mailto:bezap@student.mini.pw.edu.pl}{bezap@student.mini.pw.edu.pl}}\\[6pt]
-\small Wydział Matematyki i~Nauk Informacyjnych\\[-8pt]
-\small Politechnika Warszawska\\[-8pt]
-\small ul.~Koszykowa 75, 00-662~Warszawa
+\small \texttt{\href{mailto:bezap@student.mini.pw.edu.pl}{bezap@student.mini.pw.edu.pl}}%\\[6pt]
+%\small Wydział Matematyki i~Nauk Informacyjnych\\[-8pt]
+%\small Politechnika Warszawska\\[-8pt]
+%\small ul.~Koszykowa 75, 00-662~Warszawa
 }
 \date{}
-\maketitle\thispagestyle{empty}
+
+\maketitle
+\providecommand{\keywords}[1]{\textbf{\textit{Słowa kluczowe ---}} #1}
+\keywords{\emph{\href{https://en.wikipedia.org/wiki/Software_configuration_management}{Software Configuration Management~(SCM)}}, \emph{\href{https://en.wikipedia.org/wiki/Infrastructure_as_Code}{Infrastructure as Code~(IaC)}}, \emph{\href{https://en.wikipedia.org/wiki/Linux}{Linux}}, \emph{\href{https://en.wikipedia.org/wiki/Communications_protocol}{Communications Protocol}}}
+\global\let\newpage\newpagegood
+\thispagestyle{empty}
 
 Niniejsza praca pt.~,,Protokół zarządzania stacjami komputerowymi pod~kontrolą systemu Linux'' dotyczy automatyzacji jednakowej lub~podobnej konfiguracji grupy komputerów. Motywacją podjęcia tego tematu jest potrzeba automatyzacji konfiguracji np.~niektórych środowisk serwerów używanych do~obliczeń rozproszonych, serwerowni, biletomatów, bankomatów, stacji roboczych w~biurach, placówkach administracji publicznej, na~uczelniach wyższych, szkołach i~w~innych miejscach, gdzie pożądane jest, aby~stanowiska komputerowe miały podobny zestaw zainstalowanego oprogramowania i~konfiguracji. Automatyzacja procesu dystrybucji oprogramowania ma~na~celu ułatwienie pracy administratorów komputerowych, minimalizując lub~zwalniając ich~z~konieczności powtarzania podobnej lub~identycznej procedury instalacji i~konfiguracji wielu maszyn, w~konsekwencji zmniejszając ryzyko popełnienia błędów konfiguracji.
 

@@ -3,12 +3,11 @@
 \usepackage{graphicx}
 \usepackage[hidelinks]{hyperref}
 \usepackage[parfill]{parskip}[2001/04/09]
-
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{mathptmx}
 
-\linespread{1.25}
+\linespread{1.15}
 \setlength{\parindent}{0cm}
 
 \pagestyle{empty} % no page numbers!
@@ -16,16 +15,35 @@
 
 \begin{document}
 
+\begin{titlepage}
+	\let\endtitlepage\relax
+	\center
+	\begin{minipage}{2.6cm}
+		\hspace*{-1.1cm}\includegraphics[width=2.6cm]{img/mini}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{2.6cm}
+		\hspace*{1.1cm}\includegraphics[width=2.6cm]{img/pw}
+	\end{minipage}\par
+	\global\let\newpagegood\newpage
+	\global\let\newpage\relax
+\end{titlepage}
+
 \thispagestyle{empty}
 \title{\textbf{Management Protocol\\for~Linux Workstations}}
 \author{Patryk Bęza\\[-8pt]
-\small \texttt{\href{mailto:bezap@student.mini.pw.edu.pl}{bezap@student.mini.pw.edu.pl}}\\[6pt]
-\small Faculty of~Mathematics and~Information Science\\[-8pt]
-\small Warsaw University of Technology\\[-8pt]
-\small Koszykowa 75, 00-662~Warsaw
+\small \texttt{\href{mailto:bezap@student.mini.pw.edu.pl}{bezap@student.mini.pw.edu.pl}}%\\[6pt]
+%\small Faculty of~Mathematics and~Information Science\\[-8pt]
+%\small Warsaw University of Technology\\[-8pt]
+%\small Koszykowa 75, 00-662~Warsaw
 }
 \date{}
-\maketitle\thispagestyle{empty}
+
+\maketitle
+\providecommand{\keywords}[1]{\textbf{\textit{Keywords ---}} #1}
+\keywords{\emph{\href{https://en.wikipedia.org/wiki/Software_configuration_management}{Software Configuration Management~(SCM)}}, \emph{\href{https://en.wikipedia.org/wiki/Infrastructure_as_Code}{Infrastructure as Code~(IaC)}}, \emph{\href{https://en.wikipedia.org/wiki/Linux}{Linux}}, \emph{\href{https://en.wikipedia.org/wiki/Communications_protocol}{Communications Protocol}}}
+\global\let\newpage\newpagegood
+\thispagestyle{empty}
 
 This paper entitled 'Management Protocol for Linux Workstations' concerns the~automation of~identically or~similarly configured group of~computers. The~motivation behind this topic is~the~need to~automate configuration, for~example, in~some server environments used for~distributed computing, data centers, ticket machines, ATMs, offices, public administration, universities, colleges, schools and other places where it~is desirable for~computer workstations to~have similar set of~installed software and~configuration. Automation of~the software distribution process is~intended to~facilitate the~work of~computer administrators by~minimizing or~exempting them from the need to~repeat a~similar or~identical installation and~configuration procedure for~multiple machines, thereby reducing the~risk of~configuration errors.
 
