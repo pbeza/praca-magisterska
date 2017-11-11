@@ -1,5 +1,5 @@
-%\documentclass[notes,polish,xcolor=dvipsnames]{beamer}             % wygenerować prezentację również w tym formacie
-\documentclass[notes,polish,xcolor=dvipsnames,aspectratio=169]{beamer}
+\documentclass[notes,polish,xcolor=dvipsnames,hyperref={unicode,hidelinks,pdftex,pdfauthor={Patryk Bęza},pdftitle={Protokół zarządzania stacjami komputerowymi pod kontrolą systemu Linux},pdfsubject={Praca dyplomowa magisterska na Wydziale Matematyki i Nauk Informacyjnych Politechniki Warszawskiej},pdfkeywords={Software Configuration Management, SCM, Infrastructure as Code, IaC, Linux, Communications Protocol},pdfproducer={XeLaTeX},pdfcreator={latexmk}}]{beamer}
+%\documentclass[notes,polish,xcolor=dvipsnames,aspectratio=169,hyperref={unicode,hidelinks,pdftex,pdfauthor={Patryk Bęza},pdftitle={Protokół zarządzania stacjami komputerowymi pod kontrolą systemu Linux},pdfsubject={Praca dyplomowa magisterska na Wydziale Matematyki i Nauk Informacyjnych Politechniki Warszawskiej},pdfkeywords={Software Configuration Management, SCM, Infrastructure as Code, IaC, Linux, Communications Protocol},pdfproducer={XeLaTeX},pdfcreator={latexmk}}]{beamer}             % wygenerować prezentację również w tym formacie
 
 %\usefonttheme{professionalfonts} % using non standard fonts for beamer
 %\usefonttheme{serif} % default family is serif
@@ -22,7 +22,7 @@
 %\usepackage{enumitem}
 %\usepackage{graphicx}                                  % loaded implicitly by Beamer
 \usepackage{breakurl}
-\usepackage{hyperref}
+%\usepackage{hyperref}
 %\usepackage[hyphens]{url}
 \usepackage{lmodern}
 \usepackage{multimedia}
@@ -48,25 +48,29 @@
 %\beamertemplatenavigationsymbolsempty
 \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
 
-\newcommand{\smalllogoheight}{0.85cm}
+\newcommand{\smalllogoheight}{1.1cm}
+
+\setbeamercolor*{block title example}{bg=blue!14}
+\setbeamercolor*{block body example}{bg=blue!5}
 
 %------------------------------------------------------------------------------
 % Strona tytułowa
 %------------------------------------------------------------------------------
 
 \title{Protokół zarządzania stacjami komputerowymi\\pod~kontrolą systemu Linux}
-\subtitle{(Management Protocol for Linux Workstations)}
+\subtitle{[~Management Protocol for Linux Workstations~]}
 \author[P.Bęza]{Patryk Bęza}
 \institute[MiNI PW]{
+	\vspace*{-7pt}\\
 	Promotor: dr~inż.~Marek~Kozłowski\\[3pt]
 	Wydział Matematyki i~Nauk Informacyjnych\\
-	Politechnika Warszawska\\[10pt]
+	Politechnika Warszawska\\[12pt]
 	\begin{tikzpicture}[remember picture,overlay]
 		\node {\includegraphics[height=\smalllogoheight]{img/mini}};%
-	\end{tikzpicture}\hspace{30pt}
+	\end{tikzpicture}\hspace{40pt}
 	\begin{tikzpicture}[remember picture,overlay]
 		\node {\includegraphics[height=\smalllogoheight]{img/pw}};%
-	\end{tikzpicture}\\[4pt]
+	\end{tikzpicture}\\[6pt]
 }
 \date{\today}
 
@@ -133,10 +137,27 @@
 
 \begin{frame}{Problem}
 
-Problem dystrybuowania ujednoliconego oprogramowania do~dużej ilości maszyn roboczych pracujących pod kontrolą systemu \texttt{Linux}.
+\vspace*{-0.5cm}
+%\begin{center}
+%\begin{minipage}{10.7cm}
+\begin{exampleblock}{}
+\textbf{Problem dystrybuowania ujednoliconego oprogramowania} do~dużej ilości maszyn roboczych pracujących pod kontrolą systemu \texttt{Linux}.
+\end{exampleblock}
+%\end{minipage}
+%\end{center}
+
+\vfill
+
+\begin{itemize}
+	\item Kogo dotyka problem?
+	\item Miejsca zastosowania rozwiązania problemu
+	\item ,,Ręczne'' metody radzenia sobie z~problemem
+\end{itemize}
+
+\vfill
 
 \begin{center}
-	\begin{minipage}{1.1\textheight}
+	\begin{minipage}{0.74\textheight}
 		\includegraphics[width=\linewidth]{img/busy-admin}\\
 		\raggedleft\color{gray}\tiny Źródło: \emph{virtuallnk.com (za zgodą sales@virtuallnk.com)}
 	\end{minipage}
@@ -145,27 +166,32 @@ Problem dystrybuowania ujednoliconego oprogramowania do~dużej ilości maszyn ro
 \end{frame}
 
 \note[itemize]{
-	\item \textbf{Przedstawienie problemu, którego dotyczy praca.} Zwrócenie uwagi na to, że~oprogramowanie na~konfigurowanych systemach nie musi być identyczne (szablony konfiguracji).
-	\item \textbf{Kto może mieć ten problem?}\\\emph{Administratorzy komputerowi.}
-	\item \textbf{Gdzie można znaleźć zastosowania rozwiązania tego problemu?}\\\emph{Wszędzie tam gdzie działa grupa podobnie skonfigurowanych maszyn, np.: komputery w~laboratoriach na~uczelniach, szkołach, bibliotekach, urzędach, sklepach, grupy serwerów, biletomaty, bankomaty, automaty sprzedające (maszyny \emph{vendingowe}), komputery osób korzystających z~wielu komputerów.}
-	\item \textbf{Jakie są ,,ręczne'' metody radzenia sobie z~tym problemem bez wykorzystania dedykowanego oprogramowania?}\\\emph{Ręczna instalacja gotowego obrazu systemu na każdym z~komputerów, SSH, zdalny pulpit~(VNC).}
+	\item \textbf{Przedstawienie problemu, którego dotyczy praca} i~zwrócenie uwagi na to, że~oprogramowanie na~konfigurowanych systemach nie musi być identyczne (szablony konfiguracji).
+	\item \textbf{Kogo dotyczy problem?} Głównie administratorów komputerowych, ale też ludzi używających na~co~dzień wielu podobnie skonfigurowanych komputerów.
+	\item \textbf{Gdzie można znaleźć zastosowania rozwiązania tego problemu?} Wszędzie tam gdzie działa grupa podobnie skonfigurowanych maszyn, np.: komputery w~laboratoriach na~uczelniach, szkołach, bibliotekach, urzędach, sklepach, grupy serwerów, biletomaty, bankomaty, automaty sprzedające (maszyny \emph{vendingowe}), komputery osób korzystających z~wielu komputerów.
+	\item \textbf{Jakie są ,,ręczne'' metody radzenia sobie z~tym problemem bez wykorzystania dedykowanego oprogramowania?}\\,,Ręczna'' instalacja gotowego obrazu systemu na każdym z~komputerów, SSH, zdalny pulpit~(VNC).
 }
 
 %------------------------------------------------------------------------------
 
 \begin{frame}{Temat i~cel pracy}
 
-\textbf{Zaprojektowanie i~zaimplementowanie protokołu} umożliwiającego \textbf{propagowanie zmian w~systemie plików, pakietów oraz~elementów konfiguracji} do~stacji roboczych pod~kontrolą systemu operacyjnego \texttt{GNU/Linux} lub~innego systemu \texttt{*nix}, a~także elastycznego standardu opisu zmian oraz~narzędzi dla~ich rejestrowania i~dostosowywania.
+\begin{exampleblock}{}
+	{\textbf{Zaprojektowanie i~zaimplementowanie protokołu} umożliwiającego \textbf{propagowanie zmian w~systemie plików, pakietów oraz~elementów konfiguracji} do~stacji roboczych pod~kontrolą systemu operacyjnego \texttt{GNU/Linux} lub~innego systemu \texttt{*nix}, a~także elastycznego standardu opisu zmian oraz~narzędzi dla~ich rejestrowania i~dostosowywania.}
+	\vskip2mm
+	\hspace*\fill{\small--- Formalnie zgłoszona tematyka pracy magisterski}
+\end{exampleblock}
 
 \begin{figure}
-	\includegraphics[height=.5\textheight]{img/client_server}
+	\includegraphics[height=.32\textheight]{img/client_server}
 \end{figure}
 
 \end{frame}
 
 \note[itemize]{
-	\item \textbf{Przeczytanie formalnie zgłoszonego do~Dziekanatu celu pracy.} Zwrócenie uwagi na, to, że~głównym celem było zaimplementowanie aplikacji ,,serwera'', która umożliwia przygotowanie i~dostosowanie obrazu zmian konfiguracji systemu wzorcowego, który można zastosować na~systemie klienckim za~pomocą aplikacji ,,klienckiej'', a~nie samo przesłanie takiego obrazu do~klienta (co~zostało zaimplementowane za~pomocą \texttt{SFTP}).
-	\item \textbf{Zwrócenie uwagi na~obsługę różnych systemów \texttt{GNU/Linux} i~na~to, że~zaimplementowane rozwiązanie było testowane na~dystrybucjach \texttt{Debian} i~\texttt{ArchLinux}.}
+\item \textbf{Przeczytanie formalnie zgłoszonego do~Dziekanatu celu pracy.} Zwrócenie uwagi na, to, że~wbrew nazwie ,,protokół'' użytej w~tytule pracy, głównym celem było zaimplementowanie aplikacji ,,serwera'', która umożliwia przygotowanie i~dostosowanie obrazu zmian konfiguracji systemu wzorcowego, który można zastosować na~systemie klienckim za~pomocą aplikacji ,,klienckiej'', a~nie samo przesłanie takiego obrazu do~klienta (co~zostało zaimplementowane za~pomocą \texttt{SFTP}).
+\item \textbf{Zwrócenie uwagi, że~przez serwer rozumie się stację ze~wzorcem oprogramowania dla~klientów}, a~nie klasyczny model komunikacji klient--serwer. Przyjęty model komunikacji działa raczej w~modelu \emph{peer2peer}.
+\item Zwrócenie uwagi na~obsługę różnych systemów \texttt{GNU/Linux} i~na~to, że~zaimplementowane \textbf{rozwiązanie było testowane na~dystrybucjach \texttt{Debian} i~\texttt{ArchLinux}, ale~jest napisane w~języku Python i~prawdopodobnie działa również na~innych dystrybucjach.}
 }
 
 %------------------------------------------------------------------------------
@@ -188,7 +214,7 @@ Problem dystrybuowania ujednoliconego oprogramowania do~dużej ilości maszyn ro
 
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}} % gwiazdka zamiast numeracji arabskiej w przypisach
 \setbeamerfont{footnote}{size=\tiny} % wielkość czcionki przypisów
-\newcommand{\popularity}{miejsce w~rankingu popularności\footnote{Popularność wg liczby pobrań w~\emph{Debian Popularity Contest} (stan na~dzień 21.09.2017). W~nawiasach podano miejsce w~rankingu względem 3~pozostałych rozwiązań.}}
+\newcommand{\popularity}{miejsce w~rankingu popularności\footnote{Popularność wg liczby pobrań w~\emph{Debian Popularity Contest} (stan na~dzień 08.11.2017). W~nawiasach podano miejsce w~rankingu względem 3~pozostałych rozwiązań.}}
 
 \begin{adjustbox}{center}
 	\tiny
@@ -201,7 +227,7 @@ Problem dystrybuowania ujednoliconego oprogramowania do~dużej ilości maszyn ro
 		\fixedcell{znani użytkownicy}  & CERN, Google, NASA, Intel & Apple, NASA, Juniper     & LinkedIn, TD~Bank      & Facebook, IBM, HP, Mozilla      \\\hline
 		\fixedcell{licencja}           & Apache~2.0                & GPLv3                    & Apache~2.0             & Apache~2.0                      \\\hline
 		\fixedcell{założyciel}         & Luke Kanies (USA,~OR)     & Michael Dehaan (USA,~NC) & Thomas Hatch (USA,~UT) & Adam Jacob (USA,~WA)            \\\hline
-		\fixedcell{\popularity}        & 5996 (1)                  & 8610 (2)                 & 8738 (3)               & 12410 (4)
+		\fixedcell{\popularity}        & 6061 (1)                  & 8547 (2)                 & 8796 (3)               & 12675 (4)
 % Deklaratywny język konfiguracji wszystkich rozwiązań (nie imperatywny)
 	\end{tabular}
 \end{adjustbox}
@@ -211,10 +237,9 @@ Problem dystrybuowania ujednoliconego oprogramowania do~dużej ilości maszyn ro
 
 \note[itemize]{
 	\item \textbf{Wyjaśnienie, że~rozwiązaniem przedstawionego problemu są~systemy nazywane systemami SCM, czyli \emph{Software Configuration Systems}} --- nie mylić z~oprogramowaniem typu \emph{Source Control Management}, takimi jak np.~\texttt{git} i~\texttt{svn}.
-	\item \textbf{Scharakteryzowanie 4 (prawdopodobnie jednych z~najpopularniejszych) systemów zarządzania konfiguracją opisanych w~pracy.} Powołanie się na~zestawiania systemów SCM, w~których podane 4~rozwiązania są~niemal zawsze uwzględniane --- czasami są~też określane jako \emph{Four Major Configuration Management Systems}. Zwrócenie uwagi na~duże firmy i~instytucje używające tego wymienionych rozwiązań (CERN, NASA, Google~itd.).
+	\item \textbf{Scharakteryzowanie 4 (prawdopodobnie jednych z~najpopularniejszych) systemów zarządzania konfiguracją opisanych w~pracy.} Zwrócenie uwagi na~duże firmy i~instytucje używające tego wymienionych rozwiązań (CERN, NASA, Google~itd.).
 	\item \textbf{Deklaratywna konfiguracja przedstawionych rozwiązań (a~nie imperatywna).}
 	\item \textbf{Wyróżnienie Puppet pod~względem wyrafinowania i~popularności (vide ranking).} Wyrafinowanie polega na~budowaniu grafu zależności zasobów i~decydowanie na~jego podstawie w~jakiej kolejności zmieniać konfigurację systemu.
-	\item \textbf{Powiedzenie, że~istnieje więcej systemów SCM, ale~co do~zasady działania nie różnią się znacząco od~4~wymienionych w~przeciwieństwie do~mojego rozwiązania.}
 }
 
 %------------------------------------------------------------------------------
@@ -225,11 +250,11 @@ Problem dystrybuowania ujednoliconego oprogramowania do~dużej ilości maszyn ro
 
 Sposób wykorzystania alternatywnego rozwiązania:
 \begin{itemize}
-	\item \textbf{skanowanie} systemu wzorcowego
-	\item \textbf{modyfikacja} konfiguracji i~oprogramowania systemu wzorcowego
-	\item ponowne \textbf{skanowanie} systemu wzorcowego
-	\item \textbf{generowanie obrazu} zmian konfiguracji systemu wzorcowego na~podstawie ostatniego skanowania i~wybranego
-	\item \textbf{pobranie i~zastosowanie obrazu} zmian konfiguracji przez klienta
+	\item \textbf{Skanowanie} systemu wzorcowego
+	\item \textbf{Modyfikacja} konfiguracji i~oprogramowania systemu wzorcowego
+	\item Ponowne \textbf{skanowanie} systemu wzorcowego
+	\item \textbf{Generowanie obrazu} zmian konfiguracji systemu wzorcowego na~podstawie ostatniego skanowania i~wybranego
+	\item \textbf{Pobranie i~zastosowanie obrazu} zmian konfiguracji przez klienta
 \end{itemize}
 
 \begin{figure}
@@ -254,33 +279,15 @@ Sposób wykorzystania alternatywnego rozwiązania:
 
 Cechy rozwiązania:
 \begin{itemize}
-	\item \textbf{łatwość użytkowania} --- brak potrzeby pisania reguł określających pożądaną konfigurację klientów i~nauki języka w~którym byłyby one wyrażone
-	\item \textbf{rozproszenie} --- rozproszony model dzielenia się konfiguracją systemu wzorcowego
-	\item \textbf{wykorzystanie szablonów} --- parametryzacja konfiguracji np.~zmiennymi środowiskowymi
-	\item \textbf{uniwersalność} --- obsługa różnych dystrybucji \texttt{Linux}
-	\item \textbf{bezpieczeństwo} --- konfiguracja systemu wzorcowego podpisana cyfrowo
-	\item \textbf{elastyczność} --- możliwość synchronizacji części konfiguracji
+	\item \textbf{Łatwość użytkowania} --- brak potrzeby pisania reguł określających pożądaną konfigurację klientów i~nauki języka w~którym byłyby one wyrażone
+	\item \textbf{Rozproszenie} --- rozproszony model dzielenia się konfiguracją systemu wzorcowego
+	\item \textbf{Wykorzystanie szablonów} --- parametryzacja konfiguracji np.~zmiennymi środowiskowymi
+	\item \textbf{Uniwersalność} --- obsługa różnych dystrybucji \texttt{Linux}
+	\item \textbf{Bezpieczeństwo} --- konfiguracja systemu wzorcowego podpisana cyfrowo
+	\item \textbf{Elastyczność} --- możliwość synchronizacji części konfiguracji
 \end{itemize}
 
 \end{frame}
-
-%------------------------------------------------------------------------------
-
-\begin{frame}{Testy}
-
-\begin{itemize}
-	\item trudność automatyzacji testów
-	\item ,,małe'' testy --- częsciowo automatyczne
-	\item ,,duże'' testy --- manualne
-\end{itemize}
-
-\end{frame}
-
-\note[itemize]{
-	\item zwrócenie uwagi na to, że~w~trakcie implementacji działanie programu było testowane na~stosunkowo niewielkim drzewie plików (,,małe'' testy)
-	\item powiedzenie, że~,,duże'' testy odbyły się na~koniec projektu na~dwóch systemach i~zakończyły się wykryciem kilku drobnych błędów, które zosały naprawione (a~testy z~cukcesem powtórzone)
-}
-
 
 %------------------------------------------------------------------------------
 
@@ -289,16 +296,48 @@ Cechy rozwiązania:
 \begin{frame}{Implementacja}
 
 \begin{itemize}
-	\item początkowo w~języku~\texttt{C}, ostatecznie w~\textbf{\texttt{Python~3}}
-	\item przetestowana obsługa dystrybucjach \textbf{\texttt{Arch Linux}} i~\textbf{\texttt{Debian}}
-	\item wykorzystanie m.in.~bibliotek \textbf{\texttt{AIDE}} i~\textbf{texttt{OpenSSL}}
+	\item 3 moduły: \texttt{myscm-srv}, \texttt{myscm-cli} i~\texttt{myscm-common}
+	\item Początkowo w~języku~\texttt{C}, ostatecznie w~\textbf{\texttt{Python~3}}
+	\item Przetestowana obsługa dystrybucjach \textbf{\texttt{Arch Linux}} i~\textbf{\texttt{Debian}}
+	\item Wykorzystanie m.in.~\textbf{\texttt{AIDE}} i~\textbf{\texttt{OpenSSL}}
 \end{itemize}
 
 \end{frame}
 
 \note[itemize]{
-	\item napomknienie o~tym, że~na~początku planowałem zaimplementować całe rozwiązanie w~języku \texttt{C}, ale~okazało się, że~dużo łatwiej było wykorzystać język wysokopoziomowy (jakim jest np.~\texttt{Python})
-	\item wszystkie wspomniane \textbf{istniejące rozwiązania są~w~językach wysokopoziomowych} (poza \emph{CFEngine} wspomnianym w~pracy)
+	\item Napomknienie o~tym, że~na~początku planowałem zaimplementować całe rozwiązanie w~języku \texttt{C}, ale~okazało się, że~dużo łatwiej było wykorzystać język wysokopoziomowy (jakim jest np.~\texttt{Python})
+	\item Wszystkie wspomniane \textbf{istniejące rozwiązania są~w~językach wysokopoziomowych} (poza \emph{CFEngine} wspomnianym w~pracy)
+}
+
+%------------------------------------------------------------------------------
+
+\begin{frame}{Testy}
+
+\begin{itemize}
+	\item \textbf{Trudność automatyzacji testów}
+	\item \textbf{,,Małe'' testy} --- półautomatyczne, wykonywane regularnie na~niewielkim drzewie plików
+	\item \textbf{,,Duże'' testy} --- manualne, wykonane pod~koniec projektu na~pełnym systemie operacyjnym
+	\item \textbf{Synchronizowane katalogi}: \path{/bin}, \path{/etc}, \path{/lib}, \path{/lib64}, \path{/sbin}, \path{/srv}, \path{/usr}, \path{/var/lib/dpkg} (\path{/var/lib/pacman})
+	\item \textbf{Niesynchronizowane katalogi}: \path{/boot}, \path{/dev}, \path{/home}, \path{/lost+found}, \path{/media}, \path{/mnt}, \path{/opt}, \path{/proc}, \path{/root}, \path{/run}, \path{/sys}, \path{/tmp} i~\path{/var} (poza~ww.)
+	\item \textbf{Błędy} po~pierwszych ,,dużych'' testach:
+		\begin{itemize}
+			\item \textbf{pliki binarne} \path{/etc/ld.so.cache}, \path{/etc/localtime} w~katalogu \path{/etc}
+			\item \textbf{,,nietypowe'' znaki} w~ścieżkach pliku (np.~dwukropka)
+			\item \textbf{niesynchronizowanie \path{/var/lib/lightdm}}
+		\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\note[itemize]{
+\item Zwrócenie uwagi na to, że~w~trakcie implementacji działanie programu było testowane na~stosunkowo \textbf{niewielkim drzewie plików (,,małe'' testy)}.
+\item \textbf{,,Duże'' testy} odbyły się \textbf{na~koniec projektu na~dwóch pełnych systemach} i~zakończyły się wykryciem kilku drobnych błędów, które zostały naprawione, a~testy z~sukcesem powtórzone.
+\item Wyjaśnienie wykrytych błędów i~dodanie, że:
+	\begin{itemize}
+	\item dla~wszystkich zmienionych plików w~\path{/etc} są~robione \textbf{różnice plików (''\texttt{diff-y}'')}, a~pliki binarne były tam nieprzewidziane,
+	\item w~\texttt{Linux} (a~właściwie w~systemach plików \texttt{ext2-4}) \textbf{w~ścieżkach plików są~dozwolone wszystkie znaki poza lewym ukośnikiem (\texttt{\textbackslash}) i~znakiem \texttt{\textbackslash{}0} (\texttt{null byte})},
+	\item niesynchronizowanie \path{/var/lib/lightdm} powodowało \textbf{nieuruchamianie się środowiska graficznego}, ale~była możliwa praca w~konsoli (jak w~\emph{runlevelu}~3).
+	\end{itemize}
 }
 
 %------------------------------------------------------------------------------
@@ -308,10 +347,11 @@ Cechy rozwiązania:
 \begin{frame}{Dalsze możliwe kierunki rozwoju}
 
 \begin{itemize}
-	\item \textbf{dodanie obsługi innych protokołów wymiany plików} lub~zastąpienie \texttt{SFTP} protokołem \emph{multicastowym}
-	\item \textbf{obsługa kłopotliwych sytuacji} np.~podczas aktualizacji jądra systemu (\texttt{GRUB})
-	\item dodanie możliwości tworzenia obrazów zmian na~podstawie \textbf{dowolnych dwóch wyników skanowań} systemu wzorcowego
-	\item \textbf{lepsza obsługa sytuacji awaryjnych} --- np.~nagłe przerwanie procesu zastosowania obrazu zmian powinno być tranzakcyjne (wszystko albo nic)
+	\item \textbf{Dodanie obsługi innych protokołów wymiany plików} lub~zastąpienie \texttt{SFTP} protokołem \emph{multicastowym}
+	\item \textbf{Obsługa kłopotliwych do~obsłużenia sytuacji} np.~podczas aktualizacji jądra systemu (\texttt{GRUB})
+	\item Dodanie możliwości tworzenia obrazów zmian na~podstawie \textbf{dowolnych dwóch wyników skanowań} systemu wzorcowego
+	\item \textbf{Lepsza obsługa sytuacji awaryjnych} --- np.~nagłe przerwanie procesu zastosowania obrazu zmian powinno być tranzakcyjne (wszystko albo nic)
+	\item Dodanie obsługi \textbf{innych systemów operacyjnych} niż~\texttt{Linux}
 \end{itemize}
 
 \end{frame}
@@ -323,11 +363,11 @@ Cechy rozwiązania:
 \begin{frame}{Podsumowanie}
 
 \begin{itemize}
-	\item \textbf{zaimplementowano aplikację} przeznaczoną do~\textbf{tworzenia, dostosowywania i~zastosowania obrazów} zmian konfiguracji systemu wzorcowego dla~systemów \texttt{GNU/Linux}
-	\item \textbf{opisano 4~najpopularniejsze istniejące rozwiązania} i~wspomniano o~innych
-	\item udokumentowano sposób działania zaimplementowanej aplikacji (\LaTeX + dokumentacja w~kodzie źródłowym)
-	\item \textbf{autentyczność} (uwierzytelnienie) wygenerowanego obrazu zmian jest \textbf{zapewniona przez podpis cyfrowy~SSL}
-	\item \textbf{klienci mogą pobrać obraz zmian przez \texttt{SFTP}} od~innego klienta lub~od~stacji wzorcowej
+	\item \textbf{Zaimplementowano aplikację} przeznaczoną do~\textbf{tworzenia, dostosowywania i~zastosowania obrazów} zmian konfiguracji systemu wzorcowego dla~systemów \texttt{GNU/Linux}
+	\item Zadbano o~bezpieczeństwo, a~konkretnie \textbf{autentyczność} (uwierzytelnienie) wygenerowanego obrazu zmian jest \textbf{podpis cyfrowy~SSL}
+	\item Umożliwiono klientom \textbf{dzielenie się między sobą obrazami zmian konfiguracji}
+	\item \textbf{Opisano 4~najpopularniejsze istniejące rozwiązania} i~wspomniano o~innych
+	\item \textbf{Udokumentowano} sposób działania zaimplementowanej aplikacji (\LaTeX + dokumentacja w~kodzie źródłowym)
 \end{itemize}
 
 \end{frame}
@@ -337,8 +377,8 @@ Cechy rozwiązania:
 \begin{frame}{Koniec}
 
 \begin{center}
-	\Large Dziękuję za~uwagę\\[0.6em]
-	\begin{minipage}{1.2\textheight}
+	\LARGE Dziękuję za~uwagę\\[1em]
+	\begin{minipage}{1.1\textheight}
 		\includegraphics[width=\linewidth]{img/busy-admin}\\
 		\raggedleft\color{gray}\tiny Źródło: \emph{virtuallnk.com (za zgodą sales@virtuallnk.com)}
 	\end{minipage}

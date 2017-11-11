@@ -4,7 +4,6 @@ pkgver=1.0.0
 pkgrel=1
 arch=('any')
 license=('GPL3')
-#groups=('myscm-cli' 'myscm-common')
 pkgbase='myscm'
 
 package_myscm-srv() {

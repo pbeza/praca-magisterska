@@ -1,0 +1,34 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[english,main=polish]{babel}
+\usepackage{graphicx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[parfill]{parskip}[2001/04/09]
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+
+\linespread{1.25}
+\setlength{\parindent}{0cm}
+
+\pagestyle{empty} % no page numbers!
+\usepackage[left=35mm, right=35mm, top=15mm, bottom=20mm, noheadfoot]{geometry}
+
+\begin{document}
+
+\thispagestyle{empty}
+\title{\textbf{Protokół zarządzania stacjami komputerowymi pod~kontrolą systemu Linux}}
+\author{Patryk Bęza\\[-8pt]
+\small \texttt{\href{mailto:bezap@student.mini.pw.edu.pl}{bezap@student.mini.pw.edu.pl}}\\[6pt]
+\small Wydział Matematyki i~Nauk Informacyjnych\\[-8pt]
+\small Politechnika Warszawska\\[-8pt]
+\small ul.~Koszykowa 75, 00-662~Warszawa
+}
+\date{}
+\maketitle\thispagestyle{empty}
+
+Niniejsza praca pt.~,,Protokół zarządzania stacjami komputerowymi pod~kontrolą systemu Linux'' dotyczy automatyzacji jednakowej lub~podobnej konfiguracji grupy komputerów. Motywacją podjęcia tego tematu jest potrzeba automatyzacji konfiguracji np.~niektórych środowisk serwerów używanych do~obliczeń rozproszonych, serwerowni, biletomatów, bankomatów, stacji roboczych w~biurach, placówkach administracji publicznej, na~uczelniach wyższych, szkołach i~w~innych miejscach, gdzie pożądane jest, aby~stanowiska komputerowe miały podobny zestaw zainstalowanego oprogramowania i~konfiguracji. Automatyzacja procesu dystrybucji oprogramowania ma~na~celu ułatwienie pracy administratorów komputerowych, minimalizując lub~zwalniając ich~z~konieczności powtarzania podobnej lub~identycznej procedury instalacji i~konfiguracji wielu maszyn, w~konsekwencji zmniejszając ryzyko popełnienia błędów konfiguracji.
+
+Celem pracy jest zaprojektowanie i~zaimplementowanie protokołu umożliwiającego propagowanie zmian w~systemie plików, pakietów oraz~elementów konfiguracji na~stacjach roboczych pracujących pod~kontrolą systemu operacyjnego Linux/GNU lub~innego systemu *nix, a~także elastycznego standardu opisu zmian oraz~narzędzi dla~ich rejestrowania i~dostosowywania. Dodatkowo, na~początku pracy przedstawiono istniejące rozwiązania problemu dystrybuowania oprogramowania i~porównano ich~funkcjonalność do~funkcjonalności zestawu narzędzi stworzonych w~ramach tej pracy. Dalsza, główna część pracy została poświęcona opisowi aspektów związanych z~zaprojektowanym, alternatywnym dla~istniejących rozwiązań narzędziem dostosowania oprogramowania komputerów klienckich do~obrazu zmian przygotowanego przez administratora sieci. W~szczególności w~pracy opisano działanie oprogramowania implementującego zaproponowany protokół, aspekty bezpieczeństwa aplikacji, wykorzystane biblioteki, testy, możliwe kierunki dalszego rozwoju stworzonego oprogramowania oraz~wnioski.
+
+\end{document}

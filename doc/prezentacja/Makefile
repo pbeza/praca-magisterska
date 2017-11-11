@@ -10,3 +10,4 @@ $(PDF_FILENAME):
 
 clean:
 	latexmk -C
+	rm -f *.nav *.snm *.vrb

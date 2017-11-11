@@ -237,8 +237,15 @@ lower separated=false, fontupper=\footnotesize, nobeforeafter}{#2}
 %\PassOptionsToPackage{hyphens}{url}
 %\RequirePackage[unicode,plainpages=false,hypertexnames=true]{hyperref}
 %\RequirePackage[all]{hypcap} % żeby dało się użyć hyperref w caption
-%\RequirePackage[unicode]{hyperref}
-\RequirePackage[unicode,hidelinks]{hyperref}
+\RequirePackage[unicode,%
+                hidelinks,%
+                xetex,%
+                pdfauthor={Patryk Bęza},%
+                pdftitle={Protokół zarządzania stacjami komputerowymi pod~kontrolą systemu Linux},%
+                pdfsubject={Praca dyplomowa magisterska na~Wydziale Matematyki i~Nauk Informacyjnych Politechniki Warszawskiej},%
+                pdfkeywords={Software Configuration Management, SCM, Infrastructure as Code, IaC, Linux, Communications Protocol},%
+                pdfproducer={XeLaTeX},%
+                pdfcreator={latexmk}]{hyperref}
 
 % Zwykły \href z emph font
 
