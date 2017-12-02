@@ -317,7 +317,8 @@ lower separated=false, fontupper=\footnotesize, nobeforeafter}{#2}
 %	style=apa,
 	backend=biber,
 	sorting=nyt,
-	backref=true
+	backref=true,
+	natbib=true
 ]{biblatex}
 \DeclareLanguageMapping{polish}{english-apa}
 \addbibresource{bibliography.bib}
