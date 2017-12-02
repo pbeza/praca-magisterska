@@ -6,6 +6,7 @@ ABSTRACT_PL_SEPARATE_FILENAME = abstract-pl-separate
 ABSTRACT_PL_SEPARATE_TEX_FILENAME = $(ABSTRACT_PL_SEPARATE_FILENAME).tex
 ABSTRACT_ENG_SEPARATE_FILENAME = abstract-eng-separate
 ABSTRACT_ENG_SEPARATE_TEX_FILENAME = $(ABSTRACT_ENG_SEPARATE_FILENAME).tex
+TITLE_PAGE = strona-tytulowa
 BUILD_DIR = build
 
 .PHONY: $(MAIN_FILENAME) all clean
@@ -17,6 +18,7 @@ $(MAIN_FILENAME):
 #	latexmk -pdf -outdir=$(BUILD_DIR) -auxdir=$(BUILD_DIR) $(STATEMENT_TEX_FILENAME) $(MAIN_TEX_FILENAME)
 #	Make PDF smaller - see: https://tex.stackexchange.com/questions/18987/how-to-make-the-pdfs-produced-by-pdflatex-smaller
 #	gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dNOPAUSE -dQUIET -dBATCH -sOutputFile=foo-compressed.pdf foo.pdf
+	pdftk $(MAIN_FILENAME).pdf cat 1 output $(TITLE_PAGE).pdf
 
 $(ABSTRACT_PL_SEPARATE_FILENAME):
 	latexmk -pdf $(ABSTRACT_PL_SEPARATE_TEX_FILENAME)
