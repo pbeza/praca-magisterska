@@ -101,7 +101,24 @@
 \listoftables
 %\endgroup
 
-\printbibliography
+\printbibheading
+\printbibliography[
+    nottype=online,
+    nottype=techreport,
+    title={Książki},
+    heading=subbibliography
+]
+\printbibliography[
+    type=report,
+    title={RFC},
+    heading=subbibliography
+]
+\printbibliography[
+    type=online,
+    title={Strony internetowe},
+    heading=subbibliography
+]
+%\printbibliography[title={Książki},type=book]
 \label{bibliography-page}
 
 % Oświadczenie o samodzielności wykonania pracy
