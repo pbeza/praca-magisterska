@@ -101,21 +101,31 @@
 \listoftables
 %\endgroup
 
+% No pagebreak in bibliography entry.
+% https://tex.stackexchange.com/questions/43260/biblatex-no-pagebreak-in-bibliography-entry
+\patchcmd{\bibsetup}{\interlinepenalty=5000}{\interlinepenalty=10000}{}{}
+
 \printbibheading
 \printbibliography[
     nottype=online,
-    nottype=techreport,
-    title={Książki},
+    nottype=report,
+    nottype=misc,
+    title={Książki i~artykuły},
     heading=subbibliography
 ]
 \printbibliography[
     type=report,
-    title={RFC},
+    title={Dokumenty RFC},
     heading=subbibliography
 ]
 \printbibliography[
     type=online,
     title={Strony internetowe},
+    heading=subbibliography
+]
+\printbibliography[
+    type=misc,
+    title={Pozostałe},
     heading=subbibliography
 ]
 %\printbibliography[title={Książki},type=book]

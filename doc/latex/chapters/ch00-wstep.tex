@@ -32,7 +32,7 @@ Wybór tematu pracy jest podyktowany zainteresowaniami autora dotyczącymi m.in.
 
 \noindent Celem niniejszej pracy jest:\mynobreakpar
 \blockcquote{formularz-zgloszenia-pracy}{Zaprojektowanie i~zaimplementowanie protokołu umożliwiającego propagowanie zmian w~systemie plików, pakietów oraz~elementów konfiguracji do~stacji roboczych pod~kontrolą systemu operacyjnego \glslink{gnulinux}{Linux/GNU} lub~innego systemu \glslink{unix-like-system}{*nix}, a~także elastycznego standardu opisu zmian oraz~narzędzi dla~ich rejestrowania i~dostosowywania. Proponowaną architekturą jest model klient--serwer. Konkretny \hyperref[sec:obraz-zmian-konfiguracji]{obraz zmian} może być przeznaczony dla~konkretnej dystrybucji, jednakże stworzone rozwiązania praktyczne powinny dawać się w~prosty sposób dostosowywać do~popularnych dystrybucji systemu \glslink{gnulinux}{Linux/GNU} oraz~systemów \glslink{unix-like-system}{*nix}.}
-Innymi słowy, celem niniejszej pracy jest zaprojektowanie i~zaimplementowanie zestawu narzędzi dla~systemów \glslink{unix-like-system}{*niksowych} pozwalających na~zarządzanie synchronizacją oprogramowania i~jego konfiguracji na~grupie komputerów podłączonych do~sieci opartej na~protokole~\gls{tcpip}. Takie oprogramowanie często jest nazywane oprogramowaniem typu \hrefemph{https://en.wikipedia.org/wiki/Software_configuration_management}{Software Configuration Management}~(SCM\footnote{Skrót \href{https://en.wikipedia.org/wiki/SCM}{SCM} jest używany również w~kontekście \emph{systemów kontroli wersji} (\hrefemph{https://en.wikipedia.org/wiki/Version_control}{Source Control Management}), których reprezentatami są~np.:~\hrefemph{https://en.wikipedia.org/wiki/Git}{git}, \hrefemph{https://en.wikipedia.org/wiki/Apache_Subversion}{Subversion (SVN)}, \hrefemph{https://en.wikipedia.org/wiki/Mercurial}{Mercurial}, \hrefemph{https://en.wikipedia.org/wiki/Concurrent_Versions_System}{CVS (Concurrent Versions System)}~itd.})~\cite{wiki:scm}.
+Innymi słowy, celem niniejszej pracy jest zaprojektowanie i~zaimplementowanie zestawu narzędzi dla~systemów \glslink{unix-like-system}{*niksowych} pozwalających na~zarządzanie synchronizacją oprogramowania i~jego konfiguracji na~grupie komputerów podłączonych do~sieci opartej na~protokole~\gls{tcpip}. Takie oprogramowanie często jest nazywane oprogramowaniem typu \hrefemph{https://en.wikipedia.org/wiki/Software_configuration_management}{Software Configuration Management}~(SCM\footnote{Skrót \href{https://en.wikipedia.org/wiki/SCM}{SCM} jest używany również w~kontekście \emph{systemów kontroli wersji} (\hrefemph{https://en.wikipedia.org/wiki/Version_control}{Source Control Management}), których reprezentatami są~np.:~\hrefemph{https://en.wikipedia.org/wiki/Git}{git}, \hrefemph{https://en.wikipedia.org/wiki/Apache_Subversion}{Subversion (SVN)}, \hrefemph{https://en.wikipedia.org/wiki/Mercurial}{Mercurial}, \hrefemph{https://en.wikipedia.org/wiki/Concurrent_Versions_System}{CVS (Concurrent Versions System)}~itd.}).
 
 %------------------------------------------------------------------------------
 
@@ -75,14 +75,9 @@ W~czasie prac nad~implementacją projektu, korzystano z~wielu pomocnych dokument
 		\item dokumenty \gls{ietf}~(\gls{rfc})~\cite{rfc-editor},
 		\item dokumentacja TLDP~\cite{tldp},
 		\item dokumenty W3C~\cite{w3c},
-		\item \hreftt{http://www.tcpipguide.com/}{tcpipguide.com}, czyli szczegółowy przegląd protokołu \glslink{tcpip}{TCP/IP} i~pokrewnych protokołów, opublikowany również w~formie obszernej\footnote{Książka ma~1616 stron. \isbn{}:~\href{https://www.nostarch.com/tcpip.htm}{978--159327--047--6}. Wydawnictwo: \emph{No Starch Press}.} książki autorstwa \href{https://www.linkedin.com/in/charles-kozierok-708112/}{\mbox{Charlesa} \mbox{Kozieroka}} pt.~\emph{The~TCP/IP Guide},
+		\item \hreftt{http://www.tcpipguide.com/}{tcpipguide.com}, czyli szczegółowy przegląd protokołu \glslink{tcpip}{TCP/IP} i~pokrewnych protokołów, opublikowany również w~formie obszernej\footnote{Książka ma~1616 stron. \isbn{}:~\href{https://www.nostarch.com/tcpip.htm}{978--159327--047--6}. Wydawnictwo: \emph{No Starch Press}.} książki autorstwa \href{https://www.linkedin.com/in/charles-kozierok-708112/}{\mbox{Charlesa} \mbox{Kozieroka}} pt.~\emph{The~TCP/IP Guide}~\cite{tcpguide-book},
 		\item dokumentacja \gls{posix}~\cite{posix}.
 %		\item dokumentacja biblioteki libconfig~\cite{libconfig-doc}.
-	\end{enumerate}
-	\item materiały dydaktyczne do~przedmiotów prowadzonych na~Wydziale~MiNI~PW:\mynobreakpar
-	\begin{enumerate}
-		\item \href{http://www.mini.pw.edu.pl/~kozlowsm/tcpip}{,,TCP/IP''} --- przedmiot prowadzony przez dra~inż.~Marka~Kozłowskiego~\cite{kozlowski},
-		\item \href{http://www.mini.pw.edu.pl/~marcinbo/strona/glowna/unix.html}{,,UNIX''} --- przedmiot prowadzony przez mgra~inż.~Marcina~Borkowskiego~\cite{borkowski}.
 	\end{enumerate}
 	\item programistyczne fora i~listy dyskusyjne, w~tym m.in.:\mynobreakpar
 	\begin{enumerate}
