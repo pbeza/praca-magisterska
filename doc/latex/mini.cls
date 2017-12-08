@@ -442,6 +442,9 @@ lower separated=false, fontupper=\footnotesize, nobeforeafter}{#2}
 	\pdfbookmark[0]{\titlepagecap}{titlepage}
 	\begin{titlepage}
 		\center
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%%% Ładniejszy nagłówek (mój)                               %%%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		% Logo MiNI
 		\begin{minipage}{2.6cm}
 			\includegraphics[width=2.6cm]{img/mini}
@@ -461,6 +464,10 @@ lower separated=false, fontupper=\footnotesize, nobeforeafter}{#2}
 				\includegraphics[width=2.6cm]{img/pw}
 			\end{flushright}
 		\end{minipage}\par
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%%% Brzydki, niewyrównany nagłówek (oficjalny)             %%%%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		\vspace{3.5cm}
 
 		% Praca magisterska
