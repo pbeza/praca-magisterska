@@ -446,22 +446,22 @@ lower separated=false, fontupper=\footnotesize, nobeforeafter}{#2}
 		%%% Ładniejszy nagłówek (mój)                               %%%
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		% Logo MiNI
-		\begin{minipage}{2.6cm}
-			\includegraphics[width=2.6cm]{img/mini}
-%			\hfill % odkomentuj i wywal powyższe jeśli tak Rektor chce
-		\end{minipage}
-		\hfill
+		%\begin{minipage}{2.6cm}
+		%	\includegraphics[width=2.6cm]{img/mini}
+		%	\hfill % odkomentuj i wywal powyższe jeśli tak Rektor chce
+		%\end{minipage}
+		%\hfill
 		% Napis z nazwą Uczelni i Wydziału
 		\begin{minipage}{110mm}
 			\begin{center}
 				\universitybox\\\vspace{3mm}\facultybox
 			\end{center}
 		\end{minipage}
-		\hfill
+		%\hfill
 		% Logo PW
 		\begin{minipage}{2.6cm}
 			\begin{flushright}
-				\includegraphics[width=2.6cm]{img/pw}
+				\includegraphics[width=2.6cm]{img/pw-old}
 			\end{flushright}
 		\end{minipage}\par
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
