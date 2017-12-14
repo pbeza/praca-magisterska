@@ -322,7 +322,7 @@ lower separated=false, fontupper=\footnotesize, nobeforeafter}{#2}
 ]{biblatex}
 \DeclareLanguageMapping{polish}{english-apa}
 \addbibresource{bibliography.bib}
-\DeclareNameAlias{default}{last-first}  % sortowanie po nazwisku i wypisywanie nazwiska jako pierwszego
+%\DeclareNameAlias{default}{last-first}  % sortowanie po nazwisku i wypisywanie nazwiska jako pierwszego
 
 % Paczki dla matematycznych formuł
 
