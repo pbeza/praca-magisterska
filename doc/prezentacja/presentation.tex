@@ -6,6 +6,12 @@
 %\usepackage{fontspec}
 %\setmainfont{Liberation Serif}
 
+% Ustawienia dla pdfpc
+
+\usepackage{pgfpages}
+\setbeameroption{show notes}
+\setbeameroption{show notes on second screen=right}
+
 \usetheme{Rochester}
 \usepackage[polish]{babel}
 \usepackage{xcolor}
@@ -72,7 +78,7 @@
 		\node {\includegraphics[height=\smalllogoheight]{img/pw}};%
 	\end{tikzpicture}\\[6pt]
 }
-\date{\today}
+\date{25~stycznia 2018}
 
 % Obrazek na stronie tytułowej
 
@@ -121,13 +127,13 @@
 \end{frame}
 
 %------------------------------------------------------------------------------
-
-\begin{frame}{Spis treści}
-
-\addtocontents{toc}{\let\PICINTOC\string\MYPICINTOC}
-\tableofcontents
-
-\end{frame}
+%
+%\begin{frame}{Spis treści}
+%
+%\addtocontents{toc}{\let\PICINTOC\string\MYPICINTOC}
+%\tableofcontents
+%
+%\end{frame}
 
 %------------------------------------------------------------------------------
 
@@ -166,10 +172,10 @@
 \end{frame}
 
 \note[itemize]{
-	\item \textbf{Przedstawienie problemu, którego dotyczy praca} i~zwrócenie uwagi na to, że~oprogramowanie na~konfigurowanych systemach nie musi być identyczne (szablony konfiguracji).
-	\item \textbf{Kogo dotyczy problem?} Głównie administratorów komputerowych, ale też ludzi używających na~co~dzień wielu podobnie skonfigurowanych komputerów.
-	\item \textbf{Gdzie można znaleźć zastosowania rozwiązania tego problemu?} Wszędzie tam gdzie działa grupa podobnie skonfigurowanych maszyn, np.: komputery w~laboratoriach na~uczelniach, szkołach, bibliotekach, urzędach, sklepach, grupy serwerów, biletomaty, bankomaty, automaty sprzedające (maszyny \emph{vendingowe}), komputery osób korzystających z~wielu komputerów.
-	\item \textbf{Jakie są ,,ręczne'' metody radzenia sobie z~tym problemem bez wykorzystania dedykowanego oprogramowania?}\\,,Ręczna'' instalacja gotowego obrazu systemu na każdym z~komputerów, SSH, zdalny pulpit~(VNC).
+	\item Oprogramowanie maszyn \textbf{nie musi być identyczne} --- parametryzowanie szablonami.
+	\item Problem \textbf{dotyczy głównie administratorów}, ale też ludzi używających wielu podobnie skonfigurowanych komputerów.
+	\item \textbf{Miejsca zastosowania:} laboratoria na~uczelniach, szkołach, bibliotekach, urzędach, sklepach, grupy serwerów, biletomaty, bankomaty, automaty sprzedające (maszyny \emph{vendingowe}).
+	\item \textbf{,,Ręczne'' metody radzenia sobie z~problemem} bez wykorzystania dedykowanego oprogramowania: ,,ręczna'' instalacja gotowego obrazu systemu na każdym z~komputerów z~osobna, SSH, zdalny pulpit~(VNC).
 }
 
 %------------------------------------------------------------------------------
@@ -179,26 +185,26 @@
 \begin{exampleblock}{}
 	{\textbf{Zaprojektowanie i~zaimplementowanie protokołu} umożliwiającego \textbf{propagowanie zmian w~systemie plików, pakietów oraz~elementów konfiguracji} do~stacji roboczych pod~kontrolą systemu operacyjnego \texttt{GNU/Linux} lub~innego systemu \texttt{*nix}, a~także elastycznego standardu opisu zmian oraz~narzędzi dla~ich rejestrowania i~dostosowywania.}
 	\vskip2mm
-	\hspace*\fill{\small--- Formalnie zgłoszona tematyka pracy magisterski}
+	\hspace*\fill{\small--- Formalnie zgłoszona tematyka pracy magisterskiej}
 \end{exampleblock}
 
 \begin{figure}
-	\includegraphics[height=.32\textheight]{img/client_server}
+	\includegraphics[height=.3\textheight]{img/client_server}
 \end{figure}
 
 \end{frame}
 
 \note[itemize]{
-\item \textbf{Przeczytanie formalnie zgłoszonego do~Dziekanatu celu pracy.} Zwrócenie uwagi na, to, że~wbrew nazwie ,,protokół'' użytej w~tytule pracy, głównym celem było zaimplementowanie aplikacji ,,serwera'', która umożliwia przygotowanie i~dostosowanie obrazu zmian konfiguracji systemu wzorcowego, który można zastosować na~systemie klienckim za~pomocą aplikacji ,,klienckiej'', a~nie samo przesłanie takiego obrazu do~klienta (co~zostało zaimplementowane za~pomocą \texttt{SFTP}).
-\item \textbf{Zwrócenie uwagi, że~przez serwer rozumie się stację ze~wzorcem oprogramowania dla~klientów}, a~nie klasyczny model komunikacji klient-serwer. Przyjęty model komunikacji działa raczej w~modelu \emph{peer2peer}.
-\item Zwrócenie uwagi na~obsługę różnych systemów \texttt{GNU/Linux} i~na~to, że~zaimplementowane \textbf{rozwiązanie było testowane na~dystrybucjach \texttt{Debian} i~\texttt{ArchLinux}, ale~jest napisane w~języku Python i~prawdopodobnie działa również na~innych.}
+\item \textbf{Wbrew nazwie ,,protokół''} głównym celem było \textbf{zaimplementowanie aplikacji ,,serwera'', która umożliwia przygotowanie i~dostosowanie obrazu zmian konfiguracji systemu wzorcowego}, który można zastosować na~systemie klienckim za~pomocą aplikacji ,,klienckiej'', \textbf{a~nie samo przesłanie takiego obrazu do~klienta} (co~zostało zaimplementowane za~pomocą \texttt{SFTP}).
+\item \textbf{Aplikacja serwera = aplikacja dla~system będący wzorcem oprogramowania dla~klientów}, a~nie klasyczny model komunikacji klient-serwer. Przyjęty model komunikacji działa raczej w~modelu \emph{peer2peer}.
+\item Zaimplementowane \textbf{rozwiązanie było testowane na}~dystrybucjach \texttt{Debian} i~\texttt{ArchLinux}, ale~jest \textbf{napisane w~Python} i~prawdopodobnie działa również na~innych.
 }
 
 %------------------------------------------------------------------------------
 
 \section{Istniejące rozwiązania}
 
-\begin{frame}[fragile]{Istniejące rozwiązania --- systemy SCM}
+\begin{frame}[fragile]{Istniejące rozwiązania --- systemy SCM\\[-0.2cm]{\footnotesize (Software Configuration Systems)}}
 
 \newcommand{\tablelogoheight}{0.71cm}
 \newcommand*{\centerheader}[1]{\multicolumn{1}{c|}{\includegraphics[height=\tablelogoheight]{#1}}}
@@ -236,10 +242,12 @@
 \end{frame}
 
 \note[itemize]{
-	\item \textbf{Wyjaśnienie, że~rozwiązaniem przedstawionego problemu są~systemy nazywane systemami SCM, czyli \emph{Software Configuration Systems}} --- nie mylić z~oprogramowaniem typu \emph{Source Control Management}, takimi jak np.~\texttt{git} i~\texttt{svn}.
-	\item \textbf{Scharakteryzowanie 4 (prawdopodobnie jednych z~najpopularniejszych) systemów zarządzania konfiguracją opisanych w~pracy.} Zwrócenie uwagi na~duże firmy i~instytucje używające tego wymienionych rozwiązań (CERN, NASA, Google~itd.).
-	\item \textbf{Deklaratywna konfiguracja przedstawionych rozwiązań (a~nie imperatywna).}
-	\item \textbf{Wyróżnienie Puppet pod~względem wyrafinowania i~popularności (vide ranking).} Wyrafinowanie polega na~budowaniu grafu zależności zasobów i~decydowanie na~jego podstawie w~jakiej kolejności zmieniać konfigurację systemu.
+	\item Rozwiązaniem przedstawionego problemu są~systemy nazywane \textbf{systemami SCM, czyli \emph{Software Configuration Systems}} --- nie mylić z~oprogramowaniem typu \emph{Source Control Management}, takimi jak np.~\texttt{git} i~\texttt{svn}.
+	\item \textbf{4~najpopularniejsze wg~rankingu Debiana} systemy zarządzania konfiguracją.
+	\item \textbf{Najstarszy i~najpopularniejszy} wg~rankingu jest \textbf{Puppet}. Znani użytkownicy: \textbf{CERN, Google, NASA, Intel}.
+	\item Wszystkie napisane w~\textbf{językach skryptowych} (Python, Ruby, Erlang).
+	\item Wszystkie używają \textbf{deklaratywnej konfiguracji} (a \textbf{nie imperatywnej}), która opisuje \textbf{oczekiwany stan systemu}, a~\textbf{nie kroki jakie trzeba podjąć}, aby go uzyskać.
+	\item \textbf{Puppet pierwszy pod~względem wyrafinowania i~popularności}, ponieważ \textbf{buduje graf zależności zasobów} i~na~jego podstawie decyduje w~jakiej kolejności zmieniać konfigurację systemu.
 }
 
 %------------------------------------------------------------------------------
@@ -271,7 +279,13 @@ Sposób wykorzystania alternatywnego rozwiązania:
 
 \end{frame}
 
-\note{\textbf{Zupełnie inne podejście w~porównaniu do~istniejących rozwiązań} --- zamiast deklaratywnie/imperatywnie opisywać oczekiwany stan systemu wystarczy skonfigurować maszynę wzorcową.}
+\note[itemize]{
+	\item \textbf{Cel ten sam} co~istniejących systemów SCM, ale~\textbf{zupełnie inne podejście} --- zamiast deklaratywnie/imperatywnie opisywać oczekiwany stan systemu wystarczy skonfigurować maszynę wzorcową.
+	\item Użycie polega na~\textbf{naprzemiennym skanowaniu i~modyfikowaniu} systemu wzorcowego.
+	\item \textbf{Wygenerowanie obrazu} zmian jest \textbf{możliwe po~przeskanowaniu} systemu.
+	\item Obrazy zmian są~\textbf{podpisane cyfrowo} przez system wzorcowy.
+	\item \textbf{Klienci mogą pobrać} obraz zmian od~systemu wzorcowego lub od siebie nawzajem.
+}
 
 %------------------------------------------------------------------------------
 
@@ -279,35 +293,44 @@ Sposób wykorzystania alternatywnego rozwiązania:
 
 Cechy rozwiązania:
 \begin{itemize}
-	\item \textbf{Łatwość użytkowania} --- brak potrzeby pisania reguł określających pożądaną konfigurację klientów i~nauki języka w~którym byłyby one wyrażone
-	\item \textbf{Rozproszenie} --- rozproszony model dzielenia się konfiguracją systemu wzorcowego
-	\item \textbf{Wykorzystanie szablonów} --- parametryzacja konfiguracji np.~zmiennymi środowiskowymi
-	\item \textbf{Uniwersalność} --- obsługa różnych dystrybucji \texttt{Linux}
-	\item \textbf{Bezpieczeństwo} --- konfiguracja systemu wzorcowego podpisana cyfrowo
-	\item \textbf{Elastyczność} --- możliwość synchronizacji części konfiguracji
-\end{itemize}
-
-\end{frame}
-
-%------------------------------------------------------------------------------
-
-\section{Implementacja}
-
-\begin{frame}{Implementacja}
-
-\begin{itemize}
-	\item 3 moduły: \texttt{myscm-srv}, \texttt{myscm-cli} i~\texttt{myscm-common}
-	\item Początkowo w~języku~\texttt{C}, ostatecznie w~\textbf{\texttt{Python~3}}
-	\item Przetestowana obsługa dystrybucjach \textbf{\texttt{Arch Linux}} i~\textbf{\texttt{Debian}}
-	\item Wykorzystanie m.in.~\textbf{\texttt{AIDE}} i~\textbf{\texttt{OpenSSL}}
+	\item Łatwość użytkowania
+	\item Rozproszenie
+	\item Wykorzystanie szablonów
+	\item Uniwersalność
+	\item Bezpieczeństwo
+	\item Elastyczność
 \end{itemize}
 
 \end{frame}
 
 \note[itemize]{
-	\item Napomknienie o~tym, że~na~początku planowałem zaimplementować całe rozwiązanie w~języku \texttt{C}, ale~okazało się, że~dużo łatwiej było wykorzystać język wysokopoziomowy (jakim jest np.~\texttt{Python})
-	\item Wszystkie wspomniane \textbf{istniejące rozwiązania są~w~językach wysokopoziomowych} (poza \emph{CFEngine} wspomnianym w~pracy)
+	\item \textbf{Łatwość użytkowania} --- brak potrzeby pisania reguł określających pożądaną konfigurację klientów i~nauki języka w~którym byłyby one wyrażone
+	\item \textbf{Rozproszenie} --- rozproszony model dzielenia się konfiguracją systemu wzorcowego
+	\item \textbf{Wykorzystanie szablonów} --- parametryzacja konfiguracji np.~zmiennymi środowiskowymi
+	\item \textbf{Uniwersalność} --- obsługa różnych dystrybucji \texttt{Linux}
+	\item \textbf{Bezpieczeństwo} --- konfiguracja systemu wzorcowego podpisana cyfrowo
+	\item \textbf{Elastyczność} --- możliwość synchronizacji wybranej części systemu
 }
+
+%------------------------------------------------------------------------------
+%
+%\section{Implementacja}
+%
+%\begin{frame}{Implementacja}
+%
+%\begin{itemize}
+%	\item 3 moduły: \texttt{myscm-srv}, \texttt{myscm-cli} i~\texttt{myscm-common}
+%	\item Początkowo w~języku~\texttt{C}, ostatecznie w~\textbf{\texttt{Python~3}}
+%	\item Przetestowana obsługa dystrybucjach \textbf{\texttt{Arch Linux}} i~\textbf{\texttt{Debian}}
+%	\item Wykorzystanie m.in.~\textbf{\texttt{AIDE}} i~\textbf{\texttt{OpenSSL}}
+%\end{itemize}
+%
+%\end{frame}
+%
+%\note[itemize]{
+%	\item Napomknienie o~tym, że~na~początku planowałem zaimplementować całe rozwiązanie w~języku \texttt{C}, ale~okazało się, że~dużo łatwiej było wykorzystać język wysokopoziomowy (jakim jest np.~\texttt{Python})
+%	\item Wszystkie wspomniane \textbf{istniejące rozwiązania są~w~językach wysokopoziomowych} (poza \emph{CFEngine} wspomnianym w~pracy)
+%}
 
 %------------------------------------------------------------------------------
 
@@ -347,31 +370,31 @@ Cechy rozwiązania:
 \begin{frame}{Dalsze możliwe kierunki rozwoju}
 
 \begin{itemize}
-	\item \textbf{Dodanie obsługi innych protokołów wymiany plików} lub~zastąpienie \texttt{SFTP} protokołem \emph{multicastowym}
+	\item Zastąpienie protokołu SFTP \textbf{protokołem \emph{multicastowym}}
 	\item \textbf{Obsługa kłopotliwych do~obsłużenia sytuacji} np.~podczas aktualizacji jądra systemu (\texttt{GRUB})
 	\item Dodanie możliwości tworzenia obrazów zmian na~podstawie \textbf{dowolnych dwóch wyników skanowań} systemu wzorcowego
 	\item \textbf{Lepsza obsługa sytuacji awaryjnych} --- np.~nagłe przerwanie procesu zastosowania obrazu zmian powinno być tranzakcyjne (wszystko albo nic)
-	\item Dodanie możliwości opcjonalnego zdalnego \textbf{raportowania [nie]powodzenia} zastosowania obrazu zmian przez klientów
+	\item Dodanie możliwości zdalnego \textbf{raportowania [nie]powodzenia} zastosowania obrazu zmian przez klientów
 	\item Dodanie obsługi \textbf{innych systemów operacyjnych} niż~\texttt{Linux}
 \end{itemize}
 
 \end{frame}
 
 %------------------------------------------------------------------------------
-
-\section{Podsumowanie}
-
-\begin{frame}{Podsumowanie}
-
-\begin{itemize}
-	\item \textbf{Zaimplementowano aplikację} przeznaczoną do~\textbf{tworzenia, dostosowywania i~zastosowania obrazów} zmian konfiguracji systemu wzorcowego dla~systemów \texttt{GNU/Linux}
-	\item Zadbano o~bezpieczeństwo, a~konkretnie \textbf{autentyczność} (uwierzytelnienie) wygenerowanego obrazu zmian jest \textbf{podpis cyfrowy~SSL}
-	\item Umożliwiono klientom \textbf{dzielenie się między sobą obrazami zmian konfiguracji}
-	\item \textbf{Opisano 4~najpopularniejsze istniejące rozwiązania} i~wspomniano o~innych
-	\item \textbf{Udokumentowano} sposób działania zaimplementowanej aplikacji (\LaTeX + dokumentacja w~kodzie źródłowym)
-\end{itemize}
-
-\end{frame}
+%
+%\section{Podsumowanie}
+%
+%\begin{frame}{Podsumowanie}
+%
+%\begin{itemize}
+%	\item \textbf{Zaimplementowano aplikację} przeznaczoną do~\textbf{tworzenia, dostosowywania i~zastosowania obrazów} zmian konfiguracji systemu wzorcowego dla~systemów \texttt{GNU/Linux}
+%	\item Zadbano o~bezpieczeństwo, a~konkretnie \textbf{autentyczność} (uwierzytelnienie) wygenerowanego obrazu zmian jest \textbf{podpis cyfrowy~SSL}
+%	\item Umożliwiono klientom \textbf{dzielenie się między sobą obrazami zmian konfiguracji}
+%	\item \textbf{Opisano 4~najpopularniejsze istniejące rozwiązania} i~wspomniano o~innych
+%	\item \textbf{Udokumentowano} sposób działania zaimplementowanej aplikacji (\LaTeX + dokumentacja w~kodzie źródłowym)
+%\end{itemize}
+%
+%\end{frame}
 
 %------------------------------------------------------------------------------
 
