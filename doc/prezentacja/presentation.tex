@@ -50,6 +50,7 @@
 \usetikzlibrary{arrows,automata}
 \usepackage[absolute,overlay]{textpos}                   % podpisy autorów obrazków
 \usepackage{adjustbox}
+\usepackage{pifont}
 
 %\beamertemplatenavigationsymbolsempty
 \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
@@ -116,6 +117,16 @@
 \DeclareRobustCommand\PICINTOC{}%
 \newcommand\MYPICINTOC{\hfill\smash{\raisebox{-1.2\height}{\includegraphics[width=.38\textwidth]{img/package-manager}}}}
 
+% Kolory itemize
+
+%\newenvironment{proenv}{\only{\setbeamercolor{local structure}{fg=green}}}{}
+%\newenvironment{conenv}{\only{\setbeamercolor{local structure}{fg=red}}}{}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}%
+    \hspace{-2.5pt}}
+\newcommand{\wontfix}{\rlap{$\square$}{\large\hspace{1pt}\xmark}}
+
 \begin{document}
 
 %------------------------------------------------------------------------------
@@ -147,7 +158,7 @@
 %\begin{center}
 %\begin{minipage}{10.7cm}
 \begin{exampleblock}{}
-\textbf{Problem dystrybuowania ujednoliconego oprogramowania} do~dużej ilości maszyn roboczych pracujących pod kontrolą systemu \texttt{Linux}.
+\textbf{Problem dystrybuowania ujednoliconego oprogramowania} do~dużej liczby maszyn roboczych pracujących pod kontrolą systemu \texttt{Linux}.
 \end{exampleblock}
 %\end{minipage}
 %\end{center}
@@ -195,9 +206,9 @@
 \end{frame}
 
 \note[itemize]{
-\item \textbf{Wbrew nazwie ,,protokół''} głównym celem było \textbf{zaimplementowanie aplikacji ,,serwera'', która umożliwia przygotowanie i~dostosowanie obrazu zmian konfiguracji systemu wzorcowego}, który można zastosować na~systemie klienckim za~pomocą aplikacji ,,klienckiej'', \textbf{a~nie samo przesłanie takiego obrazu do~klienta} (co~zostało zaimplementowane za~pomocą \texttt{SFTP}).
-\item \textbf{Aplikacja serwera = aplikacja dla~system będący wzorcem oprogramowania dla~klientów}, a~nie klasyczny model komunikacji klient-serwer. Przyjęty model komunikacji działa raczej w~modelu \emph{peer2peer}.
-\item Zaimplementowane \textbf{rozwiązanie było testowane na}~dystrybucjach \texttt{Debian} i~\texttt{ArchLinux}, ale~jest \textbf{napisane w~Python} i~prawdopodobnie działa również na~innych.
+	\item \textbf{Wbrew nazwie ,,protokół''} głównym celem było \textbf{zaimplementowanie aplikacji ,,serwera'', która umożliwia przygotowanie i~dostosowanie obrazu zmian konfiguracji systemu wzorcowego}, który można zastosować na~systemie klienckim za~pomocą aplikacji ,,klienckiej'', \textbf{a~nie samo przesłanie takiego obrazu do~klienta} (co~zostało zaimplementowane za~pomocą \texttt{SFTP}).
+	\item \textbf{Aplikacja serwera = aplikacja dla~system będący wzorcem oprogramowania dla~klientów}, a~nie klasyczny model komunikacji klient-serwer. Przyjęty model komunikacji działa raczej w~modelu \emph{peer2peer}.
+	\item Zaimplementowane \textbf{rozwiązanie było testowane na}~dystrybucjach \textbf{\texttt{Debian}} i~\textbf{\texttt{ArchLinux}}, ale~jest \textbf{napisane w~Python} i~prawdopodobnie działa również na~innych.
 }
 
 %------------------------------------------------------------------------------
@@ -289,27 +300,42 @@ Sposób wykorzystania alternatywnego rozwiązania:
 
 %------------------------------------------------------------------------------
 
-\begin{frame}{Alternatywne rozwiązanie problemu cd.}
+\begin{frame}{Zalety i~wady alternatywnego rozwiązania}
 
-Cechy rozwiązania:
-\begin{itemize}
-	\item Łatwość użytkowania
-	\item Rozproszenie
-	\item Wykorzystanie szablonów
-	\item Uniwersalność
-	\item Bezpieczeństwo
-	\item Elastyczność
-\end{itemize}
+\begin{columns}[t]
+	\begin{column}{0.5\textwidth}
+		\textbf{Zalety rozwiązania:}
+		\begin{itemize}
+			\item[\done] Łatwość użytkowania
+			\item[\done] Rozproszenie
+			\item[\done] Parametryzacja konfiguracji
+			\item[\done] Przenośność na~inne dystrybucje \texttt{GNU/Linux}
+			\item[\done] Bezpieczeństwo
+			\item[\done] Elastyczność
+		\end{itemize}
+	\end{column}
+	\begin{column}{0.5\textwidth}
+		\textbf{Dalsze kierunki rozwoju:}
+		\begin{itemize}
+			\item[\wontfix] Wykorzystanie multicastu
+			\item[\wontfix] Obsługa ,,kłopotliwych'' sytuacji (GRUB)
+			\item[\wontfix] Raportowanie przez klientów
+			\item[\wontfix] Obsługa np.~Windows
+			%\item[\wontfix] Tworzenie obrazów zmian na~podstawie \textbf{dowolnych dwóch wyników skanowań}
+			%\item[\wontfix] Lepsza obsługa sytuacji awaryjnych --- np.~nagłe przerwanie procesu zastosowania obrazu zmian powinno być tranzakcyjne (wszystko albo nic)
+		\end{itemize}
+	\end{column}
+\end{columns}
 
 \end{frame}
 
 \note[itemize]{
-	\item \textbf{Łatwość użytkowania} --- brak potrzeby pisania reguł określających pożądaną konfigurację klientów i~nauki języka w~którym byłyby one wyrażone
-	\item \textbf{Rozproszenie} --- rozproszony model dzielenia się konfiguracją systemu wzorcowego
-	\item \textbf{Wykorzystanie szablonów} --- parametryzacja konfiguracji np.~zmiennymi środowiskowymi
-	\item \textbf{Uniwersalność} --- obsługa różnych dystrybucji \texttt{Linux}
-	\item \textbf{Bezpieczeństwo} --- konfiguracja systemu wzorcowego podpisana cyfrowo
-	\item \textbf{Elastyczność} --- możliwość synchronizacji wybranej części systemu
+	\item \textbf{Łatwość użytkowania} --- brak potrzeby pisania reguł określających pożądaną konfigurację klientów i~nauki języka w~którym byłyby one wyrażone.
+	\item \textbf{Rozproszenie} --- rozproszony model dzielenia się konfiguracją systemu wzorcowego.
+	\item \textbf{Wykorzystanie szablonów} --- parametryzacja konfiguracji np.~zmiennymi środowiskowymi.
+	\item \textbf{Uniwersalność} --- obsługa różnych dystrybucji \texttt{Linux}.
+	\item \textbf{Bezpieczeństwo} --- konfiguracja systemu wzorcowego podpisana cyfrowo.
+	\item \textbf{Elastyczność} --- możliwość synchronizacji wybranej części systemu.
 }
 
 %------------------------------------------------------------------------------
@@ -328,57 +354,40 @@ Cechy rozwiązania:
 %\end{frame}
 %
 %\note[itemize]{
-%	\item Napomknienie o~tym, że~na~początku planowałem zaimplementować całe rozwiązanie w~języku \texttt{C}, ale~okazało się, że~dużo łatwiej było wykorzystać język wysokopoziomowy (jakim jest np.~\texttt{Python})
-%	\item Wszystkie wspomniane \textbf{istniejące rozwiązania są~w~językach wysokopoziomowych} (poza \emph{CFEngine} wspomnianym w~pracy)
+%	\item Napomknienie o~tym, że~na~początku planowałem zaimplementować całe rozwiązanie w~języku \texttt{C}, ale~okazało się, że~dużo łatwiej było wykorzystać język wysokopoziomowy (jakim jest np.~\texttt{Python}).
+%	\item Wszystkie wspomniane \textbf{istniejące rozwiązania są~w~językach wysokopoziomowych} (poza \emph{CFEngine} wspomnianym w~pracy).
 %}
 
 %------------------------------------------------------------------------------
-
-\begin{frame}{Testy}
-
-\begin{itemize}
-	\item \textbf{Trudność automatyzacji testów}
-	\item \textbf{,,Małe'' testy} --- półautomatyczne, wykonywane regularnie na~niewielkim drzewie plików
-	\item \textbf{,,Duże'' testy} --- manualne, wykonane pod~koniec projektu na~pełnym systemie operacyjnym
-	\item \textbf{Synchronizowane katalogi}: \path{/bin}, \path{/etc}, \path{/lib}, \path{/lib64}, \path{/sbin}, \path{/srv}, \path{/usr}, \path{/var/lib/dpkg} (\path{/var/lib/pacman})
-	\item \textbf{Niesynchronizowane katalogi}: \path{/boot}, \path{/dev}, \path{/home}, \path{/lost+found}, \path{/media}, \path{/mnt}, \path{/opt}, \path{/proc}, \path{/root}, \path{/run}, \path{/sys}, \path{/tmp} i~\path{/var} (poza~ww.)
-	\item \textbf{Błędy} po~pierwszych ,,dużych'' testach:
-		\begin{itemize}
-			\item \textbf{pliki binarne} \path{/etc/ld.so.cache}, \path{/etc/localtime} w~katalogu \path{/etc}
-			\item \textbf{,,nietypowe'' znaki} w~ścieżkach pliku (np.~dwukropka)
-			\item \textbf{niesynchronizowanie \path{/var/lib/lightdm}}
-		\end{itemize}
-\end{itemize}
-
-\end{frame}
-
-\note[itemize]{
-\item Zwrócenie uwagi na to, że~w~trakcie implementacji działanie programu było testowane na~stosunkowo \textbf{niewielkim drzewie plików (,,małe'' testy)}.
-\item \textbf{,,Duże'' testy} odbyły się \textbf{na~koniec projektu na~dwóch pełnych systemach} i~zakończyły się wykryciem kilku drobnych błędów, które zostały naprawione, a~testy z~sukcesem powtórzone.
-\item Wyjaśnienie wykrytych błędów i~dodanie, że:
-	\begin{itemize}
-	\item dla~wszystkich zmienionych plików w~\path{/etc} są~robione \textbf{różnice plików (''\texttt{diff-y}'')}, a~pliki binarne były tam nieprzewidziane,
-	\item w~\texttt{Linux} (a~właściwie w~systemach plików \texttt{ext2-4}) \textbf{w~ścieżkach plików są~dozwolone wszystkie znaki poza lewym ukośnikiem (\texttt{\textbackslash}) i~znakiem \texttt{\textbackslash{}0} (\texttt{null byte})},
-	\item niesynchronizowanie \path{/var/lib/lightdm} powodowało \textbf{nieuruchamianie się środowiska graficznego}, ale~była możliwa praca w~konsoli (jak w~\emph{runlevelu}~3).
-	\end{itemize}
-}
-
-%------------------------------------------------------------------------------
-
-\section{Dalsze możliwe kierunki rozwoju projektu}
-
-\begin{frame}{Dalsze możliwe kierunki rozwoju}
-
-\begin{itemize}
-	\item Zastąpienie protokołu SFTP \textbf{protokołem \emph{multicastowym}}
-	\item \textbf{Obsługa kłopotliwych do~obsłużenia sytuacji} np.~podczas aktualizacji jądra systemu (\texttt{GRUB})
-	\item Dodanie możliwości tworzenia obrazów zmian na~podstawie \textbf{dowolnych dwóch wyników skanowań} systemu wzorcowego
-	\item \textbf{Lepsza obsługa sytuacji awaryjnych} --- np.~nagłe przerwanie procesu zastosowania obrazu zmian powinno być tranzakcyjne (wszystko albo nic)
-	\item Dodanie możliwości zdalnego \textbf{raportowania [nie]powodzenia} zastosowania obrazu zmian przez klientów
-	\item Dodanie obsługi \textbf{innych systemów operacyjnych} niż~\texttt{Linux}
-\end{itemize}
-
-\end{frame}
+%
+%\begin{frame}{Testy}
+%
+%\begin{itemize}
+%	\item \textbf{,,Małe'' testy} --- półautomatyczne, wykonywane regularnie na~niewielkim drzewie plików
+%	\item \textbf{,,Duże'' testy} --- manualne, wykonane pod~koniec projektu na~pełnym systemie operacyjnym
+%	\item Trudność automatyzacji testów
+%	\item \textbf{Błędy} po~pierwszych ,,dużych'' testach:
+%		\begin{itemize}
+%			\item \textbf{pliki binarne} \path{/etc/ld.so.cache}, \path{/etc/localtime} w~katalogu \path{/etc}
+%			\item \textbf{,,nietypowe'' znaki} w~ścieżkach pliku (np.~dwukropka)
+%			\item niesynchronizowanie \textbf{\path{/var/lib/lightdm}}
+%		\end{itemize}
+%\end{itemize}
+%
+%\end{frame}
+%
+%\note[itemize]{
+%	%\item Zwrócenie uwagi na to, że~w~trakcie implementacji działanie programu było testowane na~stosunkowo \textbf{niewielkim drzewie plików (,,małe'' testy)}.
+%	%\item \textbf{,,Duże'' testy} odbyły się \textbf{na~koniec projektu na~dwóch pełnych systemach} i~zakończyły się wykryciem kilku drobnych błędów, które zostały naprawione, a~testy z~sukcesem powtórzone.
+%	\item Wyjaśnienie wykrytych błędów i~dodanie, że:
+%	\begin{itemize}
+%		\item dla~wszystkich zmienionych plików w~\path{/etc} są~robione \textbf{różnice plików (''\texttt{diff-y}'')}, a~pliki binarne były tam nieprzewidziane,
+%		\item w~\texttt{Linux} (a~właściwie w~systemach plików \texttt{ext2-4}) \textbf{w~ścieżkach plików są~dozwolone wszystkie znaki poza lewym ukośnikiem (\texttt{\textbackslash}) i~znakiem \texttt{\textbackslash{}0} (\texttt{null byte})},
+%		\item niesynchronizowanie \path{/var/lib/lightdm} powodowało \textbf{nieuruchamianie się środowiska graficznego}, ale~była możliwa praca w~konsoli (jak w~\emph{runlevelu}~3).
+%	\end{itemize}
+%	\item \textbf{Synchronizowane katalogi}: \path{/bin}, \path{/etc}, \path{/lib}, \path{/lib64}, \path{/sbin}, \path{/srv}, \path{/usr}, \path{/var/lib/dpkg} (\path{/var/lib/pacman}).
+%	\item \textbf{Niesynchronizowane katalogi}: \path{/boot}, \path{/dev}, \path{/home}, \path{/lost+found}, \path{/media}, \path{/mnt}, \path{/opt}, \path{/proc}, \path{/root}, \path{/run}, \path{/sys}, \path{/tmp} i~\path{/var} (poza~ww.).
+%}
 
 %------------------------------------------------------------------------------
 %
